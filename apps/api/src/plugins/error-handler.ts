@@ -4,6 +4,7 @@ import {
   isResponseSerializationError,
 } from 'fastify-type-provider-zod'
 import { HttpProblem, problem } from '../errors.js'
+import { captureError } from '../observability/sentry.js'
 
 const PROBLEM_CONTENT_TYPE = 'application/problem+json; charset=utf-8'
 
@@ -39,6 +40,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
     }
 
     request.log.error({ err: error }, 'unhandled error')
+    captureError(error, request.id)
     return reply
       .code(500)
       .type(PROBLEM_CONTENT_TYPE)
