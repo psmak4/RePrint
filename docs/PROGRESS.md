@@ -84,3 +84,8 @@ Entry format:
 ### 2026-09-29 · M1-T16 · PR pending
 - `packages/db/src/seed/`: seeded PRNG with deterministic UUIDv7 IDs (`random.id()`), ordered `seedModules` registry (empty until M2-T21), `runSeed` (one transaction) and `resetDatabase` (drop schemas, migrate, seed), and a production/non-local-host guard. Root `pnpm db:seed` and `pnpm db:reset`; `src/seed/README.md` explains how to add a module. Integration test resets twice with a sample module and compares rows and IDs. D-068 records the choices.
 - Next iteration: no real tables exist yet, so `db:reset` seeds nothing; M2-T21 adds the first module. Modules must use `random.*` and never `newId()`/`Date.now()`.
+
+### 2026-09-29 · M1-T17 · PR pending
+- `renovate.json` (weekly, majors disabled, non-major grouped, Drizzle minors split out, Actions majors allowed) validated with `renovate-config-validator`; `docs/dependencies.md` states the policy; D-069 records the choices.
+- Next iteration: M1-T23 (HUMAN) installs the Renovate app. Renovate PRs must pass `merge-pr.sh` like any other. If lint/format covers `renovate.json`, keep it Biome-clean.
+

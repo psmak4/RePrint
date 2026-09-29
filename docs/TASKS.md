@@ -87,7 +87,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm db:reset` drops, migrates, and seeds the local database; running it twice gives identical row counts and IDs (seeded PRNG)
   - Accept: seed modules register in one ordered list that later milestones extend (documented in `packages/db/src/seed/README.md`)
   - Accept: the seed refuses to run when `NODE_ENV=production` or `DATABASE_URL` is not a local host (unit test)
-- [ ] M1-T17 · Renovate configuration and dependency policy · deps: M1-T02 · PRD: §8, §11
+- [x] M1-T17 · Renovate configuration and dependency policy · deps: M1-T02 · PRD: §8, §11
   - Accept: `renovate.json` pins majors per the PRD §8 stack table, groups minor/patch updates, and schedules weekly
   - Accept: `npx --yes --package renovate renovate-config-validator` passes
   - Accept: `docs/dependencies.md` states the policy (majors pinned; new dependencies need a `docs/DECISIONS.md` entry)
