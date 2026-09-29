@@ -1,0 +1,101 @@
+# Deploys every merge to `main` to staging (PRD §12 pipeline step 6): migrate, deploy the API and
+# worker, deploy the web app, then smoke-test. Without the staging secrets it exits with a notice.
+# Not a required PR check; scripts/ralph/merge-pr.sh only reads the jobs in docs/ci.md.
+name: Deploy staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false # let a running deploy finish; the next one queues
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM || secrets.TURBO_TEAM }}
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check staging configuration
+        id: gate
+        env:
+          STAGING_DATABASE_URL_DIRECT: ${{ secrets.STAGING_DATABASE_URL_DIRECT }}
+          RENDER_DEPLOY_HOOK_API_STAGING: ${{ secrets.RENDER_DEPLOY_HOOK_API_STAGING }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID || secrets.NETLIFY_SITE_ID }}
+          STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+        run: |
+          missing=()
+          for name in STAGING_DATABASE_URL_DIRECT RENDER_DEPLOY_HOOK_API_STAGING NETLIFY_AUTH_TOKEN NETLIFY_SITE_ID STAGING_WEB_URL STAGING_API_URL; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Staging deploy skipped::Staging is not set up (missing: ${missing[*]}). See docs/deploy.md."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.gate.outputs.configured == 'true'
+      - uses: ./.github/actions/setup
+        if: steps.gate.outputs.configured == 'true'
+
+      - name: Migrate staging database
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          NODE_ENV: production
+          DATABASE_URL_DIRECT: ${{ secrets.STAGING_DATABASE_URL_DIRECT }}
+        run: pnpm db:migrate
+
+      - name: Deploy API and worker (Render)
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          RENDER_DEPLOY_HOOK_API_STAGING: ${{ secrets.RENDER_DEPLOY_HOOK_API_STAGING }}
+          RENDER_DEPLOY_HOOK_WORKER_STAGING: ${{ secrets.RENDER_DEPLOY_HOOK_WORKER_STAGING }}
+        run: |
+          # The worker hook is optional: free-tier staging runs jobs inside the API (D-070).
+          for hook in "$RENDER_DEPLOY_HOOK_API_STAGING" "$RENDER_DEPLOY_HOOK_WORKER_STAGING"; do
+            [ -n "$hook" ] || continue
+            curl --fail --silent --show-error --request POST "${hook}&ref=${GITHUB_SHA}" > /dev/null
+          done
+
+      - name: Deploy web app (Netlify)
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID || secrets.NETLIFY_SITE_ID }}
+        working-directory: apps/web
+        run: npx --yes netlify-cli@27.10.2 deploy --build --prod --site "$NETLIFY_SITE_ID"
+
+      - name: Smoke test
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+        run: |
+          # Render free services sleep and deploys take minutes, so retry for up to 10 minutes.
+          check() {
+            for attempt in $(seq 1 40); do
+              if curl --fail --silent --show-error --max-time 30 --output /dev/null "$1"; then
+                echo "OK $1"
+                return 0
+              fi
+              sleep 15
+            done
+            echo "::error::Smoke test failed for $1"
+            return 1
+          }
+          check "${STAGING_API_URL%/}/v1/ready"
+          check "${STAGING_WEB_URL%/}/"

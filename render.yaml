@@ -1,0 +1,66 @@
+# Render Blueprint for the API, worker, and Redis (PRD §13). Region is Virginia (US East) so it sits
+# next to Neon (D-025). Secrets are marked `sync: false`: Render asks for them when the Blueprint is
+# created, and they never live in git. Web is on Netlify (apps/web/netlify.toml). See docs/deploy.md.
+services:
+  - type: web
+    name: reprint-api
+    runtime: node
+    region: virginia
+    plan: starter # paid: no sleeping, and pre-deploy commands need a paid plan
+    numInstances: 2 # PRD §13: at least 2 instances behind Render's load balancer
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build --filter=api
+    preDeployCommand: pnpm db:migrate # runs once per deploy, before the new instances take traffic
+    startCommand: pnpm --filter api start
+    healthCheckPath: /v1/ready
+    autoDeployTrigger: "off" # deploys come from .github/workflows/deploy-staging.yml (after migrations)
+    envVars:
+      - fromGroup: reprint-shared
+      - key: PORT
+        value: 3000
+      - key: TRUST_PROXY
+        value: true # correct client IPs behind Render's load balancer
+      - key: WORKER_IN_PROCESS
+        value: false # true only where no separate worker runs (free-tier staging, D-070)
+
+  - type: worker
+    name: reprint-worker
+    runtime: node
+    region: virginia
+    plan: starter
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build --filter=api
+    startCommand: cd apps/api && node dist/worker.js
+    autoDeployTrigger: "off"
+    envVars:
+      - fromGroup: reprint-shared
+
+keyValues:
+  - name: reprint-redis
+    region: virginia
+    plan: starter
+    maxmemoryPolicy: noeviction # BullMQ needs a store that never evicts queue keys
+    ipAllowList: [] # internal connections only
+
+envVarGroups:
+  - name: reprint-shared
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: APP_ENV
+        value: staging # set to production on the production Blueprint
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: reprint-redis
+          property: connectionString
+      - key: DATABASE_URL
+        sync: false # Neon pooled connection string
+      - key: DATABASE_URL_DIRECT
+        sync: false # Neon direct connection string, used by migrations
+      - key: WEB_ORIGINS
+        sync: false
+      - key: SENTRY_DSN
+        sync: false

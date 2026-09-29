@@ -24,6 +24,8 @@ export const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   TRUST_PROXY: booleanFlag.default(false),
+  /** Runs the job worker inside the API process, for environments with no separate worker (D-071). */
+  WORKER_IN_PROCESS: booleanFlag.default(false),
   /** Sentry is off when this is unset (PRD §11). */
   SENTRY_DSN: z.url().optional(),
   SENTRY_ENVIRONMENT: z.string().min(1).optional(),

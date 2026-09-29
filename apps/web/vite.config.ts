@@ -1,3 +1,4 @@
+import netlifyReactRouter from '@netlify/vite-plugin-react-router'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, loadEnv } from 'vite'
@@ -16,7 +17,9 @@ export default defineConfig(({ mode }) => {
     if (env[key] && process.env[key] === undefined) process.env[key] = env[key]
   }
   return {
-    plugins: [tailwindcss(), reactRouter()],
+    // The Netlify adapter turns the SSR build into a Netlify function. It runs only in Netlify builds
+    // (which set NETLIFY), so local dev, CI e2e, and `react-router-serve` keep the plain build (D-071).
+    plugins: [tailwindcss(), reactRouter(), ...(process.env.NETLIFY ? [netlifyReactRouter()] : [])],
     server: { port: Number(process.env.WEB_PORT ?? 5173) },
     envDir: '../..',
   }

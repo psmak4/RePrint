@@ -92,3 +92,8 @@ Entry format:
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
 - Owner deferred staging, preview environments, and Renovate (all `[~]`, D-070). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
 - Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-070). Don't create blocker entries for the deferred tasks.
+
+### 2026-09-29 · M1-T18 · PR pending
+- `render.yaml` (API ×2 with pre-deploy migrate, worker, Key Value, Virginia), `apps/web/netlify.toml` build config plus the Netlify adapter (enabled only when `NETLIFY` is set), `.github/workflows/deploy-staging.yml` (migrate, deploy API/worker/web, smoke; skips with a notice without secrets), `docs/deploy.md` (every secret and variable, rollback), and the `WORKER_IN_PROCESS` flag for free-tier staging. D-071 records the choices.
+- Next iteration: the deploy workflow and `render.yaml` were validated by unit tests and review only; nothing has run against real Render or Netlify (staging is deferred, D-070). Sentry source map upload and release markers are still not wired (M8). Render's pre-deploy command needs a paid plan.
+

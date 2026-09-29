@@ -38,3 +38,24 @@ describe('netlify.toml', () => {
     }
   })
 })
+
+describe('netlify.toml build', () => {
+  const toml = readFileSync(new URL('../../netlify.toml', import.meta.url), 'utf8')
+
+  it('builds with Node 24 and publishes the client assets', () => {
+    expect(toml).toContain('NODE_VERSION = "24"')
+    expect(toml).toContain('publish = "build/client"')
+  })
+
+  it('caches hashed assets immutably', () => {
+    expect(toml).toMatch(/for = "\/assets\/\*"[\s\S]*immutable/)
+  })
+})
+
+describe('vite.config.ts', () => {
+  it('enables the Netlify adapter for Netlify builds', () => {
+    const config = readFileSync(new URL('../../vite.config.ts', import.meta.url), 'utf8')
+    expect(config).toContain("from '@netlify/vite-plugin-react-router'")
+    expect(config).toContain('process.env.NETLIFY')
+  })
+})

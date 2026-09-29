@@ -91,7 +91,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `renovate.json` pins majors per the PRD §8 stack table, groups minor/patch updates, and schedules weekly
   - Accept: `npx --yes --package renovate renovate-config-validator` passes
   - Accept: `docs/dependencies.md` states the policy (majors pinned; new dependencies need a `docs/DECISIONS.md` entry)
-- [ ] M1-T18 · Deployment config: `render.yaml`, Netlify config, staging deploy workflow · deps: M1-T15, M1-T14 · PRD: §13, §12
+- [x] M1-T18 · Deployment config: `render.yaml`, Netlify config, staging deploy workflow · deps: M1-T15, M1-T14 · PRD: §13, §12
   - Accept: `render.yaml` defines the API web service (≥ 2 instances, pre-deploy `pnpm db:migrate`), the worker (`node dist/worker.js`), and Key Value in the Virginia (US East) region
   - Accept: `apps/web/netlify.toml` builds with `@netlify/vite-plugin-react-router`, uses Node 24, and caches hashed assets immutably
   - Accept: `.github/workflows/deploy-staging.yml` runs on push to `main`: migrate staging, deploy the API and worker, deploy the web app, smoke-test `/v1/ready` and `/`; it exits with a notice (not a failure) when the staging secrets are absent

@@ -12,6 +12,13 @@ describe('loadEnv', () => {
     expect(env.WEB_ORIGINS).toEqual(['http://a.test:5173', 'http://b.test'])
     expect(env.PORT).toBe(3000)
     expect(env.TRUST_PROXY).toBe(false)
+    expect(env.WORKER_IN_PROCESS).toBe(false)
+  })
+
+  it('reads WORKER_IN_PROCESS', () => {
+    const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+    expect(loadEnv({ ...source, WORKER_IN_PROCESS: 'true' }).WORKER_IN_PROCESS).toBe(true)
+    expect(() => loadEnv({ ...source, WORKER_IN_PROCESS: 'yes' })).toThrow(/WORKER_IN_PROCESS/)
   })
 
   it('names a missing required variable', () => {

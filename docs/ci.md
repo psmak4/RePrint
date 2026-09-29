@@ -20,6 +20,10 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 
 Later tasks add jobs here as their commands appear. Each one must also be added to this table (and to `pnpm check`, except `e2e`, which needs the Docker services and browsers and runs on its own).
 
+## Deploy workflow
+
+`.github/workflows/deploy-staging.yml` deploys `main` to staging after merge. It is not a required PR check and is not in the table above. See `docs/deploy.md`.
+
 ## `pnpm check`
 
 `pnpm check` runs every CI job except `e2e` locally, in order, and stops at the first failure. The integration tests need Docker running (Testcontainers), and so does the secret scan unless a local `gitleaks` binary is installed.
