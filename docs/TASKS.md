@@ -127,7 +127,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M2 · Accounts
 
-- [ ] M2-T01 · Accounts schema: users, roles, permissions, sessions, auth tokens, notifications, plus seeded roles · deps: M1-T05, M1-T06 · PRD: §4, §9
+- [x] M2-T01 · Accounts schema: users, roles, permissions, sessions, auth tokens, notifications, plus seeded roles · deps: M1-T05, M1-T06 · PRD: §4, §9
   - Accept: migration creates `users` (citext `email`/`username` unique), `roles`, `permissions`, `role_permissions`, `user_roles`, `sessions`, `auth_tokens`, and `notifications` with every FK indexed; `pnpm db:check` passes
   - Accept: a data migration inserts the Member, Moderator, and Admin roles with exactly the permission grants of the PRD §4 table (integration test compares against `packages/shared` constants)
   - Accept: `users.status` allows only active, suspended, and deleted; notification preference columns exist per `docs/DECISIONS.md`
