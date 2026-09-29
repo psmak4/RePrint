@@ -67,9 +67,22 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
   const { env, db, jobs } = options
   const webBase = (env.WEB_URL ?? env.WEB_ORIGINS[0] ?? '').replace(/\/$/, '')
 
-  app.get('/auth/session', { schema: { response: { 200: sessionResponseSchema } } }, async () => ({
-    signupsOpen: env.PUBLIC_SIGNUPS,
-  }))
+  app.get(
+    '/auth/session',
+    { schema: { response: { 200: sessionResponseSchema } } },
+    async (request) => ({
+      signupsOpen: env.PUBLIC_SIGNUPS,
+      viewer: request.auth
+        ? {
+            id: request.auth.user.id,
+            username: request.auth.user.username,
+            displayName: request.auth.user.displayName,
+            verified: request.auth.user.emailVerifiedAt !== null,
+            permissions: [...request.auth.permissions].sort(),
+          }
+        : null,
+    }),
+  )
 
   app.post(
     '/auth/register',

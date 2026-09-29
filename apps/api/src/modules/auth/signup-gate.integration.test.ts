@@ -92,8 +92,8 @@ describe('private beta signup gate', () => {
 
   it('exposes signupsOpen on GET /v1/auth/session', async () => {
     const closedResponse = await closed.inject({ method: 'GET', url: '/v1/auth/session' })
-    expect(closedResponse.json()).toEqual({ signupsOpen: false })
+    expect(closedResponse.json()).toEqual({ signupsOpen: false, viewer: null })
     const openResponse = await open.inject({ method: 'GET', url: '/v1/auth/session' })
-    expect(openResponse.json()).toEqual({ signupsOpen: true })
+    expect(openResponse.json()).toEqual({ signupsOpen: true, viewer: null })
   })
 })

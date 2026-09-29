@@ -10,6 +10,7 @@ import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
+import { verificationRoutes } from './modules/auth/verification.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
@@ -82,6 +83,12 @@ export async function buildApp(
   })
 
   await app.register(authRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(verificationRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
