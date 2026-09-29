@@ -143,7 +143,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `packages/email` renders a base layout and the verify-email template to HTML and text (unit snapshot test)
   - Accept: `EMAIL_TRANSPORT=smtp` sends to Mailpit and `EMAIL_TRANSPORT=resend` uses Resend; the choice is env-driven and Zod-validated
   - Accept: emails go through an `email.send` worker job, and an integration test asserts a message arrives in a Mailpit container
-- [ ] M2-T05 · `POST /v1/auth/register` with username rules, breached-password check, and Argon2id · deps: M2-T03, M2-T04 · PRD: §7.1, §8, §10, §11
+- [x] M2-T05 · `POST /v1/auth/register` with username rules, breached-password check, and Argon2id · deps: M2-T03, M2-T04 · PRD: §7.1, §8, §10, §11
   - Accept: username 3–30 `[A-Za-z0-9_]`, unique case-insensitive; password ≥ 12 chars; violations and a taken username return Problem Details with field `errors`; a taken email follows D-048 (same response, no second account) (integration tests)
   - Accept: the password is checked with the HIBP range API (k-anonymity: only the first 5 SHA-1 hex chars are sent; unit test with mocked fetch); `HIBP_MODE=off` for local and tests
   - Accept: the hash is Argon2id (19 MiB, 2 iterations, parallelism 1), the user gets the Member role, a session cookie is set, and a 24-hour single-use verification email is queued (integration test)
