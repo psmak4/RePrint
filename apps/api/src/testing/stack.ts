@@ -28,6 +28,7 @@ export async function startTestStack(): Promise<TestStack> {
   const redisUrl = redisContainer.getConnectionUrl()
   // Fail fast when Redis is down instead of queueing commands forever.
   const redis = new Redis(redisUrl, { maxRetriesPerRequest: 1 })
+  redis.on('error', () => {}) // expected while a test stops Redis
   let redisRunning = true
   const stopRedisContainer = async () => {
     if (!redisRunning) return
