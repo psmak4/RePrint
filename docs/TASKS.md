@@ -1,0 +1,561 @@
+# RePrint task list
+
+The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom. Each iteration takes the **first** `[ ]` task whose `deps:` are all `[x]`.
+
+- Status: `[ ]` to do · `[x]` done · `[!]` blocked (see `docs/BLOCKERS.md`) · `[~]` skipped (give the reason in the task's last bullet)
+- Line format: `- [ ] <ID> · [HUMAN · ]<title> · deps: <IDs or —> · PRD: <sections>`, followed by 2 to 5 `  - Accept:` bullets
+- `HUMAN` tasks are done by the owner. The loop records steps in `docs/BLOCKERS.md` and stops.
+- Milestone briefs: `docs/milestones/`. Each milestone ends with a verification task.
+- To defer a deploy-related HUMAN task, mark it `[~]`. Tasks that depend on it stay unbuilt, and the loop continues with the rest.
+
+## M1 · Foundation
+
+- [ ] M1-T01 · Scaffold pnpm + Turborepo monorepo with the apps and packages from PRD §8 · deps: — · PRD: §8
+  - Accept: `pnpm install` then `pnpm build` succeed on a clean clone (Node 24 pinned via `.nvmrc` and `engines`; pnpm pinned via `packageManager`)
+  - Accept: `apps/web`, `apps/api`, `packages/{shared,db,email,ui,config}` exist as workspace packages that each build and typecheck
+  - Accept: Biome config is shared from `packages/config`, `pnpm lint` passes, and a scratch file using `dangerouslySetInnerHTML` fails `pnpm lint`
+  - Accept: tsconfig bases in `packages/config` set `strict` and `noUncheckedIndexedAccess`, and `pnpm typecheck` passes
+  - Accept: every package has one Vitest smoke test, and `pnpm test:unit` passes
+- [ ] M1-T02 · GitHub Actions CI pipeline and `pnpm check` aggregate command · deps: M1-T01 · PRD: §12, §11
+  - Accept: `.github/workflows/ci.yml` runs on every PR and on push to `main`: `pnpm install --frozen-lockfile`, Biome lint and format check, typecheck, unit tests, build, Gitleaks, and `pnpm audit --audit-level high`
+  - Accept: job names are stable and listed in `docs/ci.md` (these become the required checks)
+  - Accept: `pnpm check` exists, runs every non-e2e CI step locally, and passes
+  - Accept: Turborepo remote cache is used when `TURBO_TOKEN`/`TURBO_TEAM` secrets exist, and CI still passes without them
+  - Accept: this task's own PR shows all CI jobs green in `gh pr checks`
+- [ ] M1-T03 · HUMAN · Enable branch protection on `main` requiring the CI checks · deps: M1-T02 · PRD: §12
+  - Accept: `main` requires a PR and every job listed in `docs/ci.md` to pass before merge, and allows squash merge
+  - Accept: force-pushes and deletion of `main` are disabled
+  - Accept: repo setting "Automatically delete head branches" is on
+- [ ] M1-T04 · `docker-compose.yml` for local Postgres 18, Redis, and Mailpit · deps: M1-T01 · PRD: §13
+  - Accept: `docker compose up -d --wait` brings up healthy `postgres` (18), `redis`, and `mailpit` services
+  - Accept: an init script enables `pg_trgm`, `unaccent`, and `citext`; `docker compose exec postgres psql -U reprint -c "select extname from pg_extension"` lists all three
+  - Accept: the Mailpit UI answers on `http://localhost:8025` and SMTP listens on 1025
+  - Accept: `.env.example` local defaults match the compose ports, and `docs/local-dev.md` explains the setup
+- [ ] M1-T05 · `packages/db`: Drizzle + postgres.js client, migration scripts, drift check, and test database helper · deps: M1-T04 · PRD: §9, §12
+  - Accept: `pnpm db:migrate` applies migrations to the compose database; the first migration enables the extensions idempotently
+  - Accept: `pnpm db:check` fails when a schema file changes without a generated migration, and passes otherwise (shown by a throwaway local change)
+  - Accept: a `uuidv7()` ID helper and a `timestamps()` column helper (timestamptz, UTC) exist, with unit tests
+  - Accept: `packages/db` exports a Testcontainers helper that starts Postgres 18 and runs migrations, used by a passing sample test
+  - Accept: a schema test fails if any foreign key lacks an index or any timestamp column is not `timestamptz` (PRD §9 conventions), and it runs in `pnpm test:integration`
+- [ ] M1-T06 · `packages/shared` foundation: Problem Details, pagination, IDs, permission names, and coverage gate · deps: M1-T01 · PRD: §4, §5.4, §10, §12
+  - Accept: Zod schemas exist for Problem Details (`{ type, title, status, detail, errors?: [{ path, message }] }`), page pagination (`page`, `pageSize` ≤ 50), and cursor pagination
+  - Accept: permission name constants from PRD §4 exist (`reviews.moderate`, `reports.resolve`, `users.view`, `users.suspend`, `roles.assign`, `audit.view`, plus Member permissions) with unit tests
+  - Accept: `pnpm --filter shared test:unit --coverage` enforces a 90% line threshold and passes
+- [ ] M1-T07 · `apps/api` skeleton: Fastify 5, env config, pino, Problem Details errors, helmet, CORS, Origin check, `/v1/health` · deps: M1-T05, M1-T06 · PRD: §8, §10, §11
+  - Accept: `pnpm --filter api dev` serves `GET /v1/health` → 200 on port 3000; startup fails fast with a readable message when a required env var is missing (Zod env schema)
+  - Accept: a Zod validation failure returns a 400 Problem Details body with `errors[]`, and unknown routes return a 404 Problem Details body (tests via `app.inject`)
+  - Accept: a non-GET request whose `Origin` is not in `WEB_ORIGINS` is rejected with 403 (test)
+  - Accept: every log line is pino JSON with a request ID taken from `x-request-id` or generated, and it is echoed in the response header
+- [ ] M1-T08 · API integration test harness (Testcontainers Postgres 18 + Redis) and `GET /v1/ready` · deps: M1-T07 · PRD: §10, §12
+  - Accept: `pnpm test:integration` starts Postgres 18 and Redis containers, migrates, and isolates data between tests
+  - Accept: `GET /v1/ready` returns 200 when Postgres and Redis are reachable and 503 Problem Details when Redis is stopped (integration tests)
+  - Accept: CI has an `integration` job running `pnpm test:integration`, it is green, and `pnpm check` includes it
+- [ ] M1-T09 · Background worker: BullMQ queues, `src/worker.ts` → `dist/worker.js`, repeatable jobs · deps: M1-T08 · PRD: §8, §10
+  - Accept: `node apps/api/dist/worker.js` starts after `pnpm build` and processes a sample `system.heartbeat` job (integration test)
+  - Accept: a typed job registry lets later tasks add jobs and repeatable schedules in one place, documented in `apps/api/src/jobs/README.md`
+  - Accept: `GET /v1/ready` also checks that the queue is reachable (test)
+  - Accept: `pnpm dev` runs the API and worker together
+- [ ] M1-T10 · OpenAPI 3.1 generated from Zod schemas, `/v1/docs` outside production, and spec drift check · deps: M1-T07 · PRD: §10, §12
+  - Accept: `pnpm build` writes `apps/api/openapi.json` from the route schemas
+  - Accept: `pnpm openapi:check` fails when the committed spec is stale; it is part of `pnpm check` and CI
+  - Accept: `GET /v1/docs` serves the docs when `NODE_ENV` ≠ `production` and returns 404 in production (test)
+- [ ] M1-T11 · `apps/web` skeleton: React Router 8 framework-mode SSR, Vite, Tailwind v4, `packages/ui` with shadcn/ui, API client · deps: M1-T07 · PRD: §8
+  - Accept: `pnpm dev` serves the SSR app on port 5173 alongside the API; view-source of `/` shows server-rendered HTML
+  - Accept: `packages/ui` exports the shadcn/ui `Button`, used on the home page, and Tailwind builds
+  - Accept: a server-side API client (`API_INTERNAL_URL`) forwards the incoming `cookie` and `x-request-id` headers, covered by a unit test
+  - Accept: a root error boundary renders a friendly error page for thrown loader errors (component test)
+- [ ] M1-T12 · Design foundation: `docs/DESIGN.md`, theme tokens, app shell, copy module · deps: M1-T11 · PRD: §8, §6, §7.3, §11, §3
+  - Accept: `docs/DESIGN.md` defines the layout grid and breakpoints, type scale, spacing scale, color tokens from the dark palette `#0f172a` / `#3b82f6` / `#f8fafc` with AA contrast notes, a component inventory mapped to shadcn/ui, and page templates for the book page, search results, review form, and moderation queue (plus the library, profile, and admin table patterns)
+  - Accept: `packages/ui` exposes the theme tokens as Tailwind v4 CSS variables, and the app renders in the dark theme
+  - Accept: the app shell has a header (logo, search box slot, account slot), a footer (Open Library credit, legal page links), a skip link, and a responsive layout from 360 px to desktop (component test)
+  - Accept: user-facing strings come from `apps/web/app/copy/`, and a Biome rule or unit test guards against inline strings in shell components
+- [ ] M1-T13 · Playwright + axe e2e harness running in CI against the local stack · deps: M1-T12, M1-T02 · PRD: §12, §11
+  - Accept: `pnpm test:e2e` runs Playwright projects for Chromium, WebKit, and a mobile viewport against a locally started stack (`webServer`)
+  - Accept: a shared `expectNoA11yViolations(page)` helper fails on serious or critical axe issues, and the smoke spec for `/` uses it
+  - Accept: CI has an `e2e` job (Docker services + built apps) that runs on every PR and is green
+  - Accept: local domain setup from `docs/DECISIONS.md` (`reprint.localhost`) works in all three projects, or the fallback is applied and recorded
+- [ ] M1-T14 · Security headers: helmet on the API, CSP with nonces on the web, Netlify headers · deps: M1-T11 · PRD: §11
+  - Accept: API responses include HSTS (with preload), `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin` (integration test)
+  - Accept: web SSR responses carry a strict `Content-Security-Policy` with a per-request nonce applied to React Router scripts, and the page still hydrates (e2e check)
+  - Accept: `apps/web/netlify.toml` (or `_headers`) sets the same headers for static assets
+- [ ] M1-T15 · Observability: Sentry on both apps and the worker, shared request IDs, log redaction · deps: M1-T09, M1-T11 · PRD: §11
+  - Accept: Sentry initializes only when `SENTRY_DSN`/`VITE_SENTRY_DSN` are set, and the apps start and pass tests without them
+  - Accept: a web SSR request's `x-request-id` appears in both the web and API log lines for the same page view (integration test or documented manual check script)
+  - Accept: pino redacts `cookie`, `authorization`, `password`, and `token` fields (unit test)
+- [ ] M1-T16 · Seed framework: `pnpm db:seed` and `pnpm db:reset` with deterministic data · deps: M1-T05 · PRD: §13
+  - Accept: `pnpm db:reset` drops, migrates, and seeds the local database; running it twice gives identical row counts and IDs (seeded PRNG)
+  - Accept: seed modules register in one ordered list that later milestones extend (documented in `packages/db/src/seed/README.md`)
+  - Accept: the seed refuses to run when `NODE_ENV=production` or `DATABASE_URL` is not a local host (unit test)
+- [ ] M1-T17 · Renovate configuration and dependency policy · deps: M1-T02 · PRD: §8, §11
+  - Accept: `renovate.json` pins majors per the PRD §8 stack table, groups minor/patch updates, and schedules weekly
+  - Accept: `npx --yes --package renovate renovate-config-validator` passes
+  - Accept: `docs/dependencies.md` states the policy (majors pinned; new dependencies need a `docs/DECISIONS.md` entry)
+- [ ] M1-T18 · Deployment config: `render.yaml`, Netlify config, staging deploy workflow · deps: M1-T15, M1-T14 · PRD: §13, §12
+  - Accept: `render.yaml` defines the API web service (≥ 2 instances, pre-deploy `pnpm db:migrate`), the worker (`node dist/worker.js`), and Key Value in the Virginia (US East) region
+  - Accept: `apps/web/netlify.toml` builds with `@netlify/vite-plugin-react-router`, uses Node 24, and caches hashed assets immutably
+  - Accept: `.github/workflows/deploy-staging.yml` runs on push to `main`: migrate staging, deploy the API and worker, deploy the web app, smoke-test `/v1/ready` and `/`; it exits with a notice (not a failure) when the staging secrets are absent
+  - Accept: `docs/deploy.md` lists every secret and variable the workflows read
+- [ ] M1-T19 · HUMAN · Create staging infrastructure (Neon, Render, Netlify, Resend, Sentry) and add deploy secrets · deps: M1-T18 · PRD: §13, §8, §11
+  - Accept: Neon staging project in US East on Postgres 18 (or 17 if 18 is unsupported, recorded in `docs/DECISIONS.md`), with `pg_trgm`, `unaccent`, and `citext` available
+  - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
+  - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
+  - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
+- [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
+  - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
+  - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
+  - Accept: `docs/deploy.md` documents rollback (redeploy the previous commit; migrations are expand/contract)
+- [ ] M1-T21 · HUMAN · Enable per-PR preview environments (Netlify deploy previews, Render PR previews, Neon branch per PR) · deps: M1-T20 · PRD: §12, §13
+  - Accept: a test PR gets a Netlify deploy preview URL and a Render preview API URL
+  - Accept: each Render preview uses its own Neon branch created from staging (Neon GitHub integration or Render preview env hook)
+  - Accept: preview env vars point the preview web at the preview API, email in Resend test mode, and `SOURCE_MODE=stub`
+- [ ] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
+  - Accept: the CI `e2e-preview` job waits for both preview URLs, then runs `pnpm test:e2e` against them
+  - Accept: the job is green on this task's PR, and `docs/ci.md` is updated
+  - Accept: the local-stack `e2e` job remains as a fallback for PRs where previews fail to build, and is documented
+- [ ] M1-T23 · HUMAN · Install the Renovate GitHub app on the repository · deps: M1-T17 · PRD: §8, §11
+  - Accept: Renovate opens its onboarding or dependency dashboard issue on the repo
+  - Accept: the dashboard issue shows `renovate.json` from M1-T17 was read without config errors
+- [ ] M1-T24 · M1 verification: run the Foundation acceptance criteria end to end, fix gaps, update docs · deps: M1-T10, M1-T13, M1-T15, M1-T16, M1-T17, M1-T18 · PRD: §3, §8, §12, §13
+  - Accept: from a fresh clone, `pnpm install && docker compose up -d --wait && pnpm db:reset && pnpm check && pnpm test:e2e` all pass
+  - Accept: every acceptance criterion in `docs/milestones/M1-foundation.md` is checked off in the PR body with the command that proved it
+  - Accept: `CLAUDE.md` command table matches the real `package.json` scripts exactly
+  - Accept: `gh pr checks` on this PR lists the required checks from `docs/ci.md` (branch protection from M1-T03 is active), and deploy-related items (M1-T20, M1-T22) are either verified or listed as deferred in `docs/PROGRESS.md`
+
+## M2 · Accounts
+
+- [ ] M2-T01 · Accounts schema: users, roles, permissions, sessions, auth tokens, notifications, plus seeded roles · deps: M1-T05, M1-T06 · PRD: §4, §9
+  - Accept: migration creates `users` (citext `email`/`username` unique), `roles`, `permissions`, `role_permissions`, `user_roles`, `sessions`, `auth_tokens`, and `notifications` with every FK indexed; `pnpm db:check` passes
+  - Accept: a data migration inserts the Member, Moderator, and Admin roles with exactly the permission grants of the PRD §4 table (integration test compares against `packages/shared` constants)
+  - Accept: `users.status` allows only active, suspended, and deleted; notification preference columns exist per `docs/DECISIONS.md`
+- [ ] M2-T02 · Session auth plugin and permission preHandlers · deps: M2-T01, M1-T08 · PRD: §4, §7.1, §8, §10
+  - Accept: `rp_session` holds a random 256-bit token; only its SHA-256 hash is stored; the cookie is `HttpOnly`, `SameSite=Lax`, `Secure` outside local, and uses `Domain=$COOKIE_DOMAIN` (unit and integration tests)
+  - Accept: sessions last 30 days and renew while in use (sliding expiry per `docs/DECISIONS.md`), and expired or suspended-user sessions are rejected (integration tests)
+  - Accept: `requireAuth`, `requireVerified`, and `requirePermission(name)` preHandlers return 401/403 Problem Details, and checks use permissions, never role names (integration tests on a test-only route: one allowed, one denied each)
+- [ ] M2-T03 · Redis-backed rate limiting with the PRD §11 policies · deps: M2-T02 · PRD: §11
+  - Accept: named policies exist for login (per IP and per account), register, reset/resend (per email), review create/edit, report, other authenticated writes, and anonymous reads, with the PRD §11 limits
+  - Accept: exceeding a limit returns 429 Problem Details with `Retry-After` (integration test per policy type: per-IP, per-user, per-email)
+  - Accept: limits are shared across API instances via Redis (test with two app instances on one Redis)
+- [ ] M2-T04 · Email foundation: React Email templates, mailer (Mailpit locally, Resend elsewhere), email job · deps: M2-T01, M1-T09 · PRD: §7.12, §13
+  - Accept: `packages/email` renders a base layout and the verify-email template to HTML and text (unit snapshot test)
+  - Accept: `EMAIL_TRANSPORT=smtp` sends to Mailpit and `EMAIL_TRANSPORT=resend` uses Resend; the choice is env-driven and Zod-validated
+  - Accept: emails go through an `email.send` worker job, and an integration test asserts a message arrives in a Mailpit container
+- [ ] M2-T05 · `POST /v1/auth/register` with username rules, breached-password check, and Argon2id · deps: M2-T03, M2-T04 · PRD: §7.1, §8, §10, §11
+  - Accept: username 3–30 `[A-Za-z0-9_]`, unique case-insensitive; password ≥ 12 chars; violations and a taken username return Problem Details with field `errors`; a taken email follows D-048 (same response, no second account) (integration tests)
+  - Accept: the password is checked with the HIBP range API (k-anonymity: only the first 5 SHA-1 hex chars are sent; unit test with mocked fetch); `HIBP_MODE=off` for local and tests
+  - Accept: the hash is Argon2id (19 MiB, 2 iterations, parallelism 1), the user gets the Member role, a session cookie is set, and a 24-hour single-use verification email is queued (integration test)
+  - Accept: the 6th registration from one IP within an hour returns 429 (integration test)
+- [ ] M2-T06 · Private beta signup gate (`PUBLIC_SIGNUPS`) · deps: M2-T05 · PRD: §14
+  - Accept: with `PUBLIC_SIGNUPS=false`, registration without a valid invite code returns 403 Problem Details, and with a code from `SIGNUP_INVITE_CODES` it succeeds (integration tests)
+  - Accept: with `PUBLIC_SIGNUPS=true`, no invite code is needed
+  - Accept: `GET /v1/auth/session` exposes `signupsOpen` so the web can show or hide the invite field (the web form uses it in M2-T10)
+- [ ] M2-T07 · Email verification: `POST /v1/auth/verify-email`, `POST /v1/auth/resend-verification`, `GET /v1/auth/session` · deps: M2-T05 · PRD: §7.1, §10, §11
+  - Accept: a valid token sets `email_verified_at` once; reused or expired (> 24 h) tokens return 400 Problem Details (integration tests)
+  - Accept: resend is limited to 3 per hour per email (429 on the 4th) and always returns the same response (integration test)
+  - Accept: `GET /v1/auth/session` returns the viewer (id, username, displayName, verified, permissions) or `null` for Visitors (tests for both)
+- [ ] M2-T08 · Log in and out: `POST /v1/auth/login`, `/logout`, `/logout-all` · deps: M2-T07 · PRD: §4, §7.1, §10, §11
+  - Accept: a wrong email or password returns the same 401 body and similar timing for both cases (integration test compares bodies)
+  - Accept: suspended and deleted accounts cannot log in (integration tests; message per `docs/DECISIONS.md`)
+  - Accept: 11 attempts per IP or 6 per account within 15 minutes return 429 (integration tests)
+  - Accept: `/logout` ends the current session and `/logout-all` ends every session of the user (integration tests)
+- [ ] M2-T09 · Password reset: `POST /v1/auth/forgot-password` and `/reset-password` · deps: M2-T08 · PRD: §7.1, §7.12, §10, §11
+  - Accept: forgot-password returns an identical response for known and unknown emails, and sends a 1-hour single-use link only for known ones (integration tests)
+  - Accept: reset sets a new Argon2id hash, ends all sessions, and sends the "password changed" email (integration test)
+  - Accept: reused or expired tokens are rejected; the 4th request per email per hour returns 429
+- [ ] M2-T10 · Web: register, log in, and log out pages with the header account menu · deps: M2-T08, M2-T06, M1-T12 · PRD: §7.1
+  - Accept: `/register` and `/login` use React Hook Form with the shared Zod schemas and show server field errors (component tests)
+  - Accept: the root loader reads `/v1/auth/session`; the header shows log in/register for Visitors and an account menu with log out for Members (component test)
+  - Accept: the invite code field appears only when signups are closed
+- [ ] M2-T11 · Web: verify-email page, unverified banner with resend, forgot/reset password pages · deps: M2-T10, M2-T09 · PRD: §7.1
+  - Accept: `/verify-email?token=` shows success or a clear expired/used state (component tests)
+  - Accept: signed-in unverified Members see a banner with a working "Resend link" action on every page (component test)
+  - Accept: `/forgot-password` shows the same confirmation for any email, and `/reset-password?token=` sets a new password (component tests)
+- [ ] M2-T12 · E2E: register, verify, and log in; password reset · deps: M2-T11, M1-T13 · PRD: §12
+  - Accept: `e2e/auth.spec.ts` registers, reads the verification email from the Mailpit API, verifies, logs out, and logs in, passing in all three Playwright projects with axe checks
+  - Accept: `e2e/password-reset.spec.ts` requests a reset, follows the emailed link, sets a new password, and logs in with it
+- [ ] M2-T13 · `GET/PATCH /v1/me` and `POST /v1/me/password` · deps: M2-T09 · PRD: §7.1, §7.8, §10
+  - Accept: PATCH updates display name, bio (≤ 280 chars), library privacy, and email notification preferences; invalid input returns 400 (integration tests: allowed, unauthenticated denied)
+  - Accept: password change requires the current password, ends all other sessions (keeps the current one), and sends the "password changed" email (integration tests)
+- [ ] M2-T14 · `POST /v1/me/email`: email change with verification of the new address · deps: M2-T13 · PRD: §7.1, §7.12, §10
+  - Accept: the request requires the current password; the email does not change until the link sent to the new address is used (integration tests)
+  - Accept: notification emails go to both the old and new addresses (integration test with Mailpit)
+  - Accept: a new address already in use is rejected with 409 Problem Details
+- [ ] M2-T15 · Session management: `GET /v1/me/sessions`, `GET/DELETE /v1/me/sessions/:id` · deps: M2-T13 · PRD: §7.1, §10
+  - Accept: the list shows each active session's device (parsed user agent), IP, last seen, and a `current` flag (integration test)
+  - Accept: DELETE ends that session; deleting another user's session returns 404 (allowed and denied tests)
+- [ ] M2-T16 · Image storage and `POST /v1/me/avatar` (sniffed, 5 MB cap, WebP 256 px, EXIF stripped) · deps: M2-T13 · PRD: §7.8, §6, §9, §11
+  - Accept: a storage interface writes to local disk in dev and test (`STORAGE_DRIVER=local`) and to R2 via the S3 API otherwise, with an env-validated config
+  - Accept: uploads are accepted by their actual content (a PNG renamed `.txt` works, a text file renamed `.png` is rejected with 400) and files over 5 MB return 413 (integration tests)
+  - Accept: the stored avatar is WebP 256×256 with no EXIF (integration test inspects the output with sharp) and is recorded in the `covers` table with origin `upload`
+- [ ] M2-T17 · Account deletion: `DELETE /v1/me` plus a worker job that erases after 30 days · deps: M2-T13, M1-T09 · PRD: §7.1, §7.12, §9, §10
+  - Accept: deletion requires the password, sets status `deleted` and `deleted_at`, ends all sessions, and queues the "account deletion scheduled" email (integration tests: allowed, wrong password denied)
+  - Accept: the daily `accounts.erase` job hard-deletes users deleted more than 30 days ago, and dependent rows go by FK cascade (integration test with a clock override)
+  - Accept: `docs/DECISIONS.md` records what a deleted account looks like during the 30 days
+- [ ] M2-T18 · In-app notifications API and header bell · deps: M2-T14, M1-T12 · PRD: §7.12, §10
+  - Accept: `notify(tx, userId, type, data)` creates rows; password changed and email changed create security notifications (integration tests)
+  - Accept: `GET /v1/me/notifications` is paginated newest first with an unread count; `POST /v1/me/notifications/read` marks given IDs or all as read (allowed and unauthenticated-denied tests)
+  - Accept: the header bell shows the unread count and a dropdown list, and opening it marks items read (component test)
+- [ ] M2-T19 · Web settings: profile, avatar, library privacy, email preferences · deps: M2-T16, M2-T11 · PRD: §7.1, §7.8
+  - Accept: `/settings/profile` edits display name and bio with a 280-char counter, uploads an avatar with preview, and toggles library privacy and review-decision emails (component tests)
+  - Accept: the settings pages are `noindex` and require sign-in (redirect to `/login` otherwise)
+- [ ] M2-T20 · Web settings: email, password, sessions, log out everywhere, delete account · deps: M2-T19, M2-T15, M2-T17 · PRD: §7.1
+  - Accept: `/settings/security` changes email (pending state shown until verified) and password, each asking for the current password (component tests)
+  - Accept: the active devices list ends individual sessions and "Log out everywhere" works (component test)
+  - Accept: delete account requires typing the password and explains the 30-day erase (component test)
+- [ ] M2-T21 · `pnpm --filter api seed:admin` and local user seed data · deps: M2-T01, M1-T16 · PRD: §4, §13
+  - Accept: `pnpm --filter api seed:admin -- --email … --username …` creates a verified Admin once, prompts for or reads the password from stdin, and refuses if an Admin already exists (integration test)
+  - Accept: `pnpm db:reset` seeds 50 users: Members, Moderators, Admins, unverified, suspended, and deleted accounts; dev credentials are documented in `docs/local-dev.md`
+- [ ] M2-T22 · M2 verification: run the Accounts acceptance criteria end to end, fix gaps, update docs · deps: M2-T12, M2-T18, M2-T20, M2-T21 · PRD: §3, §4, §7.1, §7.12, §11
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+  - Accept: every acceptance criterion in `docs/milestones/M2-accounts.md` is checked off in the PR body with the command that proved it
+  - Accept: every M2 endpoint has at least one allowed and one denied integration test (a listing script or test enumerates the routes)
+
+## M3 · Book catalog
+
+- [ ] M3-T01 · Catalog domain schemas in `packages/shared`, plus ISBN and slug utilities · deps: M1-T06 · PRD: §5.1, §5.2, §5.4, §6
+  - Accept: Zod schemas for Book, Edition, Author, Contribution (role enum), Series membership, Genre, Subject, Cover, Format, Language (ISO 639), Source link, and Book candidate (confidence 0–1) exist with unit tests
+  - Accept: `toIsbn13()` converts ISBN-10 to 13 and validates check digits (unit tests with valid and invalid cases)
+  - Accept: `makeSlug(title, id)` yields `the-left-hand-of-darkness-0192a3` style slugs (unaccented, lowercase, 6-hex suffix from the ID) (unit tests)
+  - Accept: coverage in `packages/shared` stays ≥ 90%
+- [ ] M3-T02 · Catalog schema part 1: books, editions, authors, contributions, source links, source records · deps: M3-T01, M2-T16 · PRD: §5.4, §6, §9
+  - Accept: migration creates the tables with PRD §9 columns and constraints (`isbn_13` unique when present, contributions PK, `source_links` unique on (`source`, `entity_type`, `source_id`)), with every FK indexed
+  - Accept: `books.search_vector` has a GIN index, and trigram indexes exist for title and author name search
+  - Accept: cached aggregates `review_count`, `rating_sum`, `rating_counts int[5]` default to zero
+  - Accept: `pnpm db:check` passes
+- [ ] M3-T03 · Catalog schema part 2: series, genres, subjects, mapping rules, merge candidates, plus the Genre list · deps: M3-T02 · PRD: §5.1, §5.4, §9
+  - Accept: migration creates `series`, `book_series` (nullable numeric `position`), `genres` (`parent_id`, `featured`), `book_genres` (`origin`), `subjects` (case-insensitive unique `label`), `book_subjects`, `subject_genre_rules`, and `merge_candidates`
+  - Accept: a data migration inserts the Genre list and starter Subject-to-Genre rules from `docs/DECISIONS.md` (integration test counts about 40 Genres)
+- [ ] M3-T04 · Source adapter interface, shared contract suite, fixture recorder, stub Source · deps: M3-T01 · PRD: §6, §12, §13
+  - Accept: `apps/api/src/catalog/sources/types.ts` defines `searchBooks`, `getBook`, `getEditions`, `getAuthor`, optional `importBulk`, `storagePolicy`, and trusted-field priorities
+  - Accept: `runSourceContract(adapter, fixtures)` checks every output against the shared Zod schemas; a stub adapter passes it
+  - Accept: `SOURCE_MODE=fixtures|live|stub` selects the adapter wiring, and a `pnpm --filter api fixtures:record` script saves raw responses under `sources/open-library/__fixtures__/`
+- [ ] M3-T05 · Open Library adapter: search translated into Book candidates · deps: M3-T04 · PRD: §5, §6, §12
+  - Accept: recorded fixtures cover title, author, and ISBN searches plus a result with no cover, committed under `__fixtures__/`
+  - Accept: `searchBooks` maps each work to one Book candidate with an Edition, a Source link, and a confidence value, and passes the contract suite (unit and contract tests)
+  - Accept: `rg -i "\bwork(s)?\b|olid" apps/api/src --glob '!**/sources/open-library/**'` finds no Open Library vocabulary outside the adapter (script in `pnpm check`)
+- [ ] M3-T06 · Open Library adapter: `getBook`, `getEditions`, `getAuthor` translation · deps: M3-T05 · PRD: §5, §6, §12
+  - Accept: fixtures cover a work, its editions (with ISBN-10 only, missing format, non-English), an author with a Wikidata ID and photo, and a work with a series and subjects
+  - Accept: output converts ISBN-10 to ISBN-13, maps formats to the five Formats, languages to ISO 639, and covers to Cover records by cover ID, passing the contract suite
+  - Accept: invalid records are logged and skipped, never returned (unit test)
+- [ ] M3-T07 · Source gateway: shared Redis rate limiter with priority, circuit breaker, User-Agent, timeouts, metrics · deps: M3-T04, M1-T08 · PRD: §6, §11, §13
+  - Accept: all outgoing Source calls pass through one limiter set by `SOURCE_RATE_LIMIT_RPS` (2 in production, 1 in staging), shared across processes via Redis (integration test)
+  - Accept: interactive requests are served before background refreshes when both are queued (integration test)
+  - Accept: the circuit breaker opens after repeated errors, short-circuits calls while open, and half-opens after a cooldown (unit tests)
+  - Accept: every request sends `User-Agent: RePrint/<version> (ops@reprint.com)`, and per-second request counts and cache hit/miss counters are recorded in Redis
+- [ ] M3-T08 · Catalog ingest: matching rules, upsert, Source links, field origins, locked fields · deps: M3-T03, M3-T06 · PRD: §5.2, §5.4, §6, §9
+  - Accept: ingest matches in PRD §5.4 order (existing Source link → ISBN-13 → shared identifier such as Wikidata), and re-ingesting the same record creates no duplicates (integration tests)
+  - Accept: a title-and-author-only match creates a new Book and a `merge_candidates` row, never an automatic merge (integration test)
+  - Accept: `field_origins` records Source and time per field; fields in `locked_fields` are never overwritten by ingest (integration test)
+  - Accept: raw responses go to `source_records`; only Store-policy Sources are accepted (test with a Cache-policy stub is rejected)
+- [ ] M3-T09 · Catalog enrichment: Primary Edition choice, Subject-to-Genre mapping, per-field Source priority · deps: M3-T08 · PRD: §5.1, §5.4, §6
+  - Accept: the Primary Edition is chosen automatically (English, has a cover, has an ISBN, most recent) unless admin-locked (unit tests on the ranking)
+  - Accept: Subjects are stored and mapped to Genres through `subject_genre_rules` by priority with `book_genres.origin = mapping`, and admin Genres are untouched (integration test)
+  - Accept: a per-field priority list decides between Sources, and admin always wins (unit test with two stub Sources)
+- [ ] M3-T10 · `GET /v1/books/:slug`, `/books/:slug/editions`, `/authors/:slug`, public caching, refresh and purge jobs · deps: M3-T09, M1-T09 · PRD: §6, §7.4, §7.5, §10
+  - Accept: the responses match shared schemas and contain no Source IDs (integration test scans the JSON for `source_id` values)
+  - Accept: public GETs set `Cache-Control` with `stale-while-revalidate` and an `ETag`, and `If-None-Match` returns 304 (integration test)
+  - Accept: viewing a Book whose data is more than 30 days old enqueues a low-priority `catalog.refresh` job, and the refresh respects locked fields (integration test)
+  - Accept: a daily `catalog.purgeSourceRecords` job deletes `source_records` older than 30 days (integration test); unknown slugs return 404 Problem Details
+- [ ] M3-T11 · Opening a Book not yet on RePrint: candidate references and `POST /v1/books/resolve` · deps: M3-T10, M3-T07 · PRD: §6, §7.3, §10
+  - Accept: search candidates carry an opaque `ref` (no Source ID; stored in Redis for 24 h per `docs/DECISIONS.md`)
+  - Accept: resolving a ref fetches, stores the Book with Editions and Authors, and returns its slug within the 5-second limit; a second resolve returns the same slug (integration tests)
+  - Accept: a Source timeout or open breaker returns 503 Problem Details, and an unknown ref returns 404
+- [ ] M3-T12 · Catalog search: full-text + trigram query and `GET /v1/search/suggest` · deps: M3-T10 · PRD: §6, §7.3, §10
+  - Accept: Catalog search matches Book titles, Edition titles, ISBNs, Author names, and Series names, including typos (trigram) and accents (unaccent) (integration tests)
+  - Accept: `GET /v1/search/suggest?q=` returns Books and Authors from the Catalog only for `q` of 2 or more chars, and never calls the Source (test asserts zero gateway calls)
+- [ ] M3-T13 · Federated `GET /v1/search`: Catalog + Source merge, caching, timeout, fallback · deps: M3-T12, M3-T11 · PRD: §6, §7.3, §10
+  - Accept: page 1 runs the Catalog query and the Source search in parallel; Source results are cached in Redis for 24 h keyed on normalized query and page (integration test counts gateway calls)
+  - Accept: candidates that match Catalog Books are shown as the stored Book; results are deduplicated; Catalog Books get a review-count boost (integration tests)
+  - Accept: when the Source takes > 1.5 s or the breaker is open, Catalog results return alone with `sourceUnavailable: true` (integration test with a slow stub)
+  - Accept: later pages request the Source's matching page and drop Books already shown
+- [ ] M3-T14 · Search filters, sorts, Authors tab, and ISBN lookup · deps: M3-T13 · PRD: §7.3, §10
+  - Accept: `genre`, `language`, and `minRating` limit results to the Catalog; `decade` applies to all results (integration tests)
+  - Accept: `sort=relevance|most_reviewed|highest_rated|newest` works; `pageSize` is 20; `type=authors` returns Authors (integration tests)
+  - Accept: a 10- or 13-digit ISBN query returns an `isbnMatch` (slug or ref) that the web follows directly, and an exact ISBN match ranks first (integration tests)
+- [ ] M3-T15 · Web: Cover with generated fallback, BookCard, rating display primitives · deps: M3-T10, M1-T12 · PRD: §5.4, §6, §7.3
+  - Accept: `Cover` renders the Open Library image by cover ID and size, and falls back to a generated cover (title and author) when the image is missing or fails to load (component tests)
+  - Accept: `BookCard` shows cover, title, authors, and first published year, plus rating and count or "No RePrint reviews yet" (component tests)
+  - Accept: these components are listed in `docs/DESIGN.md`'s inventory
+- [ ] M3-T16 · Web: header search box with Catalog suggestions · deps: M3-T15, M3-T12 · PRD: §7.3, §11
+  - Accept: suggestions appear after 2 characters, 250 ms after the last keystroke (component test with fake timers)
+  - Accept: the combobox is keyboard-navigable with correct ARIA roles, and Enter goes to `/search?q=` (component test)
+- [ ] M3-T17 · Web: search results page · deps: M3-T16, M3-T14 · PRD: §7.3
+  - Accept: `/search` has Books and Authors tabs, filters, sort, and page number in the URL; the SSR loader renders results (component tests)
+  - Accept: Books not yet on RePrint show "No RePrint reviews yet" and link to the resolve flow; the Source-unavailable note appears when flagged (component tests)
+  - Accept: an ISBN query redirects straight to the Book (loader test)
+- [ ] M3-T18 · Web: book page (`/books/:slug`) header, description, Editions, more by this author · deps: M3-T17 · PRD: §5.4, §7.4, §11
+  - Accept: the SSR page shows cover, title, subtitle, contributors with roles, Series link and position, first published year, page count, publisher, and Genre tags from the Primary Edition, and hides rows with missing data (component tests)
+  - Accept: the description collapses after 6 lines with an accessible toggle; missing descriptions show "No description yet" (component tests)
+  - Accept: the collapsible Editions list and "More by this author" (up to 6) render; canonical URL, meta description, and Open Graph tags are present (loader test)
+- [ ] M3-T19 · Web: resolve route with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
+  - Accept: opening a candidate calls resolve and redirects to `/books/<slug>` (loader test)
+  - Accept: on 503 the page shows "We couldn't load this book right now" with a working retry button (component test)
+- [ ] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
+  - Accept: the page shows photo, name, life dates, and bio when available, with fallbacks (component tests)
+  - Accept: Books are grouped by role (written, translated, narrated, and so on) and sorted by review count with each Book's rating (component and loader tests)
+- [ ] M3-T21 · Local seed: about 500 Books with Editions, Authors, Series, Genres, Subjects · deps: M3-T09, M1-T16 · PRD: §13
+  - Accept: `pnpm db:reset` loads about 500 Books through the ingest path (from recorded fixtures and deterministic generation), with Series, multiple Editions, translations, and missing-data cases
+  - Accept: seeded data passes the same Zod schemas as live data, and the seed is idempotent
+- [ ] M3-T22 · E2E: search to book page (stubbed Source) · deps: M3-T19, M3-T20, M3-T21, M1-T13 · PRD: §12
+  - Accept: `e2e/search.spec.ts` searches, opens a Catalog Book, and separately opens a "not yet on RePrint" result that resolves into a new book page, with axe checks in all projects
+  - Accept: the ISBN search path lands directly on the book page
+- [ ] M3-T23 · M3 verification: run the Book catalog acceptance criteria end to end, fix gaps, update docs · deps: M3-T22 · PRD: §3, §5, §6, §7.3, §7.4, §7.5
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+  - Accept: every acceptance criterion in `docs/milestones/M3-book-catalog.md` is checked off in the PR body with the command that proved it
+  - Accept: the vocabulary guard script finds no Source terms outside `apps/api/src/catalog/sources/`
+
+## M4 · Reviews
+
+- [ ] M4-T01 · Reviews schema and shared review rules · deps: M3-T02, M2-T01 · PRD: §5.3, §7.6, §9
+  - Accept: migration creates `reviews` (unique (`user_id`, `book_id`), rating check 1–5, status enum), `review_versions`, and `review_claims` with FK cascade from users and indexes; `pnpm db:check` passes
+  - Accept: the shared `ReviewInput` schema enforces rating 1–5 integer, headline ≤ 120, body 50–10,000, `hasSpoilers`, and optional `editionId` (unit tests)
+  - Accept: a shared status-transition function allows only the PRD transitions (new/edit → pending; pending → approved or rejected; approved → unpublished; rejected or unpublished → pending on edit) (unit tests)
+- [ ] M4-T02 · Ratings: weighted average, distribution, transactional aggregates, nightly recompute · deps: M4-T01, M2-T17 · PRD: §7.4, §7.6, §9
+  - Accept: `weightedRating = (C × m + Σ ratings) / (C + n)` with C = 5, plus average (one decimal) and 5-bucket distribution, in `packages/shared` (unit tests incl. n = 0)
+  - Accept: every review status change updates `review_count`, `rating_sum`, and `rating_counts` in the same transaction (integration test)
+  - Accept: a nightly `ratings.recompute` job recalculates from scratch, logs and reports to Sentry any mismatch, and fixes it (integration test with deliberately corrupted aggregates)
+  - Accept: deleting an account drops its reviews from aggregates immediately (D-043), and `accounts.erase` keeps aggregates correct when it removes them (integration tests)
+- [ ] M4-T03 · Audit log: append-only table and `recordAudit()` service · deps: M2-T01 · PRD: §4, §7.11, §9
+  - Accept: `audit_log` has PRD §9 columns; UPDATE and DELETE are refused by a trigger (and the app DB role gets INSERT/SELECT only in deployed environments) (integration test)
+  - Accept: `recordAudit(tx, { actorId, action, targetType, targetId, before, after, ip })` writes in the caller's transaction (integration test)
+  - Accept: `docs/DECISIONS.md` lists which actions are audited
+- [ ] M4-T04 · My review API: `GET/PUT/DELETE /v1/books/:slug/my-review` · deps: M4-T02, M2-T03 · PRD: §7.6, §10, §11
+  - Accept: PUT creates or edits the viewer's review, sets it Pending, and appends a `review_versions` row; editing an Approved review hides it until re-approved (integration tests)
+  - Accept: unverified Members get 403, Visitors get 401, and the 21st create/edit in a day returns 429 (integration tests)
+  - Accept: GET returns the viewer's review with status and rejection reason; DELETE removes it permanently and updates aggregates (integration tests)
+- [ ] M4-T05 · `GET /v1/books/:slug/reviews` and the rating summary on the Book response · deps: M4-T04 · PRD: §7.4, §7.6, §10
+  - Accept: only Approved reviews are listed, 10 per page, with `sort=most_helpful|newest|highest|lowest` (most helpful breaks ties by newest) and a `rating=` filter (integration tests)
+  - Accept: `GET /v1/books/:slug` includes average (one decimal), count, and a 5-bar distribution from Approved reviews only (integration test)
+- [ ] M4-T06 · Moderation queue API: `GET /v1/mod/reviews`, claims, `GET /v1/mod/stats` · deps: M4-T05, M4-T03 · PRD: §4, §7.10, §10
+  - Accept: the queue lists Pending reviews oldest first with cursor pagination, the reviewer's approved/rejected/reported counts, and the last approved version for edited reviews (integration tests)
+  - Accept: `POST /mod/reviews/:id/claim` claims for 10 minutes; a claim by another moderator returns 409 until it expires (integration tests)
+  - Accept: all `/mod/*` routes require `reviews.moderate` via a preHandler; a Member gets 403 (denied test per route)
+  - Accept: `/mod/stats` returns pending count and age of the oldest pending review
+- [ ] M4-T07 · Approve and reject: decisions, notifications, decision emails, audit · deps: M4-T06, M2-T18 · PRD: §4, §7.6, §7.10, §7.12
+  - Accept: `POST /mod/reviews/:id/approve` and `/reject` (optional reason) update status, the version's `decided_by`/`decision_reason`, and aggregates in one transaction (integration tests)
+  - Accept: moderators cannot decide their own reviews (403) or reviews claimed by someone else (409) (integration tests)
+  - Accept: the author gets an in-app notification and, if enabled, the review decision email (integration test with Mailpit)
+  - Accept: every decision writes an `audit_log` row
+- [ ] M4-T08 · Web: star rating input and spoiler toggle components · deps: M1-T12 · PRD: §7.6, §11, §12
+  - Accept: `StarRatingInput` is a radio group operable with arrow keys and labelled "N stars" (component tests with keyboard events)
+  - Accept: `SpoilerToggle` hides content behind a "Show spoilers" button with `aria-expanded` and a text alternative (component tests)
+  - Accept: axe finds no serious or critical issues in either component (component-level axe check)
+- [ ] M4-T09 · Web: write/edit review form and "my review" panel on the book page · deps: M4-T08, M4-T04, M3-T18 · PRD: §7.4, §7.6
+  - Accept: the form uses React Hook Form with the shared schema (rating, headline counter, body 50–10,000 counter, spoilers checkbox, optional Edition read) and shows server errors (component tests)
+  - Accept: the book page shows "Write a review" or the viewer's own review with its status; rejected reviews show the reason and can be edited and resubmitted (component tests)
+  - Accept: delete asks for confirmation and removes the review; unverified Members see a verify prompt instead of the form
+- [ ] M4-T10 · Web: rating summary chart and approved reviews list · deps: M4-T09, M4-T05 · PRD: §7.4, §7.6, §11
+  - Accept: the rating summary shows average (one decimal), count, and a 5-bar distribution with a text alternative; clicking a bar filters the list (component tests)
+  - Accept: the list supports sort, star filter, and pagination (10) via URL params; spoiler reviews are hidden behind the toggle; body text renders as paragraphs with links not clickable (component tests)
+- [ ] M4-T11 · Web: admin area shell and moderation review queue with claims · deps: M4-T06, M1-T12 · PRD: §7.10, §11
+  - Accept: `/admin/*` routes require the relevant permission (others get 403 or a redirect), are `noindex`, and share an admin layout per `docs/DESIGN.md` (loader tests)
+  - Accept: `/admin/reviews` lists Pending reviews oldest first; opening one claims it and shows Book, reviewer, rating, full text, spoiler flag, and reviewer history (component tests)
+- [ ] M4-T12 · Web: moderation actions, reason picker, side-by-side diff, keyboard shortcuts · deps: M4-T11, M4-T07 · PRD: §7.10, §12
+  - Accept: Approve and Reject work, and Reject offers saved phrases or free text (component tests)
+  - Accept: edited reviews show a side-by-side comparison with the last approved version (component test)
+  - Accept: `A` approves, `R` rejects, and `J`/`K` move between items, but not while typing in a text field (component tests)
+- [ ] M4-T13 · Web: moderation dashboard (`/admin`) · deps: M4-T11 · PRD: §7.10
+  - Accept: the dashboard shows the pending count and oldest pending age from `/mod/stats`, with open-report fields ready for M7 (component test)
+  - Accept: the dashboard is linked from the admin nav and requires `reviews.moderate` (loader test: Moderator allowed, Member denied)
+- [ ] M4-T14 · Seed: reviews in every status with versions and consistent aggregates · deps: M4-T02, M3-T21, M2-T21 · PRD: §13
+  - Accept: `pnpm db:reset` seeds reviews in Pending, Approved, Rejected (with and without reasons), and Unpublished states, including edited reviews with multiple versions
+  - Accept: after seeding, `ratings.recompute` reports zero mismatches (integration test or script)
+- [ ] M4-T15 · E2E: write, edit, and delete a review; moderate a review · deps: M4-T12, M4-T10, M4-T14 · PRD: §12
+  - Accept: `e2e/reviews.spec.ts` writes a review, edits it, and deletes it as a verified Member, with axe checks
+  - Accept: `e2e/moderation.spec.ts` has a Moderator approve one review and reject another with a reason; the author sees the result and notification
+- [ ] M4-T16 · M4 verification: run the Reviews acceptance criteria end to end, fix gaps, update docs · deps: M4-T13, M4-T15 · PRD: §3, §7.6, §7.10
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+  - Accept: every acceptance criterion in `docs/milestones/M4-reviews.md` is checked off in the PR body with the command that proved it
+
+## M5 · Discovery
+
+- [ ] M5-T01 · Helpful votes: schema and `POST/DELETE /v1/reviews/:id/helpful` · deps: M4-T05 · PRD: §5.3, §7.6, §9, §10
+  - Accept: verified Members can vote once on someone else's Approved review and remove the vote; `helpful_count` changes in the same transaction (integration tests)
+  - Accept: voting on your own review, a non-Approved review, or while unverified is denied (integration tests)
+  - Accept: `accounts.erase` keeps `helpful_count` correct when it deletes a Member's votes (integration test)
+- [ ] M5-T02 · Web: helpful button with "N people found this helpful" · deps: M5-T01, M4-T10 · PRD: §7.6
+  - Accept: the button toggles the vote with an optimistic TanStack Query update and rolls back on error (component tests)
+  - Accept: the count text reads "N people found this helpful", and the button is hidden on the viewer's own reviews
+- [ ] M5-T03 · Genres API: `GET /v1/genres` and `/v1/genres/:slug` · deps: M4-T02, M3-T03 · PRD: §7.5, §10
+  - Accept: `/genres` returns the Genre tree; `/genres/:slug` lists Books in the Genre and its child Genres, paginated (integration tests)
+  - Accept: `sort=top_rated` uses the weighted average; `most_reviewed` and `newest_review` work (integration tests)
+- [ ] M5-T04 · Series API: `GET /v1/series/:slug` · deps: M3-T10 · PRD: §7.5, §10
+  - Accept: Books are returned in reading order with position (decimal or empty, empty last) and RePrint rating (integration test)
+  - Accept: unknown slugs return 404 Problem Details
+- [ ] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5
+  - Accept: `/genres` lists all Genres; `/genres/:slug` shows Books with sort options in the URL (component and loader tests)
+  - Accept: `/series/:slug` shows Books in order with positions and ratings (component test)
+- [ ] M5-T06 · Discover rows: `featured_items`, row builders, 10-minute rebuild job, `GET /v1/discover` · deps: M5-T03, M4-T05 · PRD: §7.2, §9, §10
+  - Accept: rows are built for Recently reviewed (one card per Book), Top rated (weighted, ≥ 5 approved reviews), Most reviewed this month (last 30 days), Browse by genre (12 featured Genres), and Featured review (integration tests)
+  - Accept: a `discover.rebuild` repeatable job runs every 10 minutes and caches rows in Redis; `GET /discover` serves from that cache (integration test)
+  - Accept: rows with fewer than 6 Books are omitted (integration test)
+- [ ] M5-T07 · Web: Discover home page · deps: M5-T06, M3-T15 · PRD: §7.2
+  - Accept: `/` renders each row returned by `/v1/discover` with BookCards, a genre grid with a link to all Genres, and the featured review with its Book (component tests)
+  - Accept: Visitors see sign-in prompts, and Members do not; empty or hidden rows leave no gaps (component tests)
+- [ ] M5-T08 · Seed: featured Genres, a featured review, helpful votes · deps: M5-T06, M5-T01, M4-T14 · PRD: §13
+  - Accept: after `pnpm db:reset` and a Discover rebuild, every Discover row is visible locally
+  - Accept: seeded helpful votes make "Most helpful" sorting differ from "Newest" on at least one seeded Book
+- [ ] M5-T09 · M5 verification: run the Discovery acceptance criteria end to end, fix gaps, update docs · deps: M5-T02, M5-T05, M5-T07, M5-T08 · PRD: §3, §7.2, §7.5, §7.6
+  - Accept: `pnpm check` and `pnpm test:e2e` pass (existing specs extended to visit Discover, Genre, and Series pages with axe)
+  - Accept: every acceptance criterion in `docs/milestones/M5-discovery.md` is checked off in the PR body with the command that proved it
+
+## M6 · Libraries and profiles
+
+- [ ] M6-T01 · Shelves: schema and `PUT/DELETE /v1/books/:slug/shelf` · deps: M3-T11, M2-T02 · PRD: §5.3, §7.7, §9, §10
+  - Accept: `shelf_entries` enforces one entry per Member per Book; PUT sets or replaces the shelf (`want_to_read|reading|read`), and DELETE removes it (integration tests)
+  - Accept: unverified Members can shelve; Visitors get 401 (allowed and denied tests)
+  - Accept: shelving never creates or changes a review, and reviewing never shelves (integration test)
+- [ ] M6-T02 · Viewer shelf status in Book, search, Series, and Discover responses · deps: M6-T01, M5-T06, M5-T04, M3-T14 · PRD: §7.5, §7.7
+  - Accept: signed-in responses include `viewerShelf` on each Book; Visitor responses do not (integration tests)
+  - Accept: responses that include viewer data are not publicly cached (`Cache-Control: private` or `Vary: Cookie`) (integration test)
+- [ ] M6-T03 · Web: shelf selector on the book page, search results, Discover cards, and Series page · deps: M6-T02, M5-T07, M5-T05, M3-T17 · PRD: §7.7, §12
+  - Accept: one `ShelfSelector` control shows the current shelf and offers the three shelves plus "Remove" (component tests)
+  - Accept: on a "not yet on RePrint" search result, shelving resolves the Book first, then shelves it (component test with mocked API)
+  - Accept: Visitors are prompted to sign in instead
+- [ ] M6-T04 · Library API: `GET /v1/users/:username/library` · deps: M6-T01 · PRD: §7.7, §10
+  - Accept: returns entries with `shelf=` filter, counts per shelf, `sort=added_desc|added_asc|title|author`, and pagination (integration tests)
+  - Accept: a private library returns 404 to others and works for its owner (allowed and denied tests)
+- [ ] M6-T05 · Web: library page (`/u/:username/library`) · deps: M6-T04, M6-T03 · PRD: §7.7
+  - Accept: tabs All, Reading, Want to Read, Read with counts; sort and page in the URL (component and loader tests)
+  - Accept: the owner can change or remove shelves inline; a private library shows a clear private state to others
+- [ ] M6-T06 · Profiles API: `GET /v1/users/:username` and `/v1/users/:username/reviews` · deps: M6-T04, M5-T01 · PRD: §7.8, §10
+  - Accept: the profile returns avatar, display name, username, bio, join date, approved review total, and helpful votes received; deleted or unknown users return 404 (integration tests)
+  - Accept: `/reviews` lists Approved reviews newest first, paginated (integration test)
+- [ ] M6-T07 · Web: public profile page (`/u/:username`) · deps: M6-T06, M6-T05 · PRD: §7.8
+  - Accept: the page shows the profile header and totals, and tabs for Reviews and Library (Library only when public) (component tests)
+  - Accept: unknown or deleted usernames render the 404 page, and the page has a canonical URL and meta description (loader tests)
+- [ ] M6-T08 · Data export: `GET /v1/me/export` (JSON) and a settings download button · deps: M6-T04, M5-T01, M2-T20 · PRD: §11
+  - Accept: the export includes the account, profile, reviews with versions, helpful votes, library, notifications, and sessions, and nobody else's data (integration test)
+  - Accept: only the signed-in owner can download it (allowed and denied tests); the settings page offers the download (component test)
+- [ ] M6-T09 · Seed: libraries for seeded Members, including private libraries · deps: M6-T01, M3-T21, M2-T21 · PRD: §13
+  - Accept: `pnpm db:reset` seeds shelf entries across all three shelves, with some private libraries
+  - Accept: seeded libraries include Books the owner reviewed and Books they didn't, exercising the "independent of reviews" rule
+- [ ] M6-T10 · E2E: shelve and view a library · deps: M6-T05, M6-T07, M6-T09 · PRD: §12
+  - Accept: `e2e/library.spec.ts` shelves a Book from the book page and from search results, changes the shelf, views the library tabs and profile, with axe checks
+  - Accept: the spec confirms a private library is hidden from another signed-in Member
+- [ ] M6-T11 · M6 verification: run the Libraries and profiles acceptance criteria end to end, fix gaps, update docs · deps: M6-T08, M6-T10 · PRD: §3, §7.7, §7.8, §11
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+  - Accept: every acceptance criterion in `docs/milestones/M6-libraries-and-profiles.md` is checked off in the PR body with the command that proved it
+
+## M7 · Trust and admin
+
+- [ ] M7-T01 · Reports: schema and `POST /v1/reviews/:id/reports` with auto-hide at 3 open reports · deps: M4-T05, M6-T08 · PRD: §5.3, §7.9, §9, §10, §11
+  - Accept: verified Members can report someone else's Approved review once, with a reason enum and a note (≤ 500 chars) required for "other" (integration tests, incl. denied: own review, duplicate, unverified)
+  - Accept: the 3rd open report hides the review from public lists until a moderator decides (integration test)
+  - Accept: 21 reports in a day return 429; the export and `accounts.erase` include reports
+- [ ] M7-T02 · Reports queue API: `GET /v1/mod/reports`, dismiss, unpublish · deps: M7-T01, M4-T07 · PRD: §7.10, §7.12, §10
+  - Accept: `/mod/reports` groups open reports by review with reasons, cursor-paginated; `reports.resolve` is required (allowed and denied tests)
+  - Accept: dismiss closes the reports and un-hides the review; `POST /mod/reviews/:id/unpublish` (reason required) sets Unpublished, updates aggregates, closes the reports, and notifies the author (integration tests)
+  - Accept: `/mod/stats` adds open report count and oldest open report age; each action writes an audit row
+- [ ] M7-T03 · Admin users API: `GET /v1/admin/users` and `/v1/admin/users/:id` · deps: M4-T03, M2-T21 · PRD: §4, §7.11, §10
+  - Accept: search by email or username with filters for role, status (active, unverified, suspended, deleted), and join date, cursor-paginated (integration tests)
+  - Accept: detail returns profile, roles, sessions, reviews by status, reports filed and received, and audit history for Admins; Moderators get the limited view per `docs/DECISIONS.md`; Members get 403 (tests for each)
+- [ ] M7-T04 · Role management: `PUT/DELETE /v1/admin/users/:id/roles/:role` · deps: M7-T03 · PRD: §4, §7.11, §10
+  - Accept: `roles.assign` is required (allowed and denied tests); changes are audited with before and after values
+  - Accept: removing the Admin role from yourself when you are the last Admin returns 409 (integration test)
+- [ ] M7-T05 · Suspensions: suspend, unsuspend, revoke sessions, resend verification · deps: M7-T03, M2-T09 · PRD: §4, §7.11, §7.12, §10
+  - Accept: suspend (reason, optional end date) sets status, ends all sessions immediately, and sends the "account suspended" email; the user cannot log in (integration tests)
+  - Accept: suspensions with an end date lift automatically after it passes (integration test with a clock override); unsuspend lifts manually
+  - Accept: `/revoke-sessions` and `/resend-verification` work; all four require `users.suspend` (or `users.view` for resend, per `docs/DECISIONS.md`) and are audited (allowed and denied tests)
+  - Accept: a suspended user's Approved reviews stay visible (integration test)
+- [ ] M7-T06 · Web: report dialog and reports queue (`/admin/reports`) · deps: M7-T02, M7-T05, M4-T11 · PRD: §7.9, §7.10
+  - Accept: the report dialog offers the five reasons, requires a note for "other", and is available only to verified Members on others' Approved reviews (component tests)
+  - Accept: `/admin/reports` shows each review with its reports and reasons, with Dismiss and Unpublish (reason) actions; "Suspend author" appears only for Admins (component tests)
+  - Accept: the `/admin` dashboard now shows the open report count and oldest open report age (component test)
+- [ ] M7-T07 · Web: admin users list and detail with actions · deps: M7-T04, M7-T05, M4-T11 · PRD: §7.11
+  - Accept: `/admin/users` searches and filters with state in the URL (component and loader tests)
+  - Accept: `/admin/users/:id` shows the detail sections and actions for roles, suspend (reason, end date), unsuspend, end all sessions, and resend verification, gated by permission (component tests)
+- [ ] M7-T08 · Audit log: `GET /v1/admin/audit`, `/v1/admin/audit.csv`, and `/admin/audit` page · deps: M4-T03, M4-T11 · PRD: §7.11, §10
+  - Accept: the API filters by actor, action, target, and date range with cursor pagination; `audit.view` is required (allowed and denied tests)
+  - Accept: the CSV export streams the filtered rows with a header row, with values escaped for CSV injection (integration test)
+  - Accept: the web page shows filters and before/after values (component test)
+- [ ] M7-T09 · Admin Catalog editing: `PATCH /v1/admin/books/:id` · deps: M3-T09, M4-T03 · PRD: §5.2, §5.4, §7.11, §10
+  - Accept: Admins can edit title, description, Genres, Series (with position), and contributions; edited fields get `field_origins` = admin and are added to `locked_fields` (integration tests)
+  - Accept: a later refresh leaves locked fields untouched (integration test); the permission is per `docs/DECISIONS.md`, and non-admins get 403
+  - Accept: each edit writes an audit row with before and after values
+- [ ] M7-T10 · Admin cover upload, Primary Edition choice, and `POST /v1/admin/books/:id/refresh` · deps: M7-T09, M2-T16 · PRD: §5.1, §6, §7.11, §10
+  - Accept: an uploaded cover follows the M2 upload rules, is stored in R2/local storage as a Cover with origin `upload`, and is locked (integration test)
+  - Accept: Admins can set the Primary Edition (locked); refresh enqueues an interactive-priority re-fetch that respects locks (integration tests)
+- [ ] M7-T11 · Merge queue and `POST /v1/admin/books/merge` · deps: M7-T09, M6-T01, M5-T01 · PRD: §5.4, §7.11, §10
+  - Accept: `GET /v1/admin/books/merge-candidates` lists open candidates (endpoint per `docs/DECISIONS.md`); candidates can be dismissed
+  - Accept: merge moves reviews, shelf entries, Editions, Source links, and contributions to the remaining Book, recomputes aggregates, and redirects the old slug (integration tests)
+  - Accept: merge fails with 409 if any Member reviewed both Books (integration test); merges are audited
+- [ ] M7-T12 · Genre list and Subject rule management, Catalog growth stats · deps: M7-T09 · PRD: §5.4, §6, §7.11
+  - Accept: Admin endpoints create, edit, and archive Genres (slug, parent, description) and add or remove Subject-to-Genre rules with priority (allowed and denied tests; endpoints per `docs/DECISIONS.md`)
+  - Accept: a stats endpoint returns Catalog size (Books, Editions, Authors) and monthly growth (integration test)
+- [ ] M7-T13 · Web: admin Catalog book edit and refresh pages · deps: M7-T10 · PRD: §7.11
+  - Accept: `/admin/books/:id` edits the allowed fields, shows locked fields and their origins, uploads a cover, sets the Primary Edition, and triggers a refresh (component tests)
+  - Accept: only holders of `catalog.manage` can open the page; others get 403 (loader tests)
+- [ ] M7-T14 · Web: merge queue, Genre and rule management, Catalog dashboard · deps: M7-T11, M7-T12, M7-T13 · PRD: §6, §7.11
+  - Accept: `/admin/catalog/merge` shows candidate pairs side by side with Merge and Dismiss (component tests)
+  - Accept: `/admin/catalog/genres` manages Genres and rules; `/admin/catalog` shows size and monthly growth (component tests)
+- [ ] M7-T15 · Featured content: `PUT /v1/admin/featured` and admin UI · deps: M5-T06, M4-T11 · PRD: §7.2, §7.11, §10
+  - Accept: the endpoint sets 12 featured Genres and one featured review (must be Approved), triggers a Discover rebuild, and is audited (integration tests)
+  - Accept: permissions follow `docs/DECISIONS.md` (allowed and denied tests); `/admin/featured` manages both (component test)
+- [ ] M7-T16 · IP retention: clear session and audit IPs after 90 days · deps: M4-T03, M2-T15 · PRD: §11
+  - Accept: a daily job nulls `ip` on sessions and `audit_log` rows older than 90 days (integration test with a clock override)
+  - Accept: the audit trigger allows only this IP-clearing update and still rejects every other UPDATE or DELETE (integration test)
+- [ ] M7-T17 · E2E: report and unpublish; admin assigns a role and suspends a user · deps: M7-T06, M7-T07 · PRD: §12
+  - Accept: `e2e/reports.spec.ts` has a Member report a review and a Moderator unpublish it; the author sees the notification
+  - Accept: `e2e/admin.spec.ts` has an Admin grant Moderator to a Member and suspend another user, who then cannot log in; axe checks run on each admin page
+- [ ] M7-T18 · M7 verification: run the Trust and admin acceptance criteria end to end, fix gaps, update docs · deps: M7-T08, M7-T14, M7-T15, M7-T16, M7-T17 · PRD: §3, §4, §7.9, §7.10, §7.11
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+  - Accept: every acceptance criterion in `docs/milestones/M7-trust-and-admin.md` is checked off in the PR body with the command that proved it
+  - Accept: a test enumerates every `/mod/*` and `/admin/*` route and asserts each has a permission preHandler and an allowed and denied test
+
+## M8 · Launch readiness
+
+- [ ] M8-T01 · SEO meta on every page: canonical, description, Open Graph, `noindex` rules · deps: M7-T18 · PRD: §7.4, §11
+  - Accept: every web route renders a canonical URL and meta description (a test walks the route manifest)
+  - Accept: admin, settings, auth pages, and profiles of unverified Members are `noindex` (loader tests)
+  - Accept: Book, Author, Genre, Series, and profile pages have Open Graph tags
+- [ ] M8-T02 · Structured data: schema.org Book, AggregateRating, Review, Person, BreadcrumbList · deps: M8-T01 · PRD: §7.4, §11
+  - Accept: the book page emits JSON-LD `Book` with `AggregateRating` (when reviewed) and `Review` entries; Author pages emit `Person`; content pages emit `BreadcrumbList` (unit tests validate shapes)
+  - Accept: JSON-LD is rendered without `dangerouslySetInnerHTML` (serialized via a safe script component that escapes `<`), and the lint rule stays on
+- [ ] M8-T03 · Sitemaps: chunked, rebuilt nightly, `robots.txt` · deps: M8-T01 · PRD: §11
+  - Accept: a nightly `sitemaps.build` job writes a sitemap index plus chunks (≤ 50,000 URLs each) for Books, Authors, Genres, Series, and public profiles (integration test)
+  - Accept: `/sitemap.xml` and `/robots.txt` are served by the web app, and `robots.txt` disallows admin and settings paths
+- [ ] M8-T04 · Legal and static pages: Terms, Privacy, Community Guidelines, About, Contact (draft copy) · deps: M1-T12 · PRD: §7.13, §11
+  - Accept: the five pages exist with draft copy clearly marked `DRAFT – owner review` and are linked from the footer (component test)
+  - Accept: the Privacy draft covers GDPR and CCPA rights, 90-day IP retention, JSON export, and cookieless analytics; the Community Guidelines list rejection reasons
+- [ ] M8-T05 · Cookieless analytics and success-metric events · deps: M1-T14 · PRD: §2, §11
+  - Accept: the analytics script (provider per `docs/DECISIONS.md`) loads only when `ANALYTICS_DOMAIN` is set, sets no cookies (e2e check of `document.cookie` and response headers), and is allowed by the CSP
+  - Accept: custom events fire for search → book page click, review submitted, and shelf added (component tests with a mocked tracker)
+- [ ] M8-T06 · Alert signals and a monitor job for the PRD §11 alerts · deps: M3-T07, M7-T02 · PRD: §6, §11
+  - Accept: a `system.monitor` repeatable job checks queue depth (> 1,000 waiting or oldest > 15 min), oldest pending review > 48 h, circuit breaker open, and Source usage > 70% of the limit for an hour, and reports each to Sentry with a stable tag (integration tests)
+  - Accept: `docs/runbooks/alerts.md` maps every PRD §11 alert (incl. error rate > 2% and p95 over target) to its signal and the Sentry, Slack, or uptime rule the owner must configure
+- [ ] M8-T07 · Admin system dashboard: Source requests per second, cache hit rate, queue health · deps: M8-T06, M7-T14 · PRD: §6
+  - Accept: `/admin/system` (Admin only) shows Source requests per second, search cache hit rate, breaker state, and queue depth from the M3-T07 counters (component and integration tests)
+  - Accept: the page is linked from the admin nav, refreshes every 30 seconds, and is covered by axe in e2e
+- [ ] M8-T08 · Load and performance tooling: k6 scenario and web vitals checks · deps: M7-T18 · PRD: §11, §12
+  - Accept: `load/k6/mixed-read-heavy.js` models 200 rps for 10 minutes with thresholds for < 1% errors and p95 of 200 ms (reads), 400 ms (writes), and 300 ms (search)
+  - Accept: `pnpm load:smoke` runs a 30-second low-rate version against the local stack and passes
+  - Accept: a Playwright check records LCP, CLS, and INP for the book page on a throttled mobile profile and fails above the PRD targets (documented in `docs/performance.md`)
+- [ ] M8-T09 · Accessibility audit: axe on every page type, fixes, manual screen-reader checklist · deps: M7-T18 · PRD: §11, §12
+  - Accept: e2e specs visit every page type (Discover, search, book, author, genre, series, profile, library, settings, auth, legal, every admin page) with zero serious or critical axe issues
+  - Accept: `docs/a11y.md` holds the VoiceOver and NVDA manual test script for the owner
+- [ ] M8-T10 · Security review preparation against OWASP ASVS 5.0 Level 2 · deps: M7-T18 · PRD: §11
+  - Accept: `docs/security/asvs-l2.md` maps each authentication, session, and access-control requirement to code and tests, with gaps fixed or filed as tasks
+  - Accept: `pnpm audit --audit-level high` and Gitleaks are clean, and CSP, HSTS, cookie flags, and Origin checks are verified by tests
+- [ ] M8-T11 · Backups: nightly logical dump to R2 and a restore runbook · deps: M1-T18 · PRD: §11
+  - Accept: `.github/workflows/backup.yml` runs nightly `pg_dump` of production into the R2 backups bucket (30-day lifecycle) and exits with a notice when secrets are absent
+  - Accept: `scripts/restore.sh` and `docs/runbooks/restore.md` restore a dump into a scratch database; the script is exercised locally against the compose database in CI
+- [ ] M8-T12 · Release workflow: tag → production deploy with Sentry releases · deps: M1-T20 · PRD: §12, §13, §11
+  - Accept: `.github/workflows/release.yml` on a `v*` tag runs migrations (pre-deploy), deploys the API and worker, then the web app, then smoke tests; it exits with a notice when production secrets are absent
+  - Accept: Sentry release markers and source maps for both apps are uploaded in the release and staging workflows
+  - Accept: `docs/deploy.md` documents the release and rollback steps
+- [ ] M8-T13 · HUMAN · Create production infrastructure, DNS, email domain, alerting, and the first Admin · deps: M8-T11, M8-T12 · PRD: §11, §13
+  - Accept: Neon production (US East, PITR ≥ 7 days), Render production (API ≥ 2 instances, worker, Key Value, Virginia), and the Netlify production site exist, with env vars set outside git
+  - Accept: Cloudflare DNS serves `www`, `api`, and `img.reprint.com` (R2 + CDN); Resend verifies `mail.reprint.com` with SPF, DKIM, and DMARC
+  - Accept: R2 buckets for uploads and backups (30-day lifecycle) exist; GitHub production secrets are set; Sentry alert rules route to email and Slack; the uptime monitor watches `/v1/ready` and `/`
+  - Accept: `pnpm --filter api seed:admin` has created the first production Admin
+- [ ] M8-T14 · HUMAN · Provide or approve final legal and static page copy · deps: M8-T04 · PRD: §7.13, §11
+  - Accept: the owner (and counsel as needed) replaces the draft copy or approves it, and the `DRAFT` markers are removed in a PR
+  - Accept: the Contact page's address is a real monitored inbox
+- [ ] M8-T15 · HUMAN · Pre-launch checks: load test on staging, screen-reader pass, security sign-off, restore drill · deps: M8-T13, M8-T08, M8-T09, M8-T10 · PRD: §11, §12
+  - Accept: the k6 scenario passes against staging, with results recorded in `docs/performance.md`
+  - Accept: the VoiceOver and NVDA pass from `docs/a11y.md` is done and issues are filed as tasks
+  - Accept: the ASVS L2 review is signed off in `docs/security/asvs-l2.md`, and a restore drill from a real backup is recorded in `docs/runbooks/restore.md`
+- [ ] M8-T16 · M8 verification: launch readiness end to end, fix gaps, update docs · deps: M8-T02, M8-T03, M8-T14, M8-T05, M8-T07, M8-T15 · PRD: §3, §11, §12, §13
+  - Accept: `pnpm check` and `pnpm test:e2e` pass, and the latest staging deploy is green
+  - Accept: every acceptance criterion in `docs/milestones/M8-launch-readiness.md` is checked off in the PR body with the command or record that proved it
+  - Accept: `docs/PROGRESS.md` lists anything remaining before tagging `v1.0.0`
