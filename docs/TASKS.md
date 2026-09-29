@@ -169,7 +169,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/register` and `/login` use React Hook Form with the shared Zod schemas and show server field errors (component tests)
   - Accept: the root loader reads `/v1/auth/session`; the header shows log in/register for Visitors and an account menu with log out for Members (component test)
   - Accept: the invite code field appears only when signups are closed
-- [ ] M2-T11 · Web: verify-email page, unverified banner with resend, forgot/reset password pages · deps: M2-T10, M2-T09 · PRD: §7.1
+- [x] M2-T11 · Web: verify-email page, unverified banner with resend, forgot/reset password pages · deps: M2-T10, M2-T09 · PRD: §7.1
   - Accept: `/verify-email?token=` shows success or a clear expired/used state (component tests)
   - Accept: signed-in unverified Members see a banner with a working "Resend link" action on every page (component test)
   - Accept: `/forgot-password` shows the same confirmation for any email, and `/reset-password?token=` sets a new password (component tests)
