@@ -56,7 +56,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a typed job registry lets later tasks add jobs and repeatable schedules in one place, documented in `apps/api/src/jobs/README.md`
   - Accept: `GET /v1/ready` also checks that the queue is reachable (test)
   - Accept: `pnpm dev` runs the API and worker together
-- [ ] M1-T10 · OpenAPI 3.1 generated from Zod schemas, `/v1/docs` outside production, and spec drift check · deps: M1-T07 · PRD: §10, §12
+- [x] M1-T10 · OpenAPI 3.1 generated from Zod schemas, `/v1/docs` outside production, and spec drift check · deps: M1-T07 · PRD: §10, §12
   - Accept: `pnpm build` writes `apps/api/openapi.json` from the route schemas
   - Accept: `pnpm openapi:check` fails when the committed spec is stale; it is part of `pnpm check` and CI
   - Accept: `GET /v1/docs` serves the docs when `NODE_ENV` ≠ `production` and returns 404 in production (test)

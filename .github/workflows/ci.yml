@@ -74,6 +74,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: pnpm build
+      - run: pnpm openapi:check
 
   gitleaks:
     name: gitleaks

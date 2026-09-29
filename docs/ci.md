@@ -13,11 +13,11 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `db-check` | Migration drift check: the Drizzle schema must match the committed migrations (`drizzle-kit check` plus a scratch `generate`) | `pnpm db:check` |
 | `unit` | Vitest unit tests in every workspace package via Turbo | `pnpm test:unit` |
 | `integration` | Vitest + Testcontainers tests (Postgres 18 and Redis 7) via Turbo; needs Docker | `pnpm test:integration` |
-| `build` | Builds every workspace package via Turbo | `pnpm build` |
+| `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) | `pnpm build && pnpm openapi:check` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
 
-Later M1 tasks add jobs here as their commands appear (OpenAPI drift in `build`, `e2e`). Each one must also be added to `pnpm check` and to this table.
+Later M1 tasks add jobs here as their commands appear (`e2e`). Each one must also be added to `pnpm check` and to this table.
 
 ## `pnpm check`
 

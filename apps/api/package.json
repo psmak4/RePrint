@@ -6,18 +6,21 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @reprint/shared build && pnpm run --parallel \"/^dev:/\"",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsx src/scripts/openapi.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json",
     "test:unit": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "dev:server": "tsx watch --env-file-if-exists=../../.env src/server.ts",
     "dev:worker": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
-    "start:worker": "node dist/worker.js"
+    "start:worker": "node dist/worker.js",
+    "openapi:check": "tsx src/scripts/openapi.ts --check"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
+    "@fastify/swagger": "^9.9.0",
+    "@fastify/swagger-ui": "^6.1.1",
     "@reprint/db": "workspace:*",
     "@reprint/shared": "workspace:*",
     "bullmq": "^6.3.9",

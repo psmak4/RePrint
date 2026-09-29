@@ -16,11 +16,12 @@
     "format": "biome check --write .",
     "secrets:scan": "bash scripts/gitleaks.sh",
     "audit:deps": "pnpm audit --audit-level high",
-    "check": "pnpm lint && pnpm typecheck && pnpm db:check && pnpm test:unit && pnpm test:integration && pnpm build && pnpm secrets:scan && pnpm audit:deps",
+    "check": "pnpm lint && pnpm typecheck && pnpm db:check && pnpm test:unit && pnpm test:integration && pnpm build && pnpm openapi:check && pnpm secrets:scan && pnpm audit:deps",
     "test:integration": "turbo run test:integration",
     "db:generate": "pnpm --filter @reprint/db db:generate",
     "db:migrate": "pnpm --filter @reprint/db db:migrate",
-    "db:check": "pnpm --filter @reprint/db db:check"
+    "db:check": "pnpm --filter @reprint/db db:check",
+    "openapi:check": "turbo run openapi:check"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

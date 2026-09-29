@@ -7,6 +7,7 @@ import type { Env } from './config/env.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
+import { registerOpenApi } from './plugins/openapi.js'
 import { registerOriginCheck } from './plugins/origin-check.js'
 
 const REQUEST_ID_HEADER = 'x-request-id'
@@ -44,6 +45,8 @@ export async function buildApp(
   await app.register(helmet)
   await app.register(cors, { origin: env.WEB_ORIGINS, credentials: true })
   registerOriginCheck(app, env.WEB_ORIGINS)
+
+  await registerOpenApi(app, { serveDocs: env.NODE_ENV !== 'production' })
 
   await app.register(opsRoutes, {
     prefix: '/v1',
