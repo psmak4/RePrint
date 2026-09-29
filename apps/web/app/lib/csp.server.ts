@@ -6,13 +6,14 @@ export function generateNonce(): string {
 
 /**
  * Strict Content-Security-Policy for server-rendered pages (PRD §11). Scripts run only with the
- * per-request nonce. `apiOrigin` is allowed for client-side fetches after load.
+ * per-request nonce. `apiOrigin` is allowed for client-side fetches after load, and `sentryOrigin` for error reports.
  */
 export function buildCsp(
   nonce: string,
-  options: { apiOrigin?: string; dev?: boolean } = {},
+  options: { apiOrigin?: string; sentryOrigin?: string; dev?: boolean } = {},
 ): string {
   const connect = ["'self'", ...(options.apiOrigin ? [options.apiOrigin] : [])]
+  if (options.sentryOrigin) connect.push(options.sentryOrigin)
   // The Vite dev server needs a websocket for HMR and inline styles for injected CSS.
   if (options.dev) connect.push('ws:', 'http:')
   const directives: Record<string, string[]> = {

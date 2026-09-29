@@ -6,6 +6,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import type { Env } from './config/env.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
+import { baseLoggerOptions } from './observability/logging.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
 import { registerOpenApi } from './plugins/openapi.js'
 import { registerOriginCheck } from './plugins/origin-check.js'
@@ -26,9 +27,8 @@ export async function buildApp(
   const app = Fastify({
     trustProxy: env.TRUST_PROXY,
     logger: {
-      level: env.LOG_LEVEL,
+      ...baseLoggerOptions(env),
       ...(options.logStream ? { stream: options.logStream } : {}),
-      ...(env.NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {}),
     },
     requestIdHeader: false,
     genReqId: (request) => requestIdFrom(request.headers[REQUEST_ID_HEADER]),

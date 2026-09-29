@@ -5,7 +5,14 @@ import { defineConfig, loadEnv } from 'vite'
 export default defineConfig(({ mode }) => {
   // Server-side variables (API_INTERNAL_URL, WEB_PORT) live in the repo-root .env.
   const env = loadEnv(mode, '../..', '')
-  for (const key of ['API_INTERNAL_URL', 'WEB_PORT']) {
+  for (const key of [
+    'API_INTERNAL_URL',
+    'WEB_PORT',
+    'API_ORIGIN',
+    'APP_ENV',
+    'LOG_LEVEL',
+    'VITE_SENTRY_DSN',
+  ]) {
     if (env[key] && process.env[key] === undefined) process.env[key] = env[key]
   }
   return {

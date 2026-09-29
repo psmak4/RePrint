@@ -4,9 +4,11 @@ import { buildApp } from './app.js'
 import { EnvError, loadEnv } from './config/env.js'
 import { createJobQueue, queueCheck } from './jobs/queue.js'
 import { postgresCheck, redisCheck } from './modules/ops/readiness.js'
+import { initSentry } from './observability/sentry.js'
 
 async function main(): Promise<void> {
   const env = loadEnv()
+  initSentry(env, 'api')
   const database = createDb(env.DATABASE_URL)
   // Connect lazily so the API can start (and report not ready) while Redis is down.
   const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 1 })

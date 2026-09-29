@@ -79,7 +79,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: API responses include HSTS (with preload), `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin` (integration test)
   - Accept: web SSR responses carry a strict `Content-Security-Policy` with a per-request nonce applied to React Router scripts, and the page still hydrates (e2e check)
   - Accept: `apps/web/netlify.toml` (or `_headers`) sets the same headers for static assets
-- [ ] M1-T15 · Observability: Sentry on both apps and the worker, shared request IDs, log redaction · deps: M1-T09, M1-T11 · PRD: §11
+- [x] M1-T15 · Observability: Sentry on both apps and the worker, shared request IDs, log redaction · deps: M1-T09, M1-T11 · PRD: §11
   - Accept: Sentry initializes only when `SENTRY_DSN`/`VITE_SENTRY_DSN` are set, and the apps start and pass tests without them
   - Accept: a web SSR request's `x-request-id` appears in both the web and API log lines for the same page view (integration test or documented manual check script)
   - Accept: pino redacts `cookie`, `authorization`, `password`, and `token` fields (unit test)

@@ -18,6 +18,13 @@ describe('buildCsp', () => {
     )
   })
 
+  it('permits the Sentry ingest origin only when given', () => {
+    expect(buildCsp('n')).not.toContain('sentry')
+    expect(buildCsp('n', { sentryOrigin: 'https://o1.ingest.sentry.io' })).toContain(
+      "connect-src 'self' https://o1.ingest.sentry.io",
+    )
+  })
+
   it('generates a fresh nonce each time', () => {
     expect(generateNonce()).not.toBe(generateNonce())
   })

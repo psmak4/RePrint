@@ -24,6 +24,10 @@ export const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   TRUST_PROXY: booleanFlag.default(false),
+  /** Sentry is off when this is unset (PRD §11). */
+  SENTRY_DSN: z.url().optional(),
+  SENTRY_ENVIRONMENT: z.string().min(1).optional(),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -33,6 +37,9 @@ export const workerEnvSchema = envSchema.pick({
   NODE_ENV: true,
   APP_ENV: true,
   LOG_LEVEL: true,
+  SENTRY_DSN: true,
+  SENTRY_ENVIRONMENT: true,
+  SENTRY_TRACES_SAMPLE_RATE: true,
   DATABASE_URL: true,
   REDIS_URL: true,
 })
