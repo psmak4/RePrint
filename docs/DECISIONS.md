@@ -464,7 +464,14 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §10 and §12 require a generated spec and a build that fails when the spec changes without being committed, but leave the mechanism open.
 - Affects: every later route task (run `pnpm build` and commit `apps/api/openapi.json`), M1-T24
 
-### D-063 · Deployment deferred; free-tier staging plan
+
+### D-063 · Web app skeleton (M1-T11)
+- Status: Decided (loop)
+- Decision: (1) `apps/web` is React Router 8 framework mode with `ssr: true`, Vite 8, and `@tailwindcss/vite`; the default `entry.client`/`entry.server` are used until M1-T14 needs a nonce-aware server entry. `pnpm build` runs `react-router build` (output in `build/`, added to Turbo outputs) and `typecheck` runs `react-router typegen` first. (2) `packages/ui` compiles with `tsc` to `dist/` like the other packages; it holds the shadcn/ui-style `Button` (Radix `Slot`, `class-variance-authority`, `clsx`, `tailwind-merge`) and `cn`. The web `app.css` scans `packages/ui/src` with `@source`. The full theme tokens come in M1-T12. (3) The server API client (`app/lib/api.server.ts`) takes the incoming `Request`, forwards `cookie`, and forwards `x-request-id` (generating a UUID when absent); the base URL is `API_INTERNAL_URL`. (4) `vite.config.ts` loads `API_INTERNAL_URL` and `WEB_PORT` from the repo-root `.env` (Vite only exposes `VITE_*` by default); tests use a separate `vitest.config.ts` so the React Router plugin is not loaded. (5) Root `pnpm dev` builds `shared` and `ui`, then runs `api` and `web` dev scripts in parallel. (6) Biome's CSS parser has `tailwindDirectives` on. (7) Component tests use jsdom (per-file `@vitest-environment jsdom`) with `@testing-library/react`. (8) Strings live in `apps/web/app/copy/`.
+- Why: PRD §8 fixes the stack but not the file layout, build wiring, or test environment.
+- Affects: M1-T12, M1-T13, M1-T14, M1-T18
+
+### D-064 · Deployment deferred; free-tier staging plan
 - Status: Decided (owner)
 - Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
 - Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.

@@ -1,9 +1,0 @@
-{
-  "extends": "@reprint/config/tsconfig/react-library.json",
-  "compilerOptions": {
-    "rootDir": "app",
-    "outDir": "dist"
-  },
-  "include": ["app"],
-  "exclude": ["app/**/*.test.ts", "app/**/*.test.tsx"]
-}

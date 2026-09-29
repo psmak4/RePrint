@@ -60,7 +60,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm build` writes `apps/api/openapi.json` from the route schemas
   - Accept: `pnpm openapi:check` fails when the committed spec is stale; it is part of `pnpm check` and CI
   - Accept: `GET /v1/docs` serves the docs when `NODE_ENV` ≠ `production` and returns 404 in production (test)
-- [ ] M1-T11 · `apps/web` skeleton: React Router 8 framework-mode SSR, Vite, Tailwind v4, `packages/ui` with shadcn/ui, API client · deps: M1-T07 · PRD: §8
+- [x] M1-T11 · `apps/web` skeleton: React Router 8 framework-mode SSR, Vite, Tailwind v4, `packages/ui` with shadcn/ui, API client · deps: M1-T07 · PRD: §8
   - Accept: `pnpm dev` serves the SSR app on port 5173 alongside the API; view-source of `/` shows server-rendered HTML
   - Accept: `packages/ui` exports the shadcn/ui `Button`, used on the home page, and Tailwind builds
   - Accept: a server-side API client (`API_INTERNAL_URL`) forwards the incoming `cookie` and `x-request-id` headers, covered by a unit test
@@ -101,7 +101,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
   - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
   - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
-  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-063 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
+  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-064 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
 - [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
   - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
   - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
@@ -110,7 +110,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a test PR gets a Netlify deploy preview URL and a Render preview API URL
   - Accept: each Render preview uses its own Neon branch created from staging (Neon GitHub integration or Render preview env hook)
   - Accept: preview env vars point the preview web at the preview API, email in Resend test mode, and `SOURCE_MODE=stub`
-  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-063). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
+  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-064). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
 - [ ] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
   - Accept: the CI `e2e-preview` job waits for both preview URLs, then runs `pnpm test:e2e` against them
   - Accept: the job is green on this task's PR, and `docs/ci.md` is updated

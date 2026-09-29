@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+@theme {
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-accent: #3b82f6;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

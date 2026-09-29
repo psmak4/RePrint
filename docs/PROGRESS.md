@@ -61,6 +61,10 @@ Entry format:
 - `apps/api`: OpenAPI 3.1 from the Zod route schemas (`src/plugins/openapi.ts`), `/v1/docs` served only outside production (404 Problem Details in production), `src/scripts/openapi.ts` writing `apps/api/openapi.json` during `pnpm build`, and `pnpm openapi:check` (Turbo task; a step in the CI `build` job and in `pnpm check`). Biome ignores the generated file. D-062 records the choices.
 - Next iteration: after adding or changing any route or schema, run `pnpm build` and commit the updated `apps/api/openapi.json`, or CI fails. Error responses (Problem Details) are not yet declared per route in the spec; add a shared `problemDetailsSchema` response when the first real routes land (M2).
 
+### 2026-09-29 · M1-T11 · PR pending
+- `apps/web`: React Router 8 SSR skeleton (root layout + error boundary, home route with the `Button`, `app/copy/`, server API client `app/lib/api.server.ts` forwarding `cookie` and `x-request-id`). `packages/ui`: `Button` and `cn`. Root `pnpm dev` now runs shared/ui builds, then api, worker, and web. D-063 records the choices.
+- Next iteration: M1-T12 builds the theme tokens, app shell, and copy guard on top of `app.css` and `app/copy/`. Web unit tests need `@reprint/ui` built (Turbo handles it via `^build`). Loaders should call `apiClientFor(request)`.
+
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
-- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-063). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
-- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-063). Don't create blocker entries for the deferred tasks.
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-064). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-064). Don't create blocker entries for the deferred tasks.
