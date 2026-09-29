@@ -39,6 +39,15 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm typecheck
 
+  db-check:
+    name: db-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm db:check
+
   unit:
     name: unit
     runs-on: ubuntu-latest
@@ -47,6 +56,15 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: pnpm test:unit
+
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm test:integration
 
   build:
     name: build

@@ -32,7 +32,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: an init script enables `pg_trgm`, `unaccent`, and `citext`; `docker compose exec postgres psql -U reprint -c "select extname from pg_extension"` lists all three
   - Accept: the Mailpit UI answers on `http://localhost:8025` and SMTP listens on 1025
   - Accept: `.env.example` local defaults match the compose ports, and `docs/local-dev.md` explains the setup
-- [ ] M1-T05 · `packages/db`: Drizzle + postgres.js client, migration scripts, drift check, and test database helper · deps: M1-T04 · PRD: §9, §12
+- [x] M1-T05 · `packages/db`: Drizzle + postgres.js client, migration scripts, drift check, and test database helper · deps: M1-T04 · PRD: §9, §12
   - Accept: `pnpm db:migrate` applies migrations to the compose database; the first migration enables the extensions idempotently
   - Accept: `pnpm db:check` fails when a schema file changes without a generated migration, and passes otherwise (shown by a throwaway local change)
   - Accept: a `uuidv7()` ID helper and a `timestamps()` column helper (timestamptz, UTC) exist, with unit tests
