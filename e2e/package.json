@@ -1,0 +1,19 @@
+{
+  "name": "e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Playwright end-to-end and axe accessibility specs",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test:e2e": "playwright test",
+    "install:browsers": "playwright install --with-deps chromium webkit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@reprint/config": "workspace:*",
+    "@types/node": "^24",
+    "typescript": "^7.0.2"
+  }
+}
