@@ -47,3 +47,8 @@ Entry format:
 ### 2026-09-29 · M1-T07 · PR pending
 - `apps/api`: Fastify 5 app (`buildApp(env)` in `src/app.ts`, entry `src/server.ts`), Zod env loader (`src/config/env.ts`), Problem Details error/404 handling (`src/errors.ts`, `src/plugins/error-handler.ts`), Origin check, CORS, helmet defaults, pino with `reqId`, and `GET /v1/health`. Routes are Zod-typed via `fastify-type-provider-zod`; new routes go in `src/modules/<area>/routes.ts` and register in `app.ts`. D-059 records the choices. Added `HOST` to `.env.example`.
 - Next iteration: M1-T08 adds Redis to the test harness and `/v1/ready`; add `DATABASE_URL`/`REDIS_URL` to the env schema then. Throw `HttpProblem` from handlers for errors. The API needs `.env` (or `WEB_ORIGINS` set) to start.
+
+### 2026-09-29 · M1-T08 · PR pending
+- `apps/api`: `GET /v1/ready` (Postgres + Redis checks in parallel, 2 s timeout, 503 Problem Details when a dependency is down), `startTestStack()` integration harness (Postgres 18 + Redis 7 Testcontainers, `reset()` for isolation), `test:integration` script and config, `ioredis` and `@reprint/db` dependencies. `truncateAllTables()` added to `@reprint/db/testing`. `DATABASE_URL` and `REDIS_URL` are now required env vars. D-060 records the choices. The `integration` CI job and `pnpm check` step already existed from M1-T05, so no CI change.
+- Next iteration: M1-T09 adds the queue check by appending to `readinessChecks` in `server.ts`. Use `startTestStack()` for new API integration tests, and `.env` needs `DATABASE_URL` and `REDIS_URL` to run the API locally (both are in `.env.example`).
+

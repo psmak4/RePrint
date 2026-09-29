@@ -21,6 +21,8 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   /** Origins allowed to send non-GET requests and to use credentialed CORS (PRD §10). */
   WEB_ORIGINS: originList,
+  DATABASE_URL: z.url(),
+  REDIS_URL: z.url(),
   TRUST_PROXY: booleanFlag.default(false),
 })
 

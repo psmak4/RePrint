@@ -7,6 +7,10 @@ import { buildApp } from './app.js'
 import { loadEnv } from './config/env.js'
 
 const WEB_ORIGIN = 'http://www.reprint.test:5173'
+const BACKING_SERVICES = {
+  DATABASE_URL: 'postgres://u:p@localhost:5432/db',
+  REDIS_URL: 'redis://localhost:6379',
+}
 
 let app: FastifyInstance
 let logLines: string[]
@@ -19,9 +23,12 @@ beforeEach(async () => {
       callback()
     },
   })
-  app = await buildApp(loadEnv({ WEB_ORIGINS: WEB_ORIGIN, LOG_LEVEL: 'info', NODE_ENV: 'test' }), {
-    logStream,
-  })
+  app = await buildApp(
+    loadEnv({ ...BACKING_SERVICES, WEB_ORIGINS: WEB_ORIGIN, LOG_LEVEL: 'info', NODE_ENV: 'test' }),
+    {
+      logStream,
+    },
+  )
   app.post(
     '/v1/echo',
     {
@@ -80,7 +87,9 @@ describe('errors', () => {
   })
 
   it('returns a 500 Problem Details body without leaking the error', async () => {
-    const failing = await buildApp(loadEnv({ WEB_ORIGINS: WEB_ORIGIN, LOG_LEVEL: 'silent' }))
+    const failing = await buildApp(
+      loadEnv({ ...BACKING_SERVICES, WEB_ORIGINS: WEB_ORIGIN, LOG_LEVEL: 'silent' }),
+    )
     failing.get('/boom', async () => {
       throw new Error('secret internals')
     })
