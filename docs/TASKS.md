@@ -165,7 +165,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: forgot-password returns an identical response for known and unknown emails, and sends a 1-hour single-use link only for known ones (integration tests)
   - Accept: reset sets a new Argon2id hash, ends all sessions, and sends the "password changed" email (integration test)
   - Accept: reused or expired tokens are rejected; the 4th request per email per hour returns 429
-- [ ] M2-T10 · Web: register, log in, and log out pages with the header account menu · deps: M2-T08, M2-T06, M1-T12 · PRD: §7.1
+- [x] M2-T10 · Web: register, log in, and log out pages with the header account menu · deps: M2-T08, M2-T06, M1-T12 · PRD: §7.1
   - Accept: `/register` and `/login` use React Hook Form with the shared Zod schemas and show server field errors (component tests)
   - Accept: the root loader reads `/v1/auth/session`; the header shows log in/register for Visitors and an account menu with log out for Members (component test)
   - Accept: the invite code field appears only when signups are closed

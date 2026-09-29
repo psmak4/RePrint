@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { Button, cn } from './index.js'
+import { Button, cn, Input, Label } from './index.js'
 
 describe('@reprint/ui', () => {
   it('renders a Button with its variant classes', () => {
@@ -21,5 +21,15 @@ describe('@reprint/ui', () => {
 
   it('merges conflicting Tailwind classes', () => {
     expect(cn('px-2', 'px-4')).toBe('px-4')
+  })
+
+  it('renders an Input that a Label names', () => {
+    render(
+      <>
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" type="email" />
+      </>,
+    )
+    expect(screen.getByLabelText('Email').getAttribute('type')).toBe('email')
   })
 })
