@@ -495,7 +495,13 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §11 requires Sentry, structured logs, and a shared request ID but leaves the wiring open.
 - Affects: M1-T18 (source map upload, `--import` instrumentation), M1-T22
 
-### D-068 · Deployment deferred; free-tier staging plan
+### D-068 · Seed framework (M1-T16)
+- Status: Decided (loop)
+- Decision: (1) Seed modules are listed in order in `packages/db/src/seed/registry.ts` and all run in one transaction, so a failed seed leaves nothing behind. (2) Determinism comes from one fixed seed (`SEED`) through a mulberry32 PRNG; modules get `random.id()` (UUIDv7 from a fixed clock starting 2026-01-01 UTC, advancing 1 ms per ID), `int`, `pick`, `next`, and `now` instead of `newId()`, `Math.random()`, or `Date.now()`. (3) `db:reset` drops the `drizzle` and `public` schemas, recreates `public`, re-runs migrations (which re-enable the extensions), then seeds. (4) Both commands refuse when `NODE_ENV=production` or the `DATABASE_URL` host is not `localhost`, `127.0.0.1`, `::1`, or `*.localhost`. `db:seed` alone is for a freshly reset database; running it twice is not supported. (5) No `tsx` dependency: the CLI runs from `dist` like `db:migrate`.
+- Why: PRD §13 wants `pnpm db:reset` to recreate the database with sample data; how is left open.
+- Affects: M2-T21, M3-T21, M4-T14, M5-T08 (each appends a module).
+
+### D-069 · Deployment deferred; free-tier staging plan
 - Status: Decided (owner)
 - Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
 - Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.

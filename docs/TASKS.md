@@ -83,7 +83,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Sentry initializes only when `SENTRY_DSN`/`VITE_SENTRY_DSN` are set, and the apps start and pass tests without them
   - Accept: a web SSR request's `x-request-id` appears in both the web and API log lines for the same page view (integration test or documented manual check script)
   - Accept: pino redacts `cookie`, `authorization`, `password`, and `token` fields (unit test)
-- [ ] M1-T16 · Seed framework: `pnpm db:seed` and `pnpm db:reset` with deterministic data · deps: M1-T05 · PRD: §13
+- [x] M1-T16 · Seed framework: `pnpm db:seed` and `pnpm db:reset` with deterministic data · deps: M1-T05 · PRD: §13
   - Accept: `pnpm db:reset` drops, migrates, and seeds the local database; running it twice gives identical row counts and IDs (seeded PRNG)
   - Accept: seed modules register in one ordered list that later milestones extend (documented in `packages/db/src/seed/README.md`)
   - Accept: the seed refuses to run when `NODE_ENV=production` or `DATABASE_URL` is not a local host (unit test)
@@ -101,7 +101,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
   - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
   - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
-  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-068 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
+  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-069 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
 - [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
   - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
   - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
@@ -110,7 +110,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a test PR gets a Netlify deploy preview URL and a Render preview API URL
   - Accept: each Render preview uses its own Neon branch created from staging (Neon GitHub integration or Render preview env hook)
   - Accept: preview env vars point the preview web at the preview API, email in Resend test mode, and `SOURCE_MODE=stub`
-  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-068). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
+  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-069). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
 - [ ] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
   - Accept: the CI `e2e-preview` job waits for both preview URLs, then runs `pnpm test:e2e` against them
   - Accept: the job is green on this task's PR, and `docs/ci.md` is updated
