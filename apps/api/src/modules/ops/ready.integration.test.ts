@@ -4,17 +4,20 @@ import { Redis } from 'ioredis'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
 import { loadEnv } from '../../config/env.js'
+import { createJobQueue, type JobQueue, queueCheck } from '../../jobs/queue.js'
 import { startTestStack, type TestStack } from '../../testing/stack.js'
 import { postgresCheck, redisCheck } from './readiness.js'
 
 let stack: TestStack
 let app: FastifyInstance
 let appRedis: Redis
+let jobQueue: JobQueue
 
 beforeAll(async () => {
   stack = await startTestStack()
   appRedis = new Redis(stack.redisUrl, { maxRetriesPerRequest: 1 })
   appRedis.on('error', () => {})
+  jobQueue = createJobQueue(stack.redisUrl)
   const env = loadEnv({
     NODE_ENV: 'test',
     LOG_LEVEL: 'silent',
@@ -22,21 +25,27 @@ beforeAll(async () => {
     DATABASE_URL: stack.databaseUrl,
     REDIS_URL: stack.redisUrl,
   })
-  app = await buildApp(env, { readinessChecks: [postgresCheck(stack.db), redisCheck(appRedis)] })
+  app = await buildApp(env, {
+    readinessChecks: [postgresCheck(stack.db), redisCheck(appRedis), queueCheck(jobQueue)],
+  })
   await app.ready()
 })
 
 afterAll(async () => {
   await app?.close()
+  await jobQueue?.close()
   appRedis?.disconnect()
   await stack?.stop()
 })
 
 describe('GET /v1/ready', () => {
-  it('returns 200 when Postgres and Redis are reachable', async () => {
+  it('returns 200 when Postgres, Redis, and the queue are reachable', async () => {
     const response = await app.inject({ method: 'GET', url: '/v1/ready' })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ status: 'ok', checks: { postgres: 'ok', redis: 'ok' } })
+    expect(response.json()).toEqual({
+      status: 'ok',
+      checks: { postgres: 'ok', redis: 'ok', queue: 'ok' },
+    })
   })
 
   // Runs last: it stops the Redis container.
@@ -48,6 +57,7 @@ describe('GET /v1/ready', () => {
     const body = problemDetailsSchema.parse(response.json())
     expect(body.status).toBe(503)
     expect(body.detail).toContain('redis')
+    expect(body.detail).toContain('queue')
     expect(body.detail).not.toContain('postgres')
   })
 })

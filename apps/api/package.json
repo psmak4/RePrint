@@ -5,21 +5,26 @@
   "description": "RePrint API (Fastify) and background worker",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @reprint/shared build && tsx watch --env-file-if-exists=../../.env src/server.ts",
+    "dev": "pnpm --filter @reprint/shared build && pnpm run --parallel \"/^dev:/\"",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json",
     "test:unit": "vitest run",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "dev:server": "tsx watch --env-file-if-exists=../../.env src/server.ts",
+    "dev:worker": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
+    "start:worker": "node dist/worker.js"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
     "@reprint/db": "workspace:*",
     "@reprint/shared": "workspace:*",
+    "bullmq": "^6.3.9",
     "fastify": "^5.12.5",
     "fastify-type-provider-zod": "^7.0.0",
     "ioredis": "^6.0.0",
+    "pino": "^10.3.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {

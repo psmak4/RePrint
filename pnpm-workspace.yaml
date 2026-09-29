@@ -7,5 +7,6 @@ packages:
 allowBuilds:
   cpu-features: false
   esbuild: false
+  msgpackr-extract: set this to true or false
   protobufjs: false
   ssh2: false

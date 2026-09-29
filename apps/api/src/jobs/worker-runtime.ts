@@ -1,0 +1,47 @@
+import { type ConnectionOptions, type Job, Worker } from 'bullmq'
+import type { Logger } from 'pino'
+import { createJobQueue, QUEUE_NAME, workerConnection } from './queue.js'
+import { isJobName, jobs } from './registry.js'
+
+export interface RunningWorker {
+  /** Finishes the jobs in progress, then closes every connection. */
+  stop: () => Promise<void>
+}
+
+async function processJob(job: Job, log: Logger): Promise<unknown> {
+  if (!isJobName(job.name)) throw new Error(`No handler registered for job "${job.name}"`)
+  const definition = jobs[job.name]
+  const payload = definition.payload.parse(job.data)
+  // The handler type is a union over every job; the payload was just parsed with this job's schema.
+  return (definition.handler as (payload: unknown, context: { log: Logger }) => Promise<unknown>)(
+    payload,
+    { log: log.child({ job: job.name, jobId: job.id }) },
+  )
+}
+
+export async function startWorker(options: {
+  redisUrl: string
+  log: Logger
+}): Promise<RunningWorker> {
+  const { redisUrl, log } = options
+  const jobQueue = createJobQueue(redisUrl)
+  const connection = workerConnection(redisUrl)
+  connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
+  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, log), {
+    connection: connection as ConnectionOptions,
+    concurrency: 5,
+  })
+  worker.on('failed', (job, error) =>
+    log.error({ err: error, job: job?.name, jobId: job?.id }, 'job failed'),
+  )
+  worker.on('error', (error) => log.warn({ err: error }, 'worker error'))
+  await worker.waitUntilReady()
+  await jobQueue.syncSchedules()
+  return {
+    stop: async () => {
+      await worker.close()
+      await jobQueue.close()
+      connection.disconnect()
+    },
+  }
+}

@@ -449,3 +449,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §10 defines `/ready` and PRD §12 requires Testcontainers with Postgres 18 and Redis; the per-file containers keep the harness simple and let a test stop Redis without affecting others.
 - Affects: M1-T09, M1-T15, every API integration test
 
+
+### D-061 · Background worker details (M1-T09)
+- Status: Decided (loop)
+- Decision: (1) One BullMQ queue, `reprint`; jobs are named `<area>.<action>` and declared in `apps/api/src/jobs/registry.ts` with a Zod payload, a handler, and an optional `schedule` (see `src/jobs/README.md`). Payloads are validated on enqueue and again before the handler runs. (2) Repeatable jobs use BullMQ job schedulers (`upsertJobScheduler`, keyed by job name), synced at worker start, so several worker instances never duplicate a schedule. (3) The worker reads only `NODE_ENV`, `APP_ENV`, `LOG_LEVEL`, `DATABASE_URL`, and `REDIS_URL` (`loadWorkerEnv`); it needs no `WEB_ORIGINS`. (4) `pino` is now a direct API dependency (it was already installed through Fastify; PRD §8 lists it). The worker logs with `service: worker`. (5) `pnpm dev` (root) runs `apps/api` `dev`, which runs `dev:server` and `dev:worker` in parallel. (6) `test:integration` now depends on the package's own `build`, because the worker test starts the built `dist/worker.js`. (7) `pnpm-workspace.yaml` sets `allowBuilds` to `false` for `msgpackr-extract`, an optional native accelerator of BullMQ (same reason as D-057). (8) The queue readiness check calls `getJobCounts('waiting')`; the API and worker each hold their own Redis connection for BullMQ, with `maxRetriesPerRequest: 1` for the API's queue client and `null` for the worker.
+- Why: PRD §8 and §10 require a separate worker process and a `/ready` queue check but leave the queue layout, schedule mechanism, and dev wiring open.
+- Affects: M1-T10, M1-T15, M3 (Book refreshes), M2 (emails), M8 (queue alerts)
+

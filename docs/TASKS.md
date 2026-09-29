@@ -51,7 +51,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm test:integration` starts Postgres 18 and Redis containers, migrates, and isolates data between tests
   - Accept: `GET /v1/ready` returns 200 when Postgres and Redis are reachable and 503 Problem Details when Redis is stopped (integration tests)
   - Accept: CI has an `integration` job running `pnpm test:integration`, it is green, and `pnpm check` includes it
-- [ ] M1-T09 · Background worker: BullMQ queues, `src/worker.ts` → `dist/worker.js`, repeatable jobs · deps: M1-T08 · PRD: §8, §10
+- [x] M1-T09 · Background worker: BullMQ queues, `src/worker.ts` → `dist/worker.js`, repeatable jobs · deps: M1-T08 · PRD: §8, §10
   - Accept: `node apps/api/dist/worker.js` starts after `pnpm build` and processes a sample `system.heartbeat` job (integration test)
   - Accept: a typed job registry lets later tasks add jobs and repeatable schedules in one place, documented in `apps/api/src/jobs/README.md`
   - Accept: `GET /v1/ready` also checks that the queue is reachable (test)
