@@ -1,4 +1,10 @@
-import { emailAlreadyRegisteredProps, renderEmail, verifyEmailProps } from '@reprint/email'
+import {
+  emailAlreadyRegisteredProps,
+  passwordChangedProps,
+  passwordResetProps,
+  renderEmail,
+  verifyEmailProps,
+} from '@reprint/email'
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import type { Mailer } from '../email/mailer.js'
@@ -33,6 +39,12 @@ const emailSendPayload = z.discriminatedUnion('template', [
     template: z.literal('email-already-registered'),
     to: z.email(),
     props: emailAlreadyRegisteredProps,
+  }),
+  z.object({ template: z.literal('password-reset'), to: z.email(), props: passwordResetProps }),
+  z.object({
+    template: z.literal('password-changed'),
+    to: z.email(),
+    props: passwordChangedProps,
   }),
 ])
 
