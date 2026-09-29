@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
     }
   },
   "files": [
@@ -16,12 +20,24 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "pnpm build && node --env-file-if-exists=../../.env dist/migrate-cli.js",
+    "db:check": "node scripts/db-check.mjs"
   },
   "devDependencies": {
     "@reprint/config": "workspace:*",
+    "@testcontainers/postgresql": "^12.2.0",
     "@types/node": "^24",
+    "drizzle-kit": "^0.31.11",
+    "testcontainers": "^12.2.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9",
+    "uuid": "^13.0.2"
   }
 }

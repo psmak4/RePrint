@@ -2,3 +2,10 @@ packages:
   - apps/*
   - packages/*
   - e2e
+# Build scripts stay off: esbuild ships prebuilt binaries, and the rest are optional native
+# accelerators pulled in by testcontainers (see docs/DECISIONS.md D-057).
+allowBuilds:
+  cpu-features: false
+  esbuild: false
+  protobufjs: false
+  ssh2: false

@@ -40,3 +40,4 @@ pnpm-debug.log*
 
 # Claude Code local settings (the shared .claude/settings.json is committed)
 .claude/settings.local.json
+.drizzle-check/
