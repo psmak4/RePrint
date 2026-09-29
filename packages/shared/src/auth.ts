@@ -28,12 +28,31 @@ export const registerRequestSchema = z.object({
   inviteCode: z.string().trim().min(1).max(100).optional(),
 })
 
-/** What the web needs before anyone signs in; M2-T07 adds the viewer. */
-export const sessionResponseSchema = z.object({ signupsOpen: z.boolean() })
+/** The signed-in Member as the web sees it. Permission names only, never role names (PRD §4). */
+export const viewerSchema = z.object({
+  id: z.uuid(),
+  username: z.string(),
+  displayName: z.string(),
+  verified: z.boolean(),
+  permissions: z.array(z.string()),
+})
+
+/** What the web needs on every page: whether signups are open, and the viewer (`null` for Visitors). */
+export const sessionResponseSchema = z.object({
+  signupsOpen: z.boolean(),
+  viewer: viewerSchema.nullable(),
+})
+
+export const verifyEmailRequestSchema = z.object({ token: z.string().trim().min(1).max(200) })
+export const verifyEmailResponseSchema = z.object({ status: z.literal('verified') })
+
+/** Signed-in callers may omit `email`; the API then uses the session's address (D-078). */
+export const resendVerificationRequestSchema = z.object({ email: emailSchema.optional() })
 
 /** Same body whether the email was new or already registered (D-048). */
 export const registerResponseSchema = z.object({ status: z.literal('check_your_email') })
 
+export type Viewer = z.infer<typeof viewerSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 export type RegisterRequest = z.infer<typeof registerRequestSchema>
 export type RegisterResponse = z.infer<typeof registerResponseSchema>

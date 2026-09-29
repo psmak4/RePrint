@@ -127,3 +127,7 @@ Entry format:
 ### 2026-09-29 · M2-T06 · PR pending
 - `PUBLIC_SIGNUPS` (default closed) and `SIGNUP_INVITE_CODES` in the API env; register takes optional `inviteCode` and returns 403 without a listed code while closed. `GET /v1/auth/session` now exists and returns `{ signupsOpen }` (shared `sessionResponseSchema`). D-077 records the choices.
 - Next iteration: M2-T07 should extend the same `/auth/session` route (in `modules/auth/register.ts`, or move it to its own file) with `viewer` and keep `signupsOpen`. Tests that register must set `PUBLIC_SIGNUPS: 'true'` or pass a code. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T07 · PR pending
+- `modules/auth/verification.ts`: `POST /v1/auth/verify-email` (atomic single-use token, 24 h) and `POST /v1/auth/resend-verification` (3/hour per email, identical reply, newest link wins). `GET /v1/auth/session` now returns `{ signupsOpen, viewer }` with the shared `viewerSchema`. D-078 records the choices.
+- Next iteration: M2-T08 login can call `app.sessions.start`; the web banner (M2-T11) calls resend with an empty body when signed in. The viewer has no email field by design. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

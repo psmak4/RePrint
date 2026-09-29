@@ -152,7 +152,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: with `PUBLIC_SIGNUPS=false`, registration without a valid invite code returns 403 Problem Details, and with a code from `SIGNUP_INVITE_CODES` it succeeds (integration tests)
   - Accept: with `PUBLIC_SIGNUPS=true`, no invite code is needed
   - Accept: `GET /v1/auth/session` exposes `signupsOpen` so the web can show or hide the invite field (the web form uses it in M2-T10)
-- [ ] M2-T07 · Email verification: `POST /v1/auth/verify-email`, `POST /v1/auth/resend-verification`, `GET /v1/auth/session` · deps: M2-T05 · PRD: §7.1, §10, §11
+- [x] M2-T07 · Email verification: `POST /v1/auth/verify-email`, `POST /v1/auth/resend-verification`, `GET /v1/auth/session` · deps: M2-T05 · PRD: §7.1, §10, §11
   - Accept: a valid token sets `email_verified_at` once; reused or expired (> 24 h) tokens return 400 Problem Details (integration tests)
   - Accept: resend is limited to 3 per hour per email (429 on the 4th) and always returns the same response (integration test)
   - Accept: `GET /v1/auth/session` returns the viewer (id, username, displayName, verified, permissions) or `null` for Visitors (tests for both)
