@@ -56,3 +56,13 @@ export type Viewer = z.infer<typeof viewerSchema>
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 export type RegisterRequest = z.infer<typeof registerRequestSchema>
 export type RegisterResponse = z.infer<typeof registerResponseSchema>
+
+/** Login takes any non-empty password: the rules for new passwords must not lock out old ones. */
+export const loginRequestSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, 'Enter your password.').max(PASSWORD_MAX_LENGTH),
+})
+export const loginResponseSchema = z.object({ status: z.literal('logged_in') })
+export const logoutResponseSchema = z.object({ status: z.literal('logged_out') })
+
+export type LoginRequest = z.infer<typeof loginRequestSchema>

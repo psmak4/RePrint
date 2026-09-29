@@ -156,7 +156,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a valid token sets `email_verified_at` once; reused or expired (> 24 h) tokens return 400 Problem Details (integration tests)
   - Accept: resend is limited to 3 per hour per email (429 on the 4th) and always returns the same response (integration test)
   - Accept: `GET /v1/auth/session` returns the viewer (id, username, displayName, verified, permissions) or `null` for Visitors (tests for both)
-- [ ] M2-T08 · Log in and out: `POST /v1/auth/login`, `/logout`, `/logout-all` · deps: M2-T07 · PRD: §4, §7.1, §10, §11
+- [x] M2-T08 · Log in and out: `POST /v1/auth/login`, `/logout`, `/logout-all` · deps: M2-T07 · PRD: §4, §7.1, §10, §11
   - Accept: a wrong email or password returns the same 401 body and similar timing for both cases (integration test compares bodies)
   - Accept: suspended and deleted accounts cannot log in (integration tests; message per `docs/DECISIONS.md`)
   - Accept: 11 attempts per IP or 6 per account within 15 minutes return 429 (integration tests)
