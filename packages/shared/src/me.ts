@@ -63,3 +63,20 @@ export type Me = z.infer<typeof meSchema>
 export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>
 export type ChangeEmailRequest = z.infer<typeof changeEmailRequestSchema>
+
+/** One signed-in device. The token hash never leaves the server. */
+export const sessionInfoSchema = z.object({
+  id: z.uuid(),
+  /** A readable device name such as "Firefox on macOS". */
+  device: z.string(),
+  ip: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  lastSeenAt: z.iso.datetime(),
+  /** True for the session making this request. */
+  current: z.boolean(),
+})
+export type SessionInfo = z.infer<typeof sessionInfoSchema>
+
+export const sessionListResponseSchema = z.object({ items: z.array(sessionInfoSchema) })
+export const sessionParamsSchema = z.object({ id: z.uuid() })
+export const endSessionResponseSchema = z.object({ status: z.literal('session_ended') })

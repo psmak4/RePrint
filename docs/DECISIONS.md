@@ -605,3 +605,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.1 and §7.12 fix the current-password requirement, the verify-before-effect rule, and the emails to both addresses, but not the endpoint for the link, the limits, or the error shapes.
 - Affects: M2-T18, M2-T20
 
+
+### D-086 · Session management API (M2-T15)
+- Status: Decided (loop)
+- Decision: (1) `GET /v1/me/sessions` lists the Member's unexpired sessions, most recently seen first, as `{ items: [{ id, device, ip, createdAt, lastSeenAt, current }] }`; `GET /v1/me/sessions/:id` returns one. The session `id` is the row's UUID, never the cookie token or its hash. (2) `device` is "Browser on OS" from `ua-parser-js` (approved in D-022), or "Unknown device" when the user agent is missing or unrecognized. (3) `DELETE /v1/me/sessions/:id` ends that session and returns `{ status: "session_ended" }`. A session that is unknown or belongs to another Member is a 404, so IDs can't be probed. Ending the current session also clears the cookie, like logout. (4) Expired sessions are hidden from the list and the single read but are not removed here.
+- Why: PRD §7.1 and §10 fix the list and end-a-device behavior but not the response shape, the device label, or what happens when a Member ends the session they are using.
+- Affects: M2-T20
