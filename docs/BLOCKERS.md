@@ -15,4 +15,26 @@ Entry format:
 
 ---
 
-_No open blockers._
+### 2026-09-29 · M1-T03 · HUMAN
+- Task: Enable branch protection on `main` requiring the CI checks
+- Tried: n/a, human task. Confirmed the latest `main` CI run (36519713048) is green, so all six required job names below have reported at least once and can be selected.
+- Error / question: The loop has no admin access to repository settings. Required checks are the six jobs in `docs/ci.md`: `lint`, `typecheck`, `unit`, `build`, `gitleaks`, `audit`.
+- Owner must:
+  1. Open https://github.com/psmak4/RePrint/settings/branches, then **Add branch protection rule** (or **Add classic branch protection rule**) for the branch name pattern `main`.
+  2. Tick **Require a pull request before merging**. Set required approvals to 0 so the loop can merge its own PRs.
+  3. Tick **Require status checks to pass before merging** and **Require branches to be up to date before merging**. Search for and add each of `lint`, `typecheck`, `unit`, `build`, `gitleaks`, and `audit`.
+  4. Leave **Allow force pushes** and **Allow deletions** unticked (this disables both). Save the rule.
+  5. Open https://github.com/psmak4/RePrint/settings. Under **Pull Requests**, make sure **Allow squash merging** is ticked and tick **Automatically delete head branches**.
+  6. Mark M1-T03 `[x]` in `docs/TASKS.md` (through a PR, since `main` is now protected), fill in `Resolved:` below, and re-run `scripts/ralph/ralph.sh`.
+  - CLI alternative for steps 1–5 (needs an admin token):
+    ```
+    gh api -X PUT repos/psmak4/RePrint/branches/main/protection --input - <<'EOF'
+    {"required_status_checks":{"strict":true,"contexts":["lint","typecheck","unit","build","gitleaks","audit"]},
+     "enforce_admins":false,
+     "required_pull_request_reviews":{"required_approving_review_count":0},
+     "restrictions":null,"allow_force_pushes":false,"allow_deletions":false}
+    EOF
+    gh api -X PATCH repos/psmak4/RePrint -F allow_squash_merge=true -F delete_branch_on_merge=true
+    ```
+  - Check: `gh api repos/psmak4/RePrint/branches/main/protection --jq '.required_status_checks.contexts'` lists the six jobs.
+- Resolved: 
