@@ -22,7 +22,9 @@
     "db:migrate": "pnpm --filter @reprint/db db:migrate",
     "db:check": "pnpm --filter @reprint/db db:check",
     "openapi:check": "turbo run openapi:check",
-    "test:e2e": "pnpm --filter e2e test:e2e"
+    "test:e2e": "pnpm --filter e2e test:e2e",
+    "db:seed": "pnpm --filter @reprint/db db:seed",
+    "db:reset": "pnpm --filter @reprint/db db:reset"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

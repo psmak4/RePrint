@@ -83,7 +83,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Sentry initializes only when `SENTRY_DSN`/`VITE_SENTRY_DSN` are set, and the apps start and pass tests without them
   - Accept: a web SSR request's `x-request-id` appears in both the web and API log lines for the same page view (integration test or documented manual check script)
   - Accept: pino redacts `cookie`, `authorization`, `password`, and `token` fields (unit test)
-- [ ] M1-T16 · Seed framework: `pnpm db:seed` and `pnpm db:reset` with deterministic data · deps: M1-T05 · PRD: §13
+- [x] M1-T16 · Seed framework: `pnpm db:seed` and `pnpm db:reset` with deterministic data · deps: M1-T05 · PRD: §13
   - Accept: `pnpm db:reset` drops, migrates, and seeds the local database; running it twice gives identical row counts and IDs (seeded PRNG)
   - Accept: seed modules register in one ordered list that later milestones extend (documented in `packages/db/src/seed/README.md`)
   - Accept: the seed refuses to run when `NODE_ENV=production` or `DATABASE_URL` is not a local host (unit test)
