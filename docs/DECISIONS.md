@@ -501,7 +501,13 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §13 wants `pnpm db:reset` to recreate the database with sample data; how is left open.
 - Affects: M2-T21, M3-T21, M4-T14, M5-T08 (each appends a module).
 
-### D-069 · Deployment deferred; free-tier staging plan
+### D-069 · Renovate configuration (M1-T17)
+- Status: Decided (loop)
+- Decision: (1) `renovate.json` extends `config:recommended`, runs weekly (before 06:00 UTC Monday), and disables all `major` updates, which pins every major in the PRD §8 stack table (Node, Postgres, Redis images included) without listing each package. (2) Minor, patch, pin, and digest updates share one group. (3) `drizzle-orm` and `drizzle-kit` minors are split out with a `review-carefully` label because 0.x minors can break. (4) GitHub Actions majors are re-enabled as separate PRs since Actions are not part of the stack table. (5) `rangeStrategy: bump` keeps `^x.y.z` ranges current. (6) The policy is in `docs/dependencies.md`.
+- Why: PRD §8 and §11 say to pin majors and let Renovate open updates, but do not give the settings.
+- Affects: M1-T23
+
+### D-070 · Deployment deferred; free-tier staging plan
 - Status: Decided (owner)
 - Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
 - Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.

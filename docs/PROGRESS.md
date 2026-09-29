@@ -85,6 +85,10 @@ Entry format:
 - `packages/db/src/seed/`: seeded PRNG with deterministic UUIDv7 IDs (`random.id()`), ordered `seedModules` registry (empty until M2-T21), `runSeed` (one transaction) and `resetDatabase` (drop schemas, migrate, seed), and a production/non-local-host guard. Root `pnpm db:seed` and `pnpm db:reset`; `src/seed/README.md` explains how to add a module. Integration test resets twice with a sample module and compares rows and IDs. D-068 records the choices.
 - Next iteration: no real tables exist yet, so `db:reset` seeds nothing; M2-T21 adds the first module. Modules must use `random.*` and never `newId()`/`Date.now()`.
 
+### 2026-09-29 · M1-T17 · PR pending
+- `renovate.json` (weekly, majors disabled, non-major grouped, Drizzle minors split out, Actions majors allowed) validated with `renovate-config-validator`; `docs/dependencies.md` states the policy; D-069 records the choices.
+- Next iteration: M1-T23 (HUMAN) installs the Renovate app. Renovate PRs must pass `merge-pr.sh` like any other. If lint/format covers `renovate.json`, keep it Biome-clean.
+
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
-- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-069). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
-- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-069). Don't create blocker entries for the deferred tasks.
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-070). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-070). Don't create blocker entries for the deferred tasks.
