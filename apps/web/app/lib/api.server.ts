@@ -20,6 +20,10 @@ export function createApiClient({
   const forwarded = new Headers()
   const cookie = request.headers.get('cookie')
   if (cookie) forwarded.set('cookie', cookie)
+  // The API refuses writes without an allowed Origin, and rate limits by client IP.
+  forwarded.set('origin', request.headers.get('origin') ?? new URL(request.url).origin)
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) forwarded.set('x-forwarded-for', forwardedFor)
   forwarded.set('x-request-id', request.headers.get('x-request-id') ?? crypto.randomUUID())
 
   const send = (path: string, init: RequestInit = {}) => {

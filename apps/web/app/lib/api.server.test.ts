@@ -40,4 +40,21 @@ describe('createApiClient', () => {
     expect(new Headers(init?.headers).get('x-request-id')).toBe('other')
     expect(init?.method).toBe('POST')
   })
+
+  it('forwards the browser Origin and client IP, falling back to the request origin', async () => {
+    const { client, fetchMock } = setup({
+      origin: 'https://www.reprint.test',
+      'x-forwarded-for': '203.0.113.7',
+    })
+    await client.request('/v1/x', { method: 'POST' })
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers)
+    expect(headers.get('origin')).toBe('https://www.reprint.test')
+    expect(headers.get('x-forwarded-for')).toBe('203.0.113.7')
+
+    const bare = setup({})
+    await bare.client.request('/v1/x', { method: 'POST' })
+    const bareHeaders = new Headers(bare.fetchMock.mock.calls[0]?.[1]?.headers)
+    expect(bareHeaders.get('origin')).toBe('http://www.reprint.test')
+    expect(bareHeaders.get('x-forwarded-for')).toBeNull()
+  })
 })
