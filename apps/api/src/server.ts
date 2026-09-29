@@ -18,6 +18,7 @@ async function main(): Promise<void> {
   const jobQueue = createJobQueue(env.REDIS_URL)
   const app = await buildApp(env, {
     database: database.db,
+    redis,
     readinessChecks: [postgresCheck(database), redisCheck(redis), queueCheck(jobQueue)],
   })
   // Connection errors are reported through /v1/ready; log them without crashing or spamming stderr.

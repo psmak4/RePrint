@@ -19,7 +19,11 @@ export function registerErrorHandling(app: FastifyInstance): void {
 
   app.setErrorHandler((error: FastifyError | HttpProblem, request, reply) => {
     if (error instanceof HttpProblem) {
-      return reply.code(error.problem.status).type(PROBLEM_CONTENT_TYPE).send(error.problem)
+      return reply
+        .code(error.problem.status)
+        .headers(error.headers)
+        .type(PROBLEM_CONTENT_TYPE)
+        .send(error.problem)
     }
 
     if (hasZodFastifySchemaValidationErrors(error)) {

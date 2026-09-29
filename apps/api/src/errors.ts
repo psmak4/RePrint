@@ -31,14 +31,21 @@ export function problem(
 /** Throw from a route or preHandler to send a Problem Details response. */
 export class HttpProblem extends Error {
   readonly problem: ProblemDetails
+  /** Extra response headers, such as `Retry-After` on a 429. */
+  readonly headers: Record<string, string>
 
   constructor(
     status: number,
     detail: string,
-    options: { errors?: ProblemDetailsError[]; title?: string } = {},
+    options: {
+      errors?: ProblemDetailsError[]
+      title?: string
+      headers?: Record<string, string>
+    } = {},
   ) {
     super(detail)
     this.name = 'HttpProblem'
+    this.headers = options.headers ?? {}
     this.problem = problem(status, detail, options)
   }
 }
