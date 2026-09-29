@@ -17,6 +17,7 @@
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
     "@fastify/swagger": "^9.9.0",
@@ -25,6 +26,7 @@
     "@reprint/shared": "workspace:*",
     "@sentry/node": "^11.1.0",
     "bullmq": "^6.3.9",
+    "drizzle-orm": "^0.45.3",
     "fastify": "^5.12.5",
     "fastify-type-provider-zod": "^7.0.0",
     "ioredis": "^6.0.0",
