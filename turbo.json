@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "openapi.json"]
+      "outputs": ["dist/**", "build/**", "openapi.json"]
     },
     "typecheck": {
       "dependsOn": ["^build"]
