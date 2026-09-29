@@ -75,7 +75,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a shared `expectNoA11yViolations(page)` helper fails on serious or critical axe issues, and the smoke spec for `/` uses it
   - Accept: CI has an `e2e` job (Docker services + built apps) that runs on every PR and is green
   - Accept: local domain setup from `docs/DECISIONS.md` (`reprint.localhost`) works in all three projects, or the fallback is applied and recorded
-- [ ] M1-T14 · Security headers: helmet on the API, CSP with nonces on the web, Netlify headers · deps: M1-T11 · PRD: §11
+- [x] M1-T14 · Security headers: helmet on the API, CSP with nonces on the web, Netlify headers · deps: M1-T11 · PRD: §11
   - Accept: API responses include HSTS (with preload), `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin` (integration test)
   - Accept: web SSR responses carry a strict `Content-Security-Policy` with a per-request nonce applied to React Router scripts, and the page still hydrates (e2e check)
   - Accept: `apps/web/netlify.toml` (or `_headers`) sets the same headers for static assets

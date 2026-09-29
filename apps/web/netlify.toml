@@ -1,0 +1,15 @@
+# Headers for static assets, which bypass the SSR function. SSR responses get the same baseline
+# plus a per-request nonce CSP from app/entry.server.tsx. Keep in sync with
+# BASELINE_SECURITY_HEADERS in app/lib/csp.server.ts (a unit test checks this).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
