@@ -1,5 +1,10 @@
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { authTokens, type Database, newId, roles, userRoles, users } from '@reprint/db'
-import { registerRequestSchema, registerResponseSchema } from '@reprint/shared'
+import {
+  registerRequestSchema,
+  registerResponseSchema,
+  sessionResponseSchema,
+} from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { Env } from '../../config/env.js'
@@ -40,6 +45,18 @@ function uniqueViolation(error: unknown): UniqueColumn | undefined {
   return undefined
 }
 
+/** Compares digests in constant time, and against every code, so timing reveals nothing about the list. */
+function isInviteCode(candidate: string | undefined, codes: readonly string[]): boolean {
+  if (!candidate) return false
+  const digest = (value: string) => createHash('sha256').update(value).digest()
+  const given = digest(candidate)
+  let match = false
+  for (const code of codes) {
+    if (timingSafeEqual(given, digest(code))) match = true
+  }
+  return match
+}
+
 function usernameTaken(): HttpProblem {
   return new HttpProblem(400, 'The request did not pass validation.', {
     errors: [{ path: 'body.username', message: 'That username is taken.' }],
@@ -49,6 +66,10 @@ function usernameTaken(): HttpProblem {
 export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
   const { env, db, jobs } = options
   const webBase = (env.WEB_URL ?? env.WEB_ORIGINS[0] ?? '').replace(/\/$/, '')
+
+  app.get('/auth/session', { schema: { response: { 200: sessionResponseSchema } } }, async () => ({
+    signupsOpen: env.PUBLIC_SIGNUPS,
+  }))
 
   app.post(
     '/auth/register',
@@ -61,7 +82,13 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
     },
     async (request, reply) => {
       if (!db || !jobs) throw new Error('auth routes need a database and a job queue')
-      const { email, username, password } = request.body
+      const { email, username, password, inviteCode } = request.body
+
+      if (!env.PUBLIC_SIGNUPS && !isInviteCode(inviteCode, env.SIGNUP_INVITE_CODES)) {
+        throw new HttpProblem(403, 'Registration is by invitation only right now.', {
+          errors: [{ path: 'body.inviteCode', message: 'Enter a valid invite code.' }],
+        })
+      }
 
       if (await isBreachedPassword(password, { mode: env.HIBP_MODE, log: request.log })) {
         throw new HttpProblem(400, 'The request did not pass validation.', {

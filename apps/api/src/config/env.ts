@@ -34,6 +34,18 @@ const baseEnvSchema = z.object({
   WEB_URL: z.url().optional(),
   /** `live` checks new passwords against the Have I Been Pwned range API; `off` skips it (D-029). */
   HIBP_MODE: z.enum(['live', 'off']).default('live'),
+  /** `false` is the private beta: registration needs a code from `SIGNUP_INVITE_CODES` (D-014). */
+  PUBLIC_SIGNUPS: booleanFlag.default(false),
+  /** Comma-separated invite codes accepted while `PUBLIC_SIGNUPS=false`. */
+  SIGNUP_INVITE_CODES: z
+    .string()
+    .transform((value) =>
+      value
+        .split(',')
+        .map((code) => code.trim())
+        .filter(Boolean),
+    )
+    .default([]),
   /** Runs the job worker inside the API process, for environments with no separate worker (D-071). */
   WORKER_IN_PROCESS: booleanFlag.default(false),
   /** Sentry is off when this is unset (PRD §11). */

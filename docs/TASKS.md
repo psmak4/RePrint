@@ -148,7 +148,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the password is checked with the HIBP range API (k-anonymity: only the first 5 SHA-1 hex chars are sent; unit test with mocked fetch); `HIBP_MODE=off` for local and tests
   - Accept: the hash is Argon2id (19 MiB, 2 iterations, parallelism 1), the user gets the Member role, a session cookie is set, and a 24-hour single-use verification email is queued (integration test)
   - Accept: the 6th registration from one IP within an hour returns 429 (integration test)
-- [ ] M2-T06 · Private beta signup gate (`PUBLIC_SIGNUPS`) · deps: M2-T05 · PRD: §14
+- [x] M2-T06 · Private beta signup gate (`PUBLIC_SIGNUPS`) · deps: M2-T05 · PRD: §14
   - Accept: with `PUBLIC_SIGNUPS=false`, registration without a valid invite code returns 403 Problem Details, and with a code from `SIGNUP_INVITE_CODES` it succeeds (integration tests)
   - Accept: with `PUBLIC_SIGNUPS=true`, no invite code is needed
   - Accept: `GET /v1/auth/session` exposes `signupsOpen` so the web can show or hide the invite field (the web form uses it in M2-T10)

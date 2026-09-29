@@ -43,6 +43,7 @@ beforeAll(async () => {
     DATABASE_URL: stack.databaseUrl,
     REDIS_URL: stack.redisUrl,
     HIBP_MODE: 'off',
+    PUBLIC_SIGNUPS: 'true',
   })
   enqueued = []
   app = await buildApp(env, {
@@ -208,6 +209,7 @@ describe('POST /v1/auth/register with HIBP_MODE=live', () => {
       DATABASE_URL: stack.databaseUrl,
       REDIS_URL: stack.redisUrl,
       HIBP_MODE: 'live',
+      PUBLIC_SIGNUPS: 'true',
     })
     const liveApp = await buildApp(env, {
       database: stack.db.db,
