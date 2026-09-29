@@ -17,8 +17,8 @@ export function PasswordChanged({ username, resetUrl }: PasswordChangedProps) {
     <BaseLayout preview="Your RePrint password was changed" heading="Password changed">
       <Text>Hi {username},</Text>
       <Text>
-        Your RePrint password was just changed, and you were signed out everywhere. If this was you,
-        no action is needed.
+        Your RePrint password was just changed, and other devices signed in to your account were
+        signed out. If this was you, no action is needed.
       </Text>
       <Text>If it was not you, reset your password now: {resetUrl}</Text>
     </BaseLayout>
