@@ -49,8 +49,10 @@ export default defineConfig({
     },
     {
       name: 'web',
-      command: 'pnpm --filter web start',
-      cwd: '..',
+      // Run node directly: a pnpm wrapper leaves the server orphaned, holding the output pipe open
+      // so the CI step never finishes.
+      command: 'node node_modules/@react-router/serve/bin.cjs build/server/index.js',
+      cwd: '../apps/web',
       env: { ...stackEnv, PORT: webPort, HOST: '0.0.0.0' },
       url: `http://localhost:${webPort}/`,
       reuseExistingServer: !process.env.CI,
