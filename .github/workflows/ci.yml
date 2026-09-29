@@ -104,6 +104,8 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Start Postgres, Redis, and Mailpit
         run: docker compose up -d --wait
+      - name: Migrate the database
+        run: pnpm db:migrate
       - run: pnpm build
       - name: Install Playwright browsers
         run: pnpm --filter e2e install:browsers
