@@ -7,13 +7,14 @@ const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
 describe('RATE_LIMIT_POLICIES', () => {
-  it('matches the PRD §11 table', () => {
+  it('matches the PRD §11 table (plus passwordChange, D-084)', () => {
     expect(RATE_LIMIT_POLICIES).toEqual({
       loginIp: { subject: 'ip', limit: 10, windowSeconds: 15 * MINUTE },
       loginAccount: { subject: 'account', limit: 5, windowSeconds: 15 * MINUTE },
       register: { subject: 'ip', limit: 5, windowSeconds: HOUR },
       passwordReset: { subject: 'email', limit: 3, windowSeconds: HOUR },
       resendVerification: { subject: 'email', limit: 3, windowSeconds: HOUR },
+      passwordChange: { subject: 'user', limit: 5, windowSeconds: 15 * MINUTE },
       reviewWrite: { subject: 'user', limit: 20, windowSeconds: DAY },
       report: { subject: 'user', limit: 20, windowSeconds: DAY },
       authenticatedWrite: { subject: 'user', limit: 120, windowSeconds: MINUTE },

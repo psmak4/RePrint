@@ -19,6 +19,7 @@ export const RATE_LIMIT_POLICIES = {
   register: { subject: 'ip', limit: 5, windowSeconds: HOUR },
   passwordReset: { subject: 'email', limit: 3, windowSeconds: HOUR },
   resendVerification: { subject: 'email', limit: 3, windowSeconds: HOUR },
+  passwordChange: { subject: 'user', limit: 5, windowSeconds: 15 * MINUTE },
   reviewWrite: { subject: 'user', limit: 20, windowSeconds: DAY },
   report: { subject: 'user', limit: 20, windowSeconds: DAY },
   authenticatedWrite: { subject: 'user', limit: 120, windowSeconds: MINUTE },

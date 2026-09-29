@@ -13,6 +13,7 @@ import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
+import { meRoutes } from './modules/me/routes.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
@@ -103,6 +104,12 @@ export async function buildApp(
     jobs: options.jobs,
   })
   await app.register(passwordResetRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(meRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
