@@ -186,7 +186,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M2-T15 · Session management: `GET /v1/me/sessions`, `GET/DELETE /v1/me/sessions/:id` · deps: M2-T13 · PRD: §7.1, §10
   - Accept: the list shows each active session's device (parsed user agent), IP, last seen, and a `current` flag (integration test)
   - Accept: DELETE ends that session; deleting another user's session returns 404 (allowed and denied tests)
-- [ ] M2-T16 · Image storage and `POST /v1/me/avatar` (sniffed, 5 MB cap, WebP 256 px, EXIF stripped) · deps: M2-T13 · PRD: §7.8, §6, §9, §11
+- [x] M2-T16 · Image storage and `POST /v1/me/avatar` (sniffed, 5 MB cap, WebP 256 px, EXIF stripped) · deps: M2-T13 · PRD: §7.8, §6, §9, §11
   - Accept: a storage interface writes to local disk in dev and test (`STORAGE_DRIVER=local`) and to R2 via the S3 API otherwise, with an env-validated config
   - Accept: uploads are accepted by their actual content (a PNG renamed `.txt` works, a text file renamed `.png` is rejected with 400) and files over 5 MB return 413 (integration tests)
   - Accept: the stored avatar is WebP 256×256 with no EXIF (integration test inspects the output with sharp) and is recorded in the `covers` table with origin `upload`

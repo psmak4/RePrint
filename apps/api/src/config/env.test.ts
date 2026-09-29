@@ -98,3 +98,33 @@ describe('email settings', () => {
     )
   })
 })
+
+describe('storage settings', () => {
+  const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+
+  it('defaults to local disk with a 5 MB cap', () => {
+    const env = loadEnv(source)
+    expect(env.STORAGE_DRIVER).toBe('local')
+    expect(env.STORAGE_LOCAL_DIR).toBe('.data/uploads')
+    expect(env.UPLOAD_MAX_BYTES).toBe(5_242_880)
+  })
+
+  it('requires every R2 setting when the driver is r2', () => {
+    expect(() => loadEnv({ ...source, STORAGE_DRIVER: 'r2' })).toThrow(
+      /R2_ACCOUNT_ID[\s\S]*R2_ACCESS_KEY_ID[\s\S]*R2_SECRET_ACCESS_KEY[\s\S]*R2_BUCKET_UPLOADS/,
+    )
+    const env = loadEnv({
+      ...source,
+      STORAGE_DRIVER: 'r2',
+      R2_ACCOUNT_ID: 'acct',
+      R2_ACCESS_KEY_ID: 'key',
+      R2_SECRET_ACCESS_KEY: 'secret',
+      R2_BUCKET_UPLOADS: 'uploads',
+    })
+    expect(env.STORAGE_DRIVER).toBe('r2')
+  })
+
+  it('rejects an unknown driver', () => {
+    expect(() => loadEnv({ ...source, STORAGE_DRIVER: 's3' })).toThrow(/STORAGE_DRIVER/)
+  })
+})

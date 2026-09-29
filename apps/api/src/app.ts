@@ -13,15 +13,18 @@ import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
+import { avatarRoutes } from './modules/me/avatar.js'
 import { meRoutes } from './modules/me/routes.js'
 import { sessionRoutes } from './modules/me/sessions.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
+import { uploadRoutes } from './modules/uploads/routes.js'
 import { baseLoggerOptions } from './observability/logging.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
 import { registerOpenApi } from './plugins/openapi.js'
 import { registerOriginCheck } from './plugins/origin-check.js'
+import { createImageStorage, type ImageStorage, LocalImageStorage } from './storage/index.js'
 
 const REQUEST_ID_HEADER = 'x-request-id'
 // Only accept sane caller-supplied IDs so they can't inject into logs.
@@ -43,6 +46,8 @@ export async function buildApp(
     redis?: Redis
     /** Enqueues background jobs (emails); needed to serve the auth routes. */
     jobs?: Pick<JobQueue, 'enqueue'>
+    /** Where avatars are stored; defaults to the driver chosen by `STORAGE_DRIVER`. */
+    storage?: ImageStorage
   } = {},
 ): Promise<FastifyInstance> {
   const app = Fastify({
@@ -61,6 +66,8 @@ export async function buildApp(
   app.addHook('onRequest', async (request, reply) => {
     reply.header(REQUEST_ID_HEADER, request.id)
   })
+
+  const storage = options.storage ?? createImageStorage(env)
 
   registerErrorHandling(app)
   await app.register(helmet, {
@@ -115,6 +122,7 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+    storage,
   })
   await app.register(sessionRoutes, {
     prefix: '/v1',
@@ -122,6 +130,17 @@ export async function buildApp(
     db: options.database,
     jobs: options.jobs,
   })
+
+  await app.register(avatarRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    storage,
+  })
+  if (storage instanceof LocalImageStorage) {
+    await app.register(uploadRoutes, { prefix: '/v1', storage })
+  }
 
   return app
 }

@@ -166,3 +166,8 @@ Entry format:
 ### 2026-09-29 · M2-T15 · PR pending
 - `modules/me/sessions.ts`: `GET /v1/me/sessions`, `GET /v1/me/sessions/:id`, `DELETE /v1/me/sessions/:id` (shared `sessionInfoSchema`, `sessionListResponseSchema`, `sessionParamsSchema`, `endSessionResponseSchema`). Device names come from `ua-parser-js` (added to `apps/api`, approved in D-022). D-086 records the choices.
 - Next iteration: M2-T20's active devices list reads `{ items }` and calls DELETE per `id`; ending the current session clears the cookie, so the web should treat it like logout. "Log out everywhere" already exists as `POST /v1/auth/logout-all`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T16 · PR pending
+- `apps/api/src/storage/` (`ImageStorage`, local-disk and R2 drivers, `createImageStorage(env)`), `modules/me/avatar.ts` + `avatar-image.ts` (`POST /v1/me/avatar`, sharp pipeline), `modules/uploads/routes.ts` (`GET /v1/uploads/*` for the local driver). New `covers` table and `users.avatar_id` (migration `0003_covers`); `GET /v1/me` now returns `avatarUrl`. Added `sharp`, `@fastify/multipart`, `@aws-sdk/client-s3` to `apps/api` (all approved by the PRD §8 stack or D-022). D-087 records the choices.
+- Next iteration: M2-T17 `accounts.erase` cascades `users` → sessions etc., but avatar files and `covers` rows are not cascaded from `users`; delete them there (the worker env needs the `STORAGE_*` and `R2_*` settings first, see D-087 item 8). M2-T19's settings page reads `avatarUrl` from `/v1/me` and posts multipart field `file` to `/v1/me/avatar`. M3-T02 must reuse the `covers` table (already created). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

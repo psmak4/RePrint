@@ -22,6 +22,13 @@
       "when": 1790719768921,
       "tag": "0002_seed_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790725709576,
+      "tag": "0003_covers",
+      "breakpoints": true
     }
   ]
 }

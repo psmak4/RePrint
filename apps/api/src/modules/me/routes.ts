@@ -1,4 +1,4 @@
-import { authTokens, sessions, users } from '@reprint/db'
+import { authTokens, covers, type Database, sessions, users } from '@reprint/db'
 import {
   changeEmailRequestSchema,
   changeEmailResponseSchema,
@@ -13,6 +13,7 @@ import {
 import { and, eq, gt, isNull, ne } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
+import type { ImageStorage } from '../../storage/index.js'
 import { isBreachedPassword } from '../auth/breached-password.js'
 import { requireAuth } from '../auth/guards.js'
 import { hashPassword, verifyPassword } from '../auth/password.js'
@@ -29,24 +30,46 @@ const ownAccount = {
   emailVerifiedAt: users.emailVerifiedAt,
   libraryPublic: users.libraryPublic,
   emailReviewDecisions: users.emailReviewDecisions,
+  avatarKey: covers.r2Key,
 }
 
-function toMe(row: {
-  id: string
-  email: string
-  username: string
-  displayName: string
-  bio: string | null
-  emailVerifiedAt: Date | null
-  libraryPublic: boolean
-  emailReviewDecisions: boolean
-}): Me {
-  const { emailVerifiedAt, ...rest } = row
-  return { ...rest, verified: emailVerifiedAt !== null }
+function toMe(
+  row: {
+    id: string
+    email: string
+    username: string
+    displayName: string
+    bio: string | null
+    emailVerifiedAt: Date | null
+    libraryPublic: boolean
+    emailReviewDecisions: boolean
+    avatarKey: string | null
+  },
+  storage: ImageStorage,
+): Me {
+  const { emailVerifiedAt, avatarKey, ...rest } = row
+  return {
+    ...rest,
+    avatarUrl: avatarKey ? storage.url(avatarKey) : null,
+    verified: emailVerifiedAt !== null,
+  }
 }
 
-export const meRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
-  const { env, db, jobs } = options
+async function loadOwnAccount(db: Database, userId: string) {
+  const [row] = await db
+    .select(ownAccount)
+    .from(users)
+    .leftJoin(covers, eq(covers.id, users.avatarId))
+    .where(eq(users.id, userId))
+  return row
+}
+
+export interface MeRoutesOptions extends AuthRoutesOptions {
+  storage: ImageStorage
+}
+
+export const meRoutes: FastifyPluginAsyncZod<MeRoutesOptions> = async (app, options) => {
+  const { env, db, jobs, storage } = options
   const webBase = (env.WEB_URL ?? env.WEB_ORIGINS[0] ?? '').replace(/\/$/, '')
 
   app.get(
@@ -54,12 +77,9 @@ export const meRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, op
     { preHandler: [requireAuth], schema: { response: { 200: meSchema } } },
     async (request) => {
       if (!db || !request.auth) throw new Error('me routes need a database')
-      const [row] = await db
-        .select(ownAccount)
-        .from(users)
-        .where(eq(users.id, request.auth.user.id))
+      const row = await loadOwnAccount(db, request.auth.user.id)
       if (!row) throw new HttpProblem(401, 'Sign in to continue.')
-      return toMe(row)
+      return toMe(row, storage)
     },
   )
 
@@ -71,13 +91,10 @@ export const meRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, op
     },
     async (request) => {
       if (!db || !request.auth) throw new Error('me routes need a database')
-      const [row] = await db
-        .update(users)
-        .set(request.body)
-        .where(eq(users.id, request.auth.user.id))
-        .returning(ownAccount)
+      await db.update(users).set(request.body).where(eq(users.id, request.auth.user.id))
+      const row = await loadOwnAccount(db, request.auth.user.id)
       if (!row) throw new HttpProblem(401, 'Sign in to continue.')
-      return toMe(row)
+      return toMe(row, storage)
     },
   )
 

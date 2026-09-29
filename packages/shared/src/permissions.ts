@@ -66,6 +66,10 @@ export const ROLE_PERMISSIONS: Readonly<Record<RoleName, readonly Permission[]>>
 export const USER_STATUSES = ['active', 'suspended', 'deleted'] as const
 export type UserStatus = (typeof USER_STATUSES)[number]
 
+/** Where a Cover or avatar image comes from (PRD §9). Future Sources add values. */
+export const COVER_ORIGINS = ['open_library', 'upload'] as const
+export type CoverOrigin = (typeof COVER_ORIGINS)[number]
+
 /** What an `auth_tokens` row is for (PRD §9). */
 export const AUTH_TOKEN_PURPOSES = ['verify_email', 'reset_password', 'change_email'] as const
 export type AuthTokenPurpose = (typeof AUTH_TOKEN_PURPOSES)[number]
