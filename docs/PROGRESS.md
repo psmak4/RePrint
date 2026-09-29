@@ -80,3 +80,7 @@ Entry format:
 ### 2026-09-29 · M1-T15 · PR pending
 - Sentry (`@sentry/node` in API and worker, `@sentry/react-router` in the web server and browser via new `entry.client.tsx`) starts only when `SENTRY_DSN` / `VITE_SENTRY_DSN` is set. The web app now has a pino logger and a root route `middleware` that stamps `x-request-id` before loaders, logs one line per request (`service: web`), and echoes the ID; the API client forwards it and the API logs it as `reqId`. Redaction paths are `LOG_REDACT_PATHS` in `packages/shared`, used by API, worker, and web. D-067 records the choices.
 - Next iteration: Sentry `--import` instrumentation, source map upload, and release markers belong in M1-T18. Use `logger` from `app/lib/logger.server.ts` in web server code. Verified by hand that a built web server echoes and logs a supplied `x-request-id`.
+
+### 2026-09-29 · M1-T16 · PR pending
+- `packages/db/src/seed/`: seeded PRNG with deterministic UUIDv7 IDs (`random.id()`), ordered `seedModules` registry (empty until M2-T21), `runSeed` (one transaction) and `resetDatabase` (drop schemas, migrate, seed), and a production/non-local-host guard. Root `pnpm db:seed` and `pnpm db:reset`; `src/seed/README.md` explains how to add a module. Integration test resets twice with a sample module and compares rows and IDs. D-068 records the choices.
+- Next iteration: no real tables exist yet, so `db:reset` seeds nothing; M2-T21 adds the first module. Modules must use `random.*` and never `newId()`/`Date.now()`.
