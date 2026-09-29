@@ -131,3 +131,7 @@ Entry format:
 ### 2026-09-29 · M2-T07 · PR pending
 - `modules/auth/verification.ts`: `POST /v1/auth/verify-email` (atomic single-use token, 24 h) and `POST /v1/auth/resend-verification` (3/hour per email, identical reply, newest link wins). `GET /v1/auth/session` now returns `{ signupsOpen, viewer }` with the shared `viewerSchema`. D-078 records the choices.
 - Next iteration: M2-T08 login can call `app.sessions.start`; the web banner (M2-T11) calls resend with an empty body when signed in. The viewer has no email field by design. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T08 · PR pending
+- `modules/auth/login.ts`: `POST /v1/auth/login` (per-IP and per-account limits, decoy hash for unknown emails, generic 401, suspended message per D-047, deleted accounts generic), `/logout` and `/logout-all`. Shared `loginRequestSchema`, `loginResponseSchema`, `logoutResponseSchema`. D-079 records the choices.
+- Next iteration: M2-T09 reset must end all sessions with `delete from sessions where user_id`, as `/logout-all` does. The web login form (M2-T10) posts `{ email, password }` and shows the 401/403/429 Problem Details `title`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

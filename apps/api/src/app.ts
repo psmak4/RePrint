@@ -8,6 +8,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import type { Redis } from 'ioredis'
 import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
+import { loginRoutes } from './modules/auth/login.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
@@ -89,6 +90,12 @@ export async function buildApp(
     jobs: options.jobs,
   })
   await app.register(verificationRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(loginRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
