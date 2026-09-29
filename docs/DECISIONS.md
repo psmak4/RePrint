@@ -403,3 +403,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: Workspace packages are named `@reprint/<name>`; the apps are `api` and `web` (so `pnpm --filter api …` works). Each library compiles to `dist/` with `tsc -p tsconfig.build.json` (tests excluded) and exports `./dist/index.js` + types; `tsconfig.json` is the no-emit typecheck config that includes tests. Turbo runs `build`, `typecheck`, and `test:unit` after `^build`. TypeScript 7 (`typescript@^7`, the native compiler) is the only compiler so far. Node packages use `module: nodenext`. `@types/node` (major 24, matching the runtime) is added as a type-only dev dependency. Turbo's AI-agent `AGENTS.md` guidance is turned off (`agentGuidance: false`) because `CLAUDE.md` is the agent guide.
 - Why: Compiled `dist/` output lets Node run the API and worker without a bundler or loader; per-package tsconfigs keep strict settings in one base (`packages/config/tsconfig/base.json`).
 - Affects: M1-T01, every package
+
+### D-054 · CI job layout and secret scanning
+- Status: Implementation
+- Decision: CI runs one job per check (`lint`, `typecheck`, `unit`, `build`, `gitleaks`, `audit`) in parallel, each installing through a shared composite action (`.github/actions/setup`: `pnpm/action-setup` + `actions/setup-node` with the pnpm store cache). Gitleaks runs through `scripts/gitleaks.sh` (local binary if present, otherwise the pinned `ghcr.io/gitleaks/gitleaks` image) instead of `gitleaks/gitleaks-action`, so CI and `pnpm check` scan identically and no action license key is needed. `pnpm check` runs the same steps sequentially. Turbo's remote cache reads `TURBO_TOKEN` (secret) and `TURBO_TEAM` (variable or secret) and is skipped when they are empty.
+- Why: Separate jobs give stable, individually required status checks (listed in `docs/ci.md`) and fast parallel feedback.
+- Affects: M1-T02, M1-T03, later tasks that add CI jobs

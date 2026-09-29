@@ -1,0 +1,26 @@
+# CI
+
+`.github/workflows/ci.yml` runs on every pull request and on every push to `main` (PRD §12, pipeline steps 1–4). Each job installs with `pnpm install --frozen-lockfile` through the shared `.github/actions/setup` action (Node from `.nvmrc`, pnpm from `packageManager`).
+
+## Required checks
+
+These job names are stable. Branch protection on `main` (M1-T03) requires every one of them. Renaming a job means updating branch protection too.
+
+| Job | What it runs | Local equivalent |
+| --- | --- | --- |
+| `lint` | Biome lint and format check (`biome ci .`) | `pnpm lint` |
+| `typecheck` | `tsc` in every workspace package via Turbo | `pnpm typecheck` |
+| `unit` | Vitest unit tests in every workspace package via Turbo | `pnpm test:unit` |
+| `build` | Builds every workspace package via Turbo | `pnpm build` |
+| `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
+| `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
+
+Later M1 tasks add jobs here as their commands appear (`db-check`, `integration`, OpenAPI drift in `build`, `e2e`). Each one must also be added to `pnpm check` and to this table.
+
+## `pnpm check`
+
+`pnpm check` runs every non-e2e CI job locally, in order, and stops at the first failure. The secret scan uses a local `gitleaks` binary when installed, otherwise the pinned Docker image, so Docker must be running.
+
+## Turborepo remote cache
+
+Set the repository secret `TURBO_TOKEN` and the variable (or secret) `TURBO_TEAM` to enable the Vercel remote cache. Without them the values are empty and Turbo falls back to its local cache; CI still passes.
