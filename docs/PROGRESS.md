@@ -89,3 +89,6 @@ Entry format:
 - `renovate.json` (weekly, majors disabled, non-major grouped, Drizzle minors split out, Actions majors allowed) validated with `renovate-config-validator`; `docs/dependencies.md` states the policy; D-069 records the choices.
 - Next iteration: M1-T23 (HUMAN) installs the Renovate app. Renovate PRs must pass `merge-pr.sh` like any other. If lint/format covers `renovate.json`, keep it Biome-clean.
 
+### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-070). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-070). Don't create blocker entries for the deferred tasks.

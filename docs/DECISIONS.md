@@ -507,3 +507,8 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §8 and §11 say to pin majors and let Renovate open updates, but do not give the settings.
 - Affects: M1-T23
 
+### D-070 · Deployment deferred; free-tier staging plan
+- Status: Decided (owner)
+- Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
+- Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.
+- Affects: M1-T19–M1-T23, M1-T18 (config should allow an in-process worker flag), M8-T12, M8-T13
