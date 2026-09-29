@@ -16,7 +16,7 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) | `pnpm build && pnpm openapi:check` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
-| `e2e` | Playwright + axe in Chromium, WebKit, and a mobile viewport against the built apps and the Docker services (`docker compose up -d --wait`, `pnpm db:migrate`, `SOURCE_MODE=stub`). Uploads the Playwright report as an artifact | `pnpm db:migrate && pnpm build && pnpm test:e2e` |
+| `e2e` | Playwright + axe in Chromium, WebKit, and a mobile viewport against the built apps and the Docker services (`docker compose up -d --wait`, `SOURCE_MODE=stub`, database migrated after the build). Uploads the Playwright report as an artifact | `pnpm build && pnpm db:migrate && pnpm test:e2e` |
 
 Later tasks add jobs here as their commands appear. Each one must also be added to this table (and to `pnpm check`, except `e2e`, which needs the Docker services and browsers and runs on its own).
 
@@ -34,6 +34,6 @@ Set the repository secret `TURBO_TOKEN` and the variable (or secret) `TURBO_TEAM
 
 ## End-to-end tests (`e2e/`)
 
-`pnpm test:e2e` runs `e2e/specs/*.spec.ts` in three Playwright projects (`chromium`, `webkit`, and `mobile`, a Pixel 7 viewport). Playwright's `webServer` starts the built API (`apps/api/dist/server.js`, port 3000) and web app (`react-router-serve`, port 5173) with `SOURCE_MODE=stub`, so run `docker compose up -d --wait`, `pnpm db:migrate`, and `pnpm build` first. The stack runs the job worker in-process and sends email to Mailpit, and specs give each browser its own client IP (D-083). Locally it reuses servers that are already running (for example `pnpm dev`); in CI it always starts its own. Install browsers once with `pnpm --filter e2e install:browsers`.
+`pnpm test:e2e` runs `e2e/specs/*.spec.ts` in three Playwright projects (`chromium`, `webkit`, and `mobile`, a Pixel 7 viewport). Playwright's `webServer` starts the built API (`apps/api/dist/server.js`, port 3000) and web app (`react-router-serve`, port 5173) with `SOURCE_MODE=stub`, so run `docker compose up -d --wait`, `pnpm build`, and `pnpm db:migrate` first. The stack runs the job worker in-process and sends email to Mailpit, and specs give each browser its own client IP (D-083). Locally it reuses servers that are already running (for example `pnpm dev`); in CI it always starts its own. Install browsers once with `pnpm --filter e2e install:browsers`.
 
 Tests visit `http://www.reprint.localhost:5173` (D-013). Override the origins with `E2E_WEB_ORIGIN` and `E2E_API_ORIGIN`. Every spec that visits a page calls `expectNoA11yViolations(page)` from `e2e/support/a11y.ts`, which fails on serious or critical axe issues (PRD §12).
