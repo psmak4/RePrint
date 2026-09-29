@@ -162,3 +162,7 @@ Entry format:
 - `POST /v1/me/email` and `POST /v1/me/email/confirm` in `modules/me/routes.ts` (shared `changeEmail*` and `confirmEmailChange*` schemas), three templates (`email-change-confirm`, `email-change-requested`, `email-changed`) with job cases, an `emailChange` rate limit, and `emailSendPayload` is now exported from `jobs/registry.ts` for tests. Integration tests in `modules/me/email-change.integration.test.ts` include a Mailpit container. D-085 records the choices.
 - Next iteration: M2-T18 should also write security notifications on email change (call `notify` in the confirm transaction). M2-T20 must add the web route `/confirm-email-change?token=` (the emailed link points there; it should POST the token to `/v1/me/email/confirm`) and the pending state on `/settings/security`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-09-29 · M2-T15 · PR pending
+- `modules/me/sessions.ts`: `GET /v1/me/sessions`, `GET /v1/me/sessions/:id`, `DELETE /v1/me/sessions/:id` (shared `sessionInfoSchema`, `sessionListResponseSchema`, `sessionParamsSchema`, `endSessionResponseSchema`). Device names come from `ua-parser-js` (added to `apps/api`, approved in D-022). D-086 records the choices.
+- Next iteration: M2-T20's active devices list reads `{ items }` and calls DELETE per `id`; ending the current session clears the cookie, so the web should treat it like logout. "Log out everywhere" already exists as `POST /v1/auth/logout-all`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -183,7 +183,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the request requires the current password; the email does not change until the link sent to the new address is used (integration tests)
   - Accept: notification emails go to both the old and new addresses (integration test with Mailpit)
   - Accept: a new address already in use is rejected with 409 Problem Details
-- [ ] M2-T15 · Session management: `GET /v1/me/sessions`, `GET/DELETE /v1/me/sessions/:id` · deps: M2-T13 · PRD: §7.1, §10
+- [x] M2-T15 · Session management: `GET /v1/me/sessions`, `GET/DELETE /v1/me/sessions/:id` · deps: M2-T13 · PRD: §7.1, §10
   - Accept: the list shows each active session's device (parsed user agent), IP, last seen, and a `current` flag (integration test)
   - Accept: DELETE ends that session; deleting another user's session returns 404 (allowed and denied tests)
 - [ ] M2-T16 · Image storage and `POST /v1/me/avatar` (sniffed, 5 MB cap, WebP 256 px, EXIF stripped) · deps: M2-T13 · PRD: §7.8, §6, §9, §11
