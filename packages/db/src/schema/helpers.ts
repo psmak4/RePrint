@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { timestamp, uuid } from 'drizzle-orm/pg-core'
+import { customType, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { newId } from '../ids.js'
 
 /** Primary key column: UUIDv7 generated in the app (PRD §9). */
@@ -18,4 +18,9 @@ export const timestamps = () => ({
     .notNull()
     .default(sql`now()`)
     .$onUpdate(() => new Date()),
+})
+
+/** Case-insensitive text (the `citext` extension, enabled by the first migration). */
+export const citext = customType<{ data: string }>({
+  dataType: () => 'citext',
 })

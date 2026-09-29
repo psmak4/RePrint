@@ -4,7 +4,10 @@ import {
   hasPermission,
   isPermission,
   MEMBER_PERMISSIONS,
+  MODERATOR_PERMISSIONS,
   PERMISSIONS,
+  ROLE_PERMISSIONS,
+  ROLES,
 } from './permissions.js'
 
 describe('permissions', () => {
@@ -36,5 +39,22 @@ describe('permissions', () => {
     expect(hasPermission(['reviews.write'], PERMISSIONS.reviewsWrite)).toBe(true)
     expect(hasPermission(new Set(['reviews.write']), PERMISSIONS.reviewsModerate)).toBe(false)
     expect(hasPermission([], PERMISSIONS.auditView)).toBe(false)
+  })
+
+  describe('role grants (PRD §4)', () => {
+    it('gives Moderators the Member set plus moderation, reports, and limited user view', () => {
+      expect(ROLE_PERMISSIONS[ROLES.moderator]).toEqual(MODERATOR_PERMISSIONS)
+      expect(MODERATOR_PERMISSIONS).toContain(PERMISSIONS.reviewsModerate)
+      expect(MODERATOR_PERMISSIONS).toContain(PERMISSIONS.reportsResolve)
+      expect(MODERATOR_PERMISSIONS).toContain(PERMISSIONS.usersView)
+      expect(MODERATOR_PERMISSIONS).not.toContain(PERMISSIONS.usersSuspend)
+      expect(MODERATOR_PERMISSIONS).not.toContain(PERMISSIONS.rolesAssign)
+      expect(MODERATOR_PERMISSIONS).not.toContain(PERMISSIONS.auditView)
+    })
+
+    it('gives Admins every permission and Members only the Member set', () => {
+      expect(ROLE_PERMISSIONS[ROLES.admin]).toEqual(ALL_PERMISSIONS)
+      expect(ROLE_PERMISSIONS[ROLES.member]).toEqual(MEMBER_PERMISSIONS)
+    })
   })
 })
