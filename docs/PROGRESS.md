@@ -68,3 +68,7 @@ Entry format:
 ### 2026-09-29 · M1-T12 · PR pending
 - `docs/DESIGN.md` (grid, breakpoints, type and spacing scales, colour tokens with contrast table, component inventory, page templates). `packages/ui/src/theme.css` holds the tokens (imported by `apps/web/app/app.css`), and `Button` uses them. `AppShell`/`SiteHeader`/`SiteFooter` in `apps/web/app/components/shell/` wrap the root `Layout`; copy is in `copy.shell`. Tests: token contrast, shell component test, inline-string guard. D-064 records the choices.
 - Next iteration: pages must not render their own `<main>` (the shell owns it). Header search and account slots are empty until M3-T16 and M2-T10. Footer legal links 404 until M8. Layout is not verified in a real browser until the Playwright harness (M1-T13).
+
+### 2026-09-29 · M1-T13 · PR pending
+- `e2e/` workspace package: Playwright config with `chromium`, `webkit`, and `mobile` (Pixel 7) projects; `webServer` starts the built API and web app on `www.reprint.localhost:5173` / `api.reprint.localhost:3000` (works in all three, so no `localhost` fallback); `expectNoA11yViolations(page)` in `e2e/support/a11y.ts` (fails on serious/critical, checked against a bad page); `specs/smoke.spec.ts` for `/`. Root `pnpm test:e2e`, new required CI job `e2e` (in `docs/ci.md`), D-065.
+- Next iteration: `pnpm build` and `docker compose up -d --wait` must run before `pnpm test:e2e`. New specs go in `e2e/specs/` and call `expectNoA11yViolations`. `e2e` is not in `pnpm check`. If a spec needs new API env vars, add them to `stackEnv` in `e2e/playwright.config.ts`.

@@ -21,7 +21,8 @@
     "db:generate": "pnpm --filter @reprint/db db:generate",
     "db:migrate": "pnpm --filter @reprint/db db:migrate",
     "db:check": "pnpm --filter @reprint/db db:check",
-    "openapi:check": "turbo run openapi:check"
+    "openapi:check": "turbo run openapi:check",
+    "test:e2e": "pnpm --filter e2e test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

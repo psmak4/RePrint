@@ -70,7 +70,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `packages/ui` exposes the theme tokens as Tailwind v4 CSS variables, and the app renders in the dark theme
   - Accept: the app shell has a header (logo, search box slot, account slot), a footer (Open Library credit, legal page links), a skip link, and a responsive layout from 360 px to desktop (component test)
   - Accept: user-facing strings come from `apps/web/app/copy/`, and a Biome rule or unit test guards against inline strings in shell components
-- [ ] M1-T13 · Playwright + axe e2e harness running in CI against the local stack · deps: M1-T12, M1-T02 · PRD: §12, §11
+- [x] M1-T13 · Playwright + axe e2e harness running in CI against the local stack · deps: M1-T12, M1-T02 · PRD: §12, §11
   - Accept: `pnpm test:e2e` runs Playwright projects for Chromium, WebKit, and a mobile viewport against a locally started stack (`webServer`)
   - Accept: a shared `expectNoA11yViolations(page)` helper fails on serious or critical axe issues, and the smoke spec for `/` uses it
   - Accept: CI has an `e2e` job (Docker services + built apps) that runs on every PR and is green
