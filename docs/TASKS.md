@@ -60,7 +60,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm build` writes `apps/api/openapi.json` from the route schemas
   - Accept: `pnpm openapi:check` fails when the committed spec is stale; it is part of `pnpm check` and CI
   - Accept: `GET /v1/docs` serves the docs when `NODE_ENV` ≠ `production` and returns 404 in production (test)
-- [ ] M1-T11 · `apps/web` skeleton: React Router 8 framework-mode SSR, Vite, Tailwind v4, `packages/ui` with shadcn/ui, API client · deps: M1-T07 · PRD: §8
+- [x] M1-T11 · `apps/web` skeleton: React Router 8 framework-mode SSR, Vite, Tailwind v4, `packages/ui` with shadcn/ui, API client · deps: M1-T07 · PRD: §8
   - Accept: `pnpm dev` serves the SSR app on port 5173 alongside the API; view-source of `/` shows server-rendered HTML
   - Accept: `packages/ui` exports the shadcn/ui `Button`, used on the home page, and Tailwind builds
   - Accept: a server-side API client (`API_INTERNAL_URL`) forwards the incoming `cookie` and `x-request-id` headers, covered by a unit test

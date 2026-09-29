@@ -1,7 +1,14 @@
 {
   "extends": "@reprint/config/tsconfig/react-library.json",
   "compilerOptions": {
-    "noEmit": true
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node", "vite/client"],
+    "rootDirs": [".", "./.react-router/types"]
   },
-  "include": ["app"]
+  "include": ["app", "*.ts", ".react-router/types/**/*"]
 }
