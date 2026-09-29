@@ -173,7 +173,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/verify-email?token=` shows success or a clear expired/used state (component tests)
   - Accept: signed-in unverified Members see a banner with a working "Resend link" action on every page (component test)
   - Accept: `/forgot-password` shows the same confirmation for any email, and `/reset-password?token=` sets a new password (component tests)
-- [ ] M2-T12 · E2E: register, verify, and log in; password reset · deps: M2-T11, M1-T13 · PRD: §12
+- [x] M2-T12 · E2E: register, verify, and log in; password reset · deps: M2-T11, M1-T13 · PRD: §12
   - Accept: `e2e/auth.spec.ts` registers, reads the verification email from the Mailpit API, verifies, logs out, and logs in, passing in all three Playwright projects with axe checks
   - Accept: `e2e/password-reset.spec.ts` requests a reset, follows the emailed link, sets a new password, and logs in with it
 - [ ] M2-T13 · `GET/PATCH /v1/me` and `POST /v1/me/password` · deps: M2-T09 · PRD: §7.1, §7.8, §10

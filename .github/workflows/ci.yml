@@ -105,6 +105,8 @@ jobs:
       - name: Start Postgres, Redis, and Mailpit
         run: docker compose up -d --wait
       - run: pnpm build
+      - name: Migrate the database
+        run: pnpm db:migrate
       - name: Install Playwright browsers
         run: pnpm --filter e2e install:browsers
       - run: pnpm test:e2e

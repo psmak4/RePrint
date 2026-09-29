@@ -17,6 +17,15 @@ const stackEnv = {
   DATABASE_URL: process.env.DATABASE_URL ?? 'postgres://reprint:reprint@localhost:5432/reprint',
   REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379',
   SOURCE_MODE: 'stub',
+  // Accounts specs: open signups, no HIBP lookups, per-test client IPs, and emails sent by an
+  // in-process worker to Mailpit (docker compose).
+  PUBLIC_SIGNUPS: 'true',
+  HIBP_MODE: 'off',
+  TRUST_PROXY: 'true',
+  WORKER_IN_PROCESS: 'true',
+  EMAIL_TRANSPORT: 'smtp',
+  SMTP_HOST: 'localhost',
+  SMTP_PORT: '1025',
   API_INTERNAL_URL: `http://localhost:${apiPort}`,
 }
 
