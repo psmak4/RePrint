@@ -25,6 +25,8 @@ export const meSchema = z.object({
   username: usernameSchema,
   displayName: z.string(),
   bio: z.string().nullable(),
+  /** Absolute URL of the Member's avatar, or null when none is uploaded. */
+  avatarUrl: z.string().nullable(),
   verified: z.boolean(),
   libraryPublic: z.boolean(),
   emailReviewDecisions: z.boolean(),
@@ -80,3 +82,6 @@ export type SessionInfo = z.infer<typeof sessionInfoSchema>
 export const sessionListResponseSchema = z.object({ items: z.array(sessionInfoSchema) })
 export const sessionParamsSchema = z.object({ id: z.uuid() })
 export const endSessionResponseSchema = z.object({ status: z.literal('session_ended') })
+
+export const AVATAR_SIZE = 256
+export const uploadAvatarResponseSchema = z.object({ avatarUrl: z.string() })

@@ -59,6 +59,18 @@ const baseEnvSchema = z.object({
   SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(1025),
   /** Required when `EMAIL_TRANSPORT=resend`. */
   RESEND_API_KEY: z.string().min(1).optional(),
+  /** `local` writes uploads to disk and serves them from the API; `r2` uses Cloudflare R2 (D-030). */
+  STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
+  STORAGE_LOCAL_DIR: z.string().min(1).default('.data/uploads'),
+  /** Where browsers load uploaded images from; the CDN in production (PRD §13). */
+  IMAGE_BASE_URL: z.url().default('http://api.reprint.localhost:3000/v1/uploads'),
+  /** Required when `STORAGE_DRIVER=r2`. */
+  R2_ACCOUNT_ID: z.string().min(1).optional(),
+  R2_ACCESS_KEY_ID: z.string().min(1).optional(),
+  R2_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  R2_BUCKET_UPLOADS: z.string().min(1).optional(),
+  /** Largest accepted upload (PRD §11: 5 MB). */
+  UPLOAD_MAX_BYTES: z.coerce.number().int().min(1).default(5_242_880),
 })
 
 type EmailSettings = Pick<z.infer<typeof baseEnvSchema>, 'EMAIL_TRANSPORT' | 'RESEND_API_KEY'>
@@ -73,7 +85,30 @@ function requireResendKey(env: EmailSettings, context: z.RefinementCtx): void {
   }
 }
 
-export const envSchema = baseEnvSchema.superRefine(requireResendKey)
+const R2_VARIABLES = [
+  'R2_ACCOUNT_ID',
+  'R2_ACCESS_KEY_ID',
+  'R2_SECRET_ACCESS_KEY',
+  'R2_BUCKET_UPLOADS',
+] as const
+
+function requireR2Settings(
+  env: Pick<z.infer<typeof baseEnvSchema>, 'STORAGE_DRIVER' | (typeof R2_VARIABLES)[number]>,
+  context: z.RefinementCtx,
+): void {
+  if (env.STORAGE_DRIVER !== 'r2') return
+  for (const name of R2_VARIABLES) {
+    if (!env[name]) {
+      context.addIssue({
+        code: 'custom',
+        path: [name],
+        message: 'is required when STORAGE_DRIVER=r2',
+      })
+    }
+  }
+}
+
+export const envSchema = baseEnvSchema.superRefine(requireResendKey).superRefine(requireR2Settings)
 
 export type Env = z.infer<typeof envSchema>
 

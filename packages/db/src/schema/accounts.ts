@@ -1,9 +1,10 @@
 import { AUTH_TOKEN_PURPOSES, USER_STATUSES } from '@reprint/shared'
 import { sql } from 'drizzle-orm'
 import { boolean, check, index, jsonb, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core'
+import { covers } from './covers.js'
 import { citext, timestamps, timestamptz, uuidv7Pk } from './helpers.js'
 
-/** Accounts (PRD §9). `avatar_id` arrives with the `covers` table (M2-T16). */
+/** Accounts (PRD §9). */
 export const users = pgTable(
   'users',
   {
@@ -14,6 +15,7 @@ export const users = pgTable(
     emailVerifiedAt: timestamptz('email_verified_at'),
     displayName: text('display_name').notNull(),
     bio: text('bio'),
+    avatarId: uuid('avatar_id').references(() => covers.id, { onDelete: 'set null' }),
     libraryPublic: boolean('library_public').notNull().default(true),
     /** D-032: the only optional email; security emails always send. */
     emailReviewDecisions: boolean('email_review_decisions').notNull().default(true),
@@ -25,6 +27,7 @@ export const users = pgTable(
   (t) => [
     check('users_status_check', sql`${t.status} in ('active', 'suspended', 'deleted')`),
     check('users_bio_length_check', sql`char_length(${t.bio}) <= 280`),
+    index('users_avatar_id_idx').on(t.avatarId),
   ],
 )
 

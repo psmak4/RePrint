@@ -546,6 +546,12 @@
                         "null"
                       ]
                     },
+                    "avatarUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "verified": {
                       "type": "boolean"
                     },
@@ -562,6 +568,7 @@
                     "username",
                     "displayName",
                     "bio",
+                    "avatarUrl",
                     "verified",
                     "libraryPublic",
                     "emailReviewDecisions"
@@ -642,6 +649,12 @@
                         "null"
                       ]
                     },
+                    "avatarUrl": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "verified": {
                       "type": "boolean"
                     },
@@ -658,6 +671,7 @@
                     "username",
                     "displayName",
                     "bio",
+                    "avatarUrl",
                     "verified",
                     "libraryPublic",
                     "emailReviewDecisions"
@@ -991,6 +1005,50 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/me/avatar": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "avatarUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "avatarUrl"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uploads/{*}": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "*",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }

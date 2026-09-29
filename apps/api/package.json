@@ -17,9 +17,11 @@
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1142.0",
     "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
+    "@fastify/multipart": "^10.1.2",
     "@fastify/swagger": "^9.9.0",
     "@fastify/swagger-ui": "^6.1.1",
     "@node-rs/argon2": "^2.2.1",
@@ -35,6 +37,7 @@
     "nodemailer": "^10.0.12",
     "pino": "^10.3.1",
     "resend": "~6.30.0",
+    "sharp": "^0.35.5",
     "ua-parser-js": "^2.0.10",
     "zod": "^4.6.5"
   },
