@@ -456,3 +456,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §8 and §10 require a separate worker process and a `/ready` queue check but leave the queue layout, schedule mechanism, and dev wiring open.
 - Affects: M1-T10, M1-T15, M3 (Book refreshes), M2 (emails), M8 (queue alerts)
 
+
+
+### D-062 · OpenAPI generation and drift check (M1-T10)
+- Status: Decided (loop)
+- Decision: (1) `@fastify/swagger` builds an OpenAPI 3.1 document from the routes' Zod schemas through `jsonSchemaTransform` from `fastify-type-provider-zod` (`src/plugins/openapi.ts`, registered before the routes). `@fastify/swagger-ui` serves it at `/v1/docs` only when `NODE_ENV` is not `production`; in production the path is an ordinary 404 Problem Details. Both packages were pre-approved in D-055's list. (2) `pnpm build` in `apps/api` runs `tsc` and then `src/scripts/openapi.ts`, which builds the app with placeholder env values and no database or Redis connections and writes `apps/api/openapi.json`. (3) `pnpm openapi:check` (`turbo run openapi:check`) regenerates the spec in memory and exits 1 when it differs from the committed file. It runs as a step of the CI `build` job and in `pnpm check`. (4) `openapi.json` is generated output, so Biome ignores it (`!**/openapi.json`); the drift check is what guards it. (5) The spec `info.version` is `1.0.0` until a release process exists.
+- Why: PRD §10 and §12 require a generated spec and a build that fails when the spec changes without being committed, but leave the mechanism open.
+- Affects: every later route task (run `pnpm build` and commit `apps/api/openapi.json`), M1-T24

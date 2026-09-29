@@ -56,3 +56,7 @@ Entry format:
 - `apps/api`: BullMQ worker (`src/worker.ts` → `dist/worker.js`, graceful SIGTERM), typed job registry (`src/jobs/registry.ts`, with `system.heartbeat` scheduled every 60 s), `createJobQueue()` (typed `enqueue`, `syncSchedules`), `/v1/ready` now reports `queue`, and root `pnpm dev` runs API and worker together. `src/jobs/README.md` explains how to add a job. D-061 records the choices.
 - Next iteration: add jobs by editing `registry.ts` only. Integration tests that stop Redis must not close BullMQ clients afterwards (close hangs); keep those cases in their own file. `test:integration` now builds the package first because the worker test spawns `dist/worker.js`. `pnpm audit` reports 1 moderate finding (below the `high` gate).
 
+
+### 2026-09-29 · M1-T10 · PR pending
+- `apps/api`: OpenAPI 3.1 from the Zod route schemas (`src/plugins/openapi.ts`), `/v1/docs` served only outside production (404 Problem Details in production), `src/scripts/openapi.ts` writing `apps/api/openapi.json` during `pnpm build`, and `pnpm openapi:check` (Turbo task; a step in the CI `build` job and in `pnpm check`). Biome ignores the generated file. D-062 records the choices.
+- Next iteration: after adding or changing any route or schema, run `pnpm build` and commit the updated `apps/api/openapi.json`, or CI fails. Error responses (Problem Details) are not yet declared per route in the spec; add a shared `problemDetailsSchema` response when the first real routes land (M2).

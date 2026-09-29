@@ -14,7 +14,8 @@
       "!**/coverage",
       "!**/.react-router",
       "!**/.turbo",
-      "!PRD.md"
+      "!PRD.md",
+      "!**/openapi.json"
     ]
   },
   "formatter": {
