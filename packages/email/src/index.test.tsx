@@ -42,6 +42,29 @@ describe('renderEmail', () => {
     expect(changed.text).toContain('https://www.reprint.test/forgot-password')
   })
 
+  it('renders the email change templates', async () => {
+    const confirm = await renderEmail('email-change-confirm', {
+      username: 'ada_l',
+      confirmUrl: 'https://www.reprint.test/confirm-email-change?token=abc',
+    })
+    expect(confirm.subject).toBe('Confirm your new email address')
+    expect(confirm.text).toContain('https://www.reprint.test/confirm-email-change?token=abc')
+    const requested = await renderEmail('email-change-requested', {
+      username: 'ada_l',
+      newEmail: 'new@example.test',
+      resetUrl: 'https://www.reprint.test/forgot-password',
+    })
+    expect(requested.text).toContain('new@example.test')
+    const changed = await renderEmail('email-changed', {
+      username: 'ada_l',
+      oldEmail: 'old@example.test',
+      newEmail: 'new@example.test',
+      resetUrl: 'https://www.reprint.test/forgot-password',
+    })
+    expect(changed.text).toContain('old@example.test')
+    expect(changed.text).toContain('new@example.test')
+  })
+
   it('escapes user-controlled text in HTML', async () => {
     const email = await renderEmail('verify-email', { ...props, username: '<script>x</script>' })
     expect(email.html).not.toContain('<script>x')

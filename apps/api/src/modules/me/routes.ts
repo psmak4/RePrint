@@ -1,18 +1,23 @@
-import { sessions, users } from '@reprint/db'
+import { authTokens, sessions, users } from '@reprint/db'
 import {
+  changeEmailRequestSchema,
+  changeEmailResponseSchema,
   changePasswordRequestSchema,
   changePasswordResponseSchema,
+  confirmEmailChangeRequestSchema,
+  confirmEmailChangeResponseSchema,
   type Me,
   meSchema,
   updateMeRequestSchema,
 } from '@reprint/shared'
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq, gt, isNull, ne } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
 import { isBreachedPassword } from '../auth/breached-password.js'
 import { requireAuth } from '../auth/guards.js'
 import { hashPassword, verifyPassword } from '../auth/password.js'
-import type { AuthRoutesOptions } from '../auth/register.js'
+import { type AuthRoutesOptions, VERIFY_EMAIL_TTL_MS } from '../auth/register.js'
+import { generateToken, hashToken } from '../auth/tokens.js'
 import { rateLimit } from '../rate-limit/plugin.js'
 
 const ownAccount = {
@@ -130,4 +135,144 @@ export const meRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, op
       return { status: 'password_changed' as const }
     },
   )
+
+  app.post(
+    '/me/email',
+    {
+      // Like the password change, this asks for the current password, so count attempts per Member.
+      preHandler: [requireAuth, rateLimit('emailChange')],
+      schema: { body: changeEmailRequestSchema, response: { 200: changeEmailResponseSchema } },
+    },
+    async (request) => {
+      if (!db || !jobs || !request.auth)
+        throw new Error('me routes need a database and a job queue')
+      const { user } = request.auth
+      const { currentPassword, newEmail } = request.body
+      const [account] = await db
+        .select({ passwordHash: users.passwordHash })
+        .from(users)
+        .where(eq(users.id, user.id))
+      if (!account || !(await verifyPassword(account.passwordHash, currentPassword))) {
+        throw new HttpProblem(400, 'The request did not pass validation.', {
+          errors: [{ path: 'body.currentPassword', message: 'That is not your current password.' }],
+        })
+      }
+      const [taken] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, newEmail))
+        .limit(1)
+      if (taken) {
+        throw new HttpProblem(409, 'That email address is already in use.', {
+          errors: [{ path: 'body.newEmail', message: 'Use a different email address.' }],
+        })
+      }
+      const token = generateToken()
+      await db.transaction(async (tx) => {
+        // The newest request wins: earlier unused change links stop working.
+        await tx
+          .delete(authTokens)
+          .where(
+            and(
+              eq(authTokens.userId, user.id),
+              eq(authTokens.purpose, 'change_email'),
+              isNull(authTokens.usedAt),
+            ),
+          )
+        await tx.insert(authTokens).values({
+          userId: user.id,
+          tokenHash: hashToken(token),
+          purpose: 'change_email',
+          newEmail,
+          expiresAt: new Date(Date.now() + VERIFY_EMAIL_TTL_MS),
+        })
+      })
+      try {
+        await jobs.enqueue('email.send', {
+          template: 'email-change-confirm',
+          to: newEmail,
+          props: {
+            username: user.username,
+            confirmUrl: `${webBase}/confirm-email-change?token=${encodeURIComponent(token)}`,
+          },
+        })
+        await jobs.enqueue('email.send', {
+          template: 'email-change-requested',
+          to: user.email,
+          props: { username: user.username, newEmail, resetUrl: `${webBase}/forgot-password` },
+        })
+      } catch (error) {
+        request.log.error({ err: error }, 'could not queue the email change emails')
+      }
+      return { status: 'check_your_email' as const }
+    },
+  )
+
+  app.post(
+    '/me/email/confirm',
+    {
+      // The link may open in another browser, so no session is needed; the token is the proof.
+      schema: {
+        body: confirmEmailChangeRequestSchema,
+        response: { 200: confirmEmailChangeResponseSchema },
+      },
+    },
+    async (request) => {
+      if (!db || !jobs) throw new Error('me routes need a database and a job queue')
+      const now = new Date()
+      const invalid = () =>
+        new HttpProblem(400, 'This email change link has expired or was already used.', {
+          errors: [{ path: 'body.token', message: 'Request the change again from your settings.' }],
+        })
+      let changed: { username: string; oldEmail: string; newEmail: string } | null
+      try {
+        changed = await db.transaction(async (tx) => {
+          // One conditional UPDATE consumes the token, so two concurrent requests can't both succeed.
+          const [consumed] = await tx
+            .update(authTokens)
+            .set({ usedAt: now })
+            .where(
+              and(
+                eq(authTokens.tokenHash, hashToken(request.body.token)),
+                eq(authTokens.purpose, 'change_email'),
+                isNull(authTokens.usedAt),
+                gt(authTokens.expiresAt, now),
+              ),
+            )
+            .returning({ userId: authTokens.userId, newEmail: authTokens.newEmail })
+          if (!consumed?.newEmail) return null
+          const [before] = await tx
+            .select({ email: users.email, username: users.username })
+            .from(users)
+            .where(and(eq(users.id, consumed.userId), eq(users.status, 'active')))
+          if (!before) return null
+          // The link proves the Member controls the new address, so it counts as verified.
+          await tx
+            .update(users)
+            .set({ email: consumed.newEmail, emailVerifiedAt: now })
+            .where(eq(users.id, consumed.userId))
+          return { username: before.username, oldEmail: before.email, newEmail: consumed.newEmail }
+        })
+      } catch (error) {
+        // Someone registered the address after the request; the unique index refuses the switch.
+        if (isUniqueViolation(error)) throw invalid()
+        throw error
+      }
+      if (!changed) throw invalid()
+      const props = { ...changed, resetUrl: `${webBase}/forgot-password` }
+      try {
+        // Both the old and the new address hear about it (PRD §7.12).
+        await jobs.enqueue('email.send', { template: 'email-changed', to: changed.oldEmail, props })
+        await jobs.enqueue('email.send', { template: 'email-changed', to: changed.newEmail, props })
+      } catch (error) {
+        request.log.error({ err: error }, 'could not queue the email changed emails')
+      }
+      return { status: 'email_changed' as const }
+    },
+  )
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  const cause = (error as { cause?: { code?: string } } | null)?.cause
+  return (error as { code?: string } | null)?.code === '23505' || cause?.code === '23505'
 }

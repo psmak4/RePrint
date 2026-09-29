@@ -157,3 +157,8 @@ Entry format:
 ### 2026-09-29 · M2-T13 · PR pending
 - `modules/me/routes.ts`: `GET/PATCH /v1/me` and `POST /v1/me/password` (shared `me.ts` schemas: `meSchema`, `updateMeRequestSchema`, `changePasswordRequestSchema`). Password change keeps the current session, ends the others, and queues the "password changed" email. New `passwordChange` rate limit. D-084 records the choices.
 - Next iteration: M2-T14 (`POST /v1/me/email`) can add its route to `modules/me/` and reuse `verifyPassword` and the `AuthRoutesOptions` shape; the `email-changed` notification emails need new templates. The "password changed" template copy now says other devices were signed out. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T14 · PR pending
+- `POST /v1/me/email` and `POST /v1/me/email/confirm` in `modules/me/routes.ts` (shared `changeEmail*` and `confirmEmailChange*` schemas), three templates (`email-change-confirm`, `email-change-requested`, `email-changed`) with job cases, an `emailChange` rate limit, and `emailSendPayload` is now exported from `jobs/registry.ts` for tests. Integration tests in `modules/me/email-change.integration.test.ts` include a Mailpit container. D-085 records the choices.
+- Next iteration: M2-T18 should also write security notifications on email change (call `notify` in the confirm transaction). M2-T20 must add the web route `/confirm-email-change?token=` (the emailed link points there; it should POST the token to `/v1/me/email/confirm`) and the pending state on `/settings/security`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

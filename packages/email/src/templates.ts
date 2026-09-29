@@ -5,6 +5,17 @@ import {
   emailAlreadyRegisteredSubject,
 } from './templates/email-already-registered.js'
 import {
+  EmailChangeConfirm,
+  emailChangeConfirmProps,
+  emailChangeConfirmSubject,
+} from './templates/email-change-confirm.js'
+import {
+  EmailChangeRequested,
+  emailChangeRequestedProps,
+  emailChangeRequestedSubject,
+} from './templates/email-change-requested.js'
+import { EmailChanged, emailChangedProps, emailChangedSubject } from './templates/email-changed.js'
+import {
   PasswordChanged,
   passwordChangedProps,
   passwordChangedSubject,
@@ -37,6 +48,21 @@ export const emailTemplates = {
     props: passwordChangedProps,
     subject: () => passwordChangedSubject,
     component: PasswordChanged,
+  },
+  'email-change-confirm': {
+    props: emailChangeConfirmProps,
+    subject: () => emailChangeConfirmSubject,
+    component: EmailChangeConfirm,
+  },
+  'email-change-requested': {
+    props: emailChangeRequestedProps,
+    subject: () => emailChangeRequestedSubject,
+    component: EmailChangeRequested,
+  },
+  'email-changed': {
+    props: emailChangedProps,
+    subject: () => emailChangedSubject,
+    component: EmailChanged,
   },
 } as const
 

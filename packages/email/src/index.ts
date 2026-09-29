@@ -5,6 +5,15 @@ export {
   emailAlreadyRegisteredProps,
 } from './templates/email-already-registered.js'
 export {
+  type EmailChangeConfirmProps,
+  emailChangeConfirmProps,
+} from './templates/email-change-confirm.js'
+export {
+  type EmailChangeRequestedProps,
+  emailChangeRequestedProps,
+} from './templates/email-change-requested.js'
+export { type EmailChangedProps, emailChangedProps } from './templates/email-changed.js'
+export {
   type PasswordChangedProps,
   passwordChangedProps,
 } from './templates/password-changed.js'
