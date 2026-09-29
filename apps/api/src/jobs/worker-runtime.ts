@@ -22,8 +22,10 @@ async function processJob(job: Job, log: Logger): Promise<unknown> {
 export async function startWorker(options: {
   redisUrl: string
   log: Logger
+  /** Called for every failed job (the entry point wires this to Sentry). */
+  onJobError?: (error: unknown) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log } = options
+  const { redisUrl, log, onJobError } = options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
@@ -31,9 +33,10 @@ export async function startWorker(options: {
     connection: connection as ConnectionOptions,
     concurrency: 5,
   })
-  worker.on('failed', (job, error) =>
-    log.error({ err: error, job: job?.name, jobId: job?.id }, 'job failed'),
-  )
+  worker.on('failed', (job, error) => {
+    log.error({ err: error, job: job?.name, jobId: job?.id }, 'job failed')
+    onJobError?.(error)
+  })
   worker.on('error', (error) => log.warn({ err: error }, 'worker error'))
   await worker.waitUntilReady()
   await jobQueue.syncSchedules()

@@ -1,11 +1,32 @@
 import { PassThrough } from 'node:stream'
 import { createReadableStreamFromReadable } from '@react-router/node'
+import * as Sentry from '@sentry/react-router'
 import { isbot } from 'isbot'
 import type { RenderToPipeableStreamOptions } from 'react-dom/server'
 import { renderToPipeableStream } from 'react-dom/server'
-import type { EntryContext } from 'react-router'
+import type { EntryContext, HandleErrorFunction } from 'react-router'
 import { ServerRouter } from 'react-router'
 import { BASELINE_SECURITY_HEADERS, buildCsp, generateNonce } from './lib/csp.server.js'
+import { logger } from './lib/logger.server.js'
+import { REQUEST_ID_HEADER } from './lib/request-id.server.js'
+import { sentryOrigin } from './lib/sentry.js'
+
+const sentryDsn = process.env.VITE_SENTRY_DSN
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: process.env.VITE_SENTRY_ENVIRONMENT ?? process.env.APP_ENV,
+    tracesSampleRate: Number(process.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
+  })
+}
+
+/** Logs unexpected server errors with the request ID and reports them to Sentry (when enabled). */
+export const handleError: HandleErrorFunction = (error, { request }) => {
+  // Aborted requests are the browser navigating away, not a fault.
+  if (request.signal.aborted) return
+  logger.error({ err: error, reqId: request.headers.get(REQUEST_ID_HEADER) }, 'unhandled error')
+  Sentry.captureException(error)
+}
 
 export const streamTimeout = 5_000
 
@@ -23,6 +44,7 @@ export default function handleRequest(
     'Content-Security-Policy',
     buildCsp(nonce, {
       apiOrigin: process.env.API_ORIGIN,
+      sentryOrigin: sentryOrigin(sentryDsn),
       dev: process.env.NODE_ENV === 'development',
     }),
   )

@@ -1,15 +1,14 @@
 import { pino } from 'pino'
 import { EnvError, loadWorkerEnv } from './config/env.js'
 import { startWorker } from './jobs/worker-runtime.js'
+import { baseLoggerOptions } from './observability/logging.js'
+import { captureError, initSentry } from './observability/sentry.js'
 
 async function main(): Promise<void> {
   const env = loadWorkerEnv()
-  const log = pino({
-    level: env.LOG_LEVEL,
-    base: { service: 'worker' },
-    ...(env.NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {}),
-  })
-  const worker = await startWorker({ redisUrl: env.REDIS_URL, log })
+  initSentry(env, 'worker')
+  const log = pino({ ...baseLoggerOptions(env), base: { service: 'worker' } })
+  const worker = await startWorker({ redisUrl: env.REDIS_URL, log, onJobError: captureError })
   log.info('worker ready')
 
   let stopping = false

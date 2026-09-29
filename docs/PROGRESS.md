@@ -77,6 +77,10 @@ Entry format:
 - API: helmet with HSTS preload, strict referrer policy, and `default-src 'none'` CSP (integration test on `/v1/ready` and a 404). Web: `app/entry.server.tsx` sets a per-request nonce CSP and baseline headers (`app/lib/csp.server.ts`); `apps/web/netlify.toml` sets the baseline headers for everything Netlify serves. New e2e test checks the CSP and that the client router hydrates with no CSP violations. D-066 records the choices.
 - Next iteration: any new inline `<script>` or `<style>` in the web app needs the nonce (or must move to a file). Third-party origins (Sentry in M1-T15) must be added to `connect-src` in `csp.server.ts`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`) or pnpm fails to start.
 
+### 2026-09-29 · M1-T15 · PR pending
+- Sentry (`@sentry/node` in API and worker, `@sentry/react-router` in the web server and browser via new `entry.client.tsx`) starts only when `SENTRY_DSN` / `VITE_SENTRY_DSN` is set. The web app now has a pino logger and a root route `middleware` that stamps `x-request-id` before loaders, logs one line per request (`service: web`), and echoes the ID; the API client forwards it and the API logs it as `reqId`. Redaction paths are `LOG_REDACT_PATHS` in `packages/shared`, used by API, worker, and web. D-067 records the choices.
+- Next iteration: Sentry `--import` instrumentation, source map upload, and release markers belong in M1-T18. Use `logger` from `app/lib/logger.server.ts` in web server code. Verified by hand that a built web server echoes and logs a supplied `x-request-id`.
+
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
-- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-067). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
-- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-067). Don't create blocker entries for the deferred tasks.
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-068). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-068). Don't create blocker entries for the deferred tasks.

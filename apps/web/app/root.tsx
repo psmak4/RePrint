@@ -1,7 +1,11 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import { ErrorPage } from './components/error-page.js'
 import { AppShell } from './components/shell/app-shell.js'
+import { logger } from './lib/logger.server.js'
+import { createRequestLogMiddleware } from './lib/request-log.server.js'
 import './app.css'
+
+export const middleware = [createRequestLogMiddleware(logger)]
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
