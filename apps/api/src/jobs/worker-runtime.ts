@@ -1,35 +1,40 @@
 import { type ConnectionOptions, type Job, Worker } from 'bullmq'
 import type { Logger } from 'pino'
+import type { Mailer } from '../email/mailer.js'
 import { createJobQueue, QUEUE_NAME, workerConnection } from './queue.js'
-import { isJobName, jobs } from './registry.js'
+import { isJobName, type JobContext, jobs } from './registry.js'
 
 export interface RunningWorker {
   /** Finishes the jobs in progress, then closes every connection. */
   stop: () => Promise<void>
 }
 
-async function processJob(job: Job, log: Logger): Promise<unknown> {
+async function processJob(job: Job, log: Logger, mailer: Mailer): Promise<unknown> {
   if (!isJobName(job.name)) throw new Error(`No handler registered for job "${job.name}"`)
   const definition = jobs[job.name]
   const payload = definition.payload.parse(job.data)
   // The handler type is a union over every job; the payload was just parsed with this job's schema.
-  return (definition.handler as (payload: unknown, context: { log: Logger }) => Promise<unknown>)(
+  return (definition.handler as (payload: unknown, context: JobContext) => Promise<unknown>)(
     payload,
-    { log: log.child({ job: job.name, jobId: job.id }) },
+    {
+      log: log.child({ job: job.name, jobId: job.id }),
+      mailer,
+    },
   )
 }
 
 export async function startWorker(options: {
   redisUrl: string
   log: Logger
+  mailer: Mailer
   /** Called for every failed job (the entry point wires this to Sentry). */
   onJobError?: (error: unknown) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log, onJobError } = options
+  const { redisUrl, log, mailer, onJobError } = options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
-  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, log), {
+  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, log, mailer), {
     connection: connection as ConnectionOptions,
     concurrency: 5,
   })

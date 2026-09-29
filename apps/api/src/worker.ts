@@ -1,5 +1,6 @@
 import { pino } from 'pino'
 import { EnvError, loadWorkerEnv } from './config/env.js'
+import { createMailer } from './email/mailer.js'
 import { startWorker } from './jobs/worker-runtime.js'
 import { baseLoggerOptions } from './observability/logging.js'
 import { captureError, initSentry } from './observability/sentry.js'
@@ -8,7 +9,13 @@ async function main(): Promise<void> {
   const env = loadWorkerEnv()
   initSentry(env, 'worker')
   const log = pino({ ...baseLoggerOptions(env), base: { service: 'worker' } })
-  const worker = await startWorker({ redisUrl: env.REDIS_URL, log, onJobError: captureError })
+  const mailer = createMailer(env)
+  const worker = await startWorker({
+    redisUrl: env.REDIS_URL,
+    log,
+    mailer,
+    onJobError: captureError,
+  })
   log.info('worker ready')
 
   let stopping = false
@@ -17,7 +24,10 @@ async function main(): Promise<void> {
     stopping = true
     log.info({ signal }, 'worker stopping')
     worker.stop().then(
-      () => process.exit(0),
+      () => {
+        mailer.close()
+        process.exit(0)
+      },
       (error: unknown) => {
         log.error({ err: error }, 'worker failed to stop cleanly')
         process.exit(1)

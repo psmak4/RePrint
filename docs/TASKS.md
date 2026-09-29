@@ -139,7 +139,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: named policies exist for login (per IP and per account), register, reset/resend (per email), review create/edit, report, other authenticated writes, and anonymous reads, with the PRD §11 limits
   - Accept: exceeding a limit returns 429 Problem Details with `Retry-After` (integration test per policy type: per-IP, per-user, per-email)
   - Accept: limits are shared across API instances via Redis (test with two app instances on one Redis)
-- [ ] M2-T04 · Email foundation: React Email templates, mailer (Mailpit locally, Resend elsewhere), email job · deps: M2-T01, M1-T09 · PRD: §7.12, §13
+- [x] M2-T04 · Email foundation: React Email templates, mailer (Mailpit locally, Resend elsewhere), email job · deps: M2-T01, M1-T09 · PRD: §7.12, §13
   - Accept: `packages/email` renders a base layout and the verify-email template to HTML and text (unit snapshot test)
   - Accept: `EMAIL_TRANSPORT=smtp` sends to Mailpit and `EMAIL_TRANSPORT=resend` uses Resend; the choice is env-driven and Zod-validated
   - Accept: emails go through an `email.send` worker job, and an integration test asserts a message arrives in a Mailpit container

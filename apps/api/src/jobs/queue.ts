@@ -1,7 +1,7 @@
 import { type ConnectionOptions, Queue } from 'bullmq'
 import { Redis } from 'ioredis'
 import type { ReadinessCheck } from '../modules/ops/readiness.js'
-import { type JobName, type JobPayload, jobs } from './registry.js'
+import { type JobDefinition, type JobName, type JobPayload, jobs } from './registry.js'
 
 export const QUEUE_NAME = 'reprint'
 
@@ -32,7 +32,14 @@ export function createJobQueue(redisUrl: string): JobQueue {
   return {
     queue,
     enqueue: async (name, payload) => {
-      const job = await queue.add(name, jobs[name].payload.parse(payload))
+      const definition: JobDefinition = jobs[name]
+      const retry = definition.retry
+      const job = await queue.add(name, definition.payload.parse(payload), {
+        ...(retry && {
+          attempts: retry.attempts,
+          backoff: { type: 'exponential', delay: retry.backoffMs },
+        }),
+      })
       return String(job.id)
     },
     syncSchedules: async () => {
