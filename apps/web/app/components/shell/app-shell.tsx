@@ -6,10 +6,11 @@ import { SiteHeader } from './site-header.js'
 export interface AppShellProps {
   searchSlot?: ReactNode
   accountSlot?: ReactNode
+  bannerSlot?: ReactNode
   children: ReactNode
 }
 
-export function AppShell({ searchSlot, accountSlot, children }: AppShellProps) {
+export function AppShell({ searchSlot, accountSlot, bannerSlot, children }: AppShellProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -19,6 +20,7 @@ export function AppShell({ searchSlot, accountSlot, children }: AppShellProps) {
         {copy.shell.skipToContent}
       </a>
       <SiteHeader searchSlot={searchSlot} accountSlot={accountSlot} />
+      {bannerSlot}
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-page flex-1 px-4 py-8 sm:px-6">
         {children}
       </main>
