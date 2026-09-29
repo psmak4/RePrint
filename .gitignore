@@ -1,0 +1,42 @@
+# Secrets: every .env file except the example
+.env
+.env.*
+!.env.example
+
+# Build loop state and logs
+.ralph/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.react-router/
+.turbo/
+.netlify/
+*.tsbuildinfo
+
+# Tests and coverage
+coverage/
+playwright-report/
+test-results/
+blob-report/
+e2e/.auth/
+
+# Local data (uploads, dumps)
+.data/
+*.dump
+
+# Logs and OS / editor files
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code local settings (the shared .claude/settings.json is committed)
+.claude/settings.local.json
