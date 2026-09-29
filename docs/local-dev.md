@@ -38,3 +38,8 @@ pnpm db:migrate
 The first migration (`0000_extensions`) repeats the extensions from `init.sql` with `IF NOT EXISTS`, so managed databases work too.
 
 Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`: every foreign key has an index, and no column is `timestamp` without time zone. Use the `uuidv7Pk()` and `timestamps()` helpers from `packages/db/src/schema/helpers.ts` for new tables.
+
+## API integration tests (`apps/api`)
+
+`pnpm test:integration` also runs `apps/api/src/**/*.integration.test.ts`. Each file calls `startTestStack()` (`apps/api/src/testing/stack.ts`), which starts its own Postgres 18 and Redis 7 containers and runs the migrations. Call `stack.reset()` in `beforeEach` to empty every table and flush Redis; `stack.stopRedis()` simulates a Redis outage. `GET /v1/ready` checks Postgres and Redis and returns 503 Problem Details when either is unreachable.
+

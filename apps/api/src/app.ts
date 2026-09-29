@@ -4,6 +4,7 @@ import helmet from '@fastify/helmet'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { Env } from './config/env.js'
+import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
 import { registerOriginCheck } from './plugins/origin-check.js'
@@ -19,7 +20,7 @@ function requestIdFrom(header: string | string[] | undefined): string {
 
 export async function buildApp(
   env: Env,
-  options: { logStream?: NodeJS.WritableStream } = {},
+  options: { logStream?: NodeJS.WritableStream; readinessChecks?: ReadinessCheck[] } = {},
 ): Promise<FastifyInstance> {
   const app = Fastify({
     trustProxy: env.TRUST_PROXY,
@@ -44,7 +45,10 @@ export async function buildApp(
   await app.register(cors, { origin: env.WEB_ORIGINS, credentials: true })
   registerOriginCheck(app, env.WEB_ORIGINS)
 
-  await app.register(opsRoutes, { prefix: '/v1' })
+  await app.register(opsRoutes, {
+    prefix: '/v1',
+    readinessChecks: options.readinessChecks ?? [],
+  })
 
   return app
 }

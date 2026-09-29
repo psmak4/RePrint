@@ -12,7 +12,7 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `typecheck` | `tsc` in every workspace package via Turbo | `pnpm typecheck` |
 | `db-check` | Migration drift check: the Drizzle schema must match the committed migrations (`drizzle-kit check` plus a scratch `generate`) | `pnpm db:check` |
 | `unit` | Vitest unit tests in every workspace package via Turbo | `pnpm test:unit` |
-| `integration` | Vitest + Testcontainers tests (Postgres 18 today; Redis joins in M1-T08) via Turbo; needs Docker | `pnpm test:integration` |
+| `integration` | Vitest + Testcontainers tests (Postgres 18 and Redis 7) via Turbo; needs Docker | `pnpm test:integration` |
 | `build` | Builds every workspace package via Turbo | `pnpm build` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |

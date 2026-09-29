@@ -1,4 +1,5 @@
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import type postgres from 'postgres'
 import { createDb, type DbClient } from '../client.js'
 import { runMigrations } from '../migrate.js'
 
@@ -33,5 +34,15 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   } catch (error) {
     await container.stop()
     throw error
+  }
+}
+
+/** Empties every table in the `public` schema (never the migration history) so each test starts clean. */
+export async function truncateAllTables(sql: postgres.Sql): Promise<void> {
+  const rows = await sql<{ name: string }[]>`
+    select tablename as name from pg_tables where schemaname = 'public'`
+  // Identifiers are escaped by postgres.js (`sql(name)`), never interpolated.
+  for (const { name } of rows) {
+    await sql`truncate table ${sql(`public.${name}`)} restart identity cascade`
   }
 }

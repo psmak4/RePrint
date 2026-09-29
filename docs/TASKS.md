@@ -47,7 +47,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a Zod validation failure returns a 400 Problem Details body with `errors[]`, and unknown routes return a 404 Problem Details body (tests via `app.inject`)
   - Accept: a non-GET request whose `Origin` is not in `WEB_ORIGINS` is rejected with 403 (test)
   - Accept: every log line is pino JSON with a request ID taken from `x-request-id` or generated, and it is echoed in the response header
-- [ ] M1-T08 · API integration test harness (Testcontainers Postgres 18 + Redis) and `GET /v1/ready` · deps: M1-T07 · PRD: §10, §12
+- [x] M1-T08 · API integration test harness (Testcontainers Postgres 18 + Redis) and `GET /v1/ready` · deps: M1-T07 · PRD: §10, §12
   - Accept: `pnpm test:integration` starts Postgres 18 and Redis containers, migrates, and isolates data between tests
   - Accept: `GET /v1/ready` returns 200 when Postgres and Redis are reachable and 503 Problem Details when Redis is stopped (integration tests)
   - Accept: CI has an `integration` job running `pnpm test:integration`, it is green, and `pnpm check` includes it
