@@ -1,0 +1,7 @@
+{
+  "extends": "@reprint/config/tsconfig/react-library.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}

@@ -10,7 +10,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M1 · Foundation
 
-- [ ] M1-T01 · Scaffold pnpm + Turborepo monorepo with the apps and packages from PRD §8 · deps: — · PRD: §8
+- [x] M1-T01 · Scaffold pnpm + Turborepo monorepo with the apps and packages from PRD §8 · deps: — · PRD: §8
   - Accept: `pnpm install` then `pnpm build` succeed on a clean clone (Node 24 pinned via `.nvmrc` and `engines`; pnpm pinned via `packageManager`)
   - Accept: `apps/web`, `apps/api`, `packages/{shared,db,email,ui,config}` exist as workspace packages that each build and typecheck
   - Accept: Biome config is shared from `packages/config`, `pnpm lint` passes, and a scratch file using `dangerouslySetInnerHTML` fails `pnpm lint`
