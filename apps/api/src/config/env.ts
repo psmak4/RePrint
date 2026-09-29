@@ -13,7 +13,7 @@ const originList = z
 
 const booleanFlag = z.enum(['true', 'false']).transform((value) => value === 'true')
 
-export const envSchema = z.object({
+const baseEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_ENV: z.enum(['local', 'preview', 'staging', 'production']).default('local'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
@@ -36,21 +36,49 @@ export const envSchema = z.object({
   SENTRY_DSN: z.url().optional(),
   SENTRY_ENVIRONMENT: z.string().min(1).optional(),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
+  /** `smtp` sends to Mailpit locally and in CI; `resend` is for preview, staging, and production (D-028). */
+  EMAIL_TRANSPORT: z.enum(['smtp', 'resend']).default('smtp'),
+  EMAIL_FROM: z.string().min(1).default('RePrint <no-reply@reprint.localhost>'),
+  SMTP_HOST: z.string().min(1).default('localhost'),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(1025),
+  /** Required when `EMAIL_TRANSPORT=resend`. */
+  RESEND_API_KEY: z.string().min(1).optional(),
 })
+
+type EmailSettings = Pick<z.infer<typeof baseEnvSchema>, 'EMAIL_TRANSPORT' | 'RESEND_API_KEY'>
+
+function requireResendKey(env: EmailSettings, context: z.RefinementCtx): void {
+  if (env.EMAIL_TRANSPORT === 'resend' && !env.RESEND_API_KEY) {
+    context.addIssue({
+      code: 'custom',
+      path: ['RESEND_API_KEY'],
+      message: 'is required when EMAIL_TRANSPORT=resend',
+    })
+  }
+}
+
+export const envSchema = baseEnvSchema.superRefine(requireResendKey)
 
 export type Env = z.infer<typeof envSchema>
 
 /** The worker serves no web traffic, so it needs only these variables. */
-export const workerEnvSchema = envSchema.pick({
-  NODE_ENV: true,
-  APP_ENV: true,
-  LOG_LEVEL: true,
-  SENTRY_DSN: true,
-  SENTRY_ENVIRONMENT: true,
-  SENTRY_TRACES_SAMPLE_RATE: true,
-  DATABASE_URL: true,
-  REDIS_URL: true,
-})
+export const workerEnvSchema = baseEnvSchema
+  .pick({
+    NODE_ENV: true,
+    APP_ENV: true,
+    LOG_LEVEL: true,
+    SENTRY_DSN: true,
+    SENTRY_ENVIRONMENT: true,
+    SENTRY_TRACES_SAMPLE_RATE: true,
+    DATABASE_URL: true,
+    REDIS_URL: true,
+    EMAIL_TRANSPORT: true,
+    EMAIL_FROM: true,
+    SMTP_HOST: true,
+    SMTP_PORT: true,
+    RESEND_API_KEY: true,
+  })
+  .superRefine(requireResendKey)
 
 export type WorkerEnv = z.infer<typeof workerEnvSchema>
 

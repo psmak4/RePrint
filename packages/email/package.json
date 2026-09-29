@@ -21,7 +21,15 @@
   "devDependencies": {
     "@reprint/config": "workspace:*",
     "@types/node": "^24",
+    "@types/react": "^19.3.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
   }
 }

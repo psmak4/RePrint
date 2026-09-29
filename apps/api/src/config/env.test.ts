@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EnvError, loadEnv } from './env.js'
+import { EnvError, loadEnv, loadWorkerEnv } from './env.js'
 
 const SERVICES = {
   DATABASE_URL: 'postgres://u:p@localhost:5432/db',
@@ -57,5 +57,34 @@ describe('loadEnv', () => {
       /PORT/,
     )
     expect(() => loadEnv({ ...SERVICES, WEB_ORIGINS: 'not a url' })).toThrow(/WEB_ORIGINS/)
+  })
+})
+
+describe('email settings', () => {
+  const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+
+  it('defaults to SMTP on the Mailpit port', () => {
+    const env = loadEnv(source)
+    expect(env).toMatchObject({ EMAIL_TRANSPORT: 'smtp', SMTP_HOST: 'localhost', SMTP_PORT: 1025 })
+    expect(env.EMAIL_FROM).toContain('no-reply@')
+  })
+
+  it('accepts resend only with an API key', () => {
+    expect(() => loadEnv({ ...source, EMAIL_TRANSPORT: 'resend' })).toThrow(/RESEND_API_KEY/)
+    const env = loadEnv({ ...source, EMAIL_TRANSPORT: 'resend', RESEND_API_KEY: 're_test' })
+    expect(env.EMAIL_TRANSPORT).toBe('resend')
+  })
+
+  it('rejects an unknown transport', () => {
+    expect(() => loadEnv({ ...source, EMAIL_TRANSPORT: 'carrier-pigeon' })).toThrow(
+      /EMAIL_TRANSPORT/,
+    )
+  })
+
+  it('applies the same rules to the worker', () => {
+    expect(loadWorkerEnv(SERVICES).EMAIL_TRANSPORT).toBe('smtp')
+    expect(() => loadWorkerEnv({ ...SERVICES, EMAIL_TRANSPORT: 'resend' })).toThrow(
+      /RESEND_API_KEY/,
+    )
   })
 })
