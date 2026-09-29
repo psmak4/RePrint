@@ -37,12 +37,20 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   }
 }
 
-/** Empties every table in the `public` schema (never the migration history) so each test starts clean. */
+/** Tables filled by data migrations (roles and grants). Tests rely on them, so they are never emptied. */
+export const MIGRATION_SEEDED_TABLES: readonly string[] = [
+  'roles',
+  'permissions',
+  'role_permissions',
+]
+
+/** Empties every table in the `public` schema (never the migration history or migration-seeded data) so each test starts clean. */
 export async function truncateAllTables(sql: postgres.Sql): Promise<void> {
   const rows = await sql<{ name: string }[]>`
     select tablename as name from pg_tables where schemaname = 'public'`
   // Identifiers are escaped by postgres.js (`sql(name)`), never interpolated.
   for (const { name } of rows) {
+    if (MIGRATION_SEEDED_TABLES.includes(name)) continue
     await sql`truncate table ${sql(`public.${name}`)} restart identity cascade`
   }
 }

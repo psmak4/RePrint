@@ -38,3 +38,34 @@ export function hasPermission(granted: Iterable<string>, needed: Permission): bo
   }
   return false
 }
+
+/** Role names seeded at launch (PRD §4). Code never checks these; it checks permissions. */
+export const ROLES = {
+  member: 'member',
+  moderator: 'moderator',
+  admin: 'admin',
+} as const
+
+export type RoleName = (typeof ROLES)[keyof typeof ROLES]
+
+export const MODERATOR_PERMISSIONS: readonly Permission[] = [
+  ...MEMBER_PERMISSIONS,
+  PERMISSIONS.reviewsModerate,
+  PERMISSIONS.reportsResolve,
+  PERMISSIONS.usersView,
+]
+
+/** The permission grants of the PRD §4 table. The accounts data migration seeds exactly these. */
+export const ROLE_PERMISSIONS: Readonly<Record<RoleName, readonly Permission[]>> = {
+  [ROLES.member]: MEMBER_PERMISSIONS,
+  [ROLES.moderator]: MODERATOR_PERMISSIONS,
+  [ROLES.admin]: ALL_PERMISSIONS,
+}
+
+/** Account statuses (PRD §9). */
+export const USER_STATUSES = ['active', 'suspended', 'deleted'] as const
+export type UserStatus = (typeof USER_STATUSES)[number]
+
+/** What an `auth_tokens` row is for (PRD §9). */
+export const AUTH_TOKEN_PURPOSES = ['verify_email', 'reset_password', 'change_email'] as const
+export type AuthTokenPurpose = (typeof AUTH_TOKEN_PURPOSES)[number]

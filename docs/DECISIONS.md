@@ -519,3 +519,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §12 and §13 fix the hosts and order but not the wiring. The gate lets the workflow merge before staging exists (D-070).
 - Affects: M1-T20, M8-T12
 
+
+### D-072 · Accounts schema (M2-T01)
+- Status: Decided (loop)
+- Decision: (1) Roles, permissions, and grants are inserted by a data migration (`0002_seed_roles.sql`) using Postgres 18's `uuidv7()`; the grants mirror `ROLE_PERMISSIONS` in `packages/shared` (Moderator = Member set + `reviews.moderate`, `reports.resolve`, `users.view`; Admin = all), and an integration test compares them. `truncateAllTables` in the test helper skips `roles`, `permissions`, and `role_permissions` so tests keep the seeded data. (2) `auth_tokens` gets a nullable `new_email` (citext) for `change_email` links, and `purpose` is a checked text column (`verify_email`, `reset_password`, `change_email`). `users.status` and `purpose` use text with CHECK constraints rather than Postgres enums, so later values need no `ALTER TYPE`. (3) `users.library_public` defaults to true (PRD §7.8 shows the Library tab "if public"; the default is a product choice the PRD leaves open, so change it here if the owner wants private by default). (4) `users.avatar_id` is not added yet; M2-T16 adds it with the `covers` table (nullable, so expand-only). (5) `user_roles.role_id` uses `ON DELETE RESTRICT`; user-side FKs cascade so `accounts.erase` needs one delete. (6) `users.bio` has a 280-character CHECK. (7) `@reprint/db` now depends on `@reprint/shared` for the status and purpose enums.
+- Why: PRD §9 lists the columns but not defaults, cascade rules, or how roles are seeded.
+- Affects: M2-T02, M2-T05, M2-T16, M2-T17, M2-T21

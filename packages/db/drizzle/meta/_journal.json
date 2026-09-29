@@ -8,6 +8,20 @@
       "when": 1790702450350,
       "tag": "0000_extensions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790719755421,
+      "tag": "0001_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790719768921,
+      "tag": "0002_seed_roles",
+      "breakpoints": true
     }
   ]
 }
