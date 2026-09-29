@@ -23,6 +23,6 @@ export async function registerOpenApi(
   })
   // The interactive docs are never served in production (PRD §10).
   if (options.serveDocs) {
-    await app.register(swaggerUi, { routePrefix: '/v1/docs' })
+    await app.register(swaggerUi, { routePrefix: '/v1/docs', staticCSP: true })
   }
 }

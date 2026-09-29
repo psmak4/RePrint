@@ -38,6 +38,24 @@ afterAll(async () => {
   await stack?.stop()
 })
 
+describe('security headers', () => {
+  it('sets HSTS with preload, nosniff, and a strict referrer policy', async () => {
+    const { headers } = await app.inject({ method: 'GET', url: '/v1/ready' })
+    expect(headers['strict-transport-security']).toBe(
+      'max-age=63072000; includeSubDomains; preload',
+    )
+    expect(headers['x-content-type-options']).toBe('nosniff')
+    expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin')
+    expect(headers['content-security-policy']).toContain("default-src 'none'")
+  })
+
+  it('also sets them on error responses', async () => {
+    const { headers, statusCode } = await app.inject({ method: 'GET', url: '/v1/nope' })
+    expect(statusCode).toBe(404)
+    expect(headers['x-content-type-options']).toBe('nosniff')
+  })
+})
+
 describe('GET /v1/ready', () => {
   it('returns 200 when Postgres, Redis, and the queue are reachable', async () => {
     const response = await app.inject({ method: 'GET', url: '/v1/ready' })

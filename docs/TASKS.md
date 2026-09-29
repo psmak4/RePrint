@@ -70,12 +70,12 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `packages/ui` exposes the theme tokens as Tailwind v4 CSS variables, and the app renders in the dark theme
   - Accept: the app shell has a header (logo, search box slot, account slot), a footer (Open Library credit, legal page links), a skip link, and a responsive layout from 360 px to desktop (component test)
   - Accept: user-facing strings come from `apps/web/app/copy/`, and a Biome rule or unit test guards against inline strings in shell components
-- [ ] M1-T13 · Playwright + axe e2e harness running in CI against the local stack · deps: M1-T12, M1-T02 · PRD: §12, §11
+- [x] M1-T13 · Playwright + axe e2e harness running in CI against the local stack · deps: M1-T12, M1-T02 · PRD: §12, §11
   - Accept: `pnpm test:e2e` runs Playwright projects for Chromium, WebKit, and a mobile viewport against a locally started stack (`webServer`)
   - Accept: a shared `expectNoA11yViolations(page)` helper fails on serious or critical axe issues, and the smoke spec for `/` uses it
   - Accept: CI has an `e2e` job (Docker services + built apps) that runs on every PR and is green
   - Accept: local domain setup from `docs/DECISIONS.md` (`reprint.localhost`) works in all three projects, or the fallback is applied and recorded
-- [ ] M1-T14 · Security headers: helmet on the API, CSP with nonces on the web, Netlify headers · deps: M1-T11 · PRD: §11
+- [x] M1-T14 · Security headers: helmet on the API, CSP with nonces on the web, Netlify headers · deps: M1-T11 · PRD: §11
   - Accept: API responses include HSTS (with preload), `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin` (integration test)
   - Accept: web SSR responses carry a strict `Content-Security-Policy` with a per-request nonce applied to React Router scripts, and the page still hydrates (e2e check)
   - Accept: `apps/web/netlify.toml` (or `_headers`) sets the same headers for static assets
@@ -101,7 +101,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
   - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
   - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
-  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-065 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
+  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-067 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
 - [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
   - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
   - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
@@ -110,7 +110,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a test PR gets a Netlify deploy preview URL and a Render preview API URL
   - Accept: each Render preview uses its own Neon branch created from staging (Neon GitHub integration or Render preview env hook)
   - Accept: preview env vars point the preview web at the preview API, email in Resend test mode, and `SOURCE_MODE=stub`
-  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-065). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
+  - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-067). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
 - [ ] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
   - Accept: the CI `e2e-preview` job waits for both preview URLs, then runs `pnpm test:e2e` against them
   - Accept: the job is green on this task's PR, and `docs/ci.md` is updated

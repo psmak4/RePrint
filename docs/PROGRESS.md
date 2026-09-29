@@ -69,6 +69,14 @@ Entry format:
 - `docs/DESIGN.md` (grid, breakpoints, type and spacing scales, colour tokens with contrast table, component inventory, page templates). `packages/ui/src/theme.css` holds the tokens (imported by `apps/web/app/app.css`), and `Button` uses them. `AppShell`/`SiteHeader`/`SiteFooter` in `apps/web/app/components/shell/` wrap the root `Layout`; copy is in `copy.shell`. Tests: token contrast, shell component test, inline-string guard. D-064 records the choices.
 - Next iteration: pages must not render their own `<main>` (the shell owns it). Header search and account slots are empty until M3-T16 and M2-T10. Footer legal links 404 until M8. Layout is not verified in a real browser until the Playwright harness (M1-T13).
 
+### 2026-09-29 · M1-T13 · PR pending
+- `e2e/` workspace package: Playwright config with `chromium`, `webkit`, and `mobile` (Pixel 7) projects; `webServer` starts the built API and web app on `www.reprint.localhost:5173` / `api.reprint.localhost:3000` (works in all three, so no `localhost` fallback); `expectNoA11yViolations(page)` in `e2e/support/a11y.ts` (fails on serious/critical, checked against a bad page); `specs/smoke.spec.ts` for `/`. Root `pnpm test:e2e`, new required CI job `e2e` (in `docs/ci.md`), D-065.
+- Next iteration: `pnpm build` and `docker compose up -d --wait` must run before `pnpm test:e2e`. New specs go in `e2e/specs/` and call `expectNoA11yViolations`. `e2e` is not in `pnpm check`. If a spec needs new API env vars, add them to `stackEnv` in `e2e/playwright.config.ts`.
+
+### 2026-09-29 · M1-T14 · PR pending
+- API: helmet with HSTS preload, strict referrer policy, and `default-src 'none'` CSP (integration test on `/v1/ready` and a 404). Web: `app/entry.server.tsx` sets a per-request nonce CSP and baseline headers (`app/lib/csp.server.ts`); `apps/web/netlify.toml` sets the baseline headers for everything Netlify serves. New e2e test checks the CSP and that the client router hydrates with no CSP violations. D-066 records the choices.
+- Next iteration: any new inline `<script>` or `<style>` in the web app needs the nonce (or must move to a file). Third-party origins (Sentry in M1-T15) must be added to `connect-src` in `csp.server.ts`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`) or pnpm fails to start.
+
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
-- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-065). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
-- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-065). Don't create blocker entries for the deferred tasks.
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-067). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-067). Don't create blocker entries for the deferred tasks.

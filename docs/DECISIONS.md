@@ -477,7 +477,19 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §8 and §11 fix the palette and accessibility bar but not the token names, shell structure, or guard mechanism.
 - Affects: M1-T13, M2-T10, M3-T15, M3-T16
 
-### D-065 · Deployment deferred; free-tier staging plan
+### D-065 · Playwright + axe harness (M1-T13)
+- Status: Decided (loop)
+- Decision: (1) `e2e/` is a root workspace package (`@playwright/test`, `@axe-core/playwright`); specs live in `e2e/specs/`, helpers in `e2e/support/`. (2) Playwright's `webServer` starts the **built** API and web app (`node apps/api/dist/server.js`, `react-router-serve`) with `SOURCE_MODE=stub`, so the specs test what ships; it reuses running servers locally and always starts its own in CI. Docker services come from `docker compose up -d --wait`. (3) The `*.localhost` domains from D-013 (`www.reprint.localhost:5173`, `api.reprint.localhost:3000`) work in Chromium, WebKit, and the mobile project, so the `localhost` fallback is not needed. (4) `e2e` is a required CI job in `docs/ci.md` but is not part of `pnpm check` (CLAUDE.md: "everything CI runs except e2e"). (5) Browsers install with `pnpm --filter e2e install:browsers`; the Playwright report is uploaded as an artifact from CI.
+- Why: PRD §12 fixes the tools and browsers, and D-024 the CI approach, but not the layout, server wiring, or check wiring.
+- Affects: M1-T22, M2-T12, M3-T22, M4-T15
+
+### D-066 · Security headers (M1-T14)
+- Status: Decided (loop)
+- Decision: (1) The API registers `@fastify/helmet` with HSTS `max-age=63072000; includeSubDomains; preload`, `Referrer-Policy: strict-origin-when-cross-origin`, and a CSP of `default-src 'none'; frame-ancestors 'none'` (it only serves JSON). Swagger UI (non-production only) uses its own `staticCSP`. (2) The web app has its own `app/entry.server.tsx`, which generates a per-request nonce, passes it to `<ServerRouter nonce>` and `renderToPipeableStream`, and sets the CSP (`script-src 'nonce-…' 'strict-dynamic'`, `style-src 'self'`, `frame-ancestors 'none'`, `connect-src` including `API_ORIGIN`) plus the baseline headers. `style-src` allows `unsafe-inline` in development only (Vite injects CSS). (3) `apps/web/netlify.toml` sets the baseline headers (not the CSP, which needs a nonce) on everything Netlify serves, including static assets, and long-cache headers on `/assets/*`. A unit test keeps it in sync with `BASELINE_SECURITY_HEADERS`.
+- Why: PRD §11 fixes the header set but not the values, CSP directives, or where each header is set.
+- Affects: M1-T15, M1-T22
+
+### D-067 · Deployment deferred; free-tier staging plan
 - Status: Decided (owner)
 - Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
 - Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.

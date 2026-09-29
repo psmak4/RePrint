@@ -16,13 +16,20 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) | `pnpm build && pnpm openapi:check` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
+| `e2e` | Playwright + axe in Chromium, WebKit, and a mobile viewport against the built apps and the Docker services (`docker compose up -d --wait`, `SOURCE_MODE=stub`). Uploads the Playwright report as an artifact | `pnpm build && pnpm test:e2e` |
 
-Later M1 tasks add jobs here as their commands appear (`e2e`). Each one must also be added to `pnpm check` and to this table.
+Later tasks add jobs here as their commands appear. Each one must also be added to this table (and to `pnpm check`, except `e2e`, which needs the Docker services and browsers and runs on its own).
 
 ## `pnpm check`
 
-`pnpm check` runs every non-e2e CI job locally, in order, and stops at the first failure. The integration tests need Docker running (Testcontainers), and so does the secret scan unless a local `gitleaks` binary is installed.
+`pnpm check` runs every CI job except `e2e` locally, in order, and stops at the first failure. The integration tests need Docker running (Testcontainers), and so does the secret scan unless a local `gitleaks` binary is installed.
 
 ## Turborepo remote cache
 
 Set the repository secret `TURBO_TOKEN` and the variable (or secret) `TURBO_TEAM` to enable the Vercel remote cache. Without them the values are empty and Turbo falls back to its local cache; CI still passes.
+
+## End-to-end tests (`e2e/`)
+
+`pnpm test:e2e` runs `e2e/specs/*.spec.ts` in three Playwright projects (`chromium`, `webkit`, and `mobile`, a Pixel 7 viewport). Playwright's `webServer` starts the built API (`apps/api/dist/server.js`, port 3000) and web app (`react-router-serve`, port 5173) with `SOURCE_MODE=stub`, so run `pnpm build` and `docker compose up -d --wait` first. Locally it reuses servers that are already running (for example `pnpm dev`); in CI it always starts its own. Install browsers once with `pnpm --filter e2e install:browsers`.
+
+Tests visit `http://www.reprint.localhost:5173` (D-013). Override the origins with `E2E_WEB_ORIGIN` and `E2E_API_ORIGIN`. Every spec that visits a page calls `expectNoA11yViolations(page)` from `e2e/support/a11y.ts`, which fails on serious or critical axe issues (PRD §12).
