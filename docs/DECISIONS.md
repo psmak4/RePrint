@@ -428,3 +428,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §12 requires a drift check and Testcontainers-based integration tests; these are the conventional ways to get them with drizzle-kit 0.31 and pnpm 12.
 - Affects: M1-T08, M1-T16, every later schema task, `docs/ci.md`
 
+
+### D-058 · Shared foundation details (M1-T06)
+- Status: Decided (loop)
+- Decision: (1) Member permission names are `reviews.write`, `reviews.vote`, `reviews.report`, `library.manage`, and `profile.manage`; public reading needs no permission. Only names live in `packages/shared`; the role-to-permission mapping is data in the database (PRD §4). (2) Cursor pagination takes `?cursor=&limit=` (limit ≤ 50, default 20); cursors are opaque strings. Page envelopes are `{ items, meta }`. (3) `@vitest/coverage-v8` (Vitest's own coverage plugin, same major as Vitest) enforces the 90% line gate; `packages/shared` `test:unit` always runs with coverage, so `pnpm check` and CI enforce it.
+- Why: PRD §4 and §12 name the gate and the elevated permissions but not the Member permission names or the cursor parameter details.
+- Affects: M1-T07, M2 onward (permission checks), every list endpoint

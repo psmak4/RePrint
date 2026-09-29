@@ -39,3 +39,7 @@ Entry format:
 ### 2026-09-29 · M1-T05 · PR pending
 - `packages/db`: Drizzle + postgres.js client (`createDb`, UTC session), `newId()` (UUIDv7), `uuidv7Pk()`/`timestamps()` helpers, migrator, `0000_extensions` migration, `db:generate|migrate|check` scripts, and `@reprint/db/testing` (`startTestDatabase()` with Testcontainers Postgres 18, `findConventionViolations()`). Root `db:*` and `test:integration` scripts; new CI jobs `db-check` and `integration` (in `docs/ci.md` and `pnpm check`). D-057 records the choices. Added `docs/local-dev.md`, which the M1-T04 PR listed but never committed.
 - Next iteration: add tables under `packages/db/src/schema/` (re-export from `schema/index.ts`), then `pnpm db:generate`. Put `*.integration.test.ts` files next to the code; M1-T08 adds Redis to the harness. Node 24 is at `~/.nvm/versions/node/v24.19.0/bin`. `pnpm check` now needs Docker for integration tests and gitleaks.
+
+### 2026-09-29 · M1-T06 · #8
+- `packages/shared`: Zod schemas for Problem Details, page and cursor pagination (with `pageOf`/`cursorPageOf` envelopes), UUIDv7 `idSchema`, and permission name constants with `hasPermission`. Added `zod` and `@vitest/coverage-v8`; the 90% line gate is in `packages/shared/vitest.config.ts` and runs in `test:unit`. D-058 records the choices.
+- Next iteration: M1-T07 (API skeleton) should build its error helper on `problemDetailsSchema` and its env/query schemas on this package. Rebuild shared (`pnpm build`) before api typechecks against it.
