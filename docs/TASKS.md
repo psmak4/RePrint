@@ -16,7 +16,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Biome config is shared from `packages/config`, `pnpm lint` passes, and a scratch file using `dangerouslySetInnerHTML` fails `pnpm lint`
   - Accept: tsconfig bases in `packages/config` set `strict` and `noUncheckedIndexedAccess`, and `pnpm typecheck` passes
   - Accept: every package has one Vitest smoke test, and `pnpm test:unit` passes
-- [ ] M1-T02 · GitHub Actions CI pipeline and `pnpm check` aggregate command · deps: M1-T01 · PRD: §12, §11
+- [x] M1-T02 · GitHub Actions CI pipeline and `pnpm check` aggregate command · deps: M1-T01 · PRD: §12, §11
   - Accept: `.github/workflows/ci.yml` runs on every PR and on push to `main`: `pnpm install --frozen-lockfile`, Biome lint and format check, typecheck, unit tests, build, Gitleaks, and `pnpm audit --audit-level high`
   - Accept: job names are stable and listed in `docs/ci.md` (these become the required checks)
   - Accept: `pnpm check` exists, runs every non-e2e CI step locally, and passes
