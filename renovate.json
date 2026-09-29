@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommitTypeAll(chore)"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "rangeStrategy": "bump",
+  "dependencyDashboard": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "packageRules": [
+    {
+      "description": "Majors are pinned to the PRD section 8 stack table. Moving a major is a deliberate change (docs/dependencies.md), never an automatic PR.",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Group minor and patch updates into one weekly PR.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "all non-major dependencies"
+    },
+    {
+      "description": "Drizzle is 0.x, so its minor releases can break. Keep them out of the weekly group and review each one.",
+      "matchPackageNames": ["drizzle-orm", "drizzle-kit"],
+      "matchUpdateTypes": ["minor"],
+      "groupName": null,
+      "addLabels": ["review-carefully"]
+    },
+    {
+      "description": "GitHub Actions majors are not part of the PRD stack. Allow them as separate PRs.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "enabled": true,
+      "groupName": null
+    }
+  ]
+}

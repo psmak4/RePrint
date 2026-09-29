@@ -500,3 +500,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: (1) Seed modules are listed in order in `packages/db/src/seed/registry.ts` and all run in one transaction, so a failed seed leaves nothing behind. (2) Determinism comes from one fixed seed (`SEED`) through a mulberry32 PRNG; modules get `random.id()` (UUIDv7 from a fixed clock starting 2026-01-01 UTC, advancing 1 ms per ID), `int`, `pick`, `next`, and `now` instead of `newId()`, `Math.random()`, or `Date.now()`. (3) `db:reset` drops the `drizzle` and `public` schemas, recreates `public`, re-runs migrations (which re-enable the extensions), then seeds. (4) Both commands refuse when `NODE_ENV=production` or the `DATABASE_URL` host is not `localhost`, `127.0.0.1`, `::1`, or `*.localhost`. `db:seed` alone is for a freshly reset database; running it twice is not supported. (5) No `tsx` dependency: the CLI runs from `dist` like `db:migrate`.
 - Why: PRD §13 wants `pnpm db:reset` to recreate the database with sample data; how is left open.
 - Affects: M2-T21, M3-T21, M4-T14, M5-T08 (each appends a module).
+
+### D-069 · Renovate configuration (M1-T17)
+- Status: Decided (loop)
+- Decision: (1) `renovate.json` extends `config:recommended`, runs weekly (before 06:00 UTC Monday), and disables all `major` updates, which pins every major in the PRD §8 stack table (Node, Postgres, Redis images included) without listing each package. (2) Minor, patch, pin, and digest updates share one group. (3) `drizzle-orm` and `drizzle-kit` minors are split out with a `review-carefully` label because 0.x minors can break. (4) GitHub Actions majors are re-enabled as separate PRs since Actions are not part of the stack table. (5) `rangeStrategy: bump` keeps `^x.y.z` ranges current. (6) The policy is in `docs/dependencies.md`.
+- Why: PRD §8 and §11 say to pin majors and let Renovate open updates, but do not give the settings.
+- Affects: M1-T23
+
