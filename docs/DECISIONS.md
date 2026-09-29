@@ -397,3 +397,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: The `system.monitor` job raises tagged Sentry events; the owner routes them to email and Slack in Sentry. Nightly backups run as a scheduled GitHub Actions workflow (`pg_dump` → R2 bucket with a 30-day lifecycle rule).
 - Why: No extra infrastructure; both are auditable in the repo.
 - Affects: M8-T06, M8-T11
+
+### D-053 · Workspace build and TypeScript setup
+- Status: Implementation
+- Decision: Workspace packages are named `@reprint/<name>`; the apps are `api` and `web` (so `pnpm --filter api …` works). Each library compiles to `dist/` with `tsc -p tsconfig.build.json` (tests excluded) and exports `./dist/index.js` + types; `tsconfig.json` is the no-emit typecheck config that includes tests. Turbo runs `build`, `typecheck`, and `test:unit` after `^build`. TypeScript 7 (`typescript@^7`, the native compiler) is the only compiler so far. Node packages use `module: nodenext`. `@types/node` (major 24, matching the runtime) is added as a type-only dev dependency. Turbo's AI-agent `AGENTS.md` guidance is turned off (`agentGuidance: false`) because `CLAUDE.md` is the agent guide.
+- Why: Compiled `dist/` output lets Node run the API and worker without a bundler or loader; per-package tsconfigs keep strict settings in one base (`packages/config/tsconfig/base.json`).
+- Affects: M1-T01, every package
