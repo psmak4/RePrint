@@ -135,3 +135,7 @@ Entry format:
 ### 2026-09-29 · M2-T08 · PR pending
 - `modules/auth/login.ts`: `POST /v1/auth/login` (per-IP and per-account limits, decoy hash for unknown emails, generic 401, suspended message per D-047, deleted accounts generic), `/logout` and `/logout-all`. Shared `loginRequestSchema`, `loginResponseSchema`, `logoutResponseSchema`. D-079 records the choices.
 - Next iteration: M2-T09 reset must end all sessions with `delete from sessions where user_id`, as `/logout-all` does. The web login form (M2-T10) posts `{ email, password }` and shows the 401/403/429 Problem Details `title`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T09 · PR pending
+- `modules/auth/password-reset.ts`: `POST /v1/auth/forgot-password` and `/reset-password` (shared `forgotPassword*` and `resetPassword*` schemas), plus `password-reset` and `password-changed` email templates and job cases. D-080 records the choices.
+- Next iteration: the reset link is `<WEB_URL>/reset-password?token=<raw token>` and the changed email links to `<WEB_URL>/forgot-password`; the web pages (M2-T10 and later) must exist at those paths. Reset does not sign the Member in. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

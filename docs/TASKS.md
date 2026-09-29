@@ -161,7 +161,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: suspended and deleted accounts cannot log in (integration tests; message per `docs/DECISIONS.md`)
   - Accept: 11 attempts per IP or 6 per account within 15 minutes return 429 (integration tests)
   - Accept: `/logout` ends the current session and `/logout-all` ends every session of the user (integration tests)
-- [ ] M2-T09 · Password reset: `POST /v1/auth/forgot-password` and `/reset-password` · deps: M2-T08 · PRD: §7.1, §7.12, §10, §11
+- [x] M2-T09 · Password reset: `POST /v1/auth/forgot-password` and `/reset-password` · deps: M2-T08 · PRD: §7.1, §7.12, §10, §11
   - Accept: forgot-password returns an identical response for known and unknown emails, and sends a 1-hour single-use link only for known ones (integration tests)
   - Accept: reset sets a new Argon2id hash, ends all sessions, and sends the "password changed" email (integration test)
   - Accept: reused or expired tokens are rejected; the 4th request per email per hour returns 429

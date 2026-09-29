@@ -26,6 +26,22 @@ describe('renderEmail', () => {
     expect(email.text).toContain('https://www.reprint.test/login')
   })
 
+  it('renders the password-reset and password-changed templates', async () => {
+    const reset = await renderEmail('password-reset', {
+      username: 'ada_l',
+      resetUrl: 'https://www.reprint.test/reset-password?token=abc',
+    })
+    expect(reset.subject).toBe('Reset your password')
+    expect(reset.text).toContain('https://www.reprint.test/reset-password?token=abc')
+    expect(reset.text).toContain('1 hour')
+    const changed = await renderEmail('password-changed', {
+      username: 'ada_l',
+      resetUrl: 'https://www.reprint.test/forgot-password',
+    })
+    expect(changed.subject).toBe('Your password was changed')
+    expect(changed.text).toContain('https://www.reprint.test/forgot-password')
+  })
+
   it('escapes user-controlled text in HTML', async () => {
     const email = await renderEmail('verify-email', { ...props, username: '<script>x</script>' })
     expect(email.html).not.toContain('<script>x')

@@ -66,3 +66,16 @@ export const loginResponseSchema = z.object({ status: z.literal('logged_in') })
 export const logoutResponseSchema = z.object({ status: z.literal('logged_out') })
 
 export type LoginRequest = z.infer<typeof loginRequestSchema>
+
+export const forgotPasswordRequestSchema = z.object({ email: emailSchema })
+/** Same body whether or not the email is registered (PRD §7.1). */
+export const forgotPasswordResponseSchema = z.object({ status: z.literal('check_your_email') })
+
+export const resetPasswordRequestSchema = z.object({
+  token: z.string().trim().min(1).max(200),
+  password: passwordSchema,
+})
+export const resetPasswordResponseSchema = z.object({ status: z.literal('password_reset') })
+
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>
+export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>
