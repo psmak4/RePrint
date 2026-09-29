@@ -42,7 +42,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Zod schemas exist for Problem Details (`{ type, title, status, detail, errors?: [{ path, message }] }`), page pagination (`page`, `pageSize` ≤ 50), and cursor pagination
   - Accept: permission name constants from PRD §4 exist (`reviews.moderate`, `reports.resolve`, `users.view`, `users.suspend`, `roles.assign`, `audit.view`, plus Member permissions) with unit tests
   - Accept: `pnpm --filter shared test:unit --coverage` enforces a 90% line threshold and passes
-- [ ] M1-T07 · `apps/api` skeleton: Fastify 5, env config, pino, Problem Details errors, helmet, CORS, Origin check, `/v1/health` · deps: M1-T05, M1-T06 · PRD: §8, §10, §11
+- [x] M1-T07 · `apps/api` skeleton: Fastify 5, env config, pino, Problem Details errors, helmet, CORS, Origin check, `/v1/health` · deps: M1-T05, M1-T06 · PRD: §8, §10, §11
   - Accept: `pnpm --filter api dev` serves `GET /v1/health` → 200 on port 3000; startup fails fast with a readable message when a required env var is missing (Zod env schema)
   - Accept: a Zod validation failure returns a 400 Problem Details body with `errors[]`, and unknown routes return a 404 Problem Details body (tests via `app.inject`)
   - Accept: a non-GET request whose `Origin` is not in `WEB_ORIGINS` is rejected with 403 (test)
