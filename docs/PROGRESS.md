@@ -97,3 +97,8 @@ Entry format:
 - `render.yaml` (API ×2 with pre-deploy migrate, worker, Key Value, Virginia), `apps/web/netlify.toml` build config plus the Netlify adapter (enabled only when `NETLIFY` is set), `.github/workflows/deploy-staging.yml` (migrate, deploy API/worker/web, smoke; skips with a notice without secrets), `docs/deploy.md` (every secret and variable, rollback), and the `WORKER_IN_PROCESS` flag for free-tier staging. D-071 records the choices.
 - Next iteration: the deploy workflow and `render.yaml` were validated by unit tests and review only; nothing has run against real Render or Netlify (staging is deferred, D-070). Sentry source map upload and release markers are still not wired (M8). Render's pre-deploy command needs a paid plan.
 
+
+### 2026-09-29 · M1-T24 · PR pending
+- M1 verification from a fresh clone (`/tmp` clone of `main`): `pnpm install --frozen-lockfile`, `docker compose up -d --wait`, `pnpm db:reset`, `pnpm check` (exit 0; audit reports 1 moderate, below the high threshold), and `pnpm test:e2e` (6 passed in chromium, webkit, mobile) all pass. `pnpm dev` served `/v1/health` 200, `/v1/ready` 200, SSR HTML on :5173, and a foreign-Origin POST got 403. Only gap: the CLAUDE.md command table listed `seed:admin`, which M2-T21 creates; the table now says so. All other listed commands exist in `package.json`.
+- Deferred (D-070): M1-T20 and M1-T22 (staging auto-deploy and preview e2e) stay `[ ]` until M1-T19/M1-T21 are un-skipped; the staging deploy workflow itself is validated by tests only.
+- Next iteration: M2-T01 is next. M1 is complete apart from the deferred deploy items.

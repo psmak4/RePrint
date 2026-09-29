@@ -42,7 +42,7 @@ docs/            TASKS, PROGRESS, BLOCKERS, DECISIONS, DESIGN, milestones/
 - Tables go in `packages/db/src/schema/`. Generate migrations with `pnpm db:generate` and never hand-edit applied migrations.
 - User-facing strings live in one place per app (`apps/web/app/copy/`) so they can be translated later (PRD §3).
 
-## Commands (the Foundation milestone makes these real)
+## Commands (all real as of M1 except `seed:admin`, which M2-T21 adds)
 
 | Purpose | Command |
 | --- | --- |
@@ -58,7 +58,7 @@ docs/            TASKS, PROGRESS, BLOCKERS, DECISIONS, DESIGN, milestones/
 | DB: generate migration / migrate / drift check | `pnpm db:generate` / `pnpm db:migrate` / `pnpm db:check` |
 | DB: drop, migrate, seed sample data | `pnpm db:reset` |
 | DB: seed sample data only | `pnpm db:seed` |
-| First Admin (server, one-time) | `pnpm --filter api seed:admin` |
+| First Admin (server, one-time; script arrives with M2-T21) | `pnpm --filter api seed:admin` |
 | **Everything CI runs except e2e** | **`pnpm check`** (lint, typecheck, db:check, test:unit, test:integration, build, openapi drift, audit) |
 
 ## Coding conventions

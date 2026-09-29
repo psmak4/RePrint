@@ -119,7 +119,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Renovate opens its onboarding or dependency dashboard issue on the repo
   - Accept: the dashboard issue shows `renovate.json` from M1-T17 was read without config errors
   - Accept: Skipped (2026-09-29): deferred by the owner; install Renovate later, once the app is further along.
-- [ ] M1-T24 · M1 verification: run the Foundation acceptance criteria end to end, fix gaps, update docs · deps: M1-T10, M1-T13, M1-T15, M1-T16, M1-T17, M1-T18 · PRD: §3, §8, §12, §13
+- [x] M1-T24 · M1 verification: run the Foundation acceptance criteria end to end, fix gaps, update docs · deps: M1-T10, M1-T13, M1-T15, M1-T16, M1-T17, M1-T18 · PRD: §3, §8, §12, §13
   - Accept: from a fresh clone, `pnpm install && docker compose up -d --wait && pnpm db:reset && pnpm check && pnpm test:e2e` all pass
   - Accept: every acceptance criterion in `docs/milestones/M1-foundation.md` is checked off in the PR body with the command that proved it
   - Accept: `CLAUDE.md` command table matches the real `package.json` scripts exactly
