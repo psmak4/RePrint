@@ -51,7 +51,7 @@ Stand up the monorepo, local services, database tooling, both app skeletons, the
 ## Human prerequisites
 
 - **M1-T03:** skipped. Branch protection isn't enforced on private repos on the free GitHub plan; the merge gate in D-055 replaces it.
-- **M1-T19:** create Neon staging (Postgres 18, or 17 as fallback), Render Blueprint, Netlify site, Resend (sandbox), Sentry projects, and staging DNS; add deploy secrets to GitHub.
-- **M1-T21:** enable Netlify deploy previews, Render PR previews, and Neon branching.
-- **M1-T23:** install the Renovate GitHub app.
+- **M1-T19 (deferred, D-063):** create Neon staging (Postgres 18, or 17 as fallback), Render Blueprint, Netlify site, Resend (sandbox), Sentry projects, and staging DNS; add deploy secrets to GitHub.
+- **M1-T21 (deferred, D-063):** enable Netlify deploy previews, Render PR previews, and Neon branching.
+- **M1-T23 (deferred):** install the Renovate GitHub app.
 - Optional: Turborepo remote cache secrets (`TURBO_TOKEN`, `TURBO_TEAM`).
