@@ -471,7 +471,13 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §8 fixes the stack but not the file layout, build wiring, or test environment.
 - Affects: M1-T12, M1-T13, M1-T14, M1-T18
 
-### D-064 · Deployment deferred; free-tier staging plan
+### D-064 · Design foundation (M1-T12)
+- Status: Decided (loop)
+- Decision: (1) Theme tokens are a Tailwind v4 `@theme` block in `packages/ui/src/theme.css`, exported as `@reprint/ui/theme.css` and imported by `apps/web/app/app.css`. Dark only; the token values and contrast ratios are in `docs/DESIGN.md` and checked by `packages/ui/src/theme.test.ts`. `accent` is never used for text (4.0:1 on `surface`); `link` is. (2) System font stack, no web fonts. (3) `AppShell` (skip link, header with search and account slots, `main#main`, footer) wraps the root `Layout`, so error pages get it too; routes render content only. The header search box uses the `<search>` element. (4) Footer legal links point to `/about`, `/terms`, `/privacy`, `/community-guidelines`, and `/contact`; the pages arrive in M8 and 404 until then. (5) The inline-string guard is a unit test (`components/shell/copy-guard.test.ts`) that scans shell component sources for JSX text and `aria-label`/`alt`/`title`/`placeholder` literals, not a Biome rule (Biome has no such rule).
+- Why: PRD §8 and §11 fix the palette and accessibility bar but not the token names, shell structure, or guard mechanism.
+- Affects: M1-T13, M2-T10, M3-T15, M3-T16
+
+### D-065 · Deployment deferred; free-tier staging plan
 - Status: Decided (owner)
 - Decision: M1-T19 (staging), M1-T21 (previews), and M1-T23 (Renovate) are skipped for now so the loop builds the app locally without paid services; M1-T20, M1-T22, and deploy tasks that depend on them stay unbuilt. When staging is un-skipped, use free tiers where possible: Neon free (database), Netlify free (web app and per-PR deploy previews), Render free web service for the API with BullMQ jobs run in the API process on staging only (Render has no free background workers; production keeps the separate worker per PRD §8), Render Key Value free (Redis, not persisted), Resend free, and Sentry free. Render free services sleep when idle, so staging smoke tests need a long first-request timeout. Per-PR API previews aren't free, so CI keeps running e2e against the local stack (D-024). Production as specified in PRD §13 (at least 2 always-on API instances) needs a paid Render plan; that is an owner decision for M8.
 - Why: The owner doesn't want paid services yet; nothing before M8 needs a deployed environment.

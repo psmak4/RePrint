@@ -8,10 +8,10 @@ export function meta() {
 
 export default function Home() {
   return (
-    <main id="main" className="mx-auto max-w-2xl px-4 py-16">
+    <section className="mx-auto max-w-2xl py-16">
       <h1 className="text-4xl font-semibold">{copy.home.title}</h1>
-      <p className="mt-4 text-lg text-slate-300">{copy.home.lead}</p>
+      <p className="mt-4 text-lg text-muted-foreground">{copy.home.lead}</p>
       <Button className="mt-8">{copy.home.cta}</Button>
-    </main>
+    </section>
   )
 }

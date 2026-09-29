@@ -65,6 +65,10 @@ Entry format:
 - `apps/web`: React Router 8 SSR skeleton (root layout + error boundary, home route with the `Button`, `app/copy/`, server API client `app/lib/api.server.ts` forwarding `cookie` and `x-request-id`). `packages/ui`: `Button` and `cn`. Root `pnpm dev` now runs shared/ui builds, then api, worker, and web. D-063 records the choices.
 - Next iteration: M1-T12 builds the theme tokens, app shell, and copy guard on top of `app.css` and `app/copy/`. Web unit tests need `@reprint/ui` built (Turbo handles it via `^build`). Loaders should call `apiClientFor(request)`.
 
+### 2026-09-29 · M1-T12 · PR pending
+- `docs/DESIGN.md` (grid, breakpoints, type and spacing scales, colour tokens with contrast table, component inventory, page templates). `packages/ui/src/theme.css` holds the tokens (imported by `apps/web/app/app.css`), and `Button` uses them. `AppShell`/`SiteHeader`/`SiteFooter` in `apps/web/app/components/shell/` wrap the root `Layout`; copy is in `copy.shell`. Tests: token contrast, shell component test, inline-string guard. D-064 records the choices.
+- Next iteration: pages must not render their own `<main>` (the shell owns it). Header search and account slots are empty until M3-T16 and M2-T10. Footer legal links 404 until M8. Layout is not verified in a real browser until the Playwright harness (M1-T13).
+
 ### 2026-09-29 · M1-T19/M1-T21/M1-T23 (deferred) · owner/defer-deploy
-- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-064). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
-- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-064). Don't create blocker entries for the deferred tasks.
+- Owner deferred staging, preview environments, and Renovate (all `[~]`, D-065). M1-T20 and M1-T22 stay `[ ]` and are ineligible until M1-T19 is un-skipped; that is expected, not a blocker.
+- Next iteration: when building M1-T18, keep `render.yaml` and the deploy workflow as specified, and also support running the worker in the API process behind an env flag (for free-tier staging, D-065). Don't create blocker entries for the deferred tasks.
