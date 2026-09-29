@@ -30,6 +30,10 @@ const baseEnvSchema = z.object({
   COOKIE_DOMAIN: z.string().min(1).optional(),
   /** Defaults to on everywhere except `APP_ENV=local` (plain http). */
   COOKIE_SECURE: booleanFlag.optional(),
+  /** Base URL of the web app for links in emails. Defaults to the first of `WEB_ORIGINS`. */
+  WEB_URL: z.url().optional(),
+  /** `live` checks new passwords against the Have I Been Pwned range API; `off` skips it (D-029). */
+  HIBP_MODE: z.enum(['live', 'off']).default('live'),
   /** Runs the job worker inside the API process, for environments with no separate worker (D-071). */
   WORKER_IN_PROCESS: booleanFlag.default(false),
   /** Sentry is off when this is unset (PRD §11). */

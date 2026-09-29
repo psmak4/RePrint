@@ -16,6 +16,16 @@ describe('renderEmail', () => {
     expect(email.text).toMatchSnapshot()
   })
 
+  it('renders the email-already-registered template', async () => {
+    const email = await renderEmail('email-already-registered', {
+      username: 'ada_l',
+      loginUrl: 'https://www.reprint.test/login',
+    })
+    expect(email.subject).toBe('Someone tried to register with your email')
+    expect(email.text).toContain('Hi ada_l,')
+    expect(email.text).toContain('https://www.reprint.test/login')
+  })
+
   it('escapes user-controlled text in HTML', async () => {
     const email = await renderEmail('verify-email', { ...props, username: '<script>x</script>' })
     expect(email.html).not.toContain('<script>x')

@@ -1,4 +1,4 @@
-import { renderEmail, verifyEmailProps } from '@reprint/email'
+import { emailAlreadyRegisteredProps, renderEmail, verifyEmailProps } from '@reprint/email'
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import type { Mailer } from '../email/mailer.js'
@@ -29,6 +29,11 @@ export function defineJob<Schema extends z.ZodType, Result>(
 /** One case per email template; `props` is checked against the template's own schema. */
 const emailSendPayload = z.discriminatedUnion('template', [
   z.object({ template: z.literal('verify-email'), to: z.email(), props: verifyEmailProps }),
+  z.object({
+    template: z.literal('email-already-registered'),
+    to: z.email(),
+    props: emailAlreadyRegisteredProps,
+  }),
 ])
 
 /** Every background job. To add one, add an entry here (see `README.md`). */
