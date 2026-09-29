@@ -135,7 +135,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `rp_session` holds a random 256-bit token; only its SHA-256 hash is stored; the cookie is `HttpOnly`, `SameSite=Lax`, `Secure` outside local, and uses `Domain=$COOKIE_DOMAIN` (unit and integration tests)
   - Accept: sessions last 30 days and renew while in use (sliding expiry per `docs/DECISIONS.md`), and expired or suspended-user sessions are rejected (integration tests)
   - Accept: `requireAuth`, `requireVerified`, and `requirePermission(name)` preHandlers return 401/403 Problem Details, and checks use permissions, never role names (integration tests on a test-only route: one allowed, one denied each)
-- [ ] M2-T03 · Redis-backed rate limiting with the PRD §11 policies · deps: M2-T02 · PRD: §11
+- [x] M2-T03 · Redis-backed rate limiting with the PRD §11 policies · deps: M2-T02 · PRD: §11
   - Accept: named policies exist for login (per IP and per account), register, reset/resend (per email), review create/edit, report, other authenticated writes, and anonymous reads, with the PRD §11 limits
   - Accept: exceeding a limit returns 429 Problem Details with `Retry-After` (integration test per policy type: per-IP, per-user, per-email)
   - Accept: limits are shared across API instances via Redis (test with two app instances on one Redis)
