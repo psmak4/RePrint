@@ -12,7 +12,10 @@
     "typecheck": "turbo run typecheck",
     "test:unit": "turbo run test:unit",
     "lint": "biome check .",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "secrets:scan": "bash scripts/gitleaks.sh",
+    "audit:deps": "pnpm audit --audit-level high",
+    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build && pnpm secrets:scan && pnpm audit:deps"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
