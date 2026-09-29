@@ -190,7 +190,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a storage interface writes to local disk in dev and test (`STORAGE_DRIVER=local`) and to R2 via the S3 API otherwise, with an env-validated config
   - Accept: uploads are accepted by their actual content (a PNG renamed `.txt` works, a text file renamed `.png` is rejected with 400) and files over 5 MB return 413 (integration tests)
   - Accept: the stored avatar is WebP 256×256 with no EXIF (integration test inspects the output with sharp) and is recorded in the `covers` table with origin `upload`
-- [ ] M2-T17 · Account deletion: `DELETE /v1/me` plus a worker job that erases after 30 days · deps: M2-T13, M1-T09 · PRD: §7.1, §7.12, §9, §10
+- [x] M2-T17 · Account deletion: `DELETE /v1/me` plus a worker job that erases after 30 days · deps: M2-T13, M1-T09 · PRD: §7.1, §7.12, §9, §10
   - Accept: deletion requires the password, sets status `deleted` and `deleted_at`, ends all sessions, and queues the "account deletion scheduled" email (integration tests: allowed, wrong password denied)
   - Accept: the daily `accounts.erase` job hard-deletes users deleted more than 30 days ago, and dependent rows go by FK cascade (integration test with a clock override)
   - Accept: `docs/DECISIONS.md` records what a deleted account looks like during the 30 days

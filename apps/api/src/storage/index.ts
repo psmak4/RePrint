@@ -7,8 +7,20 @@ export { LocalImageStorage } from './local.js'
 export { R2ImageStorage } from './r2.js'
 export type { ImageStorage } from './types.js'
 
+/** The settings the storage drivers read; the API and the worker both provide them. */
+export type StorageSettings = Pick<
+  Env,
+  | 'STORAGE_DRIVER'
+  | 'STORAGE_LOCAL_DIR'
+  | 'IMAGE_BASE_URL'
+  | 'R2_ACCOUNT_ID'
+  | 'R2_ACCESS_KEY_ID'
+  | 'R2_SECRET_ACCESS_KEY'
+  | 'R2_BUCKET_UPLOADS'
+>
+
 /** Picks the driver from `STORAGE_DRIVER`; the env schema guarantees the R2 settings exist. */
-export function createImageStorage(env: Env): ImageStorage {
+export function createImageStorage(env: StorageSettings): ImageStorage {
   if (env.STORAGE_DRIVER === 'r2') {
     const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_UPLOADS } = env
     if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_UPLOADS) {

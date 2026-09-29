@@ -65,6 +65,16 @@ describe('renderEmail', () => {
     expect(changed.text).toContain('new@example.test')
   })
 
+  it('renders the account-deletion-scheduled template', async () => {
+    const email = await renderEmail('account-deletion-scheduled', {
+      username: 'ada_l',
+      eraseAfterDays: 30,
+    })
+    expect(email.subject).toBe('Your RePrint account is scheduled for deletion')
+    expect(email.text).toContain('Hi ada_l,')
+    expect(email.text).toContain('30 days')
+  })
+
   it('escapes user-controlled text in HTML', async () => {
     const email = await renderEmail('verify-email', { ...props, username: '<script>x</script>' })
     expect(email.html).not.toContain('<script>x')

@@ -1,6 +1,10 @@
 export { BaseLayout, type BaseLayoutProps } from './layout.js'
 export { type RenderedEmail, renderEmail } from './render.js'
 export {
+  type AccountDeletionScheduledProps,
+  accountDeletionScheduledProps,
+} from './templates/account-deletion-scheduled.js'
+export {
   type EmailAlreadyRegisteredProps,
   emailAlreadyRegisteredProps,
 } from './templates/email-already-registered.js'

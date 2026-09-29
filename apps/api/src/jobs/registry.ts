@@ -1,4 +1,6 @@
+import type { Database } from '@reprint/db'
 import {
+  accountDeletionScheduledProps,
   emailAlreadyRegisteredProps,
   emailChangeConfirmProps,
   emailChangedProps,
@@ -11,11 +13,15 @@ import {
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import type { Mailer } from '../email/mailer.js'
+import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
+import type { ImageStorage } from '../storage/index.js'
 
-/** What a job handler can use besides its payload. Later tasks add services here (db, ...). */
+/** What a job handler can use besides its payload. Later tasks add services here. */
 export interface JobContext {
   log: Logger
   mailer: Mailer
+  db: Database
+  storage: ImageStorage
 }
 
 export interface JobDefinition<Schema extends z.ZodType = z.ZodType, Result = unknown> {
@@ -60,6 +66,11 @@ export const emailSendPayload = z.discriminatedUnion('template', [
     props: emailChangeRequestedProps,
   }),
   z.object({ template: z.literal('email-changed'), to: z.email(), props: emailChangedProps }),
+  z.object({
+    template: z.literal('account-deletion-scheduled'),
+    to: z.email(),
+    props: accountDeletionScheduledProps,
+  }),
 ])
 
 /** Every background job. To add one, add an entry here (see `README.md`). */
@@ -82,6 +93,14 @@ export const jobs = {
       log.info({ template: payload.template }, 'email sent')
     },
     retry: { attempts: 5, backoffMs: 10_000 },
+  }),
+  'accounts.erase': defineJob({
+    // `now` overrides the clock so tests can erase without waiting 30 days.
+    payload: z.object({ now: z.iso.datetime().optional() }),
+    handler: async ({ now }, { log, db, storage }) =>
+      eraseDeletedAccounts({ db, storage, log, now: now ? new Date(now) : undefined }),
+    schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
   }),
 }
 

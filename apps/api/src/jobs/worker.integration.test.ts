@@ -74,9 +74,12 @@ describe('worker (dist/worker.js)', () => {
     expect(output).toContain('heartbeat')
   })
 
-  it('registers the repeatable heartbeat schedule once', async () => {
+  it('registers each repeatable schedule once', async () => {
     const schedulers = await jobQueue.queue.getJobSchedulers()
-    expect(schedulers.map((scheduler) => scheduler.name)).toEqual(['system.heartbeat'])
+    expect(schedulers.map((scheduler) => scheduler.name).sort()).toEqual([
+      'accounts.erase',
+      'system.heartbeat',
+    ])
   })
 
   it('rejects an invalid payload before it is enqueued', async () => {

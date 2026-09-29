@@ -1,11 +1,14 @@
 import { authTokens, covers, type Database, sessions, users } from '@reprint/db'
 import {
+  ACCOUNT_ERASE_AFTER_DAYS,
   changeEmailRequestSchema,
   changeEmailResponseSchema,
   changePasswordRequestSchema,
   changePasswordResponseSchema,
   confirmEmailChangeRequestSchema,
   confirmEmailChangeResponseSchema,
+  deleteAccountRequestSchema,
+  deleteAccountResponseSchema,
   type Me,
   meSchema,
   updateMeRequestSchema,
@@ -222,6 +225,50 @@ export const meRoutes: FastifyPluginAsyncZod<MeRoutesOptions> = async (app, opti
         request.log.error({ err: error }, 'could not queue the email change emails')
       }
       return { status: 'check_your_email' as const }
+    },
+  )
+
+  app.delete(
+    '/me',
+    {
+      // Like the password change, this asks for the password, so count attempts per Member.
+      preHandler: [requireAuth, rateLimit('passwordChange')],
+      schema: { body: deleteAccountRequestSchema, response: { 200: deleteAccountResponseSchema } },
+    },
+    async (request, reply) => {
+      if (!db || !jobs || !request.auth)
+        throw new Error('me routes need a database and a job queue')
+      const { user } = request.auth
+      const [account] = await db
+        .select({ passwordHash: users.passwordHash })
+        .from(users)
+        .where(eq(users.id, user.id))
+      if (!account || !(await verifyPassword(account.passwordHash, request.body.password))) {
+        throw new HttpProblem(400, 'The request did not pass validation.', {
+          errors: [{ path: 'body.password', message: 'That is not your password.' }],
+        })
+      }
+      await db.transaction(async (tx) => {
+        // Disabled now, erased by the `accounts.erase` job after 30 days (D-043, D-088).
+        await tx
+          .update(users)
+          .set({ status: 'deleted', deletedAt: new Date() })
+          .where(eq(users.id, user.id))
+        await tx.delete(sessions).where(eq(sessions.userId, user.id))
+        // Unused links must not outlive the account's usefulness.
+        await tx.delete(authTokens).where(eq(authTokens.userId, user.id))
+      })
+      await app.sessions.end(request, reply)
+      try {
+        await jobs.enqueue('email.send', {
+          template: 'account-deletion-scheduled',
+          to: user.email,
+          props: { username: user.username, eraseAfterDays: ACCOUNT_ERASE_AFTER_DAYS },
+        })
+      } catch (error) {
+        request.log.error({ err: error }, 'could not queue the account deletion email')
+      }
+      return { status: 'account_deletion_scheduled' as const }
     },
   )
 

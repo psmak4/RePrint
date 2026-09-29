@@ -1,6 +1,8 @@
+import type { Database } from '@reprint/db'
 import { type ConnectionOptions, type Job, Worker } from 'bullmq'
 import type { Logger } from 'pino'
 import type { Mailer } from '../email/mailer.js'
+import type { ImageStorage } from '../storage/index.js'
 import { createJobQueue, QUEUE_NAME, workerConnection } from './queue.js'
 import { isJobName, type JobContext, jobs } from './registry.js'
 
@@ -9,7 +11,11 @@ export interface RunningWorker {
   stop: () => Promise<void>
 }
 
-async function processJob(job: Job, log: Logger, mailer: Mailer): Promise<unknown> {
+async function processJob(
+  job: Job,
+  services: Omit<JobContext, 'log'>,
+  log: Logger,
+): Promise<unknown> {
   if (!isJobName(job.name)) throw new Error(`No handler registered for job "${job.name}"`)
   const definition = jobs[job.name]
   const payload = definition.payload.parse(job.data)
@@ -18,7 +24,7 @@ async function processJob(job: Job, log: Logger, mailer: Mailer): Promise<unknow
     payload,
     {
       log: log.child({ job: job.name, jobId: job.id }),
-      mailer,
+      ...services,
     },
   )
 }
@@ -27,14 +33,16 @@ export async function startWorker(options: {
   redisUrl: string
   log: Logger
   mailer: Mailer
+  db: Database
+  storage: ImageStorage
   /** Called for every failed job (the entry point wires this to Sentry). */
   onJobError?: (error: unknown) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log, mailer, onJobError } = options
+  const { redisUrl, log, mailer, db, storage, onJobError } = options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
-  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, log, mailer), {
+  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, { mailer, db, storage }, log), {
     connection: connection as ConnectionOptions,
     concurrency: 5,
   })
