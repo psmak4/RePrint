@@ -31,3 +31,7 @@ Entry format:
 ### 2026-09-29 · M1-T03 (skipped) · owner/merge-gate
 - Branch protection isn't enforced on this private free-plan repo, so M1-T03 is `[~]`. Added `scripts/ralph/merge-pr.sh` (D-055): the only way the loop merges; it checks every required job in `docs/ci.md` passed on the PR head, then squash-merges.
 - Next iteration: merge with `scripts/ralph/merge-pr.sh <PR>` (`gh pr merge` is denied). Tasks that add a CI job must add its row to the `docs/ci.md` Required checks table, or the gate won't require it. Next task is M1-T04 (docker-compose).
+
+### 2026-09-29 · M1-T04 · PR pending
+- Added `docker-compose.yml` (postgres 18, redis 7, mailpit, all with healthchecks), `docker/postgres/init.sql` (pg_trgm, unaccent, citext), `docs/local-dev.md`, and D-056. `.env.example` already matched the ports, so it is unchanged.
+- Next iteration: M1-T05 (Drizzle). The Postgres 18 volume mounts at `/var/lib/postgresql`. The first migration must enable the three extensions with `IF NOT EXISTS`. Needs Docker running.

@@ -1,0 +1,49 @@
+# Local services for RePrint (PRD §13, D-056). Start with: docker compose up -d --wait
+# Ports match .env.example. Data lives in named volumes; `docker compose down -v` wipes it.
+name: reprint
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: reprint
+      POSTGRES_PASSWORD: reprint
+      POSTGRES_DB: reprint
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18 images keep the data directory under /var/lib/postgresql.
+      - postgres-data:/var/lib/postgresql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/00-extensions.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reprint -d reprint"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI and API
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:

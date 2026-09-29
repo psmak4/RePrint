@@ -415,3 +415,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: The repo stays private on the free GitHub plan, where branch protection and rulesets aren't enforced, so M1-T03 is skipped. The loop merges only through `scripts/ralph/merge-pr.sh <pr>`: it refuses unless the PR is open, not a draft, targets `main`, is mergeable, has no failing or cancelled checks, and every required job in the `docs/ci.md` "Required checks" table passed on its head commit; it then squash-merges with `--match-head-commit` and deletes the branch. `.claude/settings.json` denies `gh pr merge` and allows the script; `scripts/ralph/PROMPT.md` requires it. Force-pushes and direct pushes to `main` stay blocked by the existing deny rules.
 - Why: Keeps "CI must be green before merge" for the loop without a paid plan. It doesn't stop a person with write access from merging by hand; if the repo goes public or to a paid plan, enable branch protection as well.
 - Affects: M1-T03, M1-T24, `scripts/ralph/`, `docs/ci.md`, every task that adds a CI job
+
+### D-056 · Local compose services
+- Status: Decided (loop)
+- Decision: `docker-compose.yml` (project name `reprint`) runs `postgres:18`, `redis:7`, and `axllent/mailpit` on the host ports in `.env.example`, each with a healthcheck so `docker compose up -d --wait` blocks until ready. Postgres mounts its volume at `/var/lib/postgresql` (the Postgres 18 image layout). Extensions are enabled by `docker/postgres/init.sql` through `docker-entrypoint-initdb.d`, and the first migration (M1-T05) repeats them with `IF NOT EXISTS` so managed databases (Neon) work too. Mailpit's healthcheck is `/mailpit readyz`. Images are unpinned beyond the major version the PRD requires, to match the Testcontainers images later.
+- Why: Follows the earlier compose decision (images) and PRD §13; the init script keeps local setup zero-step.
+- Affects: M1-T05, M1-T08, M1-T13, `docs/local-dev.md`
