@@ -1,0 +1,45 @@
+/*
+ * RePrint theme tokens (Tailwind v4). Dark only for v1.
+ * Contrast ratios are documented in docs/DESIGN.md and checked by src/theme.test.ts.
+ */
+@theme {
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-surface: #1e293b;
+  --color-surface-raised: #273449;
+  --color-muted-foreground: #94a3b8;
+  --color-border: #334155;
+  --color-input-border: #64748b;
+  --color-accent: #3b82f6;
+  --color-accent-foreground: #020617;
+  --color-link: #60a5fa;
+  --color-ring: #3b82f6;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+
+  --container-page: 72rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}

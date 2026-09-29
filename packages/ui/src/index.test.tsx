@@ -7,7 +7,7 @@ describe('@reprint/ui', () => {
   it('renders a Button with its variant classes', () => {
     render(<Button variant="secondary">Save</Button>)
     const button = screen.getByRole('button', { name: 'Save' })
-    expect(button.className).toContain('bg-slate-800')
+    expect(button.className).toContain('bg-surface')
   })
 
   it('renders the child element when asChild is set', () => {

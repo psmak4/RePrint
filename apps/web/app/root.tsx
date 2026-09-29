@@ -1,5 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router'
 import { ErrorPage } from './components/error-page.js'
+import { AppShell } from './components/shell/app-shell.js'
 import './app.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AppShell>{children}</AppShell>
         <ScrollRestoration />
         <Scripts />
       </body>
