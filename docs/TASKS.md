@@ -65,7 +65,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `packages/ui` exports the shadcn/ui `Button`, used on the home page, and Tailwind builds
   - Accept: a server-side API client (`API_INTERNAL_URL`) forwards the incoming `cookie` and `x-request-id` headers, covered by a unit test
   - Accept: a root error boundary renders a friendly error page for thrown loader errors (component test)
-- [ ] M1-T12 · Design foundation: `docs/DESIGN.md`, theme tokens, app shell, copy module · deps: M1-T11 · PRD: §8, §6, §7.3, §11, §3
+- [x] M1-T12 · Design foundation: `docs/DESIGN.md`, theme tokens, app shell, copy module · deps: M1-T11 · PRD: §8, §6, §7.3, §11, §3
   - Accept: `docs/DESIGN.md` defines the layout grid and breakpoints, type scale, spacing scale, color tokens from the dark palette `#0f172a` / `#3b82f6` / `#f8fafc` with AA contrast notes, a component inventory mapped to shadcn/ui, and page templates for the book page, search results, review form, and moderation queue (plus the library, profile, and admin table patterns)
   - Accept: `packages/ui` exposes the theme tokens as Tailwind v4 CSS variables, and the app renders in the dark theme
   - Accept: the app shell has a header (logo, search box slot, account slot), a footer (Open Library credit, legal page links), a skip link, and a responsive layout from 360 px to desktop (component test)
