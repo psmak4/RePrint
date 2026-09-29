@@ -27,7 +27,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: force-pushes and deletion of `main` are disabled
   - Accept: repo setting "Automatically delete head branches" is on
   - Accept: Skipped (2026-09-29): branch protection and rulesets aren't enforced on private repos on the free GitHub plan. Replaced by the loop's merge gate `scripts/ralph/merge-pr.sh` (D-055).
-- [ ] M1-T04 · `docker-compose.yml` for local Postgres 18, Redis, and Mailpit · deps: M1-T01 · PRD: §13
+- [x] M1-T04 · `docker-compose.yml` for local Postgres 18, Redis, and Mailpit · deps: M1-T01 · PRD: §13
   - Accept: `docker compose up -d --wait` brings up healthy `postgres` (18), `redis`, and `mailpit` services
   - Accept: an init script enables `pg_trgm`, `unaccent`, and `citext`; `docker compose exec postgres psql -U reprint -c "select extname from pg_extension"` lists all three
   - Accept: the Mailpit UI answers on `http://localhost:8025` and SMTP listens on 1025
