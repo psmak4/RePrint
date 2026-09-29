@@ -47,6 +47,19 @@ export const changePasswordRequestSchema = z.object({
 })
 export const changePasswordResponseSchema = z.object({ status: z.literal('password_changed') })
 
+export const changeEmailRequestSchema = z.object({
+  currentPassword: z.string().min(1, 'Enter your current password.').max(128),
+  newEmail: emailSchema,
+})
+/** Same shape as verification: the change waits for the link sent to the new address. */
+export const changeEmailResponseSchema = z.object({ status: z.literal('check_your_email') })
+
+export const confirmEmailChangeRequestSchema = z.object({
+  token: z.string().trim().min(1).max(200),
+})
+export const confirmEmailChangeResponseSchema = z.object({ status: z.literal('email_changed') })
+
 export type Me = z.infer<typeof meSchema>
 export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>
+export type ChangeEmailRequest = z.infer<typeof changeEmailRequestSchema>

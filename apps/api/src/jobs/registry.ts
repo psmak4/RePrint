@@ -1,5 +1,8 @@
 import {
   emailAlreadyRegisteredProps,
+  emailChangeConfirmProps,
+  emailChangedProps,
+  emailChangeRequestedProps,
   passwordChangedProps,
   passwordResetProps,
   renderEmail,
@@ -33,7 +36,7 @@ export function defineJob<Schema extends z.ZodType, Result>(
 }
 
 /** One case per email template; `props` is checked against the template's own schema. */
-const emailSendPayload = z.discriminatedUnion('template', [
+export const emailSendPayload = z.discriminatedUnion('template', [
   z.object({ template: z.literal('verify-email'), to: z.email(), props: verifyEmailProps }),
   z.object({
     template: z.literal('email-already-registered'),
@@ -46,6 +49,17 @@ const emailSendPayload = z.discriminatedUnion('template', [
     to: z.email(),
     props: passwordChangedProps,
   }),
+  z.object({
+    template: z.literal('email-change-confirm'),
+    to: z.email(),
+    props: emailChangeConfirmProps,
+  }),
+  z.object({
+    template: z.literal('email-change-requested'),
+    to: z.email(),
+    props: emailChangeRequestedProps,
+  }),
+  z.object({ template: z.literal('email-changed'), to: z.email(), props: emailChangedProps }),
 ])
 
 /** Every background job. To add one, add an entry here (see `README.md`). */
