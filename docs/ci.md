@@ -4,7 +4,7 @@
 
 ## Required checks
 
-These job names are stable. Branch protection on `main` (M1-T03) requires every one of them. Renaming a job means updating branch protection too.
+These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and refuses to merge a PR unless every job listed here passed on its head commit (D-055; the repo has no server-side branch protection). Keep the table format: each required job is a row starting with its name in backticks. Renaming a job means updating this table in the same PR.
 
 | Job | What it runs | Local equivalent |
 | --- | --- | --- |

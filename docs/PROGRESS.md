@@ -27,3 +27,7 @@ Entry format:
 ### 2026-09-29 · M1-T03 (HUMAN) · #4
 - Recorded owner steps for branch protection in `docs/BLOCKERS.md`; no code changed. M1-T03 stays `[ ]` until the owner marks it `[x]`.
 - Next iteration: if M1-T03 is still `[ ]`, the loop stops with HUMAN_NEEDED again (don't add a duplicate blocker entry). Once resolved, the next task is M1-T04 (docker-compose).
+
+### 2026-09-29 · M1-T03 (skipped) · owner/merge-gate
+- Branch protection isn't enforced on this private free-plan repo, so M1-T03 is `[~]`. Added `scripts/ralph/merge-pr.sh` (D-055): the only way the loop merges; it checks every required job in `docs/ci.md` passed on the PR head, then squash-merges.
+- Next iteration: merge with `scripts/ralph/merge-pr.sh <PR>` (`gh pr merge` is denied). Tasks that add a CI job must add its row to the `docs/ci.md` Required checks table, or the gate won't require it. Next task is M1-T04 (docker-compose).

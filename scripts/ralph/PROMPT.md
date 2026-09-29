@@ -25,7 +25,7 @@ Before picking anything new, check these in order. The first one that applies is
 
 Take the **first** task in `docs/TASKS.md` marked `[ ]` whose `deps:` are all `[x]`.
 
-- **Tagged `HUMAN`:** don't attempt it. Append an entry to `docs/BLOCKERS.md` with the exact steps the owner must take. Commit that on a `loop/human-<task id>` branch, merge it, and stop with `HUMAN_NEEDED`.
+- **Tagged `HUMAN`:** don't attempt it. Append an entry to `docs/BLOCKERS.md` with the exact steps the owner must take. Commit that on a `loop/human-<task id>` branch, merge it (with `scripts/ralph/merge-pr.sh`, step 7), and stop with `HUMAN_NEEDED`.
 - **Nothing is eligible**, but `[ ]` tasks remain (all blocked by `[!]` or HUMAN tasks): stop with `BLOCKED`.
 - **Every task is `[x]` or `[~]`:** stop with `ALL_DONE`.
 
@@ -71,7 +71,7 @@ Walk through the task's `Accept:` bullets one at a time, and prove each by runni
 4. Wait for CI with `gh pr checks --watch`.
    - If CI fails, fix it and push. Allow up to 3 fix rounds.
    - If the repo has no CI checks yet (early M1), local `pnpm check` is the gate.
-5. When the checks are green, run `gh pr merge --squash --delete-branch` and confirm that the PR state is `MERGED`.
+5. When the checks are green, run `scripts/ralph/merge-pr.sh <PR number>`. It re-checks that every required job in `docs/ci.md` passed on the PR's head commit, then squash-merges and deletes the branch. If it refuses, fix what it reports (counts as a fix round). Confirm it printed `MERGED`.
 6. Choose your signal:
    - Stop with `MILESTONE_COMPLETE` if this merge completed the milestone's final verification task.
    - Otherwise stop with `TASK_DONE`.
@@ -95,6 +95,7 @@ Then:
 ## Hard rules
 
 - Never push to `main` directly, force-push, rewrite published history, or delete branches other than your own merged `loop/` branch.
+- Merge only with `scripts/ralph/merge-pr.sh`. Never call `gh pr merge` directly or merge a PR whose required checks aren't green: `main` has no server-side branch protection (D-055), so this script is the gate.
 - Never edit `PRD.md`. Never read or commit `.env` files or real secrets. Never touch staging or production infrastructure or data.
 - Only one task per iteration. Don't start a second task, even if there's time.
 

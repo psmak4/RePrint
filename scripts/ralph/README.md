@@ -50,5 +50,5 @@ Run it inside `tmux` or `screen` so it survives closing your terminal. Logs go t
     - For stricter behavior, `PERMISSION_MODE=dontAsk` allows only the allow list.
 - **Where to run it:** preferably a dedicated machine, VM, or dev container, not the laptop that holds your production credentials.
 - **Access:** the loop never needs production or staging secrets. Keep them in Render, Netlify, and GitHub settings only.
-- **Branch protection:** enable it on `main`, requiring CI, as soon as the CI task lands. The task list includes a HUMAN task for this.
+- **Merge gate:** the repo is private on a free GitHub plan, so branch protection isn't enforced (D-055). Instead the loop merges only through `scripts/ralph/merge-pr.sh`, which refuses unless every required check in `docs/ci.md` passed on the PR's head commit; `.claude/settings.json` denies calling `gh pr merge` directly. This guards the loop, not people: anyone with write access can still merge by hand, so merge red PRs only on purpose. If the repo later becomes public or moves to a paid plan, enable branch protection too.
 - **Usage:** a full build is many long sessions. Watch usage, and keep `MAX_ITERATIONS` modest at first. Start with 3 to 5 iterations and read the PRs before letting it run longer.

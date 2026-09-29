@@ -37,4 +37,4 @@ Entry format:
     gh api -X PATCH repos/psmak4/RePrint -F allow_squash_merge=true -F delete_branch_on_merge=true
     ```
   - Check: `gh api repos/psmak4/RePrint/branches/main/protection --jq '.required_status_checks.contexts'` lists the six jobs.
-- Resolved: 
+- Resolved: 2026-09-29. Branch protection and rulesets aren't enforced on private repos on the free GitHub plan, and the owner isn't upgrading. M1-T03 is marked `[~]`; the loop now merges only through `scripts/ralph/merge-pr.sh`, which requires every check in `docs/ci.md` to pass (D-055). Squash merging and "Automatically delete head branches" still need to be on in Settings → General (they work on the free plan).
