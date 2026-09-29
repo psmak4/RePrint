@@ -12,6 +12,6 @@ Entry format:
 
 ---
 
-### 2026-09-28 · BOOTSTRAP · bootstrap/build-loop
+### 2026-09-28 · BOOTSTRAP · #1
 - Added the build loop (`scripts/ralph/`), `.claude/settings.json`, `CLAUDE.md`, milestone briefs, `docs/TASKS.md`, `docs/DECISIONS.md`, `.env.example`, `.gitignore`, and `PRD.md` (a Markdown transcription of the PRD PDF).
 - No application code yet. The first loop task is M1-T01 (scaffold). Defaults for owner questions are in `docs/DECISIONS.md` (Q1–Q15).
