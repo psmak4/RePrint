@@ -38,7 +38,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a `uuidv7()` ID helper and a `timestamps()` column helper (timestamptz, UTC) exist, with unit tests
   - Accept: `packages/db` exports a Testcontainers helper that starts Postgres 18 and runs migrations, used by a passing sample test
   - Accept: a schema test fails if any foreign key lacks an index or any timestamp column is not `timestamptz` (PRD §9 conventions), and it runs in `pnpm test:integration`
-- [ ] M1-T06 · `packages/shared` foundation: Problem Details, pagination, IDs, permission names, and coverage gate · deps: M1-T01 · PRD: §4, §5.4, §10, §12
+- [x] M1-T06 · `packages/shared` foundation: Problem Details, pagination, IDs, permission names, and coverage gate · deps: M1-T01 · PRD: §4, §5.4, §10, §12
   - Accept: Zod schemas exist for Problem Details (`{ type, title, status, detail, errors?: [{ path, message }] }`), page pagination (`page`, `pageSize` ≤ 50), and cursor pagination
   - Accept: permission name constants from PRD §4 exist (`reviews.moderate`, `reports.resolve`, `users.view`, `users.suspend`, `roles.assign`, `audit.view`, plus Member permissions) with unit tests
   - Accept: `pnpm --filter shared test:unit --coverage` enforces a 90% line threshold and passes
