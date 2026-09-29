@@ -106,3 +106,8 @@ Entry format:
 ### 2026-09-29 · M2-T01 · PR #23
 - Accounts schema in `packages/db/src/schema/accounts.ts` (`users`, `roles`, `permissions`, `role_permissions`, `user_roles`, `sessions`, `auth_tokens`, `notifications`; migration `0001_accounts.sql`) and a data migration `0002_seed_roles.sql` with the PRD §4 grants. `packages/shared` gained `ROLES`, `ROLE_PERMISSIONS`, `MODERATOR_PERMISSIONS`, `USER_STATUSES`, and `AUTH_TOKEN_PURPOSES`. Integration test compares seeded grants to the shared constants. D-072 records the choices.
 - Next iteration: `truncateAllTables` now skips the seeded role tables. `users.avatar_id` is added by M2-T16. `library_public` defaults to true (flagged in D-072). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-29 · M2-T02 · PR pending
+- `apps/api/src/modules/auth/`: `tokens.ts` (256-bit token, SHA-256), `session-cookie.ts` (`rp_session` attributes), `session-plugin.ts` (`request.auth`, sliding renewal per D-027, `app.sessions.start/end`), and `guards.ts` (`requireAuth`, `requireVerified`, `requirePermission`). `buildApp` takes `database` and registers `@fastify/cookie`; env gains `SESSION_TTL_DAYS`, `COOKIE_DOMAIN`, `COOKIE_SECURE`. `createTestUser` in `src/testing/users.ts` makes users for integration tests. D-073 records the choices.
+- Next iteration: routes use `preHandler: [requireVerified]` or `requirePermission(PERMISSIONS.x)`; login/register call `app.sessions.start(request, reply, userId)`. Guarded routes must be registered on the app that received `database`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

@@ -131,7 +131,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: migration creates `users` (citext `email`/`username` unique), `roles`, `permissions`, `role_permissions`, `user_roles`, `sessions`, `auth_tokens`, and `notifications` with every FK indexed; `pnpm db:check` passes
   - Accept: a data migration inserts the Member, Moderator, and Admin roles with exactly the permission grants of the PRD §4 table (integration test compares against `packages/shared` constants)
   - Accept: `users.status` allows only active, suspended, and deleted; notification preference columns exist per `docs/DECISIONS.md`
-- [ ] M2-T02 · Session auth plugin and permission preHandlers · deps: M2-T01, M1-T08 · PRD: §4, §7.1, §8, §10
+- [x] M2-T02 · Session auth plugin and permission preHandlers · deps: M2-T01, M1-T08 · PRD: §4, §7.1, §8, §10
   - Accept: `rp_session` holds a random 256-bit token; only its SHA-256 hash is stored; the cookie is `HttpOnly`, `SameSite=Lax`, `Secure` outside local, and uses `Domain=$COOKIE_DOMAIN` (unit and integration tests)
   - Accept: sessions last 30 days and renew while in use (sliding expiry per `docs/DECISIONS.md`), and expired or suspended-user sessions are rejected (integration tests)
   - Accept: `requireAuth`, `requireVerified`, and `requirePermission(name)` preHandlers return 401/403 Problem Details, and checks use permissions, never role names (integration tests on a test-only route: one allowed, one denied each)

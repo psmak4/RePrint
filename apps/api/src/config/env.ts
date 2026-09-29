@@ -24,6 +24,12 @@ export const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   TRUST_PROXY: booleanFlag.default(false),
+  /** Session lifetime; it renews while the session is in use (PRD §7.1, D-027). */
+  SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+  /** Domain of the `rp_session` cookie so `www` and `api` both get it. Unset means host-only. */
+  COOKIE_DOMAIN: z.string().min(1).optional(),
+  /** Defaults to on everywhere except `APP_ENV=local` (plain http). */
+  COOKIE_SECURE: booleanFlag.optional(),
   /** Runs the job worker inside the API process, for environments with no separate worker (D-071). */
   WORKER_IN_PROCESS: booleanFlag.default(false),
   /** Sentry is off when this is unset (PRD §11). */

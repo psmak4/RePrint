@@ -21,6 +21,26 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...source, WORKER_IN_PROCESS: 'yes' })).toThrow(/WORKER_IN_PROCESS/)
   })
 
+  it('defaults the session settings and reads overrides', () => {
+    const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+    const env = loadEnv(source)
+    expect(env.SESSION_TTL_DAYS).toBe(30)
+    expect(env.COOKIE_DOMAIN).toBeUndefined()
+    expect(env.COOKIE_SECURE).toBeUndefined()
+    const custom = loadEnv({
+      ...source,
+      SESSION_TTL_DAYS: '7',
+      COOKIE_DOMAIN: 'reprint.com',
+      COOKIE_SECURE: 'true',
+    })
+    expect(custom).toMatchObject({
+      SESSION_TTL_DAYS: 7,
+      COOKIE_DOMAIN: 'reprint.com',
+      COOKIE_SECURE: true,
+    })
+    expect(() => loadEnv({ ...source, SESSION_TTL_DAYS: '0' })).toThrow(/SESSION_TTL_DAYS/)
+  })
+
   it('names a missing required variable', () => {
     expect(() => loadEnv({})).toThrow(EnvError)
     expect(() => loadEnv({})).toThrow(/WEB_ORIGINS: is required but not set/)
