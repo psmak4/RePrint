@@ -78,6 +78,31 @@
         }
       }
     },
+    "/v1/auth/session": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "signupsOpen": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "signupsOpen"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/auth/register": {
       "post": {
         "requestBody": {
@@ -101,6 +126,11 @@
                     "type": "string",
                     "minLength": 12,
                     "maxLength": 128
+                  },
+                  "inviteCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
                   }
                 },
                 "required": [

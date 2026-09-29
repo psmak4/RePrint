@@ -24,10 +24,16 @@ export const registerRequestSchema = z.object({
   email: emailSchema,
   username: usernameSchema,
   password: passwordSchema,
+  /** Required only while signups are closed (private beta, D-014). */
+  inviteCode: z.string().trim().min(1).max(100).optional(),
 })
+
+/** What the web needs before anyone signs in; M2-T07 adds the viewer. */
+export const sessionResponseSchema = z.object({ signupsOpen: z.boolean() })
 
 /** Same body whether the email was new or already registered (D-048). */
 export const registerResponseSchema = z.object({ status: z.literal('check_your_email') })
 
+export type SessionResponse = z.infer<typeof sessionResponseSchema>
 export type RegisterRequest = z.infer<typeof registerRequestSchema>
 export type RegisterResponse = z.infer<typeof registerResponseSchema>

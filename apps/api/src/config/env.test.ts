@@ -21,6 +21,16 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...source, WORKER_IN_PROCESS: 'yes' })).toThrow(/WORKER_IN_PROCESS/)
   })
 
+  it('closes signups by default and splits SIGNUP_INVITE_CODES', () => {
+    const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+    const env = loadEnv(source)
+    expect(env.PUBLIC_SIGNUPS).toBe(false)
+    expect(env.SIGNUP_INVITE_CODES).toEqual([])
+    const beta = loadEnv({ ...source, PUBLIC_SIGNUPS: 'true', SIGNUP_INVITE_CODES: ' a, b ,,c' })
+    expect(beta.PUBLIC_SIGNUPS).toBe(true)
+    expect(beta.SIGNUP_INVITE_CODES).toEqual(['a', 'b', 'c'])
+  })
+
   it('defaults the session settings and reads overrides', () => {
     const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
     const env = loadEnv(source)
