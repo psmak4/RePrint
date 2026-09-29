@@ -1,10 +1,13 @@
 import { createDb } from '@reprint/db'
 import { Redis } from 'ioredis'
+import { pino } from 'pino'
 import { buildApp } from './app.js'
 import { EnvError, loadEnv } from './config/env.js'
 import { createJobQueue, queueCheck } from './jobs/queue.js'
+import { startWorker } from './jobs/worker-runtime.js'
 import { postgresCheck, redisCheck } from './modules/ops/readiness.js'
-import { initSentry } from './observability/sentry.js'
+import { baseLoggerOptions } from './observability/logging.js'
+import { captureError, initSentry } from './observability/sentry.js'
 
 async function main(): Promise<void> {
   const env = loadEnv()
@@ -18,7 +21,16 @@ async function main(): Promise<void> {
   })
   // Connection errors are reported through /v1/ready; log them without crashing or spamming stderr.
   redis.on('error', (error) => app.log.warn({ err: error }, 'redis connection error'))
+  // Free-tier staging has no background workers, so the API can run the jobs itself (D-071).
+  const worker = env.WORKER_IN_PROCESS
+    ? await startWorker({
+        redisUrl: env.REDIS_URL,
+        log: pino({ ...baseLoggerOptions(env), base: { service: 'worker' } }),
+        onJobError: captureError,
+      })
+    : undefined
   app.addHook('onClose', async () => {
+    await worker?.stop()
     await jobQueue.close()
     redis.disconnect()
     await database.close()

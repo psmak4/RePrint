@@ -1,3 +1,15 @@
+# Netlify build for the SSR web app (PRD §13). Set the site's base directory to `apps/web`.
+# The @netlify/vite-plugin-react-router adapter (enabled by vite.config.ts when NETLIFY is set)
+# turns the server build into a Netlify function; `build/client` holds the static assets.
+[build]
+  command = "cd ../.. && pnpm turbo run build --filter=web"
+  publish = "build/client"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # Netlify's own install step runs at the repo root; the lockfile must not change (CI parity).
+  PNPM_FLAGS = "--frozen-lockfile"
+
 # Headers for static assets, which bypass the SSR function. SSR responses get the same baseline
 # plus a per-request nonce CSP from app/entry.server.tsx. Keep in sync with
 # BASELINE_SECURITY_HEADERS in app/lib/csp.server.ts (a unit test checks this).
