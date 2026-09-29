@@ -3,9 +3,10 @@ packages:
   - packages/*
   - e2e
 # Build scripts stay off: esbuild ships prebuilt binaries, and the rest are optional native
-# accelerators pulled in by testcontainers (see docs/DECISIONS.md D-057).
+# accelerators pulled in by testcontainers and bullmq (see docs/DECISIONS.md D-057).
 allowBuilds:
   cpu-features: false
   esbuild: false
+  msgpackr-extract: false
   protobufjs: false
   ssh2: false

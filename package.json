@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "dev": "pnpm --filter api dev",
     "typecheck": "turbo run typecheck",
     "test:unit": "turbo run test:unit",
     "lint": "biome check .",

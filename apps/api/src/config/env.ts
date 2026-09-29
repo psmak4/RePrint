@@ -28,6 +28,17 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>
 
+/** The worker serves no web traffic, so it needs only these variables. */
+export const workerEnvSchema = envSchema.pick({
+  NODE_ENV: true,
+  APP_ENV: true,
+  LOG_LEVEL: true,
+  DATABASE_URL: true,
+  REDIS_URL: true,
+})
+
+export type WorkerEnv = z.infer<typeof workerEnvSchema>
+
 export class EnvError extends Error {
   constructor(message: string) {
     super(message)
@@ -37,9 +48,20 @@ export class EnvError extends Error {
 
 /** Parses the environment and throws an `EnvError` that names every invalid variable. */
 export function loadEnv(source: Record<string, string | undefined> = process.env): Env {
+  return parseEnv(envSchema, source)
+}
+
+export function loadWorkerEnv(source: Record<string, string | undefined> = process.env): WorkerEnv {
+  return parseEnv(workerEnvSchema, source)
+}
+
+function parseEnv<Schema extends z.ZodType>(
+  schema: Schema,
+  source: Record<string, string | undefined>,
+): z.output<Schema> {
   // An empty value in a .env file means "unset", so defaults apply.
   const cleaned = Object.fromEntries(Object.entries(source).filter(([, value]) => value !== ''))
-  const result = envSchema.safeParse(cleaned)
+  const result = schema.safeParse(cleaned)
   if (result.success) return result.data
   const lines = result.error.issues.map((issue) => {
     const name = issue.path.join('.') || '(environment)'
