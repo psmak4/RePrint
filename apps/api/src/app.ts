@@ -42,7 +42,16 @@ export async function buildApp(
   })
 
   registerErrorHandling(app)
-  await app.register(helmet)
+  await app.register(helmet, {
+    // HSTS with preload needs a max-age of at least a year and includeSubDomains (PRD §11).
+    strictTransportSecurity: { maxAge: 63_072_000, includeSubDomains: true, preload: true },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    // The API only returns JSON, so nothing may load or embed from its responses.
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+    },
+  })
   await app.register(cors, { origin: env.WEB_ORIGINS, credentials: true })
   registerOriginCheck(app, env.WEB_ORIGINS)
 
