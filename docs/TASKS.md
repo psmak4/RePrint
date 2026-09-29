@@ -22,10 +22,11 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm check` exists, runs every non-e2e CI step locally, and passes
   - Accept: Turborepo remote cache is used when `TURBO_TOKEN`/`TURBO_TEAM` secrets exist, and CI still passes without them
   - Accept: this task's own PR shows all CI jobs green in `gh pr checks`
-- [ ] M1-T03 · HUMAN · Enable branch protection on `main` requiring the CI checks · deps: M1-T02 · PRD: §12
+- [~] M1-T03 · HUMAN · Enable branch protection on `main` requiring the CI checks · deps: M1-T02 · PRD: §12
   - Accept: `main` requires a PR and every job listed in `docs/ci.md` to pass before merge, and allows squash merge
   - Accept: force-pushes and deletion of `main` are disabled
   - Accept: repo setting "Automatically delete head branches" is on
+  - Accept: Skipped (2026-09-29): branch protection and rulesets aren't enforced on private repos on the free GitHub plan. Replaced by the loop's merge gate `scripts/ralph/merge-pr.sh` (D-055).
 - [ ] M1-T04 · `docker-compose.yml` for local Postgres 18, Redis, and Mailpit · deps: M1-T01 · PRD: §13
   - Accept: `docker compose up -d --wait` brings up healthy `postgres` (18), `redis`, and `mailpit` services
   - Accept: an init script enables `pg_trgm`, `unaccent`, and `citext`; `docker compose exec postgres psql -U reprint -c "select extname from pg_extension"` lists all three
@@ -119,7 +120,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: from a fresh clone, `pnpm install && docker compose up -d --wait && pnpm db:reset && pnpm check && pnpm test:e2e` all pass
   - Accept: every acceptance criterion in `docs/milestones/M1-foundation.md` is checked off in the PR body with the command that proved it
   - Accept: `CLAUDE.md` command table matches the real `package.json` scripts exactly
-  - Accept: `gh pr checks` on this PR lists the required checks from `docs/ci.md` (branch protection from M1-T03 is active), and deploy-related items (M1-T20, M1-T22) are either verified or listed as deferred in `docs/PROGRESS.md`
+  - Accept: `scripts/ralph/merge-pr.sh <this PR> --dry-run` passes, listing every required check from `docs/ci.md` (the D-055 merge gate), and deploy-related items (M1-T20, M1-T22) are either verified or listed as deferred in `docs/PROGRESS.md`
 
 ## M2 · Accounts
 

@@ -29,7 +29,7 @@ Stand up the monorepo, local services, database tooling, both app skeletons, the
 3. A validation error returns an RFC 9457 Problem Details body; a non-GET request with a foreign `Origin` returns 403.
 4. `pnpm db:check` fails on schema drift; `pnpm openapi:check` fails on a stale spec; both run in CI.
 5. `pnpm test:e2e` passes the home page smoke spec in Chromium, WebKit, and mobile, with zero serious or critical axe issues.
-6. CI is green on PRs, and `main` is protected, requiring the CI checks (HUMAN M1-T03).
+6. CI is green on PRs, and the loop merges only through `scripts/ralph/merge-pr.sh`, which requires every check in `docs/ci.md` to pass (D-055; replaces branch protection, M1-T03 skipped).
 7. A scratch file using `dangerouslySetInnerHTML` fails `pnpm lint`.
 8. Every stated command in `CLAUDE.md` exists in `package.json` and works.
 9. (If the owner has done M1-T19/M1-T21) merges to `main` auto-deploy to staging and pass the smoke tests, and PRs get preview environments with e2e running against them.
@@ -50,7 +50,7 @@ Stand up the monorepo, local services, database tooling, both app skeletons, the
 
 ## Human prerequisites
 
-- **M1-T03:** enable branch protection on `main` (required checks from `docs/ci.md`).
+- **M1-T03:** skipped. Branch protection isn't enforced on private repos on the free GitHub plan; the merge gate in D-055 replaces it.
 - **M1-T19:** create Neon staging (Postgres 18, or 17 as fallback), Render Blueprint, Netlify site, Resend (sandbox), Sentry projects, and staging DNS; add deploy secrets to GitHub.
 - **M1-T21:** enable Netlify deploy previews, Render PR previews, and Neon branching.
 - **M1-T23:** install the Renovate GitHub app.
