@@ -1,11 +1,13 @@
 import {
   authors,
+  bookGenres,
   bookSeries,
   bookSubjects,
   books,
   contributions,
   createDb,
   editions,
+  genres,
   mergeCandidates,
   series,
   sourceLinks,
@@ -13,7 +15,7 @@ import {
 } from '@reprint/db'
 import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
 import type { BookCandidate } from '@reprint/shared'
-import { count, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createStubSource } from '../sources/stub/stub-adapter.js'
 import type { SourceAdapter } from '../sources/types.js'
@@ -224,5 +226,149 @@ describe('ingestBook', () => {
     expect(new Set(results.map((r) => r.bookId)).size).toBe(1)
     expect(results.filter((r) => r.created)).toHaveLength(1)
     expect(await db.select().from(books)).toHaveLength(1)
+  })
+
+  describe('enrichment', () => {
+    const hobbit = () => stubCandidate('stub-book-hobbit')
+
+    async function genreSlugs(bookId: string) {
+      const rows = await db
+        .select({ slug: genres.slug, origin: bookGenres.origin })
+        .from(bookGenres)
+        .innerJoin(genres, eq(genres.id, bookGenres.genreId))
+        .where(eq(bookGenres.bookId, bookId))
+      return rows.map((row) => `${row.slug}:${row.origin}`).sort()
+    }
+
+    it('sets the Primary Edition to the best ranked Edition', async () => {
+      const candidate = await hobbit()
+      const [base] = candidate.editions
+      if (!base) throw new Error('missing edition')
+      const result = await ingestBook(db, {
+        source: stub,
+        candidate: {
+          ...candidate,
+          editions: [
+            {
+              ...base,
+              isbn13: '9780261102217',
+              language: 'fr',
+              sourceLink: { source: 'stub', entityType: 'edition', sourceId: 'hobbit-fr' },
+            },
+            {
+              ...base,
+              sourceLink: { source: 'stub', entityType: 'edition', sourceId: 'hobbit-en' },
+            },
+          ],
+        },
+      })
+      const [book] = await db.select().from(books).where(eq(books.id, result.bookId))
+      const [english] = await db
+        .select()
+        .from(editions)
+        .where(and(eq(editions.bookId, result.bookId), eq(editions.language, 'en')))
+      expect(book?.primaryEditionId).toBe(english?.id)
+    })
+
+    it('keeps an admin-locked Primary Edition', async () => {
+      const candidate = await hobbit()
+      const first = await ingestBook(db, { source: stub, candidate })
+      const [other] = await db
+        .insert(editions)
+        .values({ bookId: first.bookId, format: 'ebook', language: 'de' })
+        .returning()
+      await db
+        .update(books)
+        .set({ primaryEditionId: other?.id, lockedFields: ['primaryEdition'] })
+        .where(eq(books.id, first.bookId))
+      await ingestBook(db, { source: stub, candidate })
+      const [book] = await db.select().from(books).where(eq(books.id, first.bookId))
+      expect(book?.primaryEditionId).toBe(other?.id)
+    })
+
+    it('maps Subjects to Genres and leaves admin Genres untouched', async () => {
+      const candidate = await hobbit()
+      const withSubjects: BookCandidate = {
+        ...candidate,
+        book: {
+          ...candidate.book,
+          subjects: [{ label: 'Fantasy fiction' }, { label: 'Cookery' }],
+        },
+      }
+      const first = await ingestBook(db, { source: stub, candidate: withSubjects })
+      expect(await genreSlugs(first.bookId)).toEqual(['fantasy:mapping'])
+
+      const [science] = await db.select().from(genres).where(eq(genres.slug, 'science-fiction'))
+      const [fantasy] = await db.select().from(genres).where(eq(genres.slug, 'fantasy'))
+      if (!science || !fantasy) throw new Error('missing Genres')
+      await db.insert(bookGenres).values({
+        bookId: first.bookId,
+        genreId: science.id,
+        origin: 'admin',
+      })
+      await db
+        .update(bookGenres)
+        .set({ origin: 'admin' })
+        .where(and(eq(bookGenres.bookId, first.bookId), eq(bookGenres.genreId, fantasy.id)))
+      await ingestBook(db, { source: stub, candidate: withSubjects })
+      expect(await genreSlugs(first.bookId)).toEqual(['fantasy:admin', 'science-fiction:admin'])
+    })
+
+    it('does not touch Genres when an admin locked them', async () => {
+      const candidate = await hobbit()
+      const first = await ingestBook(db, { source: stub, candidate })
+      await db
+        .update(books)
+        .set({ lockedFields: ['genres'] })
+        .where(eq(books.id, first.bookId))
+      await ingestBook(db, {
+        source: stub,
+        candidate: {
+          ...candidate,
+          book: { ...candidate.book, subjects: [{ label: 'Fantasy fiction' }] },
+        },
+      })
+      expect(await genreSlugs(first.bookId)).toEqual([])
+    })
+
+    it('lets the higher-priority of two Sources win a field, and admin always wins', async () => {
+      const candidate = await hobbit()
+      const strong: SourceAdapter = { ...stub, name: 'strong', trustedFields: { description: 1 } }
+      const weak: SourceAdapter = { ...stub, name: 'weak', trustedFields: { description: 2 } }
+      const from = (name: string, description: string): BookCandidate => ({
+        ...candidate,
+        sourceLink: { ...candidate.sourceLink, source: name, sourceId: `${name}-hobbit` },
+        book: { ...candidate.book, description },
+        editions: candidate.editions.map(({ sourceLink: _link, ...rest }) => rest),
+      })
+      const first = await ingestBook(db, {
+        source: strong,
+        otherSources: [weak],
+        candidate: from('strong', 'Strong text'),
+      })
+      await ingestBook(db, {
+        source: weak,
+        otherSources: [strong],
+        candidate: from('weak', 'Weak text'),
+      })
+      const [kept] = await db.select().from(books).where(eq(books.id, first.bookId))
+      expect(kept?.description).toBe('Strong text')
+      expect(kept?.fieldOrigins).toMatchObject({ description: { source: 'strong' } })
+
+      await db
+        .update(books)
+        .set({
+          description: 'Admin text',
+          fieldOrigins: { description: { source: 'admin', at: '2026-01-01T00:00:00.000Z' } },
+        })
+        .where(eq(books.id, first.bookId))
+      await ingestBook(db, {
+        source: strong,
+        otherSources: [weak],
+        candidate: from('strong', 'Stronger text'),
+      })
+      const [locked] = await db.select().from(books).where(eq(books.id, first.bookId))
+      expect(locked?.description).toBe('Admin text')
+    })
   })
 })

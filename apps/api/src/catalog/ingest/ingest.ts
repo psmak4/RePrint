@@ -24,6 +24,8 @@ import {
   makeSlug,
 } from '@reprint/shared'
 import { and, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
+import { enrichBook } from '../enrichment/enrich.js'
+import { createPriorityLookup, type PriorityLookup } from '../enrichment/priorities.js'
 import type { SourceAdapter } from '../sources/types.js'
 import { type IncomingField, isLocked, planFieldUpdate } from './fields.js'
 
@@ -39,7 +41,13 @@ export class IngestError extends Error {
 
 export interface IngestInput {
   /** The Source the candidate came from. Only `store` Sources are accepted (PRD §6). */
-  source: Pick<SourceAdapter, 'name' | 'storagePolicy'>
+  source: Pick<SourceAdapter, 'name' | 'storagePolicy'> &
+    Partial<Pick<SourceAdapter, 'trustedFields'>>
+  /**
+   * Other Sources whose data may already be stored, so their trusted-field priorities can be compared
+   * with `source` (PRD §6). Without an entry, a Source's earlier values are treated as untrusted.
+   */
+  otherSources?: readonly Pick<SourceAdapter, 'name' | 'trustedFields'>[]
   candidate: BookCandidate
   /** Full Author records the caller fetched, keyed by the Author's Source ID. */
   authorRecords?: ReadonlyMap<string, AuthorRecord>
@@ -138,9 +146,21 @@ async function findExistingBook(tx: Tx, candidate: BookCandidate): Promise<strin
 
 async function upsertBook(
   tx: Tx,
-  input: { source: string; candidate: BookCandidate; now: Date; existingId: string | null },
-): Promise<{ id: string; slug: string; created: boolean; lockedFields: string[] }> {
-  const { source, candidate, now, existingId } = input
+  input: {
+    source: string
+    candidate: BookCandidate
+    now: Date
+    existingId: string | null
+    priorityOf: PriorityLookup
+  },
+): Promise<{
+  id: string
+  slug: string
+  created: boolean
+  lockedFields: string[]
+  origins: FieldOrigins
+}> {
+  const { source, candidate, now, existingId, priorityOf } = input
   const coverId = await resolveCover(tx, candidate.book.cover)
   const incoming: IncomingField[] = [
     { field: 'title', column: 'title', value: candidate.book.title },
@@ -168,6 +188,7 @@ async function upsertBook(
       origins: fieldOriginsOf(current.fieldOrigins),
       lockedFields: current.lockedFields,
       incoming,
+      priorityOf,
     })
     await tx
       .update(books)
@@ -182,6 +203,7 @@ async function upsertBook(
       slug: current.slug,
       created: false,
       lockedFields: current.lockedFields,
+      origins: plan.origins,
     }
   }
   const id = newId()
@@ -195,7 +217,7 @@ async function upsertBook(
     fieldOrigins: plan.origins,
     refreshedAt: now,
   })
-  return { id, slug, created: true, lockedFields: [] }
+  return { id, slug, created: true, lockedFields: [], origins: plan.origins }
 }
 
 async function isbnTaken(tx: Tx, isbn13: string): Promise<boolean> {
@@ -209,9 +231,15 @@ async function isbnTaken(tx: Tx, isbn13: string): Promise<boolean> {
 
 async function upsertEditions(
   tx: Tx,
-  input: { source: string; candidate: BookCandidate; bookId: string; now: Date },
+  input: {
+    source: string
+    candidate: BookCandidate
+    bookId: string
+    now: Date
+    priorityOf: PriorityLookup
+  },
 ): Promise<number> {
-  const { source, candidate, bookId, now } = input
+  const { source, candidate, bookId, now, priorityOf } = input
   let skipped = 0
   for (const edition of candidate.editions) {
     const coverId = await resolveCover(tx, edition.cover)
@@ -279,6 +307,7 @@ async function upsertEditions(
         current: existing,
         origins: fieldOriginsOf(existing.fieldOrigins),
         incoming,
+        priorityOf,
       })
       await tx
         .update(editions)
@@ -312,9 +341,10 @@ async function upsertAuthor(
     record: AuthorRecord | undefined
     bookId: string
     now: Date
+    priorityOf: PriorityLookup
   },
 ): Promise<string> {
-  const { source, name, link, record, bookId, now } = input
+  const { source, name, link, record, bookId, now, priorityOf } = input
   let existing: typeof authors.$inferSelect | undefined
   if (link) {
     const linked = await linkedEntityId(tx, 'author', source, link.sourceId)
@@ -348,6 +378,7 @@ async function upsertAuthor(
       current: existing,
       origins: fieldOriginsOf(existing.fieldOrigins),
       incoming,
+      priorityOf,
     })
     await tx
       .update(authors)
@@ -376,9 +407,10 @@ async function upsertContributions(
     bookId: string
     authorRecords: ReadonlyMap<string, AuthorRecord>
     now: Date
+    priorityOf: PriorityLookup
   },
 ): Promise<string[]> {
-  const { source, candidate, bookId, authorRecords, now } = input
+  const { source, candidate, bookId, authorRecords, now, priorityOf } = input
   const names: string[] = []
   for (const contribution of candidate.book.contributions) {
     const link = contribution.sourceLink
@@ -389,6 +421,7 @@ async function upsertContributions(
       record: link ? authorRecords.get(link.sourceId) : undefined,
       bookId,
       now,
+      priorityOf,
     })
     names.push(contribution.authorName)
     await tx
@@ -527,6 +560,7 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
   }
   const now = input.now ?? new Date()
   const authorRecords = input.authorRecords ?? new Map<string, AuthorRecord>()
+  const priorityOf = createPriorityLookup([source, ...(input.otherSources ?? [])])
 
   return db.transaction(async (tx) => {
     // Two people opening the same new Book at once must not both create it.
@@ -534,13 +568,20 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
       sql`select pg_advisory_xact_lock(hashtextextended(${`catalog.ingest:${source.name}:${candidate.sourceLink.sourceId}`}, 0))`,
     )
     const existingId = await findExistingBook(tx, candidate)
-    const book = await upsertBook(tx, { source: source.name, candidate, now, existingId })
+    const book = await upsertBook(tx, {
+      source: source.name,
+      candidate,
+      now,
+      existingId,
+      priorityOf,
+    })
     await addLink(tx, 'book', book.id, source.name, candidate.sourceLink.sourceId)
     const skippedEditions = await upsertEditions(tx, {
       source: source.name,
       candidate,
       bookId: book.id,
       now,
+      priorityOf,
     })
     let authorNames: string[] = []
     if (!isLocked('contributions', book.lockedFields, {})) {
@@ -550,6 +591,7 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
         bookId: book.id,
         authorRecords,
         now,
+        priorityOf,
       })
     }
     if (!isLocked('series', book.lockedFields, {})) {
@@ -563,6 +605,7 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
           authorNames,
         })
       : []
+    await enrichBook(tx, { id: book.id, lockedFields: book.lockedFields, origins: book.origins })
     await refreshSearchVector(tx, book.id)
     await tx.insert(sourceRecords).values({
       source: source.name,

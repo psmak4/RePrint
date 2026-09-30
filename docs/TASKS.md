@@ -250,7 +250,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a title-and-author-only match creates a new Book and a `merge_candidates` row, never an automatic merge (integration test)
   - Accept: `field_origins` records Source and time per field; fields in `locked_fields` are never overwritten by ingest (integration test)
   - Accept: raw responses go to `source_records`; only Store-policy Sources are accepted (test with a Cache-policy stub is rejected)
-- [ ] M3-T09 · Catalog enrichment: Primary Edition choice, Subject-to-Genre mapping, per-field Source priority · deps: M3-T08 · PRD: §5.1, §5.4, §6
+- [x] M3-T09 · Catalog enrichment: Primary Edition choice, Subject-to-Genre mapping, per-field Source priority · deps: M3-T08 · PRD: §5.1, §5.4, §6
   - Accept: the Primary Edition is chosen automatically (English, has a cover, has an ISBN, most recent) unless admin-locked (unit tests on the ranking)
   - Accept: Subjects are stored and mapped to Genres through `subject_genre_rules` by priority with `book_genres.origin = mapping`, and admin Genres are untouched (integration test)
   - Accept: a per-field priority list decides between Sources, and admin always wins (unit test with two stub Sources)
