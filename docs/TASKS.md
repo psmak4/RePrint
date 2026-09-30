@@ -228,7 +228,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T03 · Catalog schema part 2: series, genres, subjects, mapping rules, merge candidates, plus the Genre list · deps: M3-T02 · PRD: §5.1, §5.4, §9
   - Accept: migration creates `series`, `book_series` (nullable numeric `position`), `genres` (`parent_id`, `featured`), `book_genres` (`origin`), `subjects` (case-insensitive unique `label`), `book_subjects`, `subject_genre_rules`, and `merge_candidates`
   - Accept: a data migration inserts the Genre list and starter Subject-to-Genre rules from `docs/DECISIONS.md` (integration test counts about 40 Genres)
-- [ ] M3-T04 · Source adapter interface, shared contract suite, fixture recorder, stub Source · deps: M3-T01 · PRD: §6, §12, §13
+- [x] M3-T04 · Source adapter interface, shared contract suite, fixture recorder, stub Source · deps: M3-T01 · PRD: §6, §12, §13
   - Accept: `apps/api/src/catalog/sources/types.ts` defines `searchBooks`, `getBook`, `getEditions`, `getAuthor`, optional `importBulk`, `storagePolicy`, and trusted-field priorities
   - Accept: `runSourceContract(adapter, fixtures)` checks every output against the shared Zod schemas; a stub adapter passes it
   - Accept: `SOURCE_MODE=fixtures|live|stub` selects the adapter wiring, and a `pnpm --filter api fixtures:record` script saves raw responses under `sources/open-library/__fixtures__/`

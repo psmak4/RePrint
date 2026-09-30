@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  authorRecordSchema,
   authorSchema,
   bookCandidateSchema,
   bookSchema,
+  bookSearchPageSchema,
   contributionSchema,
   coverSchema,
   editionSchema,
@@ -202,6 +204,33 @@ describe('bookCandidateSchema', () => {
         ...candidate,
         book: { ...candidate.book, contributions: [] },
       }).success,
+    ).toBe(false)
+  })
+})
+
+describe('authorRecordSchema and bookSearchPageSchema', () => {
+  const sourceLink = { source: 'stub', entityType: 'author', sourceId: 'a1' }
+
+  it('accepts an Author record with a Source link and no RePrint ID', () => {
+    const record = {
+      name: 'Ursula K. Le Guin',
+      alternateNames: [],
+      bio: null,
+      birthDate: null,
+      deathDate: null,
+      photo: null,
+      sourceLink,
+    }
+    expect(authorRecordSchema.safeParse(record).success).toBe(true)
+    expect(authorRecordSchema.safeParse({ ...record, sourceLink: undefined }).success).toBe(false)
+  })
+
+  it('requires a positive page number in a search page', () => {
+    expect(
+      bookSearchPageSchema.safeParse({ candidates: [], page: 1, hasMore: false }).success,
+    ).toBe(true)
+    expect(
+      bookSearchPageSchema.safeParse({ candidates: [], page: 0, hasMore: false }).success,
     ).toBe(false)
   })
 })

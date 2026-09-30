@@ -15,6 +15,17 @@ describe('loadEnv', () => {
     expect(env.WORKER_IN_PROCESS).toBe(false)
   })
 
+  it('defaults the Source settings and rejects an unknown SOURCE_MODE', () => {
+    const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+    const env = loadEnv(source)
+    expect(env.SOURCE_MODE).toBe('fixtures')
+    expect(env.SOURCE_RATE_LIMIT_RPS).toBe(2)
+    expect(env.SOURCE_TIMEOUT_MS).toBe(5000)
+    expect(env.SOURCE_SEARCH_TIMEOUT_MS).toBe(1500)
+    expect(loadEnv({ ...source, SOURCE_MODE: 'live' }).SOURCE_MODE).toBe('live')
+    expect(() => loadEnv({ ...source, SOURCE_MODE: 'mock' })).toThrow(/SOURCE_MODE/)
+  })
+
   it('reads WORKER_IN_PROCESS', () => {
     const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
     expect(loadEnv({ ...source, WORKER_IN_PROCESS: 'true' }).WORKER_IN_PROCESS).toBe(true)

@@ -1,0 +1,44 @@
+{
+  "numFound": 1,
+  "start": 0,
+  "numFoundExact": true,
+  "num_found": 1,
+  "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+  "q": "isbn:9780441478125",
+  "offset": null,
+  "docs": [
+    {
+      "author_key": ["OL31353A"],
+      "author_name": ["Ursula K. Le Guin"],
+      "cover_edition_key": "OL31935740M",
+      "cover_height": 475,
+      "cover_i": 10618463,
+      "cover_width": 302,
+      "ebook_access": "printdisabled",
+      "edition_count": 91,
+      "first_publish_year": 1969,
+      "has_fulltext": true,
+      "ia": [
+        "lefthandofdarkne0000ursu_l8k8",
+        "bwb_S0-ALL-813",
+        "lefthandofdarkne000legu",
+        "lefthandofdarkn00legu",
+        "lefthandofdarkne0000ursu_w9c3",
+        "lefthandofdarkne00ursu",
+        "lefthandofdarkne00legu",
+        "lefthandofdarkne00legu_0"
+      ],
+      "ia_collection": [
+        "365-Books-by-Women-Authors",
+        "americana",
+        "internetarchivebookdrive",
+        "internetarchivebooks",
+        "printdisabled"
+      ],
+      "key": "/works/OL59800W",
+      "language": ["spa", "fre", "eng", "heb", "kor", "ita", "ger", "por", "tur", "rus", "cat"],
+      "public_scan_b": false,
+      "title": "The Left Hand of Darkness"
+    }
+  ]
+}
