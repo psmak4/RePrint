@@ -205,3 +205,7 @@ Entry format:
 ### 2026-09-30 · M3-T02 · PR pending
 - `packages/db/src/schema/catalog.ts` (`books`, `editions`, `authors`, `contributions`, `source_links`, `source_records`), migration `0004_catalog_core`, and `catalog.integration.test.ts` (constraints, zeroed aggregates, GIN/trigram indexes, cascade). `tsvector` helper added to `helpers.ts`. D-094 records the choices, including an extra `books.refreshed_at`.
 - Next iteration: M3-T03 adds series, genres, subjects, rules, and merge candidates, and the Genre data migration; `book_id` FKs on later community tables should be `RESTRICT` (D-094). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T03 · PR pending
+- `packages/db/src/schema/catalog.ts` gained `series`, `book_series`, `genres`, `book_genres`, `subjects`, `book_subjects`, `subject_genre_rules`, and `merge_candidates` (migration `0005_catalog_taxonomy`); `0006_seed_genres` loads the D-015 Genres (42) and starter rules (98). `genres` and `subject_genre_rules` are now in `MIGRATION_SEEDED_TABLES`. D-095 records the choices, including that D-015's table marks 13 featured Genres although its text says 12.
+- Next iteration: M3-T04 is independent of this. M3-T09 should match rules by case-insensitive substring, highest `priority` first. If `pnpm` fails with "Failed to switch pnpm to v12.6.0", run `node ~/Library/pnpm/.tools/pnpm/12.6.0/node_modules/pnpm/bin/pnpm.mjs` with `npm_config_manage_package_manager_versions=false`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -36,6 +36,20 @@
       "when": 1790742503055,
       "tag": "0004_catalog_core",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790742825266,
+      "tag": "0005_catalog_taxonomy",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790742830024,
+      "tag": "0006_seed_genres",
+      "breakpoints": true
     }
   ]
 }

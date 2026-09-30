@@ -1,20 +1,23 @@
-import { CONTRIBUTION_ROLES, FORMATS } from '@reprint/shared'
+import { CONTRIBUTION_ROLES, FORMATS, GENRE_ORIGINS } from '@reprint/shared'
 import { sql } from 'drizzle-orm'
 import {
   type AnyPgColumn,
+  boolean,
   check,
   date,
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
   primaryKey,
   text,
+  unique,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { covers } from './covers.js'
-import { timestamps, timestamptz, tsvector, uuidv7Pk } from './helpers.js'
+import { citext, timestamps, timestamptz, tsvector, uuidv7Pk } from './helpers.js'
 
 /** Catalog entity types that a Source link can point at. */
 const SOURCE_LINK_ENTITY_TYPES = ['book', 'edition', 'author', 'series'] as const
@@ -174,5 +177,137 @@ export const sourceRecords = pgTable(
   (t) => [
     index('source_records_source_source_id_idx').on(t.source, t.sourceId),
     index('source_records_fetched_at_idx').on(t.fetchedAt),
+  ],
+)
+
+/** A named, ordered set of Books (PRD §5.1, §9). */
+export const series = pgTable('series', {
+  id: uuidv7Pk(),
+  slug: text('slug').notNull().unique(),
+  name: text('name').notNull(),
+  description: text('description'),
+  fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
+  ...timestamps(),
+})
+
+/** A Book's place in a Series. `position` may be decimal (2.5) or empty (PRD §5.1). */
+export const bookSeries = pgTable(
+  'book_series',
+  {
+    bookId: uuid('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    seriesId: uuid('series_id')
+      .notNull()
+      .references(() => series.id, { onDelete: 'cascade' }),
+    position: numeric('position', { mode: 'number' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.seriesId] }),
+    index('book_series_series_id_idx').on(t.seriesId),
+    check('book_series_position_check', sql`${t.position} >= 0`),
+  ],
+)
+
+/** A curated browse category (PRD §5.1). The list is reference data, loaded by a data migration. */
+export const genres = pgTable(
+  'genres',
+  {
+    id: uuidv7Pk(),
+    slug: text('slug').notNull().unique(),
+    name: text('name').notNull(),
+    description: text('description'),
+    parentId: uuid('parent_id').references((): AnyPgColumn => genres.id, { onDelete: 'set null' }),
+    featured: boolean('featured').notNull().default(false),
+    ...timestamps(),
+  },
+  (t) => [index('genres_parent_id_idx').on(t.parentId)],
+)
+
+/** A Book's Genres. `origin` says whether a mapping rule or an admin set it; admin rows are locked. */
+export const bookGenres = pgTable(
+  'book_genres',
+  {
+    bookId: uuid('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    genreId: uuid('genre_id')
+      .notNull()
+      .references(() => genres.id, { onDelete: 'cascade' }),
+    origin: text('origin', { enum: GENRE_ORIGINS }).notNull().default('mapping'),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.genreId] }),
+    index('book_genres_genre_id_idx').on(t.genreId),
+    check('book_genres_origin_check', sql`${t.origin} in ('mapping', 'admin')`),
+  ],
+)
+
+/** A raw Source tag. It feeds search and Genre mapping and is never shown as a category (PRD §5.1). */
+export const subjects = pgTable('subjects', {
+  id: uuidv7Pk(),
+  label: citext('label').notNull().unique(),
+  createdAt: timestamptz('created_at').notNull().default(sql`now()`),
+})
+
+export const bookSubjects = pgTable(
+  'book_subjects',
+  {
+    bookId: uuid('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => subjects.id, { onDelete: 'cascade' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.bookId, t.subjectId] }),
+    index('book_subjects_subject_id_idx').on(t.subjectId),
+  ],
+)
+
+/** Maps Subjects to Genres: a case-insensitive substring `pattern`, higher `priority` first (D-015). */
+export const subjectGenreRules = pgTable(
+  'subject_genre_rules',
+  {
+    id: uuidv7Pk(),
+    pattern: text('pattern').notNull(),
+    genreId: uuid('genre_id')
+      .notNull()
+      .references(() => genres.id, { onDelete: 'cascade' }),
+    priority: integer('priority').notNull().default(50),
+    ...timestamps(),
+  },
+  (t) => [
+    index('subject_genre_rules_genre_id_idx').on(t.genreId),
+    unique('subject_genre_rules_pattern_genre_id_unique').on(t.pattern, t.genreId),
+    check('subject_genre_rules_pattern_check', sql`length(trim(${t.pattern})) > 0`),
+  ],
+)
+
+export const MERGE_CANDIDATE_STATUSES = ['pending', 'merged', 'dismissed'] as const
+
+/** Two Books that may be duplicates, for an admin to check (PRD §5.4). Never merged automatically. */
+export const mergeCandidates = pgTable(
+  'merge_candidates',
+  {
+    id: uuidv7Pk(),
+    bookAId: uuid('book_a_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    bookBId: uuid('book_b_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    reason: text('reason').notNull(),
+    status: text('status', { enum: MERGE_CANDIDATE_STATUSES }).notNull().default('pending'),
+    ...timestamps(),
+  },
+  (t) => [
+    index('merge_candidates_book_a_id_idx').on(t.bookAId),
+    index('merge_candidates_book_b_id_idx').on(t.bookBId),
+    index('merge_candidates_status_idx').on(t.status),
+    unique('merge_candidates_pair_unique').on(t.bookAId, t.bookBId),
+    check('merge_candidates_distinct_check', sql`${t.bookAId} <> ${t.bookBId}`),
+    check('merge_candidates_status_check', sql`${t.status} in ('pending', 'merged', 'dismissed')`),
   ],
 )
