@@ -296,7 +296,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
   - Accept: the page shows photo, name, life dates, and bio when available, with fallbacks (component tests)
   - Accept: Books are grouped by role (written, translated, narrated, and so on) and sorted by review count with each Book's rating (component and loader tests)
-- [ ] M3-T21 · Local seed: about 500 Books with Editions, Authors, Series, Genres, Subjects · deps: M3-T09, M1-T16 · PRD: §13
+- [x] M3-T21 · Local seed: about 500 Books with Editions, Authors, Series, Genres, Subjects · deps: M3-T09, M1-T16 · PRD: §13
   - Accept: `pnpm db:reset` loads about 500 Books through the ingest path (from recorded fixtures and deterministic generation), with Series, multiple Editions, translations, and missing-data cases
   - Accept: seeded data passes the same Zod schemas as live data, and the seed is idempotent
 - [ ] M3-T22 · E2E: search to book page (stubbed Source) · deps: M3-T19, M3-T20, M3-T21, M1-T13 · PRD: §12

@@ -4,4 +4,5 @@ export { MIGRATIONS_FOLDER, runMigrations } from './migrate.js'
 export * from './schema/index.js'
 
 export const PACKAGE_NAME = '@reprint/db'
+export { assertSeedAllowed, createSeedRandom, SEED, type SeedRandom } from './seed/index.js'
 export { DEV_PASSWORD, DEV_PASSWORD_HASH, SEED_USER_COUNT } from './seed/modules/users.js'
