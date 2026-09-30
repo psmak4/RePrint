@@ -14,6 +14,7 @@ import { ErrorPage } from './components/error-page.js'
 import { AccountMenu } from './components/shell/account-menu.js'
 import { AppShell } from './components/shell/app-shell.js'
 import { NotificationBell } from './components/shell/notification-bell.js'
+import { SearchBox } from './components/shell/search-box.js'
 import { loadSession } from './lib/auth.server.js'
 import { logger } from './lib/logger.server.js'
 import { loadNotifications } from './lib/notifications.server.js'
@@ -44,6 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppShell
+          searchSlot={<SearchBox />}
           accountSlot={
             <>
               {viewer ? <NotificationBell notifications={session?.notifications ?? null} /> : null}

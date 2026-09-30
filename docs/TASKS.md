@@ -279,7 +279,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `Cover` renders the Open Library image by cover ID and size, and falls back to a generated cover (title and author) when the image is missing or fails to load (component tests)
   - Accept: `BookCard` shows cover, title, authors, and first published year, plus rating and count or "No RePrint reviews yet" (component tests)
   - Accept: these components are listed in `docs/DESIGN.md`'s inventory
-- [ ] M3-T16 · Web: header search box with Catalog suggestions · deps: M3-T15, M3-T12 · PRD: §7.3, §11
+- [x] M3-T16 · Web: header search box with Catalog suggestions · deps: M3-T15, M3-T12 · PRD: §7.3, §11
   - Accept: suggestions appear after 2 characters, 250 ms after the last keystroke (component test with fake timers)
   - Accept: the combobox is keyboard-navigable with correct ARIA roles, and Enter goes to `/search?q=` (component test)
 - [ ] M3-T17 · Web: search results page · deps: M3-T16, M3-T14 · PRD: §7.3

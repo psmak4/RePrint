@@ -86,7 +86,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Overlays | shadcn `Dialog`, `AlertDialog` (confirm deletes), `DropdownMenu` (account, bell), `Popover`, `Tooltip` | Add as needed |
 | Navigation | shadcn `Tabs` (search Books/Authors), `Pagination`, `Breadcrumb` | Add as needed |
 | Data | shadcn `Table`, `Skeleton`, `Separator`, `Avatar` | Add as needed |
-| Combobox | shadcn `Command` in a `Popover` (header search suggestions) | M3-T16 |
+| Combobox | `SearchBox` in `apps/web/app/components/shell/`: hand-built ARIA combobox for header search suggestions (D-108) | Built (M3-T16) |
 | App shell | `AppShell`, `SiteHeader` (logo, search slot, account slot), `SiteFooter` (Open Library credit, legal links), skip link | Built (M1-T12) |
 | Books | `Cover` (2:3, generated fallback), `BookCard` (cover, title link, authors, first published year, rating), `RatingDisplay` (average and count, or "No RePrint reviews yet"), in `apps/web/app/components/books/` | Built (M3-T15) |
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
