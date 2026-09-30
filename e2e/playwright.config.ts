@@ -25,7 +25,7 @@ const stackEnv = {
   WORKER_IN_PROCESS: 'true',
   EMAIL_TRANSPORT: 'smtp',
   SMTP_HOST: 'localhost',
-  SMTP_PORT: '1025',
+  SMTP_PORT: process.env.SMTP_PORT ?? '1025',
   API_INTERNAL_URL: `http://localhost:${apiPort}`,
 }
 

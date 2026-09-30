@@ -1,4 +1,7 @@
 # Job names are the required status checks for `main`. Keep them stable and in sync with docs/ci.md.
+# Jobs run on the owner's self-hosted runner (label `reprint-ci`, D-113): GitHub-hosted minutes for this
+# private repo ran out. Setup and operation: docs/ci-runner.md. To go back to GitHub-hosted runners,
+# change every `runs-on` to `ubuntu-latest` (the e2e job's isolated ports work on either).
 name: CI
 
 on:
@@ -22,7 +25,7 @@ env:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -34,7 +37,7 @@ jobs:
 
   typecheck:
     name: typecheck
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +46,7 @@ jobs:
 
   db-check:
     name: db-check
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -52,7 +55,7 @@ jobs:
 
   unit:
     name: unit
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -61,7 +64,7 @@ jobs:
 
   integration:
     name: integration
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -70,7 +73,7 @@ jobs:
 
   build:
     name: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -80,7 +83,7 @@ jobs:
 
   gitleaks:
     name: gitleaks
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -90,7 +93,7 @@ jobs:
 
   audit:
     name: audit
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, reprint-ci]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -99,21 +102,33 @@ jobs:
 
   e2e:
     name: e2e
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    runs-on: [self-hosted, reprint-ci]
+    timeout-minutes: 30
+    # An isolated stack (D-113): its own Compose project and shifted ports, so a local stack or a
+    # loop session on the same machine is never touched.
+    env:
+      COMPOSE: docker compose -p reprint-ci -f docker-compose.yml -f docker-compose.ci.yml
+      DATABASE_URL: postgres://reprint:reprint@localhost:15432/reprint
+      REDIS_URL: redis://localhost:16379
+      SMTP_PORT: "11025"
+      MAILPIT_API_URL: http://localhost:18025
+      E2E_WEB_ORIGIN: http://www.reprint.localhost:15173
+      E2E_API_ORIGIN: http://api.reprint.localhost:13000
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Start Postgres, Redis, and Mailpit
-        run: docker compose up -d --wait
+      - name: Start Postgres, Redis, and Mailpit (fresh CI stack)
+        run: |
+          $COMPOSE down -v --remove-orphans
+          $COMPOSE up -d --wait
       - run: pnpm build
       - name: Migrate the database
         run: pnpm db:migrate
       - name: Install Playwright browsers
-        run: pnpm --filter e2e install:browsers
+        run: pnpm --filter e2e exec playwright install chromium webkit
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
+        if: ${{ failure() }}
         with:
           name: playwright-report
           path: |
@@ -121,3 +136,6 @@ jobs:
             e2e/test-results
           retention-days: 7
           if-no-files-found: ignore
+      - name: Remove the CI stack
+        if: ${{ always() }}
+        run: $COMPOSE down -v --remove-orphans
