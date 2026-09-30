@@ -61,6 +61,16 @@ export const confirmEmailChangeRequestSchema = z.object({
 })
 export const confirmEmailChangeResponseSchema = z.object({ status: z.literal('email_changed') })
 
+/** A deleted account is disabled at once and erased this many days later (PRD §7.1, D-043). */
+export const ACCOUNT_ERASE_AFTER_DAYS = 30
+
+export const deleteAccountRequestSchema = z.object({
+  password: z.string().min(1, 'Enter your password.').max(128),
+})
+export const deleteAccountResponseSchema = z.object({
+  status: z.literal('account_deletion_scheduled'),
+})
+
 export type Me = z.infer<typeof meSchema>
 export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>

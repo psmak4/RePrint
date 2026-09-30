@@ -9,6 +9,7 @@ import { startWorker } from './jobs/worker-runtime.js'
 import { postgresCheck, redisCheck } from './modules/ops/readiness.js'
 import { baseLoggerOptions } from './observability/logging.js'
 import { captureError, initSentry } from './observability/sentry.js'
+import { createImageStorage } from './storage/index.js'
 
 async function main(): Promise<void> {
   const env = loadEnv()
@@ -32,6 +33,8 @@ async function main(): Promise<void> {
         redisUrl: env.REDIS_URL,
         log: pino({ ...baseLoggerOptions(env), base: { service: 'worker' } }),
         mailer,
+        db: database.db,
+        storage: createImageStorage(env),
         onJobError: captureError,
       })
     : undefined

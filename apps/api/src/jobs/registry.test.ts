@@ -1,7 +1,12 @@
+import type { Database } from '@reprint/db'
 import { pino } from 'pino'
 import { describe, expect, it } from 'vitest'
+import type { ImageStorage } from '../storage/index.js'
 import { recordingMailer } from '../testing/mailer.js'
 import { isJobName, jobs } from './registry.js'
+
+// These handlers never touch the database or storage.
+const unusedServices = { db: {} as Database, storage: {} as ImageStorage }
 
 describe('job registry', () => {
   it('recognizes registered names only', () => {
@@ -26,7 +31,7 @@ describe('job registry', () => {
   it('heartbeat returns the time it ran', async () => {
     const result = await jobs['system.heartbeat'].handler(
       {},
-      { log: pino({ level: 'silent' }), mailer: recordingMailer().mailer },
+      { log: pino({ level: 'silent' }), mailer: recordingMailer().mailer, ...unusedServices },
     )
     expect(new Date(result.at).toString()).not.toBe('Invalid Date')
   })
@@ -41,7 +46,11 @@ describe('job registry', () => {
     it('renders the template and hands it to the mailer', async () => {
       const { mailer, sent } = recordingMailer()
       const parsed = jobs['email.send'].payload.parse(payload)
-      await jobs['email.send'].handler(parsed, { log: pino({ level: 'silent' }), mailer })
+      await jobs['email.send'].handler(parsed, {
+        log: pino({ level: 'silent' }),
+        mailer,
+        ...unusedServices,
+      })
       expect(sent).toHaveLength(1)
       expect(sent[0]).toMatchObject({
         to: 'ada@example.test',

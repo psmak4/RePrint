@@ -128,8 +128,17 @@ export const workerEnvSchema = baseEnvSchema
     SMTP_HOST: true,
     SMTP_PORT: true,
     RESEND_API_KEY: true,
+    // `accounts.erase` removes avatar files.
+    STORAGE_DRIVER: true,
+    STORAGE_LOCAL_DIR: true,
+    IMAGE_BASE_URL: true,
+    R2_ACCOUNT_ID: true,
+    R2_ACCESS_KEY_ID: true,
+    R2_SECRET_ACCESS_KEY: true,
+    R2_BUCKET_UPLOADS: true,
   })
   .superRefine(requireResendKey)
+  .superRefine(requireR2Settings)
 
 export type WorkerEnv = z.infer<typeof workerEnvSchema>
 

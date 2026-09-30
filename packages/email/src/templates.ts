@@ -1,5 +1,10 @@
 import type { z } from 'zod'
 import {
+  AccountDeletionScheduled,
+  accountDeletionScheduledProps,
+  accountDeletionScheduledSubject,
+} from './templates/account-deletion-scheduled.js'
+import {
   EmailAlreadyRegistered,
   emailAlreadyRegisteredProps,
   emailAlreadyRegisteredSubject,
@@ -63,6 +68,11 @@ export const emailTemplates = {
     props: emailChangedProps,
     subject: () => emailChangedSubject,
     component: EmailChanged,
+  },
+  'account-deletion-scheduled': {
+    props: accountDeletionScheduledProps,
+    subject: () => accountDeletionScheduledSubject,
+    component: AccountDeletionScheduled,
   },
 } as const
 

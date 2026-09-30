@@ -1,3 +1,4 @@
+import { tmpdir } from 'node:os'
 import { QueueEvents } from 'bullmq'
 import { Redis } from 'ioredis'
 import { pino } from 'pino'
@@ -5,6 +6,7 @@ import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainer
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createJobQueue, type JobQueue, QUEUE_NAME } from '../jobs/queue.js'
 import { startWorker } from '../jobs/worker-runtime.js'
+import { LocalImageStorage } from '../storage/index.js'
 import { startTestStack, type TestStack } from '../testing/stack.js'
 import { createMailer, type Mailer } from './mailer.js'
 
@@ -58,6 +60,8 @@ beforeAll(async () => {
     redisUrl: stack.redisUrl,
     log: pino({ level: 'silent' }),
     mailer,
+    db: stack.db.db,
+    storage: new LocalImageStorage(tmpdir(), 'http://localhost/uploads'),
   })
   stopWorker = worker.stop
 })
