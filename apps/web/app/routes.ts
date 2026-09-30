@@ -7,6 +7,7 @@ export default [
   route('logout', 'routes/logout.tsx'),
   route('verify-email', 'routes/verify-email.tsx'),
   route('resend-verification', 'routes/resend-verification.tsx'),
+  route('books/:slug', 'routes/book.tsx'),
   route('search', 'routes/search.tsx'),
   route('search/suggest', 'routes/search-suggest.tsx'),
   route('notifications/read', 'routes/notifications-read.tsx'),

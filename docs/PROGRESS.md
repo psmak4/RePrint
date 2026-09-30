@@ -269,3 +269,8 @@ Entry format:
 ### 2026-09-30 · M3-T17 · PR pending
 - `apps/web/app/routes/search.tsx` (loader, ISBN redirect, failure state), `components/search/search-results-page.tsx` (tabs, GET filter form, sort, pagination, cards), `lib/search-links.ts` (`parseSearchParams`, `searchHref`, `resolveHref`), `copy.search`, and tests. D-109 records the choices. Added task M5-T05a for the Genre select (no Genre list API before M5-T03).
 - Next iteration: M3-T18 (book page). Search cards link stored Books to `/books/:slug` and unstored ones to `/resolve?ref=`; M3-T19 must serve that path. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T18 · PR pending
+- `apps/web/app/routes/book.tsx` (loader, meta with canonical and Open Graph), `components/books/book-page.tsx` (`BookPage`), `lib/contributors.ts` (byline grouping), `copy.books.page`, and tests. D-110 records the choices. The route is registered in `routes.ts`.
+- Next iteration: M3-T19 (`/resolve?ref=`). The book page has no rating chart, reviews, or shelf controls yet (M4, M6); schema.org JSON-LD is deferred to M4. Series and Genre links target M5 routes. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

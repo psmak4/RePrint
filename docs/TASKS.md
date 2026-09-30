@@ -286,7 +286,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/search` has Books and Authors tabs, filters, sort, and page number in the URL; the SSR loader renders results (component tests)
   - Accept: Books not yet on RePrint show "No RePrint reviews yet" and link to the resolve flow; the Source-unavailable note appears when flagged (component tests)
   - Accept: an ISBN query redirects straight to the Book (loader test)
-- [ ] M3-T18 · Web: book page (`/books/:slug`) header, description, Editions, more by this author · deps: M3-T17 · PRD: §5.4, §7.4, §11
+- [x] M3-T18 · Web: book page (`/books/:slug`) header, description, Editions, more by this author · deps: M3-T17 · PRD: §5.4, §7.4, §11
   - Accept: the SSR page shows cover, title, subtitle, contributors with roles, Series link and position, first published year, page count, publisher, and Genre tags from the Primary Edition, and hides rows with missing data (component tests)
   - Accept: the description collapses after 6 lines with an accessible toggle; missing descriptions show "No description yet" (component tests)
   - Accept: the collapsible Editions list and "More by this author" (up to 6) render; canonical URL, meta description, and Open Graph tags are present (loader test)

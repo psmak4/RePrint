@@ -97,6 +97,39 @@ export const copy = {
     ratingLabel: (average: string, count: number) =>
       `Rated ${average} out of 5 from ${count} ${count === 1 ? 'review' : 'reviews'}`,
     reviewCount: (count: number) => `(${count})`,
+    page: {
+      roles: {
+        author: 'by',
+        translator: 'translated by',
+        illustrator: 'illustrated by',
+        editor: 'edited by',
+        narrator: 'narrated by',
+        other: 'with',
+      },
+      seriesPosition: (name: string, position: number) => `${name}, book ${position}`,
+      pages: (count: number) => `${count} pages`,
+      publisher: (name: string) => `Published by ${name}`,
+      genresLabel: 'Genres',
+      descriptionHeading: 'About this book',
+      noDescription: 'No description yet',
+      readMore: 'Read more',
+      readLess: 'Read less',
+      editionsHeading: (count: number) => `Editions (${count})`,
+      formats: {
+        hardcover: 'Hardcover',
+        paperback: 'Paperback',
+        ebook: 'E-book',
+        audiobook: 'Audiobook',
+        unknown: 'Format unknown',
+      },
+      isbn: (isbn: string) => `ISBN ${isbn}`,
+      moreByHeading: (name: string) => `More by ${name}`,
+      metaDescription: (title: string, authors: string) =>
+        authors
+          ? `${title} by ${authors}: ratings and reviews on RePrint.`
+          : `${title}: ratings and reviews on RePrint.`,
+      loadFailed: "We couldn't load this book right now. Please try again in a moment.",
+    },
   },
   auth: {
     emailLabel: 'Email',
