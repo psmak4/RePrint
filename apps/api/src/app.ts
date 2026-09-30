@@ -6,6 +6,9 @@ import type { Database } from '@reprint/db'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { Redis } from 'ioredis'
+import { type CandidateRefs, createCandidateRefs } from './catalog/candidate-refs.js'
+import type { InteractiveCall } from './catalog/resolve.js'
+import type { SourceAdapter } from './catalog/sources/types.js'
 import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
 import { loginRoutes } from './modules/auth/login.js'
@@ -13,6 +16,7 @@ import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
+import { resolveRoutes } from './modules/catalog/resolve.js'
 import { catalogRoutes } from './modules/catalog/routes.js'
 import { avatarRoutes } from './modules/me/avatar.js'
 import { meRoutes } from './modules/me/routes.js'
@@ -48,6 +52,8 @@ export async function buildApp(
     redis?: Redis
     /** Enqueues background jobs (emails); needed to serve the auth routes. */
     jobs?: Pick<JobQueue, 'enqueue'>
+    /** The Source behind the gateway; enables opening Books that are not yet on RePrint. */
+    catalog?: { source: SourceAdapter; interactive: InteractiveCall }
     /** Where avatars are stored; defaults to the driver chosen by `STORAGE_DRIVER`. */
     storage?: ImageStorage
   } = {},
@@ -144,6 +150,20 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+  })
+
+  const candidateRefs: CandidateRefs | undefined =
+    options.redis && createCandidateRefs(options.redis)
+  await app.register(resolveRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    timeoutMs: env.SOURCE_TIMEOUT_MS,
+    catalog:
+      options.catalog && candidateRefs
+        ? { source: options.catalog.source, call: options.catalog.interactive, candidateRefs }
+        : undefined,
   })
 
   await app.register(avatarRoutes, {

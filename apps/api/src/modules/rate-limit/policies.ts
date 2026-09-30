@@ -23,6 +23,7 @@ export const RATE_LIMIT_POLICIES = {
   emailChange: { subject: 'user', limit: 5, windowSeconds: HOUR },
   reviewWrite: { subject: 'user', limit: 20, windowSeconds: DAY },
   report: { subject: 'user', limit: 20, windowSeconds: DAY },
+  bookResolve: { subject: 'ip', limit: 30, windowSeconds: MINUTE },
   authenticatedWrite: { subject: 'user', limit: 120, windowSeconds: MINUTE },
   anonymousRead: { subject: 'ip', limit: 300, windowSeconds: MINUTE },
 } as const satisfies Record<string, RateLimitPolicy>

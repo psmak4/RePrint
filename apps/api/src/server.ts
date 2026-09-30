@@ -19,7 +19,9 @@ async function main(): Promise<void> {
   // Connect lazily so the API can start (and report not ready) while Redis is down.
   const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 1 })
   const jobQueue = createJobQueue(env.REDIS_URL)
+  const catalog = createCatalogRuntime(env, redis)
   const app = await buildApp(env, {
+    catalog,
     database: database.db,
     redis,
     jobs: jobQueue,
@@ -36,7 +38,7 @@ async function main(): Promise<void> {
         mailer,
         db: database.db,
         storage: createImageStorage(env),
-        catalog: createCatalogRuntime(env, redis),
+        catalog,
         onJobError: captureError,
       })
     : undefined

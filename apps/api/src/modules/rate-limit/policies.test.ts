@@ -7,7 +7,7 @@ const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
 describe('RATE_LIMIT_POLICIES', () => {
-  it('matches the PRD §11 table (plus passwordChange and emailChange, D-084 and D-085)', () => {
+  it('matches the PRD §11 table (plus passwordChange and emailChange, D-084 and D-085, and bookResolve, D-103)', () => {
     expect(RATE_LIMIT_POLICIES).toEqual({
       loginIp: { subject: 'ip', limit: 10, windowSeconds: 15 * MINUTE },
       loginAccount: { subject: 'account', limit: 5, windowSeconds: 15 * MINUTE },
@@ -18,6 +18,7 @@ describe('RATE_LIMIT_POLICIES', () => {
       emailChange: { subject: 'user', limit: 5, windowSeconds: HOUR },
       reviewWrite: { subject: 'user', limit: 20, windowSeconds: DAY },
       report: { subject: 'user', limit: 20, windowSeconds: DAY },
+      bookResolve: { subject: 'ip', limit: 30, windowSeconds: MINUTE },
       authenticatedWrite: { subject: 'user', limit: 120, windowSeconds: MINUTE },
       anonymousRead: { subject: 'ip', limit: 300, windowSeconds: MINUTE },
     })
