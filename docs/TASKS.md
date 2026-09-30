@@ -259,7 +259,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: public GETs set `Cache-Control` with `stale-while-revalidate` and an `ETag`, and `If-None-Match` returns 304 (integration test)
   - Accept: viewing a Book whose data is more than 30 days old enqueues a low-priority `catalog.refresh` job, and the refresh respects locked fields (integration test)
   - Accept: a daily `catalog.purgeSourceRecords` job deletes `source_records` older than 30 days (integration test); unknown slugs return 404 Problem Details
-- [ ] M3-T11 · Opening a Book not yet on RePrint: candidate references and `POST /v1/books/resolve` · deps: M3-T10, M3-T07 · PRD: §6, §7.3, §10
+- [x] M3-T11 · Opening a Book not yet on RePrint: candidate references and `POST /v1/books/resolve` · deps: M3-T10, M3-T07 · PRD: §6, §7.3, §10
   - Accept: search candidates carry an opaque `ref` (no Source ID; stored in Redis for 24 h per `docs/DECISIONS.md`)
   - Accept: resolving a ref fetches, stores the Book with Editions and Authors, and returns its slug within the 5-second limit; a second resolve returns the same slug (integration tests)
   - Accept: a Source timeout or open breaker returns 503 Problem Details, and an unknown ref returns 404

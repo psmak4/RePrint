@@ -58,3 +58,11 @@ export const authorDetailSchema = authorSchema.extend({
   ),
 })
 export type AuthorDetail = z.infer<typeof authorDetailSchema>
+
+/** The opaque reference a search gives a Book that is not yet on RePrint (D-033). */
+export const candidateRefSchema = z.string().regex(/^[A-Za-z0-9_-]{22,64}$/)
+
+/** `POST /books/resolve`: stores the referenced Book and returns where to find it. */
+export const resolveBookRequestSchema = z.object({ ref: candidateRefSchema })
+export const resolveBookResponseSchema = z.object({ slug: slugSchema })
+export type ResolveBookResponse = z.infer<typeof resolveBookResponseSchema>

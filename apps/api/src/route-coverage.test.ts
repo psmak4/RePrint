@@ -17,6 +17,7 @@ const SESSIONS = 'modules/me/sessions.integration.test.ts'
 const AVATAR = 'modules/me/avatar.integration.test.ts'
 const DELETION = 'modules/accounts/deletion.integration.test.ts'
 const CATALOG = 'modules/catalog/catalog.integration.test.ts'
+const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -125,6 +126,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/authors/{slug}': {
     allowed: [CATALOG, 'lists the Author’s Books grouped by Role'],
     denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'POST /v1/books/resolve': {
+    allowed: [RESOLVE, 'stores the Book with its Editions and Authors'],
+    denied: [RESOLVE, 'returns 404 Problem Details for an unknown or expired ref'],
   },
   'POST /v1/me/avatar': {
     allowed: [AVATAR, 'stores a 256 px WebP'],
