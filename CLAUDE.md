@@ -76,6 +76,7 @@ docs/            TASKS, PROGRESS, BLOCKERS, DECISIONS, DESIGN, milestones/
 - First page load uses route loaders. TanStack Query is only for client-side updates after load. Forms use React Hook Form with the shared Zod schemas.
 - Pin major versions (`^x` within the PRD §8 stack table). Node 24, TypeScript 7 (`typescript@6` only for tools that need the old API).
 - Code must run locally without external accounts: Docker Postgres and Redis, Mailpit for email, recorded Open Library fixtures (`SOURCE_MODE=fixtures`), local disk instead of R2, and Sentry disabled when there is no DSN.
+- Stop every process you start (`pnpm dev`, API, worker, web servers) before you finish. Before running e2e, check that ports 5173 and 3000 are free (`lsof -nP -iTCP:5173 -iTCP:3000 -sTCP:LISTEN`); a leftover server from an earlier session gets reused by Playwright and breaks the specs.
 
 ## Definition of done (every task)
 
