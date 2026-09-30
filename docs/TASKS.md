@@ -271,7 +271,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: candidates that match Catalog Books are shown as the stored Book; results are deduplicated; Catalog Books get a review-count boost (integration tests)
   - Accept: when the Source takes > 1.5 s or the breaker is open, Catalog results return alone with `sourceUnavailable: true` (integration test with a slow stub)
   - Accept: later pages request the Source's matching page and drop Books already shown
-- [ ] M3-T14 · Search filters, sorts, Authors tab, and ISBN lookup · deps: M3-T13 · PRD: §7.3, §10
+- [x] M3-T14 · Search filters, sorts, Authors tab, and ISBN lookup · deps: M3-T13 · PRD: §7.3, §10
   - Accept: `genre`, `language`, and `minRating` limit results to the Catalog; `decade` applies to all results (integration tests)
   - Accept: `sort=relevance|most_reviewed|highest_rated|newest` works; `pageSize` is 20; `type=authors` returns Authors (integration tests)
   - Accept: a 10- or 13-digit ISBN query returns an `isbnMatch` (slug or ref) that the web follows directly, and an exact ISBN match ranks first (integration tests)

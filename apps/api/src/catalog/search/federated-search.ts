@@ -5,19 +5,21 @@ import {
   type BookSearchPage,
   type BookSummary,
   bookSearchPageSchema,
+  type IsbnMatch,
   SEARCH_MIN_LENGTH,
   SEARCH_PAGE_SIZE,
+  type SearchQuery,
   type SearchResponse,
   type SearchResultItem,
   toIsbn13,
 } from '@reprint/shared'
 import { and, eq, inArray } from 'drizzle-orm'
 import type { Redis } from 'ioredis'
-import { loadBookSummaries } from '../../modules/catalog/read.js'
+import { loadAuthorSuggestions, loadBookSummaries } from '../../modules/catalog/read.js'
 import type { CandidateRefs } from '../candidate-refs.js'
 import type { InteractiveCall } from '../resolve.js'
 import type { SourceAdapter } from '../sources/types.js'
-import { searchCatalogBooks, searchTokens } from './catalog-search.js'
+import { searchCatalogAuthors, searchCatalogBooks, searchTokens } from './catalog-search.js'
 
 /** Source search pages stay in Redis this long (PRD §6). */
 export const SOURCE_SEARCH_CACHE_TTL_SECONDS = 24 * 60 * 60
@@ -40,6 +42,10 @@ export interface FederatedSearchDeps {
 interface Ranked {
   score: number
   isbnMatch: boolean
+  /** What the sorts other than relevance order by; a candidate has no reviews (PRD §7.3). */
+  reviews: number
+  average: number | null
+  year: number | null
   /** Sort key for ties: earlier is better. */
   order: number
   item: () => Promise<SearchResultItem>
@@ -137,17 +143,71 @@ async function matchStoredBooks(
   return matched
 }
 
+function inDecade(year: number | null, decade: number): boolean {
+  return year !== null && year >= decade && year < decade + 10
+}
+
+function isbnMatchOf(item: SearchResultItem | undefined): IsbnMatch | null {
+  if (item?.kind === 'book') return { kind: 'book', slug: item.book.slug }
+  if (item?.kind === 'candidate') return { kind: 'candidate', ref: item.candidate.ref }
+  return null
+}
+
 function candidateHasIsbn(candidate: BookCandidate, isbn: string | null): boolean {
   return isbn !== null && candidate.editions.some((edition) => edition.isbn13 === isbn)
 }
 
 const EMPTY = (page: number): SearchResponse => ({
   items: [],
+  isbnMatch: null,
   page,
   pageSize: SEARCH_PAGE_SIZE,
   hasMore: false,
   sourceUnavailable: false,
 })
+
+/** Nulls sort last whichever way the values run. */
+function byNumber(a: number | null, b: number | null): number {
+  if (a === b) return 0
+  if (a === null) return 1
+  if (b === null) return -1
+  return b - a
+}
+
+/** An exact ISBN match goes first; then the chosen sort; then relevance, then arrival order. */
+function compareRanked(sort: SearchQuery['sort']) {
+  return (a: Ranked, b: Ranked): number => {
+    let byKey = 0
+    if (sort === 'most_reviewed') byKey = b.reviews - a.reviews
+    else if (sort === 'highest_rated')
+      byKey = byNumber(a.average, b.average) || b.reviews - a.reviews
+    else if (sort === 'newest') byKey = byNumber(a.year, b.year)
+    return (
+      Number(b.isbnMatch) - Number(a.isbnMatch) || byKey || b.score - a.score || a.order - b.order
+    )
+  }
+}
+
+/** Authors whose name matches the query: Catalog only, paged by offset (PRD §7.3). */
+async function authorSearch(db: Database, q: string, page: number): Promise<SearchResponse> {
+  const hits = await searchCatalogAuthors(db, {
+    q,
+    limit: SEARCH_PAGE_SIZE + 1,
+    offset: (page - 1) * SEARCH_PAGE_SIZE,
+  })
+  const shown = await loadAuthorSuggestions(
+    db,
+    hits.slice(0, SEARCH_PAGE_SIZE).map((hit) => hit.id),
+  )
+  return {
+    items: shown.map((author) => ({ kind: 'author', author })),
+    isbnMatch: null,
+    page,
+    pageSize: SEARCH_PAGE_SIZE,
+    hasMore: hits.length > SEARCH_PAGE_SIZE,
+    sourceUnavailable: false,
+  }
+}
 
 /**
  * Federated Book search (PRD §6 "How search works", D-105). Page 1 runs the Catalog query and the
@@ -157,18 +217,33 @@ const EMPTY = (page: number): SearchResponse => ({
  */
 export async function federatedSearch(
   deps: FederatedSearchDeps,
-  input: { q: string; page: number },
+  input: Pick<SearchQuery, 'q' | 'page'> & Partial<SearchQuery>,
 ): Promise<SearchResponse> {
   const { db, source, candidateRefs } = deps
-  const { q, page } = input
+  const { q, page, genre, language, decade, minRating, sort = 'relevance' } = input
   if (q.trim().length < SEARCH_MIN_LENGTH || searchTokens(q).length === 0) return EMPTY(page)
+  if (input.type === 'authors') return authorSearch(db, q, page)
   const isbn = toIsbn13(q)
+  const filters = { genre, language, decade, minRating }
+  // Genres and ratings exist only in the Catalog, so choosing one leaves the Source out (PRD §7.3).
+  const catalogOnly = genre !== undefined || language !== undefined || minRating !== undefined
 
   const [catalogHits, page1Hits, sourceResult] = await Promise.all([
-    page === 1 ? searchCatalogBooks(db, { q, limit: SEARCH_PAGE_SIZE }) : Promise.resolve([]),
+    page === 1 || catalogOnly
+      ? searchCatalogBooks(db, {
+          q,
+          // One extra hit tells whether another page exists.
+          limit: catalogOnly ? SEARCH_PAGE_SIZE + 1 : SEARCH_PAGE_SIZE,
+          offset: catalogOnly ? (page - 1) * SEARCH_PAGE_SIZE : 0,
+          filters,
+          sort,
+        })
+      : Promise.resolve([]),
     // Later pages must not repeat what page 1 showed from the Catalog.
-    page > 1 ? searchCatalogBooks(db, { q, limit: SEARCH_PAGE_SIZE }) : Promise.resolve([]),
-    sourcePage(deps, q, page),
+    page > 1 && !catalogOnly
+      ? searchCatalogBooks(db, { q, limit: SEARCH_PAGE_SIZE, filters, sort })
+      : Promise.resolve([]),
+    catalogOnly ? Promise.resolve(null) : sourcePage(deps, q, page),
   ])
   const shownOnPage1 = new Set(page1Hits.map((hit) => hit.id))
   const candidates = sourceResult?.candidates ?? []
@@ -207,7 +282,12 @@ export async function federatedSearch(
   for (const [bookId, entry] of stored) {
     const summary = summaryById.get(bookId)
     if (!summary) continue
+    // Candidates are not filtered in SQL, so a stored match is checked here.
+    if (decade !== undefined && !inDecade(summary.firstPublishedYear, decade)) continue
     ranked.push({
+      reviews: summary.rating.count,
+      average: summary.rating.average,
+      year: summary.firstPublishedYear,
       // Catalog Books get a relevance boost from their review count (PRD §6).
       score: entry.score + REVIEW_BOOST * Math.log1p(summary.rating.count),
       isbnMatch: entry.isbnMatch,
@@ -219,7 +299,11 @@ export async function federatedSearch(
   for (const candidate of candidates) {
     if (matched.has(candidate) || seenSourceIds.has(candidate.sourceLink.sourceId)) continue
     seenSourceIds.add(candidate.sourceLink.sourceId)
+    if (decade !== undefined && !inDecade(candidate.book.firstPublishedYear, decade)) continue
     ranked.push({
+      reviews: 0,
+      average: null,
+      year: candidate.book.firstPublishedYear,
       score: candidate.confidence,
       isbnMatch: candidateHasIsbn(candidate, isbn),
       order: ranked.length,
@@ -239,17 +323,16 @@ export async function federatedSearch(
       }),
     })
   }
-  ranked.sort(
-    (a, b) => Number(b.isbnMatch) - Number(a.isbnMatch) || b.score - a.score || a.order - b.order,
-  )
+  ranked.sort(compareRanked(sort))
   const shown = ranked.slice(0, SEARCH_PAGE_SIZE)
   // References are issued only for what is shown, so cut-off candidates cost no Redis writes.
   const items = await Promise.all(shown.map((entry) => entry.item()))
   return {
     items,
+    isbnMatch: page === 1 && shown[0]?.isbnMatch ? isbnMatchOf(items[0]) : null,
     page,
     pageSize: SEARCH_PAGE_SIZE,
     hasMore: ranked.length > SEARCH_PAGE_SIZE || (sourceResult?.hasMore ?? false),
-    sourceUnavailable: sourceResult === null,
+    sourceUnavailable: !catalogOnly && sourceResult === null,
   }
 }
