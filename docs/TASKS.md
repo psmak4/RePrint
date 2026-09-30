@@ -198,7 +198,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `notify(tx, userId, type, data)` creates rows; password changed and email changed create security notifications (integration tests)
   - Accept: `GET /v1/me/notifications` is paginated newest first with an unread count; `POST /v1/me/notifications/read` marks given IDs or all as read (allowed and unauthenticated-denied tests)
   - Accept: the header bell shows the unread count and a dropdown list, and opening it marks items read (component test)
-- [ ] M2-T19 · Web settings: profile, avatar, library privacy, email preferences · deps: M2-T16, M2-T11 · PRD: §7.1, §7.8
+- [x] M2-T19 · Web settings: profile, avatar, library privacy, email preferences · deps: M2-T16, M2-T11 · PRD: §7.1, §7.8
   - Accept: `/settings/profile` edits display name and bio with a 280-char counter, uploads an avatar with preview, and toggles library privacy and review-decision emails (component tests)
   - Accept: the settings pages are `noindex` and require sign-in (redirect to `/login` otherwise)
 - [ ] M2-T20 · Web settings: email, password, sessions, log out everywhere, delete account · deps: M2-T19, M2-T15, M2-T17 · PRD: §7.1

@@ -52,3 +52,32 @@ describe('loadSession', () => {
     vi.unstubAllGlobals()
   })
 })
+
+describe('sendToApi', () => {
+  const request = new Request('http://web.test/settings/avatar', { method: 'POST' })
+
+  async function sent(body: unknown) {
+    const { sendToApi } = await import('./auth.server.js')
+    const fetchMock = vi.fn(async () => Response.json({ ok: true }))
+    vi.stubGlobal('fetch', fetchMock)
+    const result = await sendToApi(request, 'POST', '/v1/me/avatar', body, 'fallback')
+    vi.unstubAllGlobals()
+    const [, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit]
+    return { result, init }
+  }
+
+  it('sends JSON with a content type', async () => {
+    const { result, init } = await sent({ a: 1 })
+    expect(result.ok).toBe(true)
+    expect(new Headers(init.headers).get('content-type')).toBe('application/json')
+    expect(init.body).toBe('{"a":1}')
+  })
+
+  it('sends FormData untouched so the runtime sets the multipart boundary', async () => {
+    const form = new FormData()
+    form.set('file', new File(['x'], 'a.png'))
+    const { init } = await sent(form)
+    expect(init.body).toBe(form)
+    expect(new Headers(init.headers).has('content-type')).toBe(false)
+  })
+})

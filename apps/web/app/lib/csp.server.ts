@@ -20,7 +20,8 @@ export function buildCsp(
     'default-src': ["'self'"],
     'script-src': [`'nonce-${nonce}'`, "'strict-dynamic'"],
     'style-src': options.dev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
-    'img-src': ["'self'", 'data:', 'https:'],
+    // blob: is the avatar preview; the local uploads driver serves over http in dev.
+    'img-src': ["'self'", 'data:', 'blob:', 'https:', ...(options.dev ? ['http:'] : [])],
     'font-src': ["'self'"],
     'connect-src': connect,
     'object-src': ["'none'"],

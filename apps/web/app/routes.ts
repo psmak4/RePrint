@@ -10,4 +10,9 @@ export default [
   route('notifications/read', 'routes/notifications-read.tsx'),
   route('forgot-password', 'routes/forgot-password.tsx'),
   route('reset-password', 'routes/reset-password.tsx'),
+  route('settings/avatar', 'routes/settings-avatar.tsx'),
+  route('settings', 'routes/settings.tsx', [
+    index('routes/settings-index.tsx'),
+    route('profile', 'routes/settings-profile.tsx'),
+  ]),
 ] satisfies RouteConfig
