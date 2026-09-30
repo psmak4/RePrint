@@ -8,6 +8,7 @@ import {
 import { and, eq, gt, isNull } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
+import { notify } from '../notifications/notify.js'
 import { rateLimit } from '../rate-limit/plugin.js'
 import { isBreachedPassword } from './breached-password.js'
 import { hashPassword } from './password.js'
@@ -127,6 +128,7 @@ export const passwordResetRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = asy
           .returning({ email: users.email, username: users.username })
         if (!user) return null
         await tx.delete(sessions).where(eq(sessions.userId, consumed.userId))
+        await notify(tx, consumed.userId, 'password_changed')
         return user
       })
       if (!account) {
