@@ -89,6 +89,16 @@ export const copy = {
     next: 'Next',
     pageOf: (page: number) => `Page ${page}`,
   },
+  resolve: {
+    title: 'Opening book',
+    failedHeading: 'We couldn’t load this book right now',
+    failedBody: 'The book service didn’t respond in time. Try again in a moment.',
+    retry: 'Try again',
+    loading: 'Loading this book…',
+    notFoundHeading: 'We couldn’t find that book',
+    notFoundBody: 'This search result has expired. Search again to find it.',
+    backToSearch: 'Back to search',
+  },
   books: {
     coverAlt: (title: string) => `Cover of ${title}`,
     byAuthors: (names: string) => `by ${names}`,

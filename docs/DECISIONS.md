@@ -762,3 +762,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.4 fixes the header, description collapse, Editions, and More by author, but not the failure handling, the overflow test, where the canonical host comes from, or the Role wording.
 - Affects: M3-T19, M3-T20, M4 (rating summary and reviews slot into the main column), M5 (Series and Genre pages)
 
+
+### D-111 · Resolve route (M3-T19)
+- Status: Implementation
+- Decision: (1) `/resolve?ref=` (`routes/resolve.tsx`, `components/books/resolve-page.tsx`) is a loader-only route: it POSTs the ref to `/v1/books/resolve` and redirects to `/books/<slug>`, so the wait is the browser's normal navigation with no client script. (2) Any non-404 failure (503, other status, network error) renders "We couldn't load this book right now" with status 503 and a retry. A 404, a missing ref, or a malformed ref renders "We couldn't find that book" (an expired ref lasts 24 h) with a link back to search. (3) Retry is a plain GET form to `/resolve` with the ref as a hidden field, so it re-runs the loader without JavaScript; with JavaScript it shows "Loading this book…" while the navigation is pending. (4) The page is `noindex`.
+- Why: PRD §6 fixes the message and the retry button but not the failure cases, the not-found copy, or how retry works.
+- Affects: M3-T22

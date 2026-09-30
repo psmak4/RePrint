@@ -290,7 +290,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the SSR page shows cover, title, subtitle, contributors with roles, Series link and position, first published year, page count, publisher, and Genre tags from the Primary Edition, and hides rows with missing data (component tests)
   - Accept: the description collapses after 6 lines with an accessible toggle; missing descriptions show "No description yet" (component tests)
   - Accept: the collapsible Editions list and "More by this author" (up to 6) render; canonical URL, meta description, and Open Graph tags are present (loader test)
-- [ ] M3-T19 · Web: resolve route (`/resolve?ref=`, the URL search results already link to; D-109) with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
+- [x] M3-T19 · Web: resolve route (`/resolve?ref=`, the URL search results already link to; D-109) with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
   - Accept: opening a candidate calls resolve and redirects to `/books/<slug>` (loader test)
   - Accept: on 503 the page shows "We couldn't load this book right now" with a working retry button (component test)
 - [ ] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
