@@ -43,3 +43,23 @@ Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`
 
 `pnpm test:integration` also runs `apps/api/src/**/*.integration.test.ts`. Each file calls `startTestStack()` (`apps/api/src/testing/stack.ts`), which starts its own Postgres 18 and Redis 7 containers and runs the migrations. Call `stack.reset()` in `beforeEach` to empty every table and flush Redis; `stack.stopRedis()` simulates a Redis outage. `GET /v1/ready` checks Postgres and Redis and returns 503 Problem Details when either is unreachable.
 
+
+## Seeded users and the first Admin
+
+`pnpm db:reset` seeds 50 accounts (`packages/db/src/seed/modules/users.ts`), all with the password `reprint-dev-password`. Local only: the seed refuses non-local databases.
+
+| Accounts | Sign in with | Notes |
+| --- | --- | --- |
+| 2 Admins | `admin1@example.test`, `admin2@example.test` | Member + Admin roles |
+| 3 Moderators | `moderator1@example.test` … `moderator3@example.test` | Member + Moderator roles |
+| 34 Members | `member1@example.test`, `member2@example.test`, and 32 with pen names | verified, some with private libraries |
+| 5 unverified | `unverified1@example.test` … | cannot review until verified |
+| 3 suspended, 3 deleted | `suspended1@example.test`, `deleted1@example.test` … | cannot log in |
+
+On a real server, create the one-time first Admin (it refuses if any Admin exists). The password is read from stdin, or prompted for on a terminal; it is never taken from arguments:
+
+```
+echo "$PASSWORD" | pnpm --filter api seed:admin -- --email you@example.com --username your_name
+```
+
+It uses `DATABASE_URL` from the environment or `.env`. Because `pnpm db:reset` already seeds Admins, the command only succeeds locally on a database that has not been seeded.

@@ -642,3 +642,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.1 fixes what security settings do, not the route shape, the pending display, or the redirects.
 - Affects: M2-T22
 
+
+### D-092 · First Admin command and seeded users (M2-T21)
+- Status: Decided (loop)
+- Decision: (1) `pnpm --filter api seed:admin -- --email … --username …` runs `src/scripts/seed-admin.ts`, which validates with the shared email, username, and password schemas (no HIBP check; it is an operator command), hashes with the API's Argon2id, and creates a verified account with the Member and Admin roles. It refuses when any user already holds the Admin role, in the same transaction as the insert. The password comes from stdin (pipe) or a terminal prompt, never from argv, so it stays out of shell history and process lists. (2) The 50 seeded users (2 Admins, 3 Moderators, 34 Members, 5 unverified, 3 suspended, 3 deleted) all share one dev password. The seed stores a precomputed Argon2id hash constant (`DEV_PASSWORD_HASH`) instead of hashing at seed time, so re-seeding is byte-identical and `packages/db` gains no hashing dependency; an API test proves the constant verifies against `DEV_PASSWORD`. (3) Because the seed creates Admins, `seed:admin` locally only works on an unseeded database.
+- Why: PRD §4 and §13 name the command and the seed users but not password handling, the hash strategy, or the mix.
+- Affects: M2-T22

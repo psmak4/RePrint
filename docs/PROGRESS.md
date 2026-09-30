@@ -188,3 +188,7 @@ Entry format:
 - Web `/settings/security` (change email with pending state, change password, active devices with end-session and "Log out everywhere", delete account with the 30-day erase notice) and `/confirm-email-change?token=`. One route action takes an `intent` per form. Components in `components/settings/` (`security-forms.tsx`, `sessions-section.tsx`, `text-field.tsx`), copy under `copy.settings.security`. `sendToApi` now supports `DELETE` and a `null` body. D-091 records the choices.
 - Next iteration: M2-T22 e2e could cover the security page and the email-change link (Mailpit). The pending email state is not restored after reload (no API read for it). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-09-29 · M2-T21 · PR pending
+- `pnpm --filter api seed:admin` (`scripts/seed-admin.ts` + `modules/accounts/seed-admin.ts`, `createFirstAdmin`) and the `users` seed module (50 accounts: Admins, Moderators, Members, unverified, suspended, deleted) registered in `packages/db/src/seed/registry.ts`. Dev credentials are in `docs/local-dev.md`; `CLAUDE.md` command table updated. D-092 records the choices.
+- Next iteration: M2-T22 verifies M2 end to end (route enumeration test for allowed/denied coverage is still to write). Later seed modules (M3 Books, M4 reviews) append to `seedModules` and can look users up by username (`member1`, `moderator1`, ...). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

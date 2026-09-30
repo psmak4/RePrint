@@ -1,4 +1,5 @@
 import type { Database } from '../client.js'
+import { usersSeed } from './modules/users.js'
 import type { SeedRandom } from './prng.js'
 
 export interface SeedContext {
@@ -17,4 +18,4 @@ export interface SeedModule {
  * Every seed module, in the order it runs. A module may rely on rows written by the ones above it.
  * Later milestones append here (see README.md).
  */
-export const seedModules: readonly SeedModule[] = []
+export const seedModules: readonly SeedModule[] = [usersSeed]
