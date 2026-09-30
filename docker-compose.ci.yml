@@ -1,0 +1,15 @@
+# CI override for the self-hosted runner (D-113). Used as:
+#   docker compose -p reprint-ci -f docker-compose.yml -f docker-compose.ci.yml up -d --wait
+# A separate project name gives CI its own containers and volumes, and the shifted host ports keep
+# it clear of a local stack or a loop session running on the same machine.
+services:
+  postgres:
+    ports: !override
+      - "15432:5432"
+  redis:
+    ports: !override
+      - "16379:6379"
+  mailpit:
+    ports: !override
+      - "11025:1025" # SMTP
+      - "18025:8025" # web UI and API

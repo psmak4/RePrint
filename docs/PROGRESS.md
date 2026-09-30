@@ -283,7 +283,11 @@ Entry format:
 - `apps/web/app/routes/author.tsx` (loader, meta with canonical and Open Graph), `components/books/author-page.tsx` (`AuthorPage`, `groupWorks`, `lifeDates`), `copy.author`, route registered in `routes.ts`, and tests. D-112 records the choices.
 - Next iteration: M3-T21 (local seed of about 500 Books) is next; M3-T22 e2e can rely on `/authors/:slug` now existing. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+### 2026-09-30 · CI runner (owner) · owner/self-hosted-ci
+- GitHub-hosted Actions minutes ran out, so CI now runs on a self-hosted runner on the owner's Mac (D-113, `docs/ci-runner.md`). The e2e job uses an isolated Compose project (`reprint-ci`) on shifted ports.
+- Next iteration: finish PR #66 (M3-T21): merge `main` into its branch so it picks up the new workflow, mark it ready (`gh pr ready`), wait for checks, and merge with `scripts/ralph/merge-pr.sh`. Jobs run one at a time on one runner, so `gh pr checks --watch` can take 10–20 minutes. Don't hard-code new host ports in CI; use env vars as the e2e job does.
+
 ### 2026-09-30 · M3-T21 · PR pending
-- `apps/api/src/catalog/seed-catalog.ts` (`seedCatalog`), `sources/seed/` (generator and `seed` Source), `sources/open-library/seed-fixtures.ts` (recorded Book), `scripts/seed-catalog.ts` (`pnpm --filter api seed:catalog`). Root `db:seed` and `db:reset` now run it after the database seed; `@reprint/db` exports `assertSeedAllowed`, `createSeedRandom`, and `SEED`. Integration test covers 500 Books, all 42 Genres, 3 merge candidates, the book-detail response schema, and a second run adding nothing. D-113 records the choices.
+- `apps/api/src/catalog/seed-catalog.ts` (`seedCatalog`), `sources/seed/` (generator and `seed` Source), `sources/open-library/seed-fixtures.ts` (recorded Book), `scripts/seed-catalog.ts` (`pnpm --filter api seed:catalog`). Root `db:seed` and `db:reset` now run it after the database seed; `@reprint/db` exports `assertSeedAllowed`, `createSeedRandom`, and `SEED`. Integration test covers 500 Books, all 42 Genres, 3 merge candidates, the book-detail response schema, and a second run adding nothing. D-114 records the choices.
 - Next iteration: M3-T22 (e2e search to book page) can rely on the seed for Catalog Books; the "not yet on RePrint" flow still needs the stub Source (`SOURCE_MODE=stub` offers Dune and The Hobbit). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
