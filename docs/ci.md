@@ -24,6 +24,10 @@ Later tasks add jobs here as their commands appear. Each one must also be added 
 
 `.github/workflows/deploy-staging.yml` deploys `main` to staging after merge. It is not a required PR check and is not in the table above. See `docs/deploy.md`.
 
+## Where CI runs
+
+All jobs run on the owner's self-hosted runner (label `reprint-ci`), not GitHub-hosted runners (D-113). Setup, isolation, and troubleshooting: `docs/ci-runner.md`. If a PR's checks sit in "Queued", the runner is offline.
+
 ## `pnpm check`
 
 `pnpm check` runs every CI job except `e2e` locally, in order, and stops at the first failure. The integration tests need Docker running (Testcontainers), and so does the secret scan unless a local `gitleaks` binary is installed.
