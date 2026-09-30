@@ -291,3 +291,7 @@ Entry format:
 - `apps/api/src/catalog/seed-catalog.ts` (`seedCatalog`), `sources/seed/` (generator and `seed` Source), `sources/open-library/seed-fixtures.ts` (recorded Book), `scripts/seed-catalog.ts` (`pnpm --filter api seed:catalog`). Root `db:seed` and `db:reset` now run it after the database seed; `@reprint/db` exports `assertSeedAllowed`, `createSeedRandom`, and `SEED`. Integration test covers 500 Books, all 42 Genres, 3 merge candidates, the book-detail response schema, and a second run adding nothing. D-114 records the choices.
 - Next iteration: M3-T22 (e2e search to book page) can rely on the seed for Catalog Books; the "not yet on RePrint" flow still needs the stub Source (`SOURCE_MODE=stub` offers Dune and The Hobbit). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-09-30 · M3-T22 · PR pending
+- `e2e/specs/search.spec.ts`: search from the header box, open a not-yet-stored result through `/resolve` to the new Book page, re-search to confirm the result now links to `/books/:slug`, and the ISBN path landing on the Book page. Axe runs on every page in all three projects. Steps are state-agnostic because the projects share one database and run in parallel.
+- Next iteration: M3-T23 (M3 verification). M1-T20 and M1-T22 stay unbuilt while M1-T19/T21 are skipped. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
