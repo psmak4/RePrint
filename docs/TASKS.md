@@ -302,7 +302,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T22 · E2E: search to book page (stubbed Source) · deps: M3-T19, M3-T20, M3-T21, M1-T13 · PRD: §12
   - Accept: `e2e/search.spec.ts` searches, opens a Catalog Book, and separately opens a "not yet on RePrint" result that resolves into a new book page, with axe checks in all projects
   - Accept: the ISBN search path lands directly on the book page
-- [ ] M3-T23 · M3 verification: run the Book catalog acceptance criteria end to end, fix gaps, update docs · deps: M3-T22 · PRD: §3, §5, §6, §7.3, §7.4, §7.5
+- [x] M3-T23 · M3 verification: run the Book catalog acceptance criteria end to end, fix gaps, update docs · deps: M3-T22 · PRD: §3, §5, §6, §7.3, §7.4, §7.5
   - Accept: `pnpm check` and `pnpm test:e2e` pass
   - Accept: every acceptance criterion in `docs/milestones/M3-book-catalog.md` is checked off in the PR body with the command that proved it
   - Accept: the vocabulary guard script finds no Source terms outside `apps/api/src/catalog/sources/`

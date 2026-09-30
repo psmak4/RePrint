@@ -295,3 +295,7 @@ Entry format:
 ### 2026-09-30 · M3-T22 · PR pending
 - `e2e/specs/search.spec.ts`: search from the header box, open a not-yet-stored result through `/resolve` to the new Book page, re-search to confirm the result now links to `/books/:slug`, and the ISBN path landing on the Book page. Axe runs on every page in all three projects. Steps are state-agnostic because the projects share one database and run in parallel.
 - Next iteration: M3-T23 (M3 verification). M1-T20 and M1-T22 stay unbuilt while M1-T19/T21 are skipped. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T23 · PR pending
+- M3 verification: no code changes. `pnpm check` (including the vocabulary guard, openapi drift, gitleaks, audit), `pnpm db:reset` (500 Books, 3 merge candidates), and `pnpm test:e2e` (18 passed across chromium, webkit, mobile) all pass. Each M3 acceptance criterion maps to an existing test (listed in the PR body); no gaps found.
+- Next iteration: M4-T01 (Reviews schema and shared review rules). M1-T20 and M1-T22 stay unbuilt while M1-T19/T21 are skipped. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
