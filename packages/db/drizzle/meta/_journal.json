@@ -29,6 +29,13 @@
       "when": 1790725709576,
       "tag": "0003_covers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790742503055,
+      "tag": "0004_catalog_core",
+      "breakpoints": true
     }
   ]
 }

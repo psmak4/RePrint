@@ -220,7 +220,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `toIsbn13()` converts ISBN-10 to 13 and validates check digits (unit tests with valid and invalid cases)
   - Accept: `makeSlug(title, id)` yields `the-left-hand-of-darkness-0192a3` style slugs (unaccented, lowercase, 6-hex suffix from the ID) (unit tests)
   - Accept: coverage in `packages/shared` stays ≥ 90%
-- [ ] M3-T02 · Catalog schema part 1: books, editions, authors, contributions, source links, source records · deps: M3-T01, M2-T16 · PRD: §5.4, §6, §9
+- [x] M3-T02 · Catalog schema part 1: books, editions, authors, contributions, source links, source records · deps: M3-T01, M2-T16 · PRD: §5.4, §6, §9
   - Accept: migration creates the tables with PRD §9 columns and constraints (`isbn_13` unique when present, contributions PK, `source_links` unique on (`source`, `entity_type`, `source_id`)), with every FK indexed
   - Accept: `books.search_vector` has a GIN index, and trigram indexes exist for title and author name search
   - Accept: cached aggregates `review_count`, `rating_sum`, `rating_counts int[5]` default to zero
