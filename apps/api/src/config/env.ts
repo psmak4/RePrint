@@ -69,6 +69,16 @@ const baseEnvSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().min(1).optional(),
   R2_SECRET_ACCESS_KEY: z.string().min(1).optional(),
   R2_BUCKET_UPLOADS: z.string().min(1).optional(),
+  /** `fixtures` replays recorded Source responses, `live` calls the Source, `stub` is in-memory (PRD §6, §13). */
+  SOURCE_MODE: z.enum(['fixtures', 'live', 'stub']).default('fixtures'),
+  /** Outgoing Source requests per second, shared across processes. */
+  SOURCE_RATE_LIMIT_RPS: z.coerce.number().positive().default(2),
+  /** Limit for a full Book fetch, in milliseconds. */
+  SOURCE_TIMEOUT_MS: z.coerce.number().int().min(1).default(5000),
+  /** How long search waits for the Source before showing Catalog-only results. */
+  SOURCE_SEARCH_TIMEOUT_MS: z.coerce.number().int().min(1).default(1500),
+  /** Sent in `User-Agent: RePrint/<version> (<email>)` on every Source request. */
+  SOURCE_CONTACT_EMAIL: z.email().default('ops@reprint.com'),
   /** Largest accepted upload (PRD §11: 5 MB). */
   UPLOAD_MAX_BYTES: z.coerce.number().int().min(1).default(5_242_880),
 })

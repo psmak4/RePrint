@@ -162,6 +162,8 @@ export const bookCandidateBookSchema = z.object({
         authorName: z.string().trim().min(1),
         role: contributionRoleSchema,
         position: z.number().int().min(0).nullable(),
+        /** The Source link for the Author, so the ingest service can call `getAuthor`. */
+        sourceLink: sourceLinkSchema.optional(),
       }),
     )
     .min(1),
@@ -174,6 +176,7 @@ export const bookCandidateBookSchema = z.object({
 export const bookCandidateEditionSchema = editionSchema
   .omit({ id: true, bookId: true })
   .extend({ sourceLink: sourceLinkSchema.optional() })
+export type BookCandidateEdition = z.infer<typeof bookCandidateEditionSchema>
 
 export const bookCandidateSchema = z.object({
   book: bookCandidateBookSchema,
@@ -183,3 +186,17 @@ export const bookCandidateSchema = z.object({
   confidence: z.number().min(0).max(1),
 })
 export type BookCandidate = z.infer<typeof bookCandidateSchema>
+
+/** What a Source adapter returns for an Author: the fields RePrint shows, plus the Source link. */
+export const authorRecordSchema = authorSchema
+  .omit({ id: true, slug: true })
+  .extend({ sourceLink: sourceLinkSchema })
+export type AuthorRecord = z.infer<typeof authorRecordSchema>
+
+/** One page of Book candidates for a search. */
+export const bookSearchPageSchema = z.object({
+  candidates: z.array(bookCandidateSchema),
+  page: z.number().int().min(1),
+  hasMore: z.boolean(),
+})
+export type BookSearchPage = z.infer<typeof bookSearchPageSchema>
