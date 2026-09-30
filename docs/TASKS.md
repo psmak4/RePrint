@@ -194,7 +194,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: deletion requires the password, sets status `deleted` and `deleted_at`, ends all sessions, and queues the "account deletion scheduled" email (integration tests: allowed, wrong password denied)
   - Accept: the daily `accounts.erase` job hard-deletes users deleted more than 30 days ago, and dependent rows go by FK cascade (integration test with a clock override)
   - Accept: `docs/DECISIONS.md` records what a deleted account looks like during the 30 days
-- [ ] M2-T18 · In-app notifications API and header bell · deps: M2-T14, M1-T12 · PRD: §7.12, §10
+- [x] M2-T18 · In-app notifications API and header bell · deps: M2-T14, M1-T12 · PRD: §7.12, §10
   - Accept: `notify(tx, userId, type, data)` creates rows; password changed and email changed create security notifications (integration tests)
   - Accept: `GET /v1/me/notifications` is paginated newest first with an unread count; `POST /v1/me/notifications/read` marks given IDs or all as read (allowed and unauthenticated-denied tests)
   - Accept: the header bell shows the unread count and a dropdown list, and opening it marks items read (component test)

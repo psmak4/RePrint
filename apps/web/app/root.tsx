@@ -13,15 +13,19 @@ import { VerificationBanner } from './components/auth/verification-banner.js'
 import { ErrorPage } from './components/error-page.js'
 import { AccountMenu } from './components/shell/account-menu.js'
 import { AppShell } from './components/shell/app-shell.js'
+import { NotificationBell } from './components/shell/notification-bell.js'
 import { loadSession } from './lib/auth.server.js'
 import { logger } from './lib/logger.server.js'
+import { loadNotifications } from './lib/notifications.server.js'
 import { createRequestLogMiddleware } from './lib/request-log.server.js'
 import './app.css'
 
 export const middleware = [createRequestLogMiddleware(logger)]
 
 export async function loader({ request }: Route.LoaderArgs) {
-  return loadSession(request)
+  const session = await loadSession(request)
+  const notifications = session.viewer ? await loadNotifications(request) : null
+  return { ...session, notifications }
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -40,7 +44,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppShell
-          accountSlot={<AccountMenu viewer={viewer} />}
+          accountSlot={
+            <>
+              {viewer ? <NotificationBell notifications={session?.notifications ?? null} /> : null}
+              <AccountMenu viewer={viewer} />
+            </>
+          }
           bannerSlot={
             viewer && !onVerifyPage ? <VerificationBanner verified={viewer.verified} /> : null
           }

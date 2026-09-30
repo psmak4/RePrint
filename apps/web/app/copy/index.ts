@@ -13,6 +13,20 @@ export const copy = {
     register: 'Register',
     logOut: 'Log out',
     accountMenuLabel: 'Account menu',
+    notifications: {
+      label: 'Notifications',
+      unreadLabel: (count: number) => `Notifications, ${count} unread`,
+      empty: 'No notifications yet.',
+      unreadMark: 'Unread',
+      messages: {
+        review_approved: 'Your review was approved and is now published.',
+        review_rejected: 'Your review was not approved.',
+        review_unpublished: 'Your review was unpublished.',
+        password_changed: 'Your password was changed.',
+        email_changed: 'Your email address was changed.',
+      },
+      readFailed: 'We could not update your notifications.',
+    },
     legalLinks: [
       { label: 'About', href: '/about' },
       { label: 'Terms of Service', href: '/terms' },

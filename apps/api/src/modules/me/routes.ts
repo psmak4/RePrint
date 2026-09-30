@@ -22,6 +22,7 @@ import { requireAuth } from '../auth/guards.js'
 import { hashPassword, verifyPassword } from '../auth/password.js'
 import { type AuthRoutesOptions, VERIFY_EMAIL_TTL_MS } from '../auth/register.js'
 import { generateToken, hashToken } from '../auth/tokens.js'
+import { notify } from '../notifications/notify.js'
 import { rateLimit } from '../rate-limit/plugin.js'
 
 const ownAccount = {
@@ -142,6 +143,7 @@ export const meRoutes: FastifyPluginAsyncZod<MeRoutesOptions> = async (app, opti
         await tx
           .delete(sessions)
           .where(and(eq(sessions.userId, user.id), ne(sessions.id, sessionId)))
+        await notify(tx, user.id, 'password_changed')
       })
       try {
         await jobs.enqueue('email.send', {
@@ -315,6 +317,7 @@ export const meRoutes: FastifyPluginAsyncZod<MeRoutesOptions> = async (app, opti
             .update(users)
             .set({ email: consumed.newEmail, emailVerifiedAt: now })
             .where(eq(users.id, consumed.userId))
+          await notify(tx, consumed.userId, 'email_changed')
           return { username: before.username, oldEmail: before.email, newEmail: consumed.newEmail }
         })
       } catch (error) {
