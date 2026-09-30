@@ -299,7 +299,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T21 · Local seed: about 500 Books with Editions, Authors, Series, Genres, Subjects · deps: M3-T09, M1-T16 · PRD: §13
   - Accept: `pnpm db:reset` loads about 500 Books through the ingest path (from recorded fixtures and deterministic generation), with Series, multiple Editions, translations, and missing-data cases
   - Accept: seeded data passes the same Zod schemas as live data, and the seed is idempotent
-- [ ] M3-T22 · E2E: search to book page (stubbed Source) · deps: M3-T19, M3-T20, M3-T21, M1-T13 · PRD: §12
+- [x] M3-T22 · E2E: search to book page (stubbed Source) · deps: M3-T19, M3-T20, M3-T21, M1-T13 · PRD: §12
   - Accept: `e2e/search.spec.ts` searches, opens a Catalog Book, and separately opens a "not yet on RePrint" result that resolves into a new book page, with axe checks in all projects
   - Accept: the ISBN search path lands directly on the book page
 - [ ] M3-T23 · M3 verification: run the Book catalog acceptance criteria end to end, fix gaps, update docs · deps: M3-T22 · PRD: §3, §5, §6, §7.3, §7.4, §7.5
