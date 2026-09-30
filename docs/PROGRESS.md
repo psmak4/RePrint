@@ -265,3 +265,7 @@ Entry format:
 ### 2026-09-30 · M3-T16 · PR pending
 - `apps/web/app/components/shell/search-box.tsx` (`SearchBox`, hand-built ARIA combobox, 250 ms debounce, 2-character minimum, wired into `root.tsx`'s `searchSlot`), resource route `routes/search-suggest.tsx` (`/search/suggest`, forwards to `/v1/search/suggest`), `copy.shell.search`. Component tests use fake timers; loader test covers the API-down case. D-108 records the choices.
 - Next iteration: M3-T17 (`/search` results page) reads `q` from the URL; the box's form already submits `GET /search?q=`. Suggestion links point at `/books/:slug` and `/authors/:slug`, which arrive in M3-T18 and M3-T20. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T17 · PR pending
+- `apps/web/app/routes/search.tsx` (loader, ISBN redirect, failure state), `components/search/search-results-page.tsx` (tabs, GET filter form, sort, pagination, cards), `lib/search-links.ts` (`parseSearchParams`, `searchHref`, `resolveHref`), `copy.search`, and tests. D-109 records the choices. Added task M5-T05a for the Genre select (no Genre list API before M5-T03).
+- Next iteration: M3-T18 (book page). Search cards link stored Books to `/books/:slug` and unstored ones to `/resolve?ref=`; M3-T19 must serve that path. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

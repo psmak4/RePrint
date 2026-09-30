@@ -282,7 +282,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T16 · Web: header search box with Catalog suggestions · deps: M3-T15, M3-T12 · PRD: §7.3, §11
   - Accept: suggestions appear after 2 characters, 250 ms after the last keystroke (component test with fake timers)
   - Accept: the combobox is keyboard-navigable with correct ARIA roles, and Enter goes to `/search?q=` (component test)
-- [ ] M3-T17 · Web: search results page · deps: M3-T16, M3-T14 · PRD: §7.3
+- [x] M3-T17 · Web: search results page · deps: M3-T16, M3-T14 · PRD: §7.3
   - Accept: `/search` has Books and Authors tabs, filters, sort, and page number in the URL; the SSR loader renders results (component tests)
   - Accept: Books not yet on RePrint show "No RePrint reviews yet" and link to the resolve flow; the Source-unavailable note appears when flagged (component tests)
   - Accept: an ISBN query redirects straight to the Book (loader test)
@@ -290,7 +290,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the SSR page shows cover, title, subtitle, contributors with roles, Series link and position, first published year, page count, publisher, and Genre tags from the Primary Edition, and hides rows with missing data (component tests)
   - Accept: the description collapses after 6 lines with an accessible toggle; missing descriptions show "No description yet" (component tests)
   - Accept: the collapsible Editions list and "More by this author" (up to 6) render; canonical URL, meta description, and Open Graph tags are present (loader test)
-- [ ] M3-T19 · Web: resolve route with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
+- [ ] M3-T19 · Web: resolve route (`/resolve?ref=`, the URL search results already link to; D-109) with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
   - Accept: opening a candidate calls resolve and redirects to `/books/<slug>` (loader test)
   - Accept: on 503 the page shows "We couldn't load this book right now" with a working retry button (component test)
 - [ ] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
@@ -388,6 +388,8 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [ ] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5
   - Accept: `/genres` lists all Genres; `/genres/:slug` shows Books with sort options in the URL (component and loader tests)
   - Accept: `/series/:slug` shows Books in order with positions and ratings (component test)
+- [ ] M5-T05a · Web: Genre filter select on the search results page · deps: M5-T03, M3-T17 · PRD: §7.3
+  - Accept: the `/search` filter form has a Genre select filled from `GET /v1/genres`, keeps the choice in the URL, and replaces the "remove Genre filter" link (component and loader tests)
 - [ ] M5-T06 · Discover rows: `featured_items`, row builders, 10-minute rebuild job, `GET /v1/discover` · deps: M5-T03, M4-T05 · PRD: §7.2, §9, §10
   - Accept: rows are built for Recently reviewed (one card per Book), Top rated (weighted, ≥ 5 approved reviews), Most reviewed this month (last 30 days), Browse by genre (12 featured Genres), and Featured review (integration tests)
   - Accept: a `discover.rebuild` repeatable job runs every 10 minutes and caches rows in Redis; `GET /discover` serves from that cache (integration test)
