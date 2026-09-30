@@ -3,7 +3,7 @@ import { createSourceAdapter } from '../index.js'
 import { createFixtureFetch } from './fixture-fetch.js'
 import { openLibraryImplementations } from './index.js'
 
-const config = { contactEmail: 'ops@reprint.test', version: '1.2.3', timeoutMs: 1000 }
+const config = { fetch: fetch }
 
 describe('Open Library wiring', () => {
   it('serves fixtures mode from the recorded responses', async () => {
@@ -17,14 +17,14 @@ describe('Open Library wiring', () => {
     expect(response.status).toBe(404)
   })
 
-  it('sends the RePrint User-Agent and a timeout in live mode', async () => {
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify({ numFound: 0, docs: [] })))
-    await createSourceAdapter('live', openLibraryImplementations(config)).searchBooks('dune', 1)
-    const init = fetchSpy.mock.calls[0]?.[1]
-    expect(new Headers(init?.headers).get('User-Agent')).toBe('RePrint/1.2.3 (ops@reprint.test)')
-    expect(init?.signal).toBeInstanceOf(AbortSignal)
-    fetchSpy.mockRestore()
+  it('sends live requests through the gateway fetch it is given', async () => {
+    const gatewayFetch = vi.fn<typeof fetch>(
+      async () => new Response(JSON.stringify({ numFound: 0, docs: [] })),
+    )
+    await createSourceAdapter(
+      'live',
+      openLibraryImplementations({ fetch: gatewayFetch }),
+    ).searchBooks('dune', 1)
+    expect(gatewayFetch).toHaveBeenCalledTimes(1)
   })
 })

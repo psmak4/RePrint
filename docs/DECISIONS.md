@@ -686,3 +686,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §6 names the methods but not the request plan, the Series and date heuristics, or the Edition cap.
 - Affects: M3-T07, M3-T08, M3-T09
 
+
+### D-099 · Source gateway (M3-T07)
+- Status: Decided (loop)
+- Decision: (1) `apps/api/src/catalog/gateway/` wraps the transport `fetch` handed to a Source adapter (`openLibraryImplementations({ fetch: gateway.fetch })`), so adapters stay unaware of limits. (2) The limiter hands out one slot every `1000 / SOURCE_RATE_LIMIT_RPS` ms using the Redis clock (one Lua script), so all processes share it. Interactive callers register in a Redis sorted set while they wait; background callers are refused while it holds anyone, so interactive requests always go first. Waiters expire on their own if a process dies. (3) Callers are interactive by default; background work uses `gateway.run({ priority: 'background' }, fn)` (AsyncLocalStorage). `timeoutMs` (default `SOURCE_TIMEOUT_MS`) bounds the slot wait and the response together; search will pass `SOURCE_SEARCH_TIMEOUT_MS`. (4) The circuit breaker is per process: 5 consecutive failures (network error, timeout, 5xx, or 429) open it, 30 s cooldown, then one trial call. A 404 or other 4xx is a normal answer. A call that timed out waiting for a slot never reached the Source and does not count. (5) Metrics: `source:metrics:requests:<epoch second>` counters (2 hour TTL) and a `source:metrics:cache` hash of `hits` and `misses`; the search cache (M3-T09) calls `recordCache`.
+- Why: PRD §6 sets the behavior but not the algorithm, thresholds, or key names. A per-process breaker avoids shared state that could itself fail; each process learns of an outage within five calls.
+- Affects: M3-T09, M3-T11, M8-T06
