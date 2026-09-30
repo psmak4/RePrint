@@ -236,7 +236,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: recorded fixtures cover title, author, and ISBN searches plus a result with no cover, committed under `__fixtures__/`
   - Accept: `searchBooks` maps each work to one Book candidate with an Edition, a Source link, and a confidence value, and passes the contract suite (unit and contract tests)
   - Accept: `rg -i "\bwork(s)?\b|olid" apps/api/src --glob '!**/sources/open-library/**'` finds no Open Library vocabulary outside the adapter (script in `pnpm check`)
-- [ ] M3-T06 · Open Library adapter: `getBook`, `getEditions`, `getAuthor` translation · deps: M3-T05 · PRD: §5, §6, §12
+- [x] M3-T06 · Open Library adapter: `getBook`, `getEditions`, `getAuthor` translation · deps: M3-T05 · PRD: §5, §6, §12
   - Accept: fixtures cover a work, its editions (with ISBN-10 only, missing format, non-English), an author with a Wikidata ID and photo, and a work with a series and subjects
   - Accept: output converts ISBN-10 to ISBN-13, maps formats to the five Formats, languages to ISO 639, and covers to Cover records by cover ID, passing the contract suite
   - Accept: invalid records are logged and skipped, never returned (unit test)

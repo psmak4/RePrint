@@ -218,3 +218,8 @@ Entry format:
 ### 2026-09-30 · M3-T05 · PR pending
 - `sources/open-library/`: `adapter.ts` (`createOpenLibraryAdapter`, `searchBooks`), `search.ts` (translation, confidence), `languages.ts` (MARC to ISO 639), `fixture-fetch.ts`, and `index.ts` (`openLibraryImplementations` for `createSourceAdapter`'s `fixtures` and `live` slots). Added `search-no-cover` and `search-empty` fixtures and re-recorded `search-author` as `q=`. `pnpm vocabulary:check` is in `pnpm check` and the CI `lint` job. D-097 records the choices.
 - Next iteration: M3-T06 replaces the `getBook`/`getEditions`/`getAuthor` stubs, adds work/edition/author fixtures to `FIXTURE_REQUESTS`, and fills `bookIds`/`authorIds` in the contract call in `adapter.test.ts`. Nothing calls `createSourceAdapter` yet; the gateway (M3-T07) will wrap the live `fetch`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T06 · PR pending
+- `sources/open-library/record.ts` (work, Edition, Series, Subject, and Author translation) and real `getBook`/`getEditions`/`getAuthor` in `adapter.ts`. Four new fixtures recorded for *The Left Hand of Darkness* (work, byline search, Editions, Author Le Guin) in `record-fixtures.ts`; the adapter contract now runs with `bookIds`/`authorIds`. D-098 records the choices, including that `getBook` costs three Source requests and only the first 50 Editions are read.
+- Next iteration: M3-T07 (gateway) should count `getBook` as three calls when sizing limits. Wrap the live `fetch` in `openLibraryImplementations`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
