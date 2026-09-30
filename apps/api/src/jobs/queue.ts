@@ -5,11 +5,22 @@ import { type JobDefinition, type JobName, type JobPayload, jobs } from './regis
 
 export const QUEUE_NAME = 'reprint'
 
+export interface EnqueueOptions {
+  /** A second job with the same ID is ignored while the first is still stored, so callers can dedupe. */
+  jobId?: string
+  /** BullMQ priority: 1 runs first and larger numbers wait behind smaller ones. */
+  priority?: number
+}
+
 /** Only queue-name-specific keys: `bull:reprint:*`. Keeps job data apart from other Redis use. */
 export interface JobQueue {
   queue: Queue
   /** Validates the payload against the job's schema, then adds it. Returns the job ID. */
-  enqueue: <Name extends JobName>(name: Name, payload: JobPayload<Name>) => Promise<string>
+  enqueue: <Name extends JobName>(
+    name: Name,
+    payload: JobPayload<Name>,
+    options?: EnqueueOptions,
+  ) => Promise<string>
   /** Creates or updates the repeatable schedule of every job that declares one. */
   syncSchedules: () => Promise<void>
   close: () => Promise<void>
@@ -31,10 +42,12 @@ export function createJobQueue(redisUrl: string): JobQueue {
   queue.on('error', () => {})
   return {
     queue,
-    enqueue: async (name, payload) => {
+    enqueue: async (name, payload, options) => {
       const definition: JobDefinition = jobs[name]
       const retry = definition.retry
       const job = await queue.add(name, definition.payload.parse(payload), {
+        ...(options?.jobId && { jobId: options.jobId }),
+        ...(options?.priority && { priority: options.priority }),
         ...(retry && {
           attempts: retry.attempts,
           backoff: { type: 'exponential', delay: retry.backoffMs },

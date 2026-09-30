@@ -164,7 +164,7 @@ describe('accounts.erase job', () => {
     jobs['accounts.erase'].handler(
       { now: now?.toISOString() },
       // The job only reads the database, storage, and log.
-      { log, db: stack.db.db, storage, mailer: undefined as never },
+      { log, db: stack.db.db, storage, mailer: undefined as never, catalog: undefined as never },
     )
 
   async function deletedUser(deletedDaysAgo: number) {

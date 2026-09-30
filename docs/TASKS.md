@@ -254,7 +254,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the Primary Edition is chosen automatically (English, has a cover, has an ISBN, most recent) unless admin-locked (unit tests on the ranking)
   - Accept: Subjects are stored and mapped to Genres through `subject_genre_rules` by priority with `book_genres.origin = mapping`, and admin Genres are untouched (integration test)
   - Accept: a per-field priority list decides between Sources, and admin always wins (unit test with two stub Sources)
-- [ ] M3-T10 · `GET /v1/books/:slug`, `/books/:slug/editions`, `/authors/:slug`, public caching, refresh and purge jobs · deps: M3-T09, M1-T09 · PRD: §6, §7.4, §7.5, §10
+- [x] M3-T10 · `GET /v1/books/:slug`, `/books/:slug/editions`, `/authors/:slug`, public caching, refresh and purge jobs · deps: M3-T09, M1-T09 · PRD: §6, §7.4, §7.5, §10
   - Accept: the responses match shared schemas and contain no Source IDs (integration test scans the JSON for `source_id` values)
   - Accept: public GETs set `Cache-Control` with `stale-while-revalidate` and an `ETag`, and `If-None-Match` returns 304 (integration test)
   - Accept: viewing a Book whose data is more than 30 days old enqueues a low-priority `catalog.refresh` job, and the refresh respects locked fields (integration test)

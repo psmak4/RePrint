@@ -13,6 +13,7 @@ import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
+import { catalogRoutes } from './modules/catalog/routes.js'
 import { avatarRoutes } from './modules/me/avatar.js'
 import { meRoutes } from './modules/me/routes.js'
 import { sessionRoutes } from './modules/me/sessions.js'
@@ -132,6 +133,13 @@ export async function buildApp(
     jobs: options.jobs,
   })
   await app.register(notificationRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+
+  await app.register(catalogRoutes, {
     prefix: '/v1',
     env,
     db: options.database,

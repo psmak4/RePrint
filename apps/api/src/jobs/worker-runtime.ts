@@ -35,17 +35,22 @@ export async function startWorker(options: {
   mailer: Mailer
   db: Database
   storage: ImageStorage
+  catalog: JobContext['catalog']
   /** Called for every failed job (the entry point wires this to Sentry). */
   onJobError?: (error: unknown) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log, mailer, db, storage, onJobError } = options
+  const { redisUrl, log, mailer, db, storage, catalog, onJobError } = options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
-  const worker = new Worker(QUEUE_NAME, (job) => processJob(job, { mailer, db, storage }, log), {
-    connection: connection as ConnectionOptions,
-    concurrency: 5,
-  })
+  const worker = new Worker(
+    QUEUE_NAME,
+    (job) => processJob(job, { mailer, db, storage, catalog }, log),
+    {
+      connection: connection as ConnectionOptions,
+      concurrency: 5,
+    },
+  )
   worker.on('failed', (job, error) => {
     log.error({ err: error, job: job?.name, jobId: job?.id }, 'job failed')
     onJobError?.(error)

@@ -2,6 +2,7 @@ import { createDb } from '@reprint/db'
 import { Redis } from 'ioredis'
 import { pino } from 'pino'
 import { buildApp } from './app.js'
+import { createCatalogRuntime } from './catalog/runtime.js'
 import { EnvError, loadEnv } from './config/env.js'
 import { createMailer } from './email/mailer.js'
 import { createJobQueue, queueCheck } from './jobs/queue.js'
@@ -35,6 +36,7 @@ async function main(): Promise<void> {
         mailer,
         db: database.db,
         storage: createImageStorage(env),
+        catalog: createCatalogRuntime(env, redis),
         onJobError: captureError,
       })
     : undefined

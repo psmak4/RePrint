@@ -20,7 +20,7 @@ export interface SourceGatewayOptions {
   fetch?: typeof fetch
 }
 
-interface CallContext {
+export interface CallContext {
   priority: RequestPriority
   timeoutMs?: number
 }

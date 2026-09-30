@@ -62,6 +62,8 @@ beforeAll(async () => {
     mailer,
     db: stack.db.db,
     storage: new LocalImageStorage(tmpdir(), 'http://localhost/uploads'),
+    // The email job never touches the Source.
+    catalog: undefined as never,
   })
   stopWorker = worker.stop
 })

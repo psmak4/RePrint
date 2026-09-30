@@ -146,6 +146,11 @@ export const workerEnvSchema = baseEnvSchema
     R2_ACCESS_KEY_ID: true,
     R2_SECRET_ACCESS_KEY: true,
     R2_BUCKET_UPLOADS: true,
+    // `catalog.refresh` calls the Source.
+    SOURCE_MODE: true,
+    SOURCE_RATE_LIMIT_RPS: true,
+    SOURCE_TIMEOUT_MS: true,
+    SOURCE_CONTACT_EMAIL: true,
   })
   .superRefine(requireResendKey)
   .superRefine(requireR2Settings)

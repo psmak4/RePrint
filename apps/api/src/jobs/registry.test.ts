@@ -3,10 +3,14 @@ import { pino } from 'pino'
 import { describe, expect, it } from 'vitest'
 import type { ImageStorage } from '../storage/index.js'
 import { recordingMailer } from '../testing/mailer.js'
-import { isJobName, jobs } from './registry.js'
+import { isJobName, type JobContext, jobs } from './registry.js'
 
 // These handlers never touch the database or storage.
-const unusedServices = { db: {} as Database, storage: {} as ImageStorage }
+const unusedServices = {
+  db: {} as Database,
+  storage: {} as ImageStorage,
+  catalog: {} as JobContext['catalog'],
+}
 
 describe('job registry', () => {
   it('recognizes registered names only', () => {
