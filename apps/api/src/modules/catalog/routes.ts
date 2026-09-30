@@ -3,13 +3,20 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  searchQuerySchema,
+  searchResponseSchema,
   searchSuggestQuerySchema,
   searchSuggestResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import type { Redis } from 'ioredis'
+import type { CandidateRefs } from '../../catalog/candidate-refs.js'
 import { isStale } from '../../catalog/refresh.js'
+import type { InteractiveCall } from '../../catalog/resolve.js'
 import { searchCatalogAuthors, searchCatalogBooks } from '../../catalog/search/catalog-search.js'
+import { federatedSearch } from '../../catalog/search/federated-search.js'
+import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
 import {
@@ -38,8 +45,19 @@ function matches(header: string | undefined, etag: string): boolean {
     .some((value) => value === '*' || value === etag.replace(/^W\//, ''))
 }
 
-export const catalogRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
-  const { db, jobs } = options
+export interface CatalogRoutesOptions extends AuthRoutesOptions {
+  /** Missing only when the spec is generated; `GET /search` then answers Catalog results alone. */
+  catalog?: {
+    source: SourceAdapter
+    call: InteractiveCall
+    candidateRefs: CandidateRefs
+    recordCache?: (hit: boolean) => Promise<void>
+  }
+  redis?: Redis
+}
+
+export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async (app, options) => {
+  const { db, jobs, catalog, redis } = options
 
   // Every route here is a public GET, so the whole plugin shares one caching rule (PRD §10).
   app.addHook('onSend', async (request, reply, payload) => {
@@ -80,6 +98,28 @@ export const catalogRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (ap
         ),
       ])
       return { books, authors }
+    },
+  )
+
+  // Catalog and Source results together; the Source part is best effort (PRD §6).
+  app.get(
+    '/search',
+    { schema: { querystring: searchQuerySchema, response: { 200: searchResponseSchema } } },
+    async (request) => {
+      if (!db || !catalog || !redis) throw new Error('search needs a database, Redis, and a Source')
+      return federatedSearch(
+        {
+          db,
+          redis,
+          source: catalog.source,
+          call: catalog.call,
+          candidateRefs: catalog.candidateRefs,
+          sourceTimeoutMs: options.env.SOURCE_SEARCH_TIMEOUT_MS,
+          recordCache: catalog.recordCache,
+          onError: (error) => request.log.warn({ err: error }, 'Source search failed'),
+        },
+        request.query,
+      )
     },
   )
 

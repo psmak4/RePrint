@@ -266,7 +266,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T12 · Catalog search: full-text + trigram query and `GET /v1/search/suggest` · deps: M3-T10 · PRD: §6, §7.3, §10
   - Accept: Catalog search matches Book titles, Edition titles, ISBNs, Author names, and Series names, including typos (trigram) and accents (unaccent) (integration tests)
   - Accept: `GET /v1/search/suggest?q=` returns Books and Authors from the Catalog only for `q` of 2 or more chars, and never calls the Source (test asserts zero gateway calls)
-- [ ] M3-T13 · Federated `GET /v1/search`: Catalog + Source merge, caching, timeout, fallback · deps: M3-T12, M3-T11 · PRD: §6, §7.3, §10
+- [x] M3-T13 · Federated `GET /v1/search`: Catalog + Source merge, caching, timeout, fallback · deps: M3-T12, M3-T11 · PRD: §6, §7.3, §10
   - Accept: page 1 runs the Catalog query and the Source search in parallel; Source results are cached in Redis for 24 h keyed on normalized query and page (integration test counts gateway calls)
   - Accept: candidates that match Catalog Books are shown as the stored Book; results are deduplicated; Catalog Books get a review-count boost (integration tests)
   - Accept: when the Source takes > 1.5 s or the breaker is open, Catalog results return alone with `sourceUnavailable: true` (integration test with a slow stub)
