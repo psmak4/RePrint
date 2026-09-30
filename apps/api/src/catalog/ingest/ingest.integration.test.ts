@@ -1,0 +1,228 @@
+import {
+  authors,
+  bookSeries,
+  bookSubjects,
+  books,
+  contributions,
+  createDb,
+  editions,
+  mergeCandidates,
+  series,
+  sourceLinks,
+  sourceRecords,
+} from '@reprint/db'
+import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
+import type { BookCandidate } from '@reprint/shared'
+import { count, eq } from 'drizzle-orm'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { createStubSource } from '../sources/stub/stub-adapter.js'
+import type { SourceAdapter } from '../sources/types.js'
+import { IngestError, ingestBook } from './ingest.js'
+
+let database: TestDatabase
+let db: ReturnType<typeof createDb>['db']
+let closeDb: () => Promise<void>
+const stub = createStubSource()
+
+beforeAll(async () => {
+  database = await startTestDatabase()
+  const client = createDb(database.url)
+  db = client.db
+  closeDb = client.close
+})
+afterAll(async () => {
+  await closeDb?.()
+  await database?.stop()
+})
+beforeEach(() => truncateAllTables(database.sql))
+
+async function stubCandidate(sourceId: string): Promise<BookCandidate> {
+  const candidate = await stub.getBook(sourceId)
+  if (!candidate) throw new Error(`stub has no ${sourceId}`)
+  return candidate
+}
+
+async function rowCounts() {
+  const tables = { books, editions, authors, contributions, sourceLinks, series, bookSubjects }
+  const result: Record<string, number> = {}
+  for (const [name, table] of Object.entries(tables)) {
+    const [row] = await db.select({ n: count() }).from(table)
+    result[name] = row?.n ?? 0
+  }
+  return result
+}
+
+describe('ingestBook', () => {
+  it('stores a Book with its Editions, Authors, Subjects, and Source links', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const authorRecord = await stub.getAuthor('stub-author-herbert')
+    if (!authorRecord) throw new Error('missing author')
+    const result = await ingestBook(db, {
+      source: stub,
+      candidate,
+      authorRecords: new Map([['stub-author-herbert', authorRecord]]),
+    })
+    expect(result.created).toBe(true)
+    expect(result.slug).toMatch(/^dune-[0-9a-f]{6}$/)
+
+    const [book] = await db.select().from(books).where(eq(books.id, result.bookId))
+    expect(book?.title).toBe('Dune')
+    expect(book?.refreshedAt).not.toBeNull()
+    expect(book?.searchVector).toContain('frank')
+    expect(Object.keys(book?.fieldOrigins ?? {})).toContain('title')
+    const [author] = await db.select().from(authors)
+    expect(author?.name).toBe('Frank Herbert')
+    expect(author?.bio).toBe('American science fiction author.')
+    expect(author?.birthDate).toBe('1920-10-08')
+    const links = await db.select().from(sourceLinks)
+    expect(links.map((link) => link.entityType).sort()).toEqual(['author', 'book', 'edition'])
+    expect(await db.select().from(editions)).toHaveLength(1)
+    expect(await db.select().from(sourceRecords)).toHaveLength(1)
+  })
+
+  it('creates no duplicates when the same record is ingested again', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const first = await ingestBook(db, { source: stub, candidate })
+    const before = await rowCounts()
+    const second = await ingestBook(db, { source: stub, candidate })
+    expect(second.created).toBe(false)
+    expect(second.bookId).toBe(first.bookId)
+    expect(second.slug).toBe(first.slug)
+    expect(await rowCounts()).toEqual(before)
+  })
+
+  it('matches by ISBN-13 when the Source link is new', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const first = await ingestBook(db, { source: stub, candidate })
+    const relinked: BookCandidate = {
+      ...candidate,
+      sourceLink: { ...candidate.sourceLink, sourceId: 'stub-book-dune-other-id' },
+      editions: candidate.editions.map(({ sourceLink: _link, ...rest }) => rest),
+    }
+    const second = await ingestBook(db, { source: stub, candidate: relinked })
+    expect(second.created).toBe(false)
+    expect(second.bookId).toBe(first.bookId)
+    expect(await db.select().from(editions)).toHaveLength(1)
+    const bookLinks = await db.select().from(sourceLinks).where(eq(sourceLinks.entityType, 'book'))
+    expect(bookLinks).toHaveLength(2)
+  })
+
+  it('queues a merge candidate, and does not merge, on a title-and-author-only match', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const first = await ingestBook(db, { source: stub, candidate })
+    const lookalike: BookCandidate = {
+      ...candidate,
+      sourceLink: { ...candidate.sourceLink, sourceId: 'stub-book-dune-2' },
+      book: {
+        ...candidate.book,
+        contributions: candidate.book.contributions.map(({ sourceLink: _link, ...rest }) => rest),
+      },
+      editions: candidate.editions.map(({ sourceLink: _link, ...rest }) => ({
+        ...rest,
+        isbn13: null,
+      })),
+    }
+    const second = await ingestBook(db, { source: stub, candidate: lookalike })
+    expect(second.created).toBe(true)
+    expect(second.bookId).not.toBe(first.bookId)
+    expect(second.mergeCandidateBookIds).toEqual([first.bookId])
+    const [pending] = await db.select().from(mergeCandidates)
+    expect(pending).toMatchObject({
+      bookAId: first.bookId,
+      bookBId: second.bookId,
+      status: 'pending',
+    })
+    expect(await db.select().from(books)).toHaveLength(2)
+  })
+
+  it('records Series with a decimal position and keeps it when a later Source omits it', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const withSeries: BookCandidate = {
+      ...candidate,
+      book: { ...candidate.book, series: [{ name: 'Dune Chronicles', position: 2.5 }] },
+    }
+    const first = await ingestBook(db, { source: stub, candidate: withSeries })
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...withSeries,
+        book: { ...withSeries.book, series: [{ name: 'dune chronicles', position: null }] },
+      },
+    })
+    expect(await db.select().from(series)).toHaveLength(1)
+    const [membership] = await db
+      .select()
+      .from(bookSeries)
+      .where(eq(bookSeries.bookId, first.bookId))
+    expect(membership?.position).toBe(2.5)
+  })
+
+  it('records field origins and never overwrites locked fields on re-ingest', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const first = await ingestBook(db, { source: stub, candidate })
+    await db
+      .update(books)
+      .set({
+        title: 'Dune (admin title)',
+        lockedFields: ['title'],
+        fieldOrigins: { title: { source: 'admin', at: '2026-01-01T00:00:00.000Z' } },
+      })
+      .where(eq(books.id, first.bookId))
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...candidate,
+        book: { ...candidate.book, title: 'Dune Again', description: 'A new description.' },
+      },
+    })
+    const [book] = await db.select().from(books).where(eq(books.id, first.bookId))
+    expect(book?.title).toBe('Dune (admin title)')
+    expect(book?.description).toBe('A new description.')
+    expect(book?.fieldOrigins).toMatchObject({
+      title: { source: 'admin' },
+      description: { source: 'stub' },
+    })
+  })
+
+  it('keeps the raw record in source_records', async () => {
+    const candidate = await stubCandidate('stub-book-hobbit')
+    await ingestBook(db, { source: stub, candidate, rawRecord: { raw: true } })
+    const [record] = await db.select().from(sourceRecords)
+    expect(record).toMatchObject({
+      source: 'stub',
+      sourceId: 'stub-book-hobbit',
+      payload: { raw: true },
+    })
+  })
+
+  it('rejects a Source whose storage policy is not Store', async () => {
+    const cacheOnly: SourceAdapter = { ...stub, storagePolicy: 'cache' }
+    const candidate = await stubCandidate('stub-book-dune')
+    await expect(ingestBook(db, { source: cacheOnly, candidate })).rejects.toBeInstanceOf(
+      IngestError,
+    )
+    await expect(
+      ingestBook(db, { source: { ...stub, storagePolicy: 'none' }, candidate }),
+    ).rejects.toThrow(/does not allow/)
+    expect(await rowCounts()).toMatchObject({ books: 0, editions: 0, authors: 0 })
+  })
+
+  it('rejects a candidate that belongs to a different Source', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    await expect(
+      ingestBook(db, { source: { ...stub, name: 'other' }, candidate }),
+    ).rejects.toBeInstanceOf(IngestError)
+  })
+
+  it('creates one Book when the same record is ingested concurrently', async () => {
+    const candidate = await stubCandidate('stub-book-hobbit')
+    const results = await Promise.all([
+      ingestBook(db, { source: stub, candidate }),
+      ingestBook(db, { source: stub, candidate }),
+      ingestBook(db, { source: stub, candidate }),
+    ])
+    expect(new Set(results.map((r) => r.bookId)).size).toBe(1)
+    expect(results.filter((r) => r.created)).toHaveLength(1)
+    expect(await db.select().from(books)).toHaveLength(1)
+  })
+})

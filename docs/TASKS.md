@@ -245,7 +245,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: interactive requests are served before background refreshes when both are queued (integration test)
   - Accept: the circuit breaker opens after repeated errors, short-circuits calls while open, and half-opens after a cooldown (unit tests)
   - Accept: every request sends `User-Agent: RePrint/<version> (ops@reprint.com)`, and per-second request counts and cache hit/miss counters are recorded in Redis
-- [ ] M3-T08 · Catalog ingest: matching rules, upsert, Source links, field origins, locked fields · deps: M3-T03, M3-T06 · PRD: §5.2, §5.4, §6, §9
+- [x] M3-T08 · Catalog ingest: matching rules, upsert, Source links, field origins, locked fields · deps: M3-T03, M3-T06 · PRD: §5.2, §5.4, §6, §9
   - Accept: ingest matches in PRD §5.4 order (existing Source link → ISBN-13 → shared identifier such as Wikidata), and re-ingesting the same record creates no duplicates (integration tests)
   - Accept: a title-and-author-only match creates a new Book and a `merge_candidates` row, never an automatic merge (integration test)
   - Accept: `field_origins` records Source and time per field; fields in `locked_fields` are never overwritten by ingest (integration test)
