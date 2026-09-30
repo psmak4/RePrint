@@ -215,7 +215,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M3 · Book catalog
 
-- [ ] M3-T01 · Catalog domain schemas in `packages/shared`, plus ISBN and slug utilities · deps: M1-T06 · PRD: §5.1, §5.2, §5.4, §6
+- [x] M3-T01 · Catalog domain schemas in `packages/shared`, plus ISBN and slug utilities · deps: M1-T06 · PRD: §5.1, §5.2, §5.4, §6
   - Accept: Zod schemas for Book, Edition, Author, Contribution (role enum), Series membership, Genre, Subject, Cover, Format, Language (ISO 639), Source link, and Book candidate (confidence 0–1) exist with unit tests
   - Accept: `toIsbn13()` converts ISBN-10 to 13 and validates check digits (unit tests with valid and invalid cases)
   - Accept: `makeSlug(title, id)` yields `the-left-hand-of-darkness-0192a3` style slugs (unaccented, lowercase, 6-hex suffix from the ID) (unit tests)
