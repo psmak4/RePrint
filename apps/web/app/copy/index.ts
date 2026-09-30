@@ -40,6 +40,15 @@ export const copy = {
     lead: 'Every review on RePrint is approved by a moderator before anyone sees it.',
     cta: 'Browse books',
   },
+  books: {
+    coverAlt: (title: string) => `Cover of ${title}`,
+    byAuthors: (names: string) => `by ${names}`,
+    firstPublished: (year: number) => `First published ${year}`,
+    noReviews: 'No RePrint reviews yet',
+    ratingLabel: (average: string, count: number) =>
+      `Rated ${average} out of 5 from ${count} ${count === 1 ? 'review' : 'reviews'}`,
+    reviewCount: (count: number) => `(${count})`,
+  },
   auth: {
     emailLabel: 'Email',
     usernameLabel: 'Username',

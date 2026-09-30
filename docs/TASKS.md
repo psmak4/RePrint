@@ -275,7 +275,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `genre`, `language`, and `minRating` limit results to the Catalog; `decade` applies to all results (integration tests)
   - Accept: `sort=relevance|most_reviewed|highest_rated|newest` works; `pageSize` is 20; `type=authors` returns Authors (integration tests)
   - Accept: a 10- or 13-digit ISBN query returns an `isbnMatch` (slug or ref) that the web follows directly, and an exact ISBN match ranks first (integration tests)
-- [ ] M3-T15 · Web: Cover with generated fallback, BookCard, rating display primitives · deps: M3-T10, M1-T12 · PRD: §5.4, §6, §7.3
+- [x] M3-T15 · Web: Cover with generated fallback, BookCard, rating display primitives · deps: M3-T10, M1-T12 · PRD: §5.4, §6, §7.3
   - Accept: `Cover` renders the Open Library image by cover ID and size, and falls back to a generated cover (title and author) when the image is missing or fails to load (component tests)
   - Accept: `BookCard` shows cover, title, authors, and first published year, plus rating and count or "No RePrint reviews yet" (component tests)
   - Accept: these components are listed in `docs/DESIGN.md`'s inventory
