@@ -128,6 +128,7 @@ export async function loadBookSummaries(db: Database, ids: string[]): Promise<Bo
         title: book.title,
         subtitle: book.subtitle,
         cover: toCover(book.coverId ? coverMap.get(book.coverId) : null),
+        firstPublishedYear: book.firstPublishedYear,
         contributions: byline.get(book.id) ?? [],
         rating: ratingSummary(book),
       },
@@ -246,6 +247,7 @@ export async function loadAuthorDetail(
       title: book.title,
       subtitle: book.subtitle,
       cover: toCover(book.coverId ? coverMap.get(book.coverId) : null),
+      firstPublishedYear: book.firstPublishedYear,
       contributions: byline.get(book.id) ?? [],
       rating: ratingSummary(book),
     })

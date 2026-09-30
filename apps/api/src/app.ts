@@ -53,7 +53,11 @@ export async function buildApp(
     /** Enqueues background jobs (emails); needed to serve the auth routes. */
     jobs?: Pick<JobQueue, 'enqueue'>
     /** The Source behind the gateway; enables opening Books that are not yet on RePrint. */
-    catalog?: { source: SourceAdapter; interactive: InteractiveCall }
+    catalog?: {
+      source: SourceAdapter
+      interactive: InteractiveCall
+      recordCache?: (hit: boolean) => Promise<void>
+    }
     /** Where avatars are stored; defaults to the driver chosen by `STORAGE_DRIVER`. */
     storage?: ImageStorage
   } = {},
@@ -145,15 +149,24 @@ export async function buildApp(
     jobs: options.jobs,
   })
 
+  const candidateRefs: CandidateRefs | undefined =
+    options.redis && createCandidateRefs(options.redis)
   await app.register(catalogRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
     jobs: options.jobs,
+    redis: options.redis,
+    catalog:
+      options.catalog && candidateRefs
+        ? {
+            source: options.catalog.source,
+            call: options.catalog.interactive,
+            candidateRefs,
+            recordCache: options.catalog.recordCache,
+          }
+        : undefined,
   })
-
-  const candidateRefs: CandidateRefs | undefined =
-    options.redis && createCandidateRefs(options.redis)
   await app.register(resolveRoutes, {
     prefix: '/v1',
     env,

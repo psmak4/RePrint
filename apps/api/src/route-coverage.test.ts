@@ -17,6 +17,7 @@ const SESSIONS = 'modules/me/sessions.integration.test.ts'
 const AVATAR = 'modules/me/avatar.integration.test.ts'
 const DELETION = 'modules/accounts/deletion.integration.test.ts'
 const CATALOG = 'modules/catalog/catalog.integration.test.ts'
+const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
@@ -131,6 +132,13 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/search/suggest': {
     allowed: [SEARCH, 'returns Books and Authors from the Catalog'],
     denied: [SEARCH, 'rejects a query over 100 characters'],
+  },
+  'GET /v1/search': {
+    allowed: [
+      FEDERATED,
+      'shows Books the Source found that are not on RePrint yet, with opaque references',
+    ],
+    denied: [FEDERATED, 'rejects a page below 1 with Problem Details'],
   },
   'POST /v1/books/resolve': {
     allowed: [RESOLVE, 'stores the Book with its Editions and Authors'],

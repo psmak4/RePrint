@@ -43,6 +43,7 @@ export const bookSummarySchema = z.object({
   title: bookSchema.shape.title,
   subtitle: bookSchema.shape.subtitle,
   cover: coverSchema.nullable(),
+  firstPublishedYear: bookSchema.shape.firstPublishedYear,
   contributions: z.array(contributionSchema),
   rating: ratingSummarySchema,
 })

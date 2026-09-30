@@ -28,6 +28,7 @@ export function createCatalogRuntime(env: SourceSettings, redis: Redis) {
     gateway,
     interactive: <T>(fn: () => Promise<T>, timeoutMs: number): Promise<T> =>
       gateway.run({ priority: 'interactive', timeoutMs }, fn),
+    recordCache: (hit: boolean) => gateway.metrics.recordCache(hit),
     background: <T>(fn: () => Promise<T>): Promise<T> =>
       gateway.run({ priority: 'background' }, fn),
   }
