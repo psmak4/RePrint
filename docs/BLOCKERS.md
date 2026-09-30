@@ -47,5 +47,5 @@ Entry format:
   1. Open https://github.com/settings/billing (or the organization's Billing & plans) and fix the failed payment or raise the Actions spending limit.
   2. Re-run the failed jobs on PR #66 (`gh run rerun 36736210952 --failed`), or push an empty commit.
   3. Re-run `scripts/ralph/ralph.sh`; the next iteration finishes PR #66 (step 2 of the loop prompt) and merges it.
-- Resolved: <date and what was done; the owner fills this in>
+- Resolved: 2026-09-30. The owner chose a free self-hosted runner over paying or making the repo public. CI now runs on the owner's Mac (D-113, PR #67, `docs/ci-runner.md`); #66 was updated from `main`, passed all nine checks, and merged.
 
