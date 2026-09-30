@@ -12,8 +12,8 @@ const adapter = createOpenLibraryAdapter({ fetch: createFixtureFetch() })
 runSourceContract(adapter, {
   searches: ['the left hand of darkness', 'ursula le guin', '978-0-441-47812-5'],
   emptySearch: 'zzz little known pamphlet 1890',
-  bookIds: [],
-  authorIds: [],
+  bookIds: ['OL59800W'],
+  authorIds: ['OL31353A'],
   unknownId: 'OL0W',
 })
 
@@ -152,5 +152,114 @@ describe('Open Library searchBooks', () => {
     await expect(notJson.searchBooks('dune', 1)).rejects.toBeInstanceOf(SourceError)
     const wrongShape = createOpenLibraryAdapter({ fetch: replay('{"docs": 4}') })
     await expect(wrongShape.searchBooks('dune', 1)).rejects.toBeInstanceOf(SourceError)
+  })
+})
+
+describe('Open Library getBook, getEditions, and getAuthor', () => {
+  it('maps a work to a full Book with description, subjects, series, Editions, and Source link', async () => {
+    const book = await adapter.getBook('OL59800W')
+    expect(book).toMatchObject({
+      book: {
+        title: 'The Left Hand of Darkness',
+        firstPublishedYear: 1969,
+        cover: { origin: 'open_library', originRef: '10618463' },
+        series: [{ name: 'Hainish Cycle', position: 4 }],
+        contributions: [{ authorName: 'Ursula K. Le Guin', role: 'author' }],
+      },
+      sourceLink: { source: 'open_library', entityType: 'book', sourceId: 'OL59800W' },
+      confidence: 1,
+    })
+    expect(book?.book.description).toContain('Kim Stanley Robinson')
+    const labels = book?.book.subjects.map((s) => s.label)
+    expect(labels).toContain('Science fiction')
+    expect(labels?.some((label) => label.includes(':'))).toBe(false)
+    expect(book?.editions.length).toBeGreaterThan(40)
+  })
+
+  it('maps the Editions: ISBN-13 from ISBN-10, the five Formats, ISO 639 languages, and covers', async () => {
+    const editions = await adapter.getEditions('OL59800W')
+    const byId = (id: string) => editions.find((e) => e.sourceLink?.sourceId === id)
+    // French paperback with ISBN-10 and ISBN-13, no language.
+    expect(byId('OL12509193M')).toMatchObject({ isbn13: '9782266014632', format: 'paperback' })
+    // No format, no ISBN, English.
+    expect(byId('OL58916236M')).toMatchObject({ isbn13: null, format: 'unknown', language: 'en' })
+    // Non-English.
+    expect(byId('OL50179038M')).toMatchObject({ language: 'he' })
+    expect(byId('OL35614636M')).toMatchObject({ language: 'tr', format: 'paperback' })
+    // Ebook and audiobook.
+    expect(byId('OL51009297M')?.format).toBe('ebook')
+    expect(byId('OL8350044M')?.format).toBe('audiobook')
+    expect(byId('OL8014319M')?.format).toBe('hardcover')
+    // A cover by cover ID.
+    expect(byId('OL33036131M')?.cover).toMatchObject({
+      origin: 'open_library',
+      originRef: '11727865',
+    })
+    // A publisher's ISBN-10 filed under isbn_13 is still converted.
+    expect(byId('OL32003578M')?.isbn13).toBe('9788445070239')
+  })
+
+  it('maps an Author with a bio, dates, alternate names, and a photo', async () => {
+    const author = await adapter.getAuthor('OL31353A')
+    expect(author).toMatchObject({
+      name: 'Ursula K. Le Guin',
+      birthDate: '1929-10-21',
+      deathDate: '2018-01-22',
+      photo: { origin: 'open_library', originRef: '15165689' },
+      sourceLink: { source: 'open_library', entityType: 'author', sourceId: 'OL31353A' },
+    })
+    expect(author?.bio).toContain('Ursula Kroeber Le Guin')
+    expect(author?.alternateNames).toContain('Ursula LeGuin')
+    expect(author?.alternateNames).not.toContain('Ursula K. Le Guin')
+  })
+
+  it('returns null or nothing for records the Source lacks, and for IDs that are not bare IDs', async () => {
+    const spy = vi.fn()
+    const guarded = createOpenLibraryAdapter({ fetch: spy })
+    expect(await guarded.getBook('/works/OL1W')).toBeNull()
+    expect(await guarded.getBook('OL1W/../../admin')).toBeNull()
+    expect(await guarded.getEditions('x')).toEqual([])
+    expect(await guarded.getAuthor('OL1W')).toBeNull()
+    expect(spy).not.toHaveBeenCalled()
+    expect(await adapter.getEditions('OL0W')).toEqual([])
+  })
+
+  it('logs and skips invalid records, never returning them', async () => {
+    const onInvalid = vi.fn()
+    const work = fixture('work-left-hand')
+    const editions = JSON.parse(fixture('work-left-hand-editions'))
+    editions.entries = [{ key: 'broken' }, editions.entries[0]]
+    const routes: Record<string, string> = {
+      '/works/OL59800W.json': work,
+      '/works/OL59800W/editions.json': JSON.stringify(editions),
+      '/search.json': fixture('work-left-hand-byline'),
+    }
+    const partial = createOpenLibraryAdapter({
+      onInvalid,
+      fetch: async (input) =>
+        new Response(routes[new URL(String(input)).pathname] ?? '', { status: 200 }),
+    })
+    const book = await partial.getBook('OL59800W')
+    expect(book?.editions).toHaveLength(1)
+    expect(onInvalid).toHaveBeenCalledWith('Skipped an invalid Edition record', expect.anything())
+
+    const badAuthor = createOpenLibraryAdapter({
+      onInvalid,
+      fetch: replay('{"key":"/authors/OL1A"}'),
+    })
+    expect(await badAuthor.getAuthor('OL1A')).toBeNull()
+    const redirect = createOpenLibraryAdapter({
+      onInvalid,
+      fetch: replay('{"type":{"key":"/type/redirect"},"location":"/works/OL2W"}'),
+    })
+    expect(await redirect.getBook('OL1W')).toBeNull()
+    expect(onInvalid).toHaveBeenCalledTimes(3)
+  })
+
+  it('throws SourceError when the Source fails while reading a record', async () => {
+    const failing = createOpenLibraryAdapter({ fetch: replay('boom', 503) })
+    await expect(failing.getBook('OL1W')).rejects.toBeInstanceOf(SourceError)
+    await expect(failing.getEditions('OL1W')).rejects.toBeInstanceOf(SourceError)
+    await expect(failing.getAuthor('OL1A')).rejects.toBeInstanceOf(SourceError)
   })
 })

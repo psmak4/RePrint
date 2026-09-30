@@ -22,6 +22,11 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   // Old, obscure results: several have no cover, and a few have no Author.
   { name: 'search-no-cover', path: '/search.json?q=dune+frank+herbert&limit=10&sort=old' },
   { name: 'search-empty', path: '/search.json?q=zzz+little+known+pamphlet+1890&limit=10' },
+  // One Book end to end: its record, its byline (a `key:` search), its Editions, and its Author.
+  { name: 'work-left-hand', path: '/works/OL59800W.json' },
+  { name: 'work-left-hand-byline', path: '/search.json?q=key%3A%2Fworks%2FOL59800W&limit=1' },
+  { name: 'work-left-hand-editions', path: '/works/OL59800W/editions.json?limit=50' },
+  { name: 'author-le-guin', path: '/authors/OL31353A.json' },
 ]
 
 export interface RecordOptions {

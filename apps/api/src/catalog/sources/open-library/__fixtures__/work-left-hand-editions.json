@@ -1,0 +1,2276 @@
+{
+  "links": {
+    "self": "/works/OL59800W/editions.json?limit=50",
+    "work": "/works/OL59800W",
+    "next": "/works/OL59800W/editions.json?limit=50&offset=50"
+  },
+  "size": 91,
+  "entries": [
+    {
+      "identifiers": {
+        "goodreads": ["6956433"],
+        "librarything": ["23117"]
+      },
+      "title": "La Main Gauche De La Nuit",
+      "publish_date": "1969",
+      "publishers": ["Editions Robert Laffont"],
+      "isbn_13": ["9782266014632"],
+      "physical_format": "Paperback",
+      "isbn_10": ["2266014633"],
+      "type": {
+        "key": "/type/edition"
+      },
+      "source_records": ["amazon:2266014633"],
+      "key": "/books/OL12509193M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-30T20:50:18.033121"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-03-06T07:46:36.934083"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La main gauche de la nuit",
+      "source_records": ["amazon:2253021490"],
+      "isbn_10": ["2253021490"],
+      "isbn_13": ["9782253021490"],
+      "physical_format": "hardcover",
+      "full_title": "La main gauche de la nuit",
+      "covers": [11727865],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL33036131M",
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-08-20T16:02:54.011980"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-03-06T07:46:36.934083"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "the left hand of darkness",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "1977",
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "number_of_pages": 322,
+      "publishers": ["ace books"],
+      "source_records": ["ia:lefthandofdarkne0000ursu_l8k8"],
+      "ocaid": "lefthandofdarkne0000ursu_l8k8",
+      "full_title": "the left hand of darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL58916236M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2025-05-05T23:57:47.466811"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-10-24T08:48:21.988498"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "1969",
+      "number_of_pages": 230,
+      "ocaid": "bwb_S0-ALL-813",
+      "source_records": [
+        "ia:bwb_S0-ALL-813",
+        "ia:bwb_W9-CSJ-634",
+        "ia:lefthandofdarkne0000ursu_m5b2"
+      ],
+      "full_title": "The Left Hand of Darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL58688990M",
+      "covers": [14920821],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "publishers": ["Walker and Company New York"],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2025-04-27T14:52:44.047566"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-10-24T08:48:21.988498"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "The Left Hand of Darkness",
+      "publishers": ["Mondadori"],
+      "publish_date": "2021",
+      "key": "/books/OL57929894M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [14847273],
+      "isbn_13": ["9788804732051"],
+      "publish_places": ["Milano"],
+      "series": ["Oscar Moderni Cult"],
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Chiara Reali"
+        },
+        {
+          "role": "Afterword",
+          "name": "Nicoletta Vallorani"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/ita"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "physical_format": "Brossura",
+      "number_of_pages": 285,
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2025-02-27T17:17:13.173634"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-02-27T17:19:45.286400"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "publish_date": "1992",
+      "publish_country": "ctu",
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "title": "The Left hand of darkness",
+      "by_statement": "Ursula K. Le Guin ; preface by Joan D. Vinge ; illustrated by Frank Kelly Freas and Laura Brodian Kelly Freas",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "edition_name": "Collector's ed.",
+      "notes": "\"Published by arrangement with Walker and Company.\"--T.p. verso.",
+      "publishers": ["Easton Press"],
+      "publish_places": ["Norwalk, Conn"],
+      "pagination": "xviii, 213 p., [4] p. of plates",
+      "number_of_pages": 213,
+      "source_records": [
+        "marc:harvard_bibliographic_metadata/ab.bib.09.20150123.full.mrc:560309360:724",
+        "marc:harvard_bibliographic_metadata/20220215_002.bib.mrc:182416086:1102"
+      ],
+      "full_title": "The Left hand of darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL57361363M",
+      "identifiers": {},
+      "oclc_numbers": ["38551622"],
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2024-12-25T01:56:03.850543"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-04-29T19:34:11.229328"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "publish_date": "1978",
+      "publish_country": "is",
+      "languages": [
+        {
+          "key": "/languages/heb"
+        }
+      ],
+      "work_titles": ["Left hand of darkness"],
+      "title": "מעבר לעלטה",
+      "other_titles": ["Me-ʻever la-ʻalaṭah"],
+      "by_statement": "Orsulah Lah Geṿin ; tirgem me-Anglit Aryeh Ḥashavyah",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "series": ["Madaʻ bidyoni (ʻAm ʻoved)"],
+      "contributions": ["Hashavia, Arye"],
+      "subjects": ["Extraterrestrial anthropology", "Fiction", "Sex role", "Life on other planets"],
+      "publishers": ["ʻAm ʻoved"],
+      "publish_places": ["Tel Aviv"],
+      "pagination": "229 p.",
+      "number_of_pages": 229,
+      "source_records": [
+        "marc:harvard_bibliographic_metadata/ab.bib.11.20150123.full.mrc:796499344:914"
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL50179038M",
+      "covers": [14638342],
+      "identifiers": {},
+      "oclc_numbers": ["46719700"],
+      "classifications": {},
+      "translation_of": "The Left Hand of Darkness",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-11-30T07:29:15.294119"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-06-28T06:25:26.360175"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Lewa ręka ciemności",
+      "source_records": ["amazon:8325000295", "promise:bwb_daily_pallets_2021-06-17"],
+      "physical_format": "paperback",
+      "covers": [11218115],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL32576277M",
+      "local_id": ["urn:bwbsku:KP-907-416"],
+      "identifiers": {},
+      "isbn_10": ["8325000295"],
+      "isbn_13": ["9788325000295"],
+      "publishers": ["Książnica"],
+      "publish_date": "2007",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-06-05T14:15:59.184331"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:41:50.567751"
+      }
+    },
+    {
+      "publishers": ["Editorial Presenca"],
+      "source_records": ["amazon:972232988X"],
+      "title": "A Mao Esquerda Das Trevas (Portuguese Edition)",
+      "identifiers": {
+        "amazon": ["972232988X"]
+      },
+      "physical_format": "paperback",
+      "publish_date": "Aug 27, 2003",
+      "key": "/books/OL27289471M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_10": ["972232988X"],
+      "isbn_13": ["9789722329880"],
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/por"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-08-27T15:58:32.783832"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-06-28T06:25:26.360175"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "The Left Hand of Darkness",
+      "publishers": ["Orion Publishing Group"],
+      "publish_date": "2017",
+      "key": "/books/OL51009297M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [14577488],
+      "classifications": {},
+      "publish_places": ["London, United Kingdom"],
+      "copyright_date": "1969",
+      "contributors": [
+        {
+          "role": "Introduction",
+          "name": "China Miéville"
+        },
+        {
+          "role": "Introduction",
+          "name": "David Mitchell"
+        }
+      ],
+      "by_statement": "With an introduction by David Mitchell",
+      "physical_format": "Ebook",
+      "first_sentence": "I’ll make my report as if I told a story, for I was taught as a child on my homeworld that Truth is a matter of the imagination.",
+      "isbn_13": ["9781473221635"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2024-02-09T19:22:19.590032"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-02-09T19:28:42.572739"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "Karanlığın Sol Eli",
+      "publishers": ["Ayrıntı Yayınları"],
+      "publish_date": "1993",
+      "key": "/books/OL35658818M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "covers": [12366088],
+      "identifiers": {},
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/tur"
+        }
+      ],
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Ümit Altuğ"
+        }
+      ],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-11-10T10:32:14.092437"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-23T17:26:14.821186"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Karanlığın Sol Eli",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "Nov 05, 2013",
+      "source_records": ["amazon:9755390448"],
+      "number_of_pages": 304,
+      "publishers": ["Ayrıntı Yayınları"],
+      "physical_format": "paperback",
+      "covers": [12321219],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL35614636M",
+      "identifiers": {},
+      "isbn_10": ["9755390448"],
+      "isbn_13": ["9789755390444"],
+      "classifications": {},
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/tur"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-11-05T02:37:13.784504"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-23T17:26:14.821186"
+      }
+    },
+    {
+      "identifiers": {
+        "wikidata": ["Q106508710"]
+      },
+      "title": "La Main Gauche de La Nuit (Ldp Science Fic) (French Edition)",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "Jun 01, 2006",
+      "publishers": ["Livre de Poche"],
+      "source_records": ["amazon:2253113166"],
+      "covers": [8512913],
+      "isbn_13": ["9782253113164"],
+      "isbn_10": ["2253113166"],
+      "type": {
+        "key": "/type/edition"
+      },
+      "key": "/books/OL26837444M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-04-05T18:27:25.079604"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-23T17:24:58.579693"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "La Main Gauche de La Nuit",
+      "publishers": ["Le livre de poche"],
+      "publish_date": "21/06/2006",
+      "key": "/books/OL49650549M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "covers": [14430978],
+      "identifiers": {},
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/fre"
+        }
+      ],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-10-03T08:06:54.445417"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-04-23T00:39:42.499571"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mà esquerra de la foscor",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL1540986A"
+        }
+      ],
+      "publish_date": "Mar 27, 2023",
+      "source_records": ["amazon:8419206679"],
+      "number_of_pages": 352,
+      "publishers": ["RAYO VERDE EDITORIAL, S.L."],
+      "isbn_10": ["8419206679"],
+      "isbn_13": ["9788419206671"],
+      "physical_format": "paperback",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: La mà esquerra de la foscor (rústega amb sobrecoberta)"
+      },
+      "full_title": "La mà esquerra de la foscor",
+      "covers": [13656442],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47221192M",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-19T10:08:37.237229"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-09-01T19:01:14.463417"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mà esquerra de la foscor",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL8741609A"
+        }
+      ],
+      "publish_date": "Jul 20, 2020",
+      "source_records": ["amazon:8417925295"],
+      "number_of_pages": 384,
+      "publishers": ["RAYO VERDE EDITORIAL, S.L."],
+      "physical_format": "paperback",
+      "notes": "Source title: La mà esquerra de la foscor (rústica)",
+      "full_title": "La mà esquerra de la foscor",
+      "covers": [13656471],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47221217M",
+      "identifiers": {},
+      "isbn_10": ["8417925295"],
+      "isbn_13": ["9788417925291"],
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/cat"
+        }
+      ],
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Blanca Busquets"
+        }
+      ],
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-19T10:09:24.052698"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-18T12:19:37.610084"
+      }
+    },
+    {
+      "publishers": ["RAYO VERDE EDITORIAL, S.L.", "Rayo Verde"],
+      "source_records": ["amazon:841792504X"],
+      "title": "La mà esquerra de la foscor",
+      "covers": [10328037],
+      "physical_format": "hardcover",
+      "publish_date": "2019-11-11",
+      "key": "/books/OL28617045M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "isbn_10": ["841792504X"],
+      "isbn_13": ["9788417925048"],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2020-08-05T10:04:08.543392"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:39:21.030676"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "La mà esquerra de la foscor",
+      "publishers": ["Raig Verd"],
+      "publish_date": "2022",
+      "key": "/books/OL46523988M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [13148613],
+      "isbn_13": ["9788419206947"],
+      "classifications": {},
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-01-20T16:38:24.414970"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-18T12:19:37.610084"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mano izquierda de la oscuridad",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL3207284A"
+        }
+      ],
+      "publish_date": "2008-01-22",
+      "source_records": ["amazon:8445076787"],
+      "number_of_pages": 336,
+      "publishers": ["Booket"],
+      "physical_format": "mass market paperback",
+      "full_title": "La mano izquierda de la oscuridad",
+      "covers": [13955546],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47362576M",
+      "identifiers": {},
+      "languages": [
+        {
+          "key": "/languages/spa"
+        }
+      ],
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Francisco Abelenda"
+        }
+      ],
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": ["8445076787"],
+      "isbn_13": ["9788445076781"],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-04-14T02:33:55.412626"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:38:06.400049"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mano izquierda de la oscuridad",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL3207284A"
+        }
+      ],
+      "publish_date": "May 10, 2018",
+      "source_records": ["amazon:8445005324"],
+      "number_of_pages": 312,
+      "publishers": ["Minotauro", "MINOTAURO"],
+      "isbn_10": ["8445005324"],
+      "isbn_13": ["9788445005323"],
+      "physical_format": "hardcover",
+      "full_title": "La mano izquierda de la oscuridad",
+      "covers": [14120055],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47507098M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-04-18T05:30:53.384069"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-18T12:18:53.785133"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mano izquierda de la oscuridad",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL3207284A"
+        }
+      ],
+      "publish_date": "2008-01-22",
+      "source_records": ["amazon:8445076787"],
+      "number_of_pages": 336,
+      "publishers": ["Booket"],
+      "physical_format": "mass market paperback",
+      "full_title": "La mano izquierda de la oscuridad",
+      "covers": [13955545],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47362575M",
+      "identifiers": {},
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Francisco Abelenda"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/spa"
+        }
+      ],
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": ["8445076787"],
+      "isbn_13": ["9788445076781"],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-04-14T02:33:55.400004"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:37:24.401112"
+      }
+    },
+    {
+      "title": "La mano izquierda de la oscuridad",
+      "publish_date": "1996",
+      "publishers": ["Minotauro"],
+      "type": {
+        "key": "/type/edition"
+      },
+      "covers": [10672051],
+      "isbn_13": ["8445070231"],
+      "source_records": ["amazon:8445070231"],
+      "key": "/books/OL32003578M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-03-03T17:48:17.292582"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-18T12:18:53.785133"
+      }
+    },
+    {
+      "publishers": ["Heyne Verlag"],
+      "source_records": ["amazon:3453315944"],
+      "title": "Die linke Hand der Dunkelheit: Roman",
+      "identifiers": {
+        "amazon": ["3453315944"]
+      },
+      "isbn_13": ["9783453315945"],
+      "covers": [8785719],
+      "physical_format": "paperback",
+      "full_title": "Die linke Hand der Dunkelheit: Roman",
+      "isbn_10": ["3453315944"],
+      "publish_date": "Apr 14, 2014",
+      "key": "/books/OL27314810M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-09-19T20:21:24.227892"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-14T20:29:22.836618"
+      }
+    },
+    {
+      "publishers": ["Wilhelm Heyne Verlag"],
+      "source_records": ["amazon:3453050266"],
+      "title": "Winterplanet",
+      "covers": [14544138, 8456814],
+      "isbn_13": ["9783453050266"],
+      "isbn_10": ["3453050266"],
+      "publish_date": "Mar 21, 1991",
+      "key": "/books/OL26800524M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-03-21T11:49:52.943493"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-11-14T20:29:22.836618"
+      }
+    },
+    {
+      "identifiers": {
+        "librarything": ["23117"],
+        "goodreads": ["234698"]
+      },
+      "title": "Die linke Hand der Dunkelheit.",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "March 1, 2000",
+      "publishers": ["Heyne"],
+      "physical_format": "Paperback",
+      "covers": [1009250],
+      "isbn_13": ["9783453164154"],
+      "isbn_10": ["3453164156"],
+      "type": {
+        "key": "/type/edition"
+      },
+      "source_records": ["amazon:3453164156"],
+      "key": "/books/OL9041080M",
+      "number_of_pages": 347,
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 9,
+      "revision": 9,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-30T09:38:13.731961"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-12-09T23:59:46.599590"
+      }
+    },
+    {
+      "identifiers": {
+        "goodreads": ["6665775"]
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL2686048A"
+        }
+      ],
+      "publish_date": "April 27, 1987",
+      "publishers": ["Random House Audio"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_10": ["0394299922"],
+      "isbn_13": ["9780394299921"],
+      "source_records": ["amazon:0394299922"],
+      "key": "/books/OL7456283M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T13:35:46.876380"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-12-20T23:44:19.172415"
+      }
+    },
+    {
+      "identifiers": {
+        "goodreads": ["6665775"]
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL2686048A"
+        }
+      ],
+      "publish_date": "April 27, 1987",
+      "publishers": ["Random House Audio"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_10": ["0394299922"],
+      "isbn_13": ["9780394299921"],
+      "source_records": ["amazon:0394299922"],
+      "key": "/books/OL7459800M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T13:35:46.876380"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-01-23T07:54:32.375492"
+      }
+    },
+    {
+      "publishers": ["Random House Audio"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "title": "The Left Hand of Darkness",
+      "identifiers": {
+        "librarything": ["23117"]
+      },
+      "physical_format": "Audio Cassette",
+      "publish_date": "September 1, 1985",
+      "key": "/books/OL8350044M",
+      "authors": [
+        {
+          "key": "/authors/OL2686048A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "subjects": ["Non-Classifiable", "Audio Adult: Books On Tape"],
+      "covers": [13908173],
+      "source_records": ["amazon:0871881128"],
+      "isbn_10": ["0871881128"],
+      "isbn_13": ["9780871881120"],
+      "oclc_numbers": ["12690451"],
+      "classifications": {},
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T15:03:11.581851"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-07-28T13:22:00.005745"
+      }
+    },
+    {
+      "identifiers": {
+        "librarything": ["23117"]
+      },
+      "title": "The Left Hand of Darkness",
+      "publish_date": "January 1991",
+      "publishers": ["Ace Books"],
+      "physical_format": "Paperback",
+      "edition_name": "Reissue edition",
+      "type": {
+        "key": "/type/edition"
+      },
+      "subjects": ["Science fiction"],
+      "isbn_10": ["9994886371"],
+      "isbn_13": ["9789994886371"],
+      "source_records": ["amazon:9994886371"],
+      "key": "/books/OL9207602M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-30T09:38:13.731961"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-04-18T01:01:00.513215"
+      }
+    },
+    {
+      "title": "Eodumeui wyoenson",
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": ["urn:bwbsku:W7-CBY-972"],
+      "source_records": ["promise:bwb_daily_pallets_2022-03-25"],
+      "key": "/books/OL42997476M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "identifiers": {},
+      "isbn_10": ["8952771826"],
+      "isbn_13": ["9788952771827"],
+      "publish_date": "2014",
+      "languages": [
+        {
+          "key": "/languages/kor"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-12-06T22:21:25.185217"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:40:21.634584"
+      }
+    },
+    {
+      "identifiers": {
+        "amazon": ["B0169AU2ZC"]
+      },
+      "title": "The Left Hand of Darkness",
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": ["urn:bwbsku:P7-AOR-050"],
+      "source_records": ["promise:bwb_daily_pallets_2021-04-30"],
+      "full_title": "The Left Hand of Darkness (Ace #47800) (1969)",
+      "key": "/books/OL43373375M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "publishers": ["Ace Books"],
+      "publish_date": "1969-03",
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-12-08T14:09:24.460067"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-01-16T22:34:25.665473"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": ["urn:bwbsku:W8-BKZ-041"],
+      "publish_date": "1974-01-01",
+      "source_records": ["promise:bwb_daily_pallets_2023-04-03:W8-BKZ-041"],
+      "title": "The Left Hand of Darkness",
+      "full_title": "The Left Hand of Darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL47706784M",
+      "identifiers": {},
+      "isbn_10": ["0441478034"],
+      "isbn_13": ["9780441478033"],
+      "classifications": {},
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-05-04T02:46:52.545992"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-07-28T13:21:16.868931"
+      }
+    },
+    {
+      "publishers": ["Editora Aleph"],
+      "source_records": ["amazon:8576571846", "promise:bwb_daily_pallets_2020-09-09"],
+      "title": "A Mão Esquerda da Escuridão",
+      "identifiers": {
+        "amazon": ["8576571846"]
+      },
+      "covers": [8789568],
+      "physical_format": "paperback",
+      "full_title": "A Mão Esquerda da Escuridão (Em Portuguese do Brasil)",
+      "publish_date": "Sep 26, 2014",
+      "key": "/books/OL27321373M",
+      "authors": [
+        {
+          "key": "/authors/OL2965820A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "classifications": {},
+      "translation_of": "The Left Hand of Darkness",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/por"
+        }
+      ],
+      "contributors": [
+        {
+          "name": "Susana L. de Alexandria",
+          "role": "Translator"
+        }
+      ],
+      "isbn_10": ["8576571846"],
+      "isbn_13": ["9788576571841"],
+      "local_id": ["urn:bwbsku:KO-147-814"],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-09-26T02:25:39.217084"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-12-09T23:37:30.228342"
+      }
+    },
+    {
+      "publishers": ["Editora Aleph"],
+      "number_of_pages": 296,
+      "classifications": {},
+      "title": "A Mão Esquerda da Escuridão",
+      "identifiers": {
+        "isfdb": ["672621"]
+      },
+      "covers": [8199550],
+      "languages": [
+        {
+          "key": "/languages/por"
+        }
+      ],
+      "publish_date": "2008",
+      "key": "/books/OL26466164M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "publish_places": ["Brazil"],
+      "isbn_10": ["8576570572"],
+      "isbn_13": ["9788576570578"],
+      "oclc_numbers": ["817154425"],
+      "latest_revision": 7,
+      "revision": 7,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2018-07-02T12:19:53.491651"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-01-24T15:13:29.685302"
+      }
+    },
+    {
+      "description": {
+        "type": "/type/text",
+        "value": "«La luz es la mano izquierda de la oscuridad, y la oscuridad es la mano derecha de la luz. Los dos son una, vida y muerte, juuntas como amantes en kémmer, como manos unidas, como el término y el camino.»\r\n\r\n«Escribiré mi informe como si contara una historia, pues me enseñaron siendo nió que la verdad nace de la imaginación». Así comienza su relato Genly Ai, enviado al planeta Gueden —también llamado Invierno por su gélido clima— con el propósito de contactar con sus habitantes y proponerles unirse a la liga de planetas conocida como el Ecumen.\r\n\r\nLos guedenianos tienen una particularidad que los hace únicos: son hermafroditas, y adoptan uno u otro sexo exclusivamente en la época de celo, denominada kémmer. En Invierno, Ai contacta con Estraven, un alto cargo que le mostrará cuán diferente puede llegar a ser una sociedad donde no existe la diferenciación sexual."
+      },
+      "title": "La mano izquierda de la oscuridad",
+      "publish_date": "2021",
+      "publishers": ["Minotauro", "MINOTAURO"],
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_13": ["9788445009949"],
+      "physical_dimensions": "20 x 13 x  centimeters",
+      "weight": "374 grams",
+      "series": ["Serie Ursula K. Le Guin"],
+      "publish_places": ["Barcelona"],
+      "languages": [
+        {
+          "key": "/languages/spa"
+        }
+      ],
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Francisco Abelenda"
+        }
+      ],
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "covers": [12498374],
+      "source_records": ["amazon:844500994X"],
+      "key": "/books/OL35887886M",
+      "number_of_pages": 336,
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-12-26T15:24:03.987365"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-02-16T07:45:55.450620"
+      }
+    },
+    {
+      "publishers": ["Barnes & Noble Books"],
+      "title": "The Left Hand of Darkness (Hardcover)",
+      "identifiers": {
+        "librarything": ["23117"],
+        "goodreads": ["161131"]
+      },
+      "physical_format": "Hardcover",
+      "publish_date": "1996",
+      "key": "/books/OL8014319M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_10": ["0760759146"],
+      "isbn_13": ["9780760759141"],
+      "oclc_numbers": ["56769719"],
+      "classifications": {},
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "lc_classifications": ["PS3562.E42 L43 2004"],
+      "source_records": [
+        "marc:marc_columbia/Columbia-extract-20221130-022.mrc:238867635:1041",
+        "amazon:0760759146"
+      ],
+      "covers": [13823392],
+      "latest_revision": 8,
+      "revision": 8,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T15:03:11.581851"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-04-04T08:00:42.201193"
+      }
+    },
+    {
+      "title": "THE LEFT HAND OF DARKNESS",
+      "type": {
+        "key": "/type/edition"
+      },
+      "source_records": ["marc:marc_miami_univ_ohio/allbibs0097.out:6565938:324"],
+      "key": "/books/OL14974738M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-09-16T22:36:08.374208"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-03-25T09:19:15.514221"
+      }
+    },
+    {
+      "identifiers": {
+        "librarything": ["23117"],
+        "goodreads": ["224280"]
+      },
+      "title": "THE LEFT HAND OF DARKNESS, SFBC 50th Anniversary Collection",
+      "publish_date": "2004",
+      "publishers": ["Walker and Company"],
+      "physical_format": "Hardcover",
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_10": ["0739448811"],
+      "isbn_13": ["9780739448816"],
+      "oclc_numbers": ["58390752"],
+      "source_records": ["amazon:0739448811"],
+      "key": "/books/OL7916646M",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "latest_revision": 7,
+      "revision": 7,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T15:03:11.581851"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-12-19T03:23:49.787164"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "Oct 11, 1975",
+      "source_records": ["amazon:0441478042"],
+      "publishers": ["Ace Books"],
+      "isbn_10": ["0441478042"],
+      "isbn_13": ["9780441478040"],
+      "physical_format": "mass market paperback",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: The Left Hand of Darkness (Ace SF, 47804)"
+      },
+      "full_title": "The Left Hand of Darkness",
+      "covers": [12071186],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL35256337M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-10-11T16:15:01.108214"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-11-11T22:09:31.063514"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "Nov 01, 2017",
+      "source_records": ["amazon:7550291225", "promise:bwb_daily_pallets_2023-04-18:P8-CSP-371"],
+      "number_of_pages": 361,
+      "publishers": ["Beijing United Publishing co., LTD"],
+      "isbn_10": ["7550291225"],
+      "isbn_13": ["9787550291225"],
+      "physical_format": "paperback",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: The Left Hand of Darkness (Chinese Edition)"
+      },
+      "full_title": "The Left Hand of Darkness",
+      "covers": [11477279],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL32844423M",
+      "local_id": ["urn:bwbsku:P8-CSP-371"],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-07-22T06:14:24.128252"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-05-04T07:47:16.078829"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Left Hand of Darkness",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "Jul 26, 1974",
+      "source_records": ["amazon:0441478026", "promise:bwb_daily_pallets_2023-02-27:W8-BNX-007"],
+      "publishers": ["Ace"],
+      "isbn_10": ["0441478026"],
+      "isbn_13": ["9780441478026"],
+      "physical_format": "mass market paperback",
+      "full_title": "The Left Hand of Darkness",
+      "covers": [11513126],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL32880751M",
+      "local_id": ["urn:bwbsku:W8-BNX-007"],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-07-27T06:56:54.459479"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-05-04T07:33:41.471749"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "isbn_13": ["9781405525275"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "publish_date": "2012",
+      "publishers": ["Little, Brown Book Group Limited"],
+      "source_records": ["bwb:9781405525275"],
+      "title": "Left Hand of Darkness",
+      "full_title": "Left Hand of Darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL33445301M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-09-17T19:17:05.301757"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-11-11T22:09:31.063514"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "isbn_13": ["9780356507460"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "number_of_pages": 256,
+      "publish_date": "2016",
+      "publishers": ["Little, Brown Book Group Limited"],
+      "source_records": ["bwb:9780356507460"],
+      "subjects": ["Fiction, science fiction, general"],
+      "title": "Left Hand of Darkness",
+      "full_title": "Left Hand of Darkness",
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL33517960M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-09-18T17:09:17.002748"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-11-11T22:09:31.063514"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "The Left Hand of Darkness",
+      "publishers": ["Orion Publishing Co"],
+      "publish_date": "20 Sep 2018",
+      "key": "/books/OL33220502M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [11932333],
+      "isbn_10": ["1473225949"],
+      "isbn_13": ["9781473225947"],
+      "classifications": {},
+      "physical_dimensions": "196 x 130 x 26 centimeters",
+      "weight": "240 grams",
+      "physical_format": "Paperback",
+      "number_of_pages": 336,
+      "lc_classifications": ["PS3562.E42L4 2018"],
+      "source_records": ["bwb:9781473225947"],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-09-08T09:48:16.430724"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-09-20T04:48:18.964953"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "La mano izquierda de la oscuridad",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "publish_date": "2009",
+      "source_records": ["amazon:8445077546"],
+      "number_of_pages": 304,
+      "publishers": ["MINOTAURO", "Minotauro"],
+      "physical_format": "hardcover",
+      "notes": "Source title: La mano izquierda de la oscuridad (Clásicos Minotauro) (Spanish Edition)",
+      "full_title": "La mano izquierda de la oscuridad",
+      "covers": [10952947],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "key": "/books/OL32330389M",
+      "identifiers": {},
+      "isbn_10": ["8445077546"],
+      "isbn_13": ["9788445077542"],
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/spa"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-05-06T14:55:39.588983"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-11-12T05:22:45.673789"
+      }
+    },
+    {
+      "publishers": ["Minotauro", "MINOTAURO"],
+      "source_records": ["amazon:8445009311"],
+      "title": "La mano izquierda de la oscuridad",
+      "notes": "Source title: La mano izquierda de la oscuridad (Minotauro Esenciales) (Spanish Edition)",
+      "number_of_pages": 336,
+      "covers": [10513774],
+      "physical_format": "paperback",
+      "full_title": "La mano izquierda de la oscuridad",
+      "publish_date": "Aug 25, 2020",
+      "key": "/books/OL31390107M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        },
+        {
+          "key": "/authors/OL3207284A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "isbn_10": ["8445009311"],
+      "isbn_13": ["9788445009314"],
+      "classifications": {},
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2020-11-19T09:58:38.307826"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-11-08T16:31:47.037456"
+      }
+    },
+    {
+      "publishers": ["Ace Books"],
+      "source_records": ["amazon:0441478085:bk:2712284268:249886", "bwb:9780441478088"],
+      "title": "Left Hand Darkness",
+      "identifiers": {
+        "goodreads": ["4338325"],
+        "librarything": ["23117"]
+      },
+      "isbn_13": ["9780441478088"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": ["0441478085"],
+      "publish_date": "March 1983",
+      "key": "/books/OL7525845M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "first_sentence": {
+        "type": "/type/text",
+        "value": "I'LL MAKE my report as if I told a story, for I was taught as a child on my homeworld that Truth is a matter of the imagination."
+      },
+      "latest_revision": 7,
+      "revision": 7,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T13:35:46.876380"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-12-17T14:39:47.273964"
+      }
+    },
+    {
+      "publishers": ["Ace Books", "Ace"],
+      "source_records": [
+        "amazon:0441478077:bk:2712030103:254147",
+        "bwb:9780441478071",
+        "amazon:0441478077"
+      ],
+      "title": "Left Hand Darkness",
+      "identifiers": {
+        "librarything": ["23117"],
+        "goodreads": ["965878"]
+      },
+      "isbn_13": ["9780441478071"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": ["0441478077"],
+      "publish_date": "August 1982",
+      "key": "/books/OL7525844M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "oclc_numbers": ["9226333"],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "first_sentence": {
+        "type": "/type/text",
+        "value": "I'LL MAKE my report as if I told a story, for I was taught as a child on my homeworld that Truth is a matter of the imagination."
+      },
+      "covers": [13483103],
+      "number_of_pages": 304,
+      "latest_revision": 9,
+      "revision": 9,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T13:35:46.876380"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-03-16T02:50:48.105918"
+      }
+    },
+    {
+      "publishers": ["Ace Books"],
+      "source_records": ["amazon:0441478115:bk:2713053960:252983", "bwb:9780441478118"],
+      "title": "Left Hand Darkness",
+      "identifiers": {
+        "librarything": ["23117"],
+        "goodreads": ["965882"]
+      },
+      "isbn_13": ["9780441478118"],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": ["0441478115"],
+      "publish_date": "August 1986",
+      "key": "/books/OL7525848M",
+      "authors": [
+        {
+          "key": "/authors/OL31353A"
+        }
+      ],
+      "oclc_numbers": ["152413826"],
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "first_sentence": {
+        "type": "/type/text",
+        "value": "I'LL MAKE my report as if I told a story, for I was taught as a child on my homeworld that Truth is a matter of the imagination."
+      },
+      "latest_revision": 8,
+      "revision": 8,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-29T13:35:46.876380"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-12-17T15:16:22.773599"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL59800W"
+        }
+      ],
+      "title": "Die linke Hand der Dunkelheit",
+      "publishers": ["Heyne"],
+      "publish_date": "2014",
+      "key": "/books/OL32776835M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [11408788],
+      "isbn_13": ["9783641139254"],
+      "classifications": {},
+      "table_of_contents": [
+        {
+          "level": 1,
+          "label": "",
+          "title": "Vorbemerkung",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Erstes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Zweites Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Drittes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Viertes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Fünftes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Sechstes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Siebentes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Achtes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Neuntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Zehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Elftes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Zwölftes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Dreizehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Vierzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Fünfzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Sechzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Siebzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Achtzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Neunzehntes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Zwanzigstes Kapitel",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        },
+        {
+          "level": 1,
+          "label": "",
+          "title": "Anhang",
+          "pagenum": "",
+          "type": {
+            "key": "/type/toc_item"
+          }
+        }
+      ],
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Gisela Stege"
+        },
+        {
+          "role": "Translator",
+          "name": "Erik Simon"
+        },
+        {
+          "role": "Cover Design",
+          "name": "Stardust"
+        },
+        {
+          "role": "Cover Art and Illustrations",
+          "name": "Valentina Montagna"
+        },
+        {
+          "name": "KompetenzCenter",
+          "role": "Typesetter"
+        }
+      ],
+      "series": ["Hainish Cycle, #4"],
+      "description": {
+        "type": "/type/text",
+        "value": "Die Bewohner des Planeten Gethen sind uns Menschen verblüffend ähnlich – mit einem Unterschied: Sie sind androgyn, und während einer kurzen Phase sexueller Erregbarkeit entscheidet sich, welcher der beiden Partner einer Beziehung welches Geschlecht annimmt. In einer solchen Gesellschaft sind geschlechtsspezifische Machtkämpfe und Hierarchien, wie wir sie kennen, nicht möglich. Doch es gibt andere Formen von Macht – und diese werden einem Abgesandten von der Erde schmerzhaft bewusst, als er zum Spielball politischer Interessen wird und gezwungen ist, in Begleitung eines Gethenianers durch die Eiswüsten des Planeten zu fliehen."
+      },
+      "first_sentence": {
+        "type": "/type/text",
+        "value": "Ich werde meinen Bericht schreiben, als wäre er eine Geschichte, denn schon als Kind in meiner Heimatwelt habe ich gelernt, dass die Wahrheit eine Sache der Vorstellungskraft ist."
+      },
+      "languages": [
+        {
+          "key": "/languages/ger"
+        }
+      ],
+      "physical_format": "E-book",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "translation_of": "The Left Hand of Darkness",
+      "copyright_date": "2014",
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-07-10T17:57:12.220016"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-08-06T06:45:54.226205"
+      }
+    }
+  ]
+}
