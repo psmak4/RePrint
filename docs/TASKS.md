@@ -293,7 +293,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M3-T19 · Web: resolve route (`/resolve?ref=`, the URL search results already link to; D-109) with loading and "We couldn't load this book right now" retry page · deps: M3-T18, M3-T11 · PRD: §6, §7.3
   - Accept: opening a candidate calls resolve and redirects to `/books/<slug>` (loader test)
   - Accept: on 503 the page shows "We couldn't load this book right now" with a working retry button (component test)
-- [ ] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
+- [x] M3-T20 · Web: Author page (`/authors/:slug`) · deps: M3-T18 · PRD: §7.5
   - Accept: the page shows photo, name, life dates, and bio when available, with fallbacks (component tests)
   - Accept: Books are grouped by role (written, translated, narrated, and so on) and sorted by review count with each Book's rating (component and loader tests)
 - [ ] M3-T21 · Local seed: about 500 Books with Editions, Authors, Series, Genres, Subjects · deps: M3-T09, M1-T16 · PRD: §13

@@ -278,3 +278,7 @@ Entry format:
 ### 2026-09-30 · M3-T19 · PR pending
 - `apps/web/app/routes/resolve.tsx` (loader that calls resolve and redirects), `components/books/resolve-page.tsx` (failure and not-found states, retry form), `copy.resolve`, route registered in `routes.ts`, and tests. D-111 records the choices.
 - Next iteration: M3-T20 (Author page `/authors/:slug`); book-page and suggestion links already point there. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T20 · PR pending
+- `apps/web/app/routes/author.tsx` (loader, meta with canonical and Open Graph), `components/books/author-page.tsx` (`AuthorPage`, `groupWorks`, `lifeDates`), `copy.author`, route registered in `routes.ts`, and tests. D-112 records the choices.
+- Next iteration: M3-T21 (local seed of about 500 Books) is next; M3-T22 e2e can rely on `/authors/:slug` now existing. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
