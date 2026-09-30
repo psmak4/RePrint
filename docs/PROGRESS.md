@@ -201,3 +201,7 @@ Entry format:
 ### 2026-09-30 · M3-T01 · PR pending
 - `packages/shared`: `catalog.ts` (Book, Edition, Author, Contribution, Series membership, Genre, Subject, Cover, Format, Language, Source link, Book candidate schemas), `isbn.ts` (`toIsbn13`, `isValidIsbn10`, `isValidIsbn13`), `slug.ts` (`makeSlug`), with unit tests; shared coverage is 100%. `COVER_ORIGINS` already lived in `permissions.ts` and is reused. D-093 records the choices, notably that the slug suffix is the last 6 hex of the UUIDv7.
 - Next iteration: M3-T02 (catalog tables) reuses the existing `covers` table and can import the enums (`CONTRIBUTION_ROLES`, `FORMATS`, `GENRE_ORIGINS`) for column enums. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T02 · PR pending
+- `packages/db/src/schema/catalog.ts` (`books`, `editions`, `authors`, `contributions`, `source_links`, `source_records`), migration `0004_catalog_core`, and `catalog.integration.test.ts` (constraints, zeroed aggregates, GIN/trigram indexes, cascade). `tsvector` helper added to `helpers.ts`. D-094 records the choices, including an extra `books.refreshed_at`.
+- Next iteration: M3-T03 adds series, genres, subjects, rules, and merge candidates, and the Genre data migration; `book_id` FKs on later community tables should be `RESTRICT` (D-094). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

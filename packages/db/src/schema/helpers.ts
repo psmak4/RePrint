@@ -24,3 +24,8 @@ export const timestamps = () => ({
 export const citext = customType<{ data: string }>({
   dataType: () => 'citext',
 })
+
+/** Postgres full-text search vector. Maintained by the app, not generated (M3 brief). */
+export const tsvector = customType<{ data: string }>({
+  dataType: () => 'tsvector',
+})
