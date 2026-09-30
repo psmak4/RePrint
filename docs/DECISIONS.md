@@ -636,3 +636,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.1 and §7.8 fix what the settings edit, not the route structure, how the avatar is sent, or the preview behavior.
 - Affects: M2-T20
 
+### D-091 · Web settings: security (M2-T20)
+- Status: Decided (loop)
+- Decision: (1) `/settings/security` is a second tab under the `/settings` layout. Its four forms (change email, change password, end a session or log out everywhere, delete account) each use their own fetcher but post JSON with an `intent` to the one route action, which validates with the shared request schemas and forwards to the API (`POST /v1/me/email`, `POST /v1/me/password`, `DELETE /v1/me/sessions/:id`, `POST /v1/auth/logout-all`, `DELETE /v1/me`). `sendToApi` gained `DELETE`, and a `null` body sends no body. (2) The API has no "pending email change" read, so the pending state is shown from the successful response for the rest of the visit ("we sent a link to X"); it is not restored after a reload. The account's email stays the old one until the link is opened. (3) The emailed link opens `/confirm-email-change?token=`, whose loader spends the token through `POST /v1/me/email/confirm` (the same GET-spends-token approach as D-082) and shows success or "cannot be used". (4) Logging out everywhere and deleting the account forward the cleared session cookie and redirect (`/login` and `/`). Ending the current device's session does the same: every row has an "End session" button, and the current row is tagged "This device". Password change keeps this session, so the page just confirms. (5) Last-active times show in UTC, as the bell's dates do. (6) The delete button is an outlined danger-colored button, since `@reprint/ui` has no destructive variant.
+- Why: PRD §7.1 fixes what security settings do, not the route shape, the pending display, or the redirects.
+- Affects: M2-T22
+

@@ -80,4 +80,10 @@ describe('sendToApi', () => {
     expect(init.body).toBe(form)
     expect(new Headers(init.headers).has('content-type')).toBe(false)
   })
+
+  it('sends no body and no content type for null', async () => {
+    const { init } = await sent(null)
+    expect(init.body).toBeUndefined()
+    expect(new Headers(init.headers).has('content-type')).toBe(false)
+  })
 })

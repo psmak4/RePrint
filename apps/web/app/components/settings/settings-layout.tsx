@@ -1,7 +1,10 @@
 import { NavLink, Outlet } from 'react-router'
 import { copy } from '../../copy/index.js'
 
-const tabs = [{ to: '/settings/profile', label: copy.settings.profileTab }]
+const tabs = [
+  { to: '/settings/profile', label: copy.settings.profileTab },
+  { to: '/settings/security', label: copy.settings.securityTab },
+]
 
 /** Shared frame for the settings pages: a heading and a section nav beside the page. */
 export function SettingsLayout() {
