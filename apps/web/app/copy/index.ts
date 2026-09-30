@@ -4,6 +4,18 @@ export const copy = {
     skipToContent: 'Skip to main content',
     homeLinkLabel: 'RePrint home',
     searchLabel: 'Search',
+    search: {
+      inputLabel: 'Search books and authors',
+      placeholder: 'Search books and authors',
+      submit: 'Search',
+      suggestionsLabel: 'Suggestions',
+      bookKind: 'Book',
+      authorKind: 'Author',
+      resultCount: (count: number) =>
+        count === 0
+          ? 'No suggestions'
+          : `${count} ${count === 1 ? 'suggestion' : 'suggestions'} available`,
+    },
     accountLabel: 'Account',
     legalNavLabel: 'Legal and help',
     openLibraryCredit: 'Book data and covers courtesy of',

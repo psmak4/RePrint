@@ -11,6 +11,8 @@ test('requests a reset, follows the emailed link, and logs in with the new passw
   const newPassword = 'a brand new passphrase 42'
 
   await page.goto('/register')
+  // Fill only after hydration, or the form resets and submits empty.
+  await page.waitForLoadState('networkidle')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Username').fill(username)
   await page.getByLabel('Password').fill(testPassword)
