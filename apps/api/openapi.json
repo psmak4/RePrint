@@ -1560,6 +1560,72 @@
           },
           {
             "schema": {
+              "default": "books",
+              "type": "string",
+              "enum": [
+                "books",
+                "authors"
+              ]
+            },
+            "in": "query",
+            "name": "type",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "in": "query",
+            "name": "genre",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}$"
+            },
+            "in": "query",
+            "name": "language",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 2990
+            },
+            "in": "query",
+            "name": "decade",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "in": "query",
+            "name": "minRating",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": "relevance",
+              "type": "string",
+              "enum": [
+                "relevance",
+                "most_reviewed",
+                "highest_rated",
+                "newest"
+              ]
+            },
+            "in": "query",
+            "name": "sort",
+            "required": false
+          },
+          {
+            "schema": {
               "default": 1,
               "type": "integer",
               "minimum": 1,
@@ -1976,9 +2042,99 @@
                               "candidate"
                             ],
                             "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "author"
+                                ]
+                              },
+                              "author": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                                  },
+                                  "slug": {
+                                    "type": "string",
+                                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "slug",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "author"
+                            ],
+                            "additionalProperties": false
                           }
                         ]
                       }
+                    },
+                    "isbnMatch": {
+                      "anyOf": [
+                        {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "book"
+                                  ]
+                                },
+                                "slug": {
+                                  "type": "string",
+                                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "slug"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "candidate"
+                                  ]
+                                },
+                                "ref": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_-]{22,64}$"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "ref"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "page": {
                       "type": "integer",
@@ -1999,6 +2155,7 @@
                   },
                   "required": [
                     "items",
+                    "isbnMatch",
                     "page",
                     "pageSize",
                     "hasMore",

@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { authorSchema, contributionRoleSchema, coverSchema } from './catalog.js'
+import {
+  authorSchema,
+  contributionRoleSchema,
+  coverSchema,
+  languageSchema,
+  slugSchema,
+} from './catalog.js'
 import { bookSummarySchema, candidateRefSchema } from './catalog-api.js'
 
 /** Request and response shapes for Catalog search (PRD §7.3, §10). */
@@ -27,9 +33,29 @@ export type SearchSuggestResponse = z.infer<typeof searchSuggestResponseSchema>
 /** Results per page (PRD §7.3). */
 export const SEARCH_PAGE_SIZE = 20
 
-/** `GET /search?q=&page=`. A query under `SEARCH_MIN_LENGTH` is valid and finds nothing. */
+export const SEARCH_TYPES = ['books', 'authors'] as const
+export const SEARCH_SORTS = ['relevance', 'most_reviewed', 'highest_rated', 'newest'] as const
+export type SearchSort = (typeof SEARCH_SORTS)[number]
+
+/**
+ * `GET /search?q=&type=&genre=&language=&decade=&minRating=&sort=&page=`. A query under
+ * `SEARCH_MIN_LENGTH` is valid and finds nothing. `genre`, `language`, and `minRating` limit results
+ * to the Catalog; `decade` (the first year, such as 1990) applies to every result (PRD §7.3).
+ */
 export const searchQuerySchema = z.object({
   q: z.string().trim().max(SEARCH_QUERY_MAX_LENGTH).default(''),
+  type: z.enum(SEARCH_TYPES).default('books'),
+  genre: slugSchema.optional(),
+  language: languageSchema.optional(),
+  decade: z.coerce
+    .number()
+    .int()
+    .min(1000)
+    .max(2990)
+    .refine((year) => year % 10 === 0, 'Must be the first year of a decade, such as 1990')
+    .optional(),
+  minRating: z.coerce.number().int().min(1).max(5).optional(),
+  sort: z.enum(SEARCH_SORTS).default('relevance'),
   page: z.coerce.number().int().min(1).max(50).default(1),
 })
 export type SearchQuery = z.infer<typeof searchQuerySchema>
@@ -49,11 +75,21 @@ export type SearchCandidate = z.infer<typeof searchCandidateSchema>
 export const searchResultItemSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('book'), book: bookSummarySchema }),
   z.object({ kind: z.literal('candidate'), candidate: searchCandidateSchema }),
+  z.object({ kind: z.literal('author'), author: authorSuggestionSchema }),
 ])
 export type SearchResultItem = z.infer<typeof searchResultItemSchema>
 
+/** Where an ISBN query leads: a stored Book by slug, or a candidate by reference (PRD §7.3). */
+export const isbnMatchSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('book'), slug: slugSchema }),
+  z.object({ kind: z.literal('candidate'), ref: candidateRefSchema }),
+])
+export type IsbnMatch = z.infer<typeof isbnMatchSchema>
+
 export const searchResponseSchema = z.object({
   items: z.array(searchResultItemSchema),
+  /** Set when the query is a 10- or 13-digit ISBN with an exact match; the web goes straight there. */
+  isbnMatch: isbnMatchSchema.nullable(),
   page: z.number().int().min(1),
   pageSize: z.number().int().positive(),
   hasMore: z.boolean(),
