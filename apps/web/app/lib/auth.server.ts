@@ -59,11 +59,11 @@ export type ApiPostResult =
 
 /**
  * Sends a request to the API on behalf of a form action. A `FormData` body goes out as multipart
- * (the runtime sets the boundary); anything else goes out as JSON.
+ * (the runtime sets the boundary), `null` sends no body, and anything else goes out as JSON.
  */
 export async function sendToApi(
   request: Request,
-  method: 'POST' | 'PATCH',
+  method: 'POST' | 'PATCH' | 'DELETE',
   path: string,
   body: unknown,
   fallback: string,
@@ -72,9 +72,11 @@ export async function sendToApi(
   try {
     response = await apiClientFor(request).request(
       path,
-      body instanceof FormData
-        ? { method, body }
-        : { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) },
+      body === null
+        ? { method }
+        : body instanceof FormData
+          ? { method, body }
+          : { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) },
     )
   } catch (error) {
     logger.error({ err: error, path }, 'API request failed')

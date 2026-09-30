@@ -201,7 +201,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M2-T19 · Web settings: profile, avatar, library privacy, email preferences · deps: M2-T16, M2-T11 · PRD: §7.1, §7.8
   - Accept: `/settings/profile` edits display name and bio with a 280-char counter, uploads an avatar with preview, and toggles library privacy and review-decision emails (component tests)
   - Accept: the settings pages are `noindex` and require sign-in (redirect to `/login` otherwise)
-- [ ] M2-T20 · Web settings: email, password, sessions, log out everywhere, delete account · deps: M2-T19, M2-T15, M2-T17 · PRD: §7.1
+- [x] M2-T20 · Web settings: email, password, sessions, log out everywhere, delete account · deps: M2-T19, M2-T15, M2-T17 · PRD: §7.1
   - Accept: `/settings/security` changes email (pending state shown until verified) and password, each asking for the current password (component tests)
   - Accept: the active devices list ends individual sessions and "Log out everywhere" works (component test)
   - Accept: delete account requires typing the password and explains the 30-day erase (component test)
