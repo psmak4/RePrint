@@ -17,6 +17,7 @@ const SESSIONS = 'modules/me/sessions.integration.test.ts'
 const AVATAR = 'modules/me/avatar.integration.test.ts'
 const DELETION = 'modules/accounts/deletion.integration.test.ts'
 const CATALOG = 'modules/catalog/catalog.integration.test.ts'
+const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
@@ -126,6 +127,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/authors/{slug}': {
     allowed: [CATALOG, 'lists the Author’s Books grouped by Role'],
     denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'GET /v1/search/suggest': {
+    allowed: [SEARCH, 'returns Books and Authors from the Catalog'],
+    denied: [SEARCH, 'rejects a query over 100 characters'],
   },
   'POST /v1/books/resolve': {
     allowed: [RESOLVE, 'stores the Book with its Editions and Authors'],

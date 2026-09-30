@@ -3,17 +3,22 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  searchSuggestQuerySchema,
+  searchSuggestResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { isStale } from '../../catalog/refresh.js'
+import { searchCatalogAuthors, searchCatalogBooks } from '../../catalog/search/catalog-search.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
 import {
   findAuthorBySlug,
   findBookBySlug,
   loadAuthorDetail,
+  loadAuthorSuggestions,
   loadBookDetail,
+  loadBookSummaries,
   loadEditions,
 } from './read.js'
 
@@ -21,6 +26,9 @@ import {
 export const PUBLIC_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300'
 /** Refresh jobs run behind everything else. */
 const REFRESH_PRIORITY = 10
+/** How many of each the search box's dropdown shows. */
+const SUGGESTED_BOOKS = 5
+const SUGGESTED_AUTHORS = 3
 
 function matches(header: string | undefined, etag: string): boolean {
   if (!header) return false
@@ -44,6 +52,36 @@ export const catalogRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (ap
     }
     return payload
   })
+
+  // Suggestions come from the Catalog alone, so keystrokes never reach a Source (PRD §6).
+  app.get(
+    '/search/suggest',
+    {
+      schema: {
+        querystring: searchSuggestQuerySchema,
+        response: { 200: searchSuggestResponseSchema },
+      },
+    },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const { q } = request.query
+      const [bookHits, authorHits] = await Promise.all([
+        searchCatalogBooks(db, { q, limit: SUGGESTED_BOOKS }),
+        searchCatalogAuthors(db, { q, limit: SUGGESTED_AUTHORS }),
+      ])
+      const [books, authors] = await Promise.all([
+        loadBookSummaries(
+          db,
+          bookHits.map((hit) => hit.id),
+        ),
+        loadAuthorSuggestions(
+          db,
+          authorHits.map((hit) => hit.id),
+        ),
+      ])
+      return { books, authors }
+    },
+  )
 
   app.get(
     '/books/:slug',

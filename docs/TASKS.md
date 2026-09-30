@@ -263,7 +263,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: search candidates carry an opaque `ref` (no Source ID; stored in Redis for 24 h per `docs/DECISIONS.md`)
   - Accept: resolving a ref fetches, stores the Book with Editions and Authors, and returns its slug within the 5-second limit; a second resolve returns the same slug (integration tests)
   - Accept: a Source timeout or open breaker returns 503 Problem Details, and an unknown ref returns 404
-- [ ] M3-T12 · Catalog search: full-text + trigram query and `GET /v1/search/suggest` · deps: M3-T10 · PRD: §6, §7.3, §10
+- [x] M3-T12 · Catalog search: full-text + trigram query and `GET /v1/search/suggest` · deps: M3-T10 · PRD: §6, §7.3, §10
   - Accept: Catalog search matches Book titles, Edition titles, ISBNs, Author names, and Series names, including typos (trigram) and accents (unaccent) (integration tests)
   - Accept: `GET /v1/search/suggest?q=` returns Books and Authors from the Catalog only for `q` of 2 or more chars, and never calls the Source (test asserts zero gateway calls)
 - [ ] M3-T13 · Federated `GET /v1/search`: Catalog + Source merge, caching, timeout, fallback · deps: M3-T12, M3-T11 · PRD: §6, §7.3, §10
