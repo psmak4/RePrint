@@ -89,6 +89,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Combobox | `SearchBox` in `apps/web/app/components/shell/`: hand-built ARIA combobox for header search suggestions (D-108) | Built (M3-T16) |
 | App shell | `AppShell`, `SiteHeader` (logo, search slot, account slot), `SiteFooter` (Open Library credit, legal links), skip link | Built (M1-T12) |
 | Books | `Cover` (2:3, generated fallback), `BookCard` (cover, title link, authors, first published year, rating), `RatingDisplay` (average and count, or "No RePrint reviews yet"), in `apps/web/app/components/books/` | Built (M3-T15) |
+| Book page | `BookPage` (header, collapsible description, native `<details>` Editions, More by author) in `apps/web/app/components/books/book-page.tsx` | Built (M3-T18) |
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
 
 Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
