@@ -1,10 +1,10 @@
 {
-  "numFound": 260,
+  "numFound": 504,
   "start": 0,
   "numFoundExact": true,
-  "num_found": 260,
+  "num_found": 504,
   "documentation_url": "https://openlibrary.org/dev/docs/api/search",
-  "q": "",
+  "q": "ursula le guin",
   "offset": null,
   "docs": [
     {

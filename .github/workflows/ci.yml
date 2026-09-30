@@ -29,6 +29,8 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Biome lint and format check
         run: pnpm exec biome ci .
+      - name: Source vocabulary check
+        run: pnpm vocabulary:check
 
   typecheck:
     name: typecheck

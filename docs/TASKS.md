@@ -232,7 +232,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `apps/api/src/catalog/sources/types.ts` defines `searchBooks`, `getBook`, `getEditions`, `getAuthor`, optional `importBulk`, `storagePolicy`, and trusted-field priorities
   - Accept: `runSourceContract(adapter, fixtures)` checks every output against the shared Zod schemas; a stub adapter passes it
   - Accept: `SOURCE_MODE=fixtures|live|stub` selects the adapter wiring, and a `pnpm --filter api fixtures:record` script saves raw responses under `sources/open-library/__fixtures__/`
-- [ ] M3-T05 · Open Library adapter: search translated into Book candidates · deps: M3-T04 · PRD: §5, §6, §12
+- [x] M3-T05 · Open Library adapter: search translated into Book candidates · deps: M3-T04 · PRD: §5, §6, §12
   - Accept: recorded fixtures cover title, author, and ISBN searches plus a result with no cover, committed under `__fixtures__/`
   - Accept: `searchBooks` maps each work to one Book candidate with an Edition, a Source link, and a confidence value, and passes the contract suite (unit and contract tests)
   - Accept: `rg -i "\bwork(s)?\b|olid" apps/api/src --glob '!**/sources/open-library/**'` finds no Open Library vocabulary outside the adapter (script in `pnpm check`)

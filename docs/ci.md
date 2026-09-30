@@ -8,7 +8,7 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 
 | Job | What it runs | Local equivalent |
 | --- | --- | --- |
-| `lint` | Biome lint and format check (`biome ci .`) | `pnpm lint` |
+| `lint` | Biome lint and format check (`biome ci .`), then the Source vocabulary check (`scripts/check-vocabulary.sh`) | `pnpm lint` and `pnpm vocabulary:check` |
 | `typecheck` | `tsc` in every workspace package via Turbo | `pnpm typecheck` |
 | `db-check` | Migration drift check: the Drizzle schema must match the committed migrations (`drizzle-kit check` plus a scratch `generate`) | `pnpm db:check` |
 | `unit` | Vitest unit tests in every workspace package via Turbo | `pnpm test:unit` |

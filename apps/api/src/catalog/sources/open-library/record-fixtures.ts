@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const BASE_URL = 'https://openlibrary.org'
-const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__')
+export const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__')
 /** Open Library allows 3 requests per second for identified apps; recording stays well under that. */
 const DELAY_MS = 500
 
@@ -17,8 +17,11 @@ export interface FixtureRequest {
 /** The raw responses the adapter's unit and contract tests replay. Add a request here, then re-run the recorder. */
 export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   { name: 'search-title', path: '/search.json?q=the+left+hand+of+darkness&limit=10' },
-  { name: 'search-author', path: '/search.json?author=ursula+le+guin&limit=10' },
+  { name: 'search-author', path: '/search.json?q=ursula+le+guin&limit=10' },
   { name: 'search-isbn', path: '/search.json?q=isbn%3A9780441478125&limit=10' },
+  // Old, obscure results: several have no cover, and a few have no Author.
+  { name: 'search-no-cover', path: '/search.json?q=dune+frank+herbert&limit=10&sort=old' },
+  { name: 'search-empty', path: '/search.json?q=zzz+little+known+pamphlet+1890&limit=10' },
 ]
 
 export interface RecordOptions {
