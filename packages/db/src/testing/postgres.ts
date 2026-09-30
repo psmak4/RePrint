@@ -37,11 +37,13 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   }
 }
 
-/** Tables filled by data migrations (roles and grants). Tests rely on them, so they are never emptied. */
+/** Tables filled by data migrations (roles and grants, Genres and their mapping rules). Tests rely on them, so they are never emptied. */
 export const MIGRATION_SEEDED_TABLES: readonly string[] = [
   'roles',
   'permissions',
   'role_permissions',
+  'genres',
+  'subject_genre_rules',
 ]
 
 /** Empties every table in the `public` schema (never the migration history or migration-seeded data) so each test starts clean. */
