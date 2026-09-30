@@ -12,6 +12,7 @@ import {
 } from '@reprint/db'
 import {
   type AuthorDetail,
+  type AuthorSuggestion,
   type BookDetail,
   type BookSummary,
   CONTRIBUTION_ROLES,
@@ -102,6 +103,38 @@ async function bylines(db: Database, bookIds: string[]): Promise<Map<string, Con
   return result
 }
 
+/** Cards for the given Books, in the order of `ids`; IDs that no longer exist are dropped. */
+export async function loadBookSummaries(db: Database, ids: string[]): Promise<BookSummary[]> {
+  if (ids.length === 0) return []
+  const rows = await db.select().from(books).where(inArray(books.id, ids))
+  const [byline, coverMap] = await Promise.all([
+    bylines(
+      db,
+      rows.map((row) => row.id),
+    ),
+    coversById(
+      db,
+      rows.map((row) => row.coverId),
+    ),
+  ])
+  const byId = new Map(rows.map((row) => [row.id, row]))
+  return ids.flatMap((id) => {
+    const book = byId.get(id)
+    if (!book) return []
+    return [
+      {
+        id: book.id,
+        slug: book.slug,
+        title: book.title,
+        subtitle: book.subtitle,
+        cover: toCover(book.coverId ? coverMap.get(book.coverId) : null),
+        contributions: byline.get(book.id) ?? [],
+        rating: ratingSummary(book),
+      },
+    ]
+  })
+}
+
 export async function findBookBySlug(db: Database, slug: string): Promise<BookRow | null> {
   const [row] = await db.select().from(books).where(eq(books.slug, slug)).limit(1)
   return row ?? null
@@ -164,6 +197,20 @@ export async function loadEditions(db: Database, bookId: string): Promise<Editio
     rows.map((row) => row.coverId),
   )
   return rows.map((row) => toEdition(row, coverMap))
+}
+
+/** Name-only rows for the given Authors, in the order of `ids`. */
+export async function loadAuthorSuggestions(
+  db: Database,
+  ids: string[],
+): Promise<AuthorSuggestion[]> {
+  if (ids.length === 0) return []
+  const rows = await db
+    .select({ id: authors.id, slug: authors.slug, name: authors.name })
+    .from(authors)
+    .where(inArray(authors.id, ids))
+  const byId = new Map(rows.map((row) => [row.id, row]))
+  return ids.flatMap((id) => byId.get(id) ?? [])
 }
 
 export async function findAuthorBySlug(db: Database, slug: string) {
