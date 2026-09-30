@@ -48,6 +48,8 @@ Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`
 
 `pnpm db:reset` seeds 50 accounts (`packages/db/src/seed/modules/users.ts`), all with the password `reprint-dev-password`. Local only: the seed refuses non-local databases.
 
+It then loads about 500 Books (one recorded Open Library Book plus generated sample Books with Editions, Authors, Series, and every Genre) through the ingest service. `pnpm --filter api seed:catalog` re-runs just that step and is safe to repeat (D-114).
+
 | Accounts | Sign in with | Notes |
 | --- | --- | --- |
 | 2 Admins | `admin1@example.test`, `admin2@example.test` | Member + Admin roles |

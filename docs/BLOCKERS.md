@@ -38,3 +38,14 @@ Entry format:
     ```
   - Check: `gh api repos/psmak4/RePrint/branches/main/protection --jq '.required_status_checks.contexts'` lists the six jobs.
 - Resolved: 2026-09-29. Branch protection and rulesets aren't enforced on private repos on the free GitHub plan, and the owner isn't upgrading. M1-T03 is marked `[~]`; the loop now merges only through `scripts/ralph/merge-pr.sh`, which requires every check in `docs/ci.md` to pass (D-055). Squash merging and "Automatically delete head branches" still need to be on in Settings → General (they work on the free plan).
+
+### 2026-09-30 · M3-T21 · CI cannot start
+- Task: M3-T21 Local seed (PR #66, branch `loop/m3-t21-catalog-seed`). The work is complete and `pnpm check` passes locally.
+- Tried: pushed the branch and opened the PR; all 9 CI jobs failed within 2 to 5 seconds. `main`'s CI run for #65 also never finished (pending, then cancelled runs).
+- Error / question: "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings." `scripts/ralph/merge-pr.sh` correctly refuses to merge without green required jobs (D-055), so the loop can't ship.
+- Owner must:
+  1. Open https://github.com/settings/billing (or the organization's Billing & plans) and fix the failed payment or raise the Actions spending limit.
+  2. Re-run the failed jobs on PR #66 (`gh run rerun 36736210952 --failed`), or push an empty commit.
+  3. Re-run `scripts/ralph/ralph.sh`; the next iteration finishes PR #66 (step 2 of the loop prompt) and merges it.
+- Resolved: <date and what was done; the owner fills this in>
+
