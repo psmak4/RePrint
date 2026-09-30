@@ -81,7 +81,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Need | Component | Status |
 | --- | --- | --- |
 | Buttons | shadcn `Button` (default, secondary, outline, ghost; sm, default, lg) | Built (M1-T11) |
-| Form fields | shadcn `Input`, `Textarea`, `Label`, `Checkbox`, `RadioGroup`, `Select`, `Form` (React Hook Form) | `Input`, `Label` built (M2-T10); `AuthForm` in `apps/web/app/components/auth/`; rest as needed |
+| Form fields | shadcn `Input`, `Textarea`, `Label`, `Checkbox`, `RadioGroup`, `Select`, `Form` (React Hook Form) | `Input`, `Label` built (M2-T10); `Textarea`, `Checkbox` built (M2-T19); `AuthForm` in `apps/web/app/components/auth/`; rest as needed |
 | Feedback | shadcn `Alert`, `Sonner` toast, `Badge` (status: pending, approved, rejected, unpublished) | Add as needed |
 | Overlays | shadcn `Dialog`, `AlertDialog` (confirm deletes), `DropdownMenu` (account, bell), `Popover`, `Tooltip` | Add as needed |
 | Navigation | shadcn `Tabs` (search Books/Authors), `Pagination`, `Breadcrumb` | Add as needed |

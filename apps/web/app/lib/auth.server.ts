@@ -57,20 +57,25 @@ export type ApiPostResult =
   | { ok: true; body: unknown; response: Response }
   | { ok: false; failure: FormFailure; status: number }
 
-/** POSTs JSON to the API on behalf of a form action. */
-export async function postToApi(
+/**
+ * Sends a request to the API on behalf of a form action. A `FormData` body goes out as multipart
+ * (the runtime sets the boundary); anything else goes out as JSON.
+ */
+export async function sendToApi(
   request: Request,
+  method: 'POST' | 'PATCH',
   path: string,
   body: unknown,
   fallback: string,
 ): Promise<ApiPostResult> {
   let response: Response
   try {
-    response = await apiClientFor(request).request(path, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    response = await apiClientFor(request).request(
+      path,
+      body instanceof FormData
+        ? { method, body }
+        : { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) },
+    )
   } catch (error) {
     logger.error({ err: error, path }, 'API request failed')
     return { ok: false, failure: { formError: fallback }, status: 503 }
@@ -83,6 +88,16 @@ export async function postToApi(
     failure: toFormFailure(await readProblem(response), fallback),
     status: response.status,
   }
+}
+
+/** POSTs JSON to the API on behalf of a form action. */
+export function postToApi(
+  request: Request,
+  path: string,
+  body: unknown,
+  fallback: string,
+): Promise<ApiPostResult> {
+  return sendToApi(request, 'POST', path, body, fallback)
 }
 
 /** Failure result for a form action: same body the form component reads back. */
