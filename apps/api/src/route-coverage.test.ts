@@ -16,6 +16,7 @@ const EMAIL = 'modules/me/email-change.integration.test.ts'
 const SESSIONS = 'modules/me/sessions.integration.test.ts'
 const AVATAR = 'modules/me/avatar.integration.test.ts'
 const DELETION = 'modules/accounts/deletion.integration.test.ts'
+const CATALOG = 'modules/catalog/catalog.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -112,6 +113,18 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'POST /v1/me/notifications/read': {
     allowed: [NOTIFICATIONS, 'marks the given notifications read'],
     denied: [NOTIFICATIONS, 'rejects an empty body and refuses Visitors'],
+  },
+  'GET /v1/books/{slug}': {
+    allowed: [CATALOG, 'returns the Book with its Primary Edition'],
+    denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'GET /v1/books/{slug}/editions': {
+    allowed: [CATALOG, 'lists every Edition of the Book'],
+    denied: [CATALOG, 'returns 404 for an unknown Book'],
+  },
+  'GET /v1/authors/{slug}': {
+    allowed: [CATALOG, 'lists the Author’s Books grouped by Role'],
+    denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
   },
   'POST /v1/me/avatar': {
     allowed: [AVATAR, 'stores a 256 px WebP'],

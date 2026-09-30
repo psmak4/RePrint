@@ -12,6 +12,8 @@ import {
 } from '@reprint/email'
 import type { Logger } from 'pino'
 import { z } from 'zod'
+import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
+import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
 import type { ImageStorage } from '../storage/index.js'
@@ -22,6 +24,11 @@ export interface JobContext {
   mailer: Mailer
   db: Database
   storage: ImageStorage
+  /** The Catalog's Source; `background` runs its calls behind interactive requests (PRD §6). */
+  catalog: {
+    source: SourceAdapter
+    background: <T>(fn: () => Promise<T>) => Promise<T>
+  }
 }
 
 export interface JobDefinition<Schema extends z.ZodType = z.ZodType, Result = unknown> {
@@ -99,6 +106,31 @@ export const jobs = {
     payload: z.object({ now: z.iso.datetime().optional() }),
     handler: async ({ now }, { log, db, storage }) =>
       eraseDeletedAccounts({ db, storage, log, now: now ? new Date(now) : undefined }),
+    schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.refresh': defineJob({
+    payload: z.object({ bookId: z.uuid() }),
+    handler: async ({ bookId }, { db, log, catalog }) => {
+      const outcome = await refreshBook({
+        db,
+        source: catalog.source,
+        bookId,
+        call: catalog.background,
+      })
+      log.info({ bookId, outcome }, 'book refreshed')
+      return { outcome }
+    },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.purgeSourceRecords': defineJob({
+    // `now` overrides the clock so tests can purge without waiting 30 days.
+    payload: z.object({ now: z.iso.datetime().optional() }),
+    handler: async ({ now }, { db, log }) => {
+      const deleted = await purgeSourceRecords(db, now ? new Date(now) : undefined)
+      log.info({ deleted }, 'source records purged')
+      return { deleted }
+    },
     schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
   }),

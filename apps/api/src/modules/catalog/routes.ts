@@ -1,0 +1,96 @@
+import { createHash } from 'node:crypto'
+import {
+  authorDetailSchema,
+  bookDetailSchema,
+  bookEditionsResponseSchema,
+  slugParamsSchema,
+} from '@reprint/shared'
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { isStale } from '../../catalog/refresh.js'
+import { HttpProblem } from '../../errors.js'
+import type { AuthRoutesOptions } from '../auth/register.js'
+import {
+  findAuthorBySlug,
+  findBookBySlug,
+  loadAuthorDetail,
+  loadBookDetail,
+  loadEditions,
+} from './read.js'
+
+/** Shared caches may keep a public response for a minute and serve it stale for five more (PRD §10). */
+export const PUBLIC_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300'
+/** Refresh jobs run behind everything else. */
+const REFRESH_PRIORITY = 10
+
+function matches(header: string | undefined, etag: string): boolean {
+  if (!header) return false
+  return header
+    .split(',')
+    .map((value) => value.trim().replace(/^W\//, ''))
+    .some((value) => value === '*' || value === etag.replace(/^W\//, ''))
+}
+
+export const catalogRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
+  const { db, jobs } = options
+
+  // Every route here is a public GET, so the whole plugin shares one caching rule (PRD §10).
+  app.addHook('onSend', async (request, reply, payload) => {
+    if (reply.statusCode !== 200 || typeof payload !== 'string') return payload
+    const etag = `W/"${createHash('sha1').update(payload).digest('base64url')}"`
+    reply.header('Cache-Control', PUBLIC_CACHE_CONTROL).header('ETag', etag)
+    if (matches(request.headers['if-none-match'], etag)) {
+      reply.code(304)
+      return ''
+    }
+    return payload
+  })
+
+  app.get(
+    '/books/:slug',
+    { schema: { params: slugParamsSchema, response: { 200: bookDetailSchema } } },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const book = await findBookBySlug(db, request.params.slug)
+      if (!book) throw new HttpProblem(404, 'We could not find that book.')
+      if (isStale(book.refreshedAt)) {
+        // One job per Book per day; a queue failure must never fail the page view.
+        const day = new Date().toISOString().slice(0, 10)
+        await jobs
+          ?.enqueue(
+            'catalog.refresh',
+            { bookId: book.id },
+            {
+              jobId: `catalog.refresh-${book.id}-${day}`,
+              priority: REFRESH_PRIORITY,
+            },
+          )
+          .catch((error: unknown) =>
+            request.log.warn({ err: error, bookId: book.id }, 'could not queue book refresh'),
+          )
+      }
+      return loadBookDetail(db, book)
+    },
+  )
+
+  app.get(
+    '/books/:slug/editions',
+    { schema: { params: slugParamsSchema, response: { 200: bookEditionsResponseSchema } } },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const book = await findBookBySlug(db, request.params.slug)
+      if (!book) throw new HttpProblem(404, 'We could not find that book.')
+      return { items: await loadEditions(db, book.id) }
+    },
+  )
+
+  app.get(
+    '/authors/:slug',
+    { schema: { params: slugParamsSchema, response: { 200: authorDetailSchema } } },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const author = await findAuthorBySlug(db, request.params.slug)
+      if (!author) throw new HttpProblem(404, 'We could not find that author.')
+      return loadAuthorDetail(db, author)
+    },
+  )
+}

@@ -78,6 +78,7 @@ describe('worker (dist/worker.js)', () => {
     const schedulers = await jobQueue.queue.getJobSchedulers()
     expect(schedulers.map((scheduler) => scheduler.name).sort()).toEqual([
       'accounts.erase',
+      'catalog.purgeSourceRecords',
       'system.heartbeat',
     ])
   })

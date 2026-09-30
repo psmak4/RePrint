@@ -1,5 +1,7 @@
 import { createDb } from '@reprint/db'
+import { Redis } from 'ioredis'
 import { pino } from 'pino'
+import { createCatalogRuntime } from './catalog/runtime.js'
 import { EnvError, loadWorkerEnv } from './config/env.js'
 import { createMailer } from './email/mailer.js'
 import { startWorker } from './jobs/worker-runtime.js'
@@ -13,12 +15,16 @@ async function main(): Promise<void> {
   const log = pino({ ...baseLoggerOptions(env), base: { service: 'worker' } })
   const mailer = createMailer(env)
   const database = createDb(env.DATABASE_URL)
+  const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: 1 })
+  redis.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
+  const catalog = createCatalogRuntime(env, redis)
   const worker = await startWorker({
     redisUrl: env.REDIS_URL,
     log,
     mailer,
     db: database.db,
     storage: createImageStorage(env),
+    catalog,
     onJobError: captureError,
   })
   log.info('worker ready')
@@ -32,6 +38,7 @@ async function main(): Promise<void> {
       .stop()
       .then(async () => {
         mailer.close()
+        redis.disconnect()
         await database.close()
         process.exit(0)
       })
