@@ -3,27 +3,17 @@ import { createOpenLibraryAdapter, type OpenLibraryOptions } from './adapter.js'
 import { createFixtureFetch } from './fixture-fetch.js'
 
 export interface OpenLibraryConfig {
-  contactEmail: string
-  version: string
-  timeoutMs: number
+  /** The gateway's `fetch`: it adds the User-Agent, the rate limit, the circuit breaker, and the timeout (PRD §6). */
+  fetch: typeof fetch
   onInvalid?: OpenLibraryOptions['onInvalid']
 }
 
-/** The `fixtures` and `live` wiring for `createSourceAdapter`. Live calls identify RePrint (PRD §6). */
+/** The `fixtures` and `live` wiring for `createSourceAdapter`. Live calls must go through the Source gateway. */
 export function openLibraryImplementations(config: OpenLibraryConfig): SourceImplementations {
   const onInvalid = config.onInvalid
   const base = onInvalid ? { onInvalid } : {}
-  const liveFetch: typeof fetch = (input, init) =>
-    fetch(input, {
-      ...init,
-      headers: {
-        ...init?.headers,
-        'User-Agent': `RePrint/${config.version} (${config.contactEmail})`,
-      },
-      signal: AbortSignal.timeout(config.timeoutMs),
-    })
   return {
     fixtures: () => createOpenLibraryAdapter({ ...base, fetch: createFixtureFetch() }),
-    live: () => createOpenLibraryAdapter({ ...base, fetch: liveFetch }),
+    live: () => createOpenLibraryAdapter({ ...base, fetch: config.fetch }),
   }
 }

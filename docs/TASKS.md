@@ -240,7 +240,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: fixtures cover a work, its editions (with ISBN-10 only, missing format, non-English), an author with a Wikidata ID and photo, and a work with a series and subjects
   - Accept: output converts ISBN-10 to ISBN-13, maps formats to the five Formats, languages to ISO 639, and covers to Cover records by cover ID, passing the contract suite
   - Accept: invalid records are logged and skipped, never returned (unit test)
-- [ ] M3-T07 · Source gateway: shared Redis rate limiter with priority, circuit breaker, User-Agent, timeouts, metrics · deps: M3-T04, M1-T08 · PRD: §6, §11, §13
+- [x] M3-T07 · Source gateway: shared Redis rate limiter with priority, circuit breaker, User-Agent, timeouts, metrics · deps: M3-T04, M1-T08 · PRD: §6, §11, §13
   - Accept: all outgoing Source calls pass through one limiter set by `SOURCE_RATE_LIMIT_RPS` (2 in production, 1 in staging), shared across processes via Redis (integration test)
   - Accept: interactive requests are served before background refreshes when both are queued (integration test)
   - Accept: the circuit breaker opens after repeated errors, short-circuits calls while open, and half-opens after a cooldown (unit tests)

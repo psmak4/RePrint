@@ -223,3 +223,7 @@ Entry format:
 - `sources/open-library/record.ts` (work, Edition, Series, Subject, and Author translation) and real `getBook`/`getEditions`/`getAuthor` in `adapter.ts`. Four new fixtures recorded for *The Left Hand of Darkness* (work, byline search, Editions, Author Le Guin) in `record-fixtures.ts`; the adapter contract now runs with `bookIds`/`authorIds`. D-098 records the choices, including that `getBook` costs three Source requests and only the first 50 Editions are read.
 - Next iteration: M3-T07 (gateway) should count `getBook` as three calls when sizing limits. Wrap the live `fetch` in `openLibraryImplementations`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-09-30 · M3-T07 · PR pending
+- `apps/api/src/catalog/gateway/`: `rate-limiter.ts` (Redis slot limiter with interactive-over-background priority), `circuit-breaker.ts`, `metrics.ts` (per-second request counters, cache hit/miss), and `gateway.ts` (`createSourceGateway`, whose `fetch` adds the User-Agent, limit, breaker, and timeout). `openLibraryImplementations` now takes the gateway's `fetch` instead of building its own. D-099 records the choices.
+- Next iteration: nothing constructs the gateway yet. M3-T09 should build it once in the app/worker wiring from `SOURCE_*` env vars and call `metrics.recordCache`; background refreshes wrap calls in `gateway.run({ priority: 'background' }, ...)`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
