@@ -205,7 +205,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/settings/security` changes email (pending state shown until verified) and password, each asking for the current password (component tests)
   - Accept: the active devices list ends individual sessions and "Log out everywhere" works (component test)
   - Accept: delete account requires typing the password and explains the 30-day erase (component test)
-- [ ] M2-T21 · `pnpm --filter api seed:admin` and local user seed data · deps: M2-T01, M1-T16 · PRD: §4, §13
+- [x] M2-T21 · `pnpm --filter api seed:admin` and local user seed data · deps: M2-T01, M1-T16 · PRD: §4, §13
   - Accept: `pnpm --filter api seed:admin -- --email … --username …` creates a verified Admin once, prompts for or reads the password from stdin, and refuses if an Admin already exists (integration test)
   - Accept: `pnpm db:reset` seeds 50 users: Members, Moderators, Admins, unverified, suspended, and deleted accounts; dev credentials are documented in `docs/local-dev.md`
 - [ ] M2-T22 · M2 verification: run the Accounts acceptance criteria end to end, fix gaps, update docs · deps: M2-T12, M2-T18, M2-T20, M2-T21 · PRD: §3, §4, §7.1, §7.12, §11

@@ -14,6 +14,7 @@
     "dev:server": "tsx watch --env-file-if-exists=../../.env src/server.ts",
     "dev:worker": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
     "start:worker": "node dist/worker.js",
+    "seed:admin": "tsx --env-file-if-exists=../../.env src/scripts/seed-admin.ts",
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },
   "dependencies": {
