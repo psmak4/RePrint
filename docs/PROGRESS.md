@@ -257,3 +257,7 @@ Entry format:
 ### 2026-09-30 · M3-T14 · PR pending
 - `packages/shared/src/search-api.ts`: `searchQuerySchema` gained `type`, `genre`, `language`, `decade`, `minRating`, `sort`; the response gained `isbnMatch` and an `author` item kind. `catalog-search.ts` applies filters and sort in SQL; `federated-search.ts` skips the Source for Catalog-only filters, filters candidates by decade, sorts the merged list, serves `type=authors`, and sets `isbnMatch`. New `search-filters.integration.test.ts`. D-106 records the choices.
 - Next iteration: M3-T15 (web `Cover`, `BookCard`) is independent of the API. M3-T17 reads `isbnMatch` and redirects. `apps/api/openapi.json` was regenerated. The `/v1/ready` "Redis stopped" integration test failed once under full-suite load and passed alone and on rerun. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T15 · PR pending
+- `apps/web/app/components/books/`: `Cover` (generated fallback on missing or failed image), `RatingDisplay`, `BookCard` (takes `BookCardData` plus `href`), with component tests; `lib/cover-url.ts`; `copy.books`. `docs/DESIGN.md` inventory updated. D-107 records the choices.
+- Next iteration: M3-T16 (header search box) is next; M3-T17 maps `BookSummary` (`contributions` to `authorNames`, `rating`) and search candidates (`rating: null`) onto `BookCardData`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -88,7 +88,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Data | shadcn `Table`, `Skeleton`, `Separator`, `Avatar` | Add as needed |
 | Combobox | shadcn `Command` in a `Popover` (header search suggestions) | M3-T16 |
 | App shell | `AppShell`, `SiteHeader` (logo, search slot, account slot), `SiteFooter` (Open Library credit, legal links), skip link | Built (M1-T12) |
-| Books | `Cover` (generated fallback), `BookCard`, `RatingDisplay` | M3-T15 |
+| Books | `Cover` (2:3, generated fallback), `BookCard` (cover, title link, authors, first published year, rating), `RatingDisplay` (average and count, or "No RePrint reviews yet"), in `apps/web/app/components/books/` | Built (M3-T15) |
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
 
 Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
