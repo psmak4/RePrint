@@ -231,3 +231,8 @@ Entry format:
 ### 2026-09-30 · M3-T08 · PR pending
 - `apps/api/src/catalog/ingest/`: `ingestBook` (one transaction: Source link then ISBN-13 matching, advisory lock against concurrent duplicates, Books, Editions, Authors, Contributions, Series, Subjects, covers, Source links, `source_records`, search vector), `fields.ts` (`planFieldUpdate`, field origins and locking), unit and integration tests. Title-and-author look-alikes get a `merge_candidates` row; non-`store` Sources are refused. D-100 records the choices.
 - Next iteration: M3-T09 adds Primary Edition choice, Subject-to-Genre mapping (case-insensitive substring, highest priority first), and per-field Source priority on top of `ingestBook` (currently any unlocked field is overwritten by a non-empty value). Nothing constructs the gateway or calls `ingestBook` outside tests yet. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M3-T09 · PR pending
+- `apps/api/src/catalog/enrichment/`: `primary-edition.ts` (ranking), `genres.ts` (Subject to Genre rule matching), `priorities.ts` (per-field Source priority lookup), `enrich.ts` (`enrichBook`, called inside `ingestBook`). `planFieldUpdate` gained an optional `priorityOf`, and `ingestBook` an optional `otherSources`. Unit tests plus new integration cases in `ingest.integration.test.ts`. D-101 records the choices.
+- Next iteration: M3-T10 (`GET /v1/books/:slug` etc.). The refresh job should call `ingestBook` with the same `source` and `otherSources` used for the first ingest. Nothing constructs the gateway or calls `ingestBook` outside tests yet. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
