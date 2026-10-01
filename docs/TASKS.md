@@ -357,7 +357,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Approve and Reject work, and Reject offers saved phrases or free text (component tests)
   - Accept: edited reviews show a side-by-side comparison with the last approved version (component test)
   - Accept: `A` approves, `R` rejects, and `J`/`K` move between items, but not while typing in a text field (component tests)
-- [ ] M4-T13 · Web: moderation dashboard (`/admin`) · deps: M4-T11 · PRD: §7.10
+- [x] M4-T13 · Web: moderation dashboard (`/admin`) · deps: M4-T11 · PRD: §7.10
   - Accept: the dashboard shows the pending count and oldest pending age from `/mod/stats`, with open-report fields ready for M7 (component test)
   - Accept: the dashboard is linked from the admin nav and requires `reviews.moderate` (loader test: Moderator allowed, Member denied)
 - [ ] M4-T14 · Seed: reviews in every status with versions and consistent aggregates · deps: M4-T02, M3-T21, M2-T21 · PRD: §13

@@ -20,6 +20,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const viewer = await requireViewerPermission(request, ADMIN_AREA_PERMISSIONS)
   const items: AdminNavItem[] = []
   if (viewer.permissions.includes(PERMISSIONS.reviewsModerate)) {
+    items.push({ to: '/admin', label: copy.admin.dashboardNav })
     items.push({ to: '/admin/reviews', label: copy.admin.reviewsNav })
   }
   return { items }
