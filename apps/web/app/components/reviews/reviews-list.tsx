@@ -9,7 +9,7 @@ const text = copy.reviews.list
 const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' })
 
 /** Plain text, paragraphs split on blank lines. Never a link, never HTML (PRD §7.6). */
-function ReviewBody({ body }: { body: string }) {
+export function ReviewBody({ body }: { body: string }) {
   const paragraphs = body.split(/\n{2,}/).map((p) => p.trim())
   return (
     <div className="flex flex-col gap-2">

@@ -350,7 +350,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T10 · Web: rating summary chart and approved reviews list · deps: M4-T09, M4-T05 · PRD: §7.4, §7.6, §11
   - Accept: the rating summary shows average (one decimal), count, and a 5-bar distribution with a text alternative; clicking a bar filters the list (component tests)
   - Accept: the list supports sort, star filter, and pagination (10) via URL params; spoiler reviews are hidden behind the toggle; body text renders as paragraphs with links not clickable (component tests)
-- [ ] M4-T11 · Web: admin area shell and moderation review queue with claims · deps: M4-T06, M1-T12 · PRD: §7.10, §11
+- [x] M4-T11 · Web: admin area shell and moderation review queue with claims · deps: M4-T06, M1-T12 · PRD: §7.10, §11
   - Accept: `/admin/*` routes require the relevant permission (others get 403 or a redirect), are `noindex`, and share an admin layout per `docs/DESIGN.md` (loader tests)
   - Accept: `/admin/reviews` lists Pending reviews oldest first; opening one claims it and shows Book, reviewer, rating, full text, spoiler flag, and reviewer history (component tests)
 - [ ] M4-T12 · Web: moderation actions, reason picker, side-by-side diff, keyboard shortcuts · deps: M4-T11, M4-T07 · PRD: §7.10, §12
