@@ -360,3 +360,7 @@ Entry format:
 ### 2026-10-01 · M4-T14 · PR pending
 - `seedReviews` in `apps/api/src/modules/reviews/seed-reviews.ts` with `pnpm --filter api seed:reviews`, chained after `seed:catalog` in `db:seed` and `db:reset` (146 reviews, 194 versions). `resetDatabase` is now exported from `@reprint/db`. Integration test `seed-reviews.integration.test.ts` checks every status, multi-version reviews, and zero `recomputeRatings` mismatches. D-129 records the choices.
 - Next iteration: M4-T15 (e2e for reviews and moderation). Seeded accounts: `member1`, `moderator1` (password in `docs/local-dev.md`); many Pending reviews exist already, so e2e specs should create their own Book review with a fresh Member. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T15 · PR pending
+- `e2e/specs/reviews.spec.ts` (register, verify, write with keyboard star input, edit, delete, axe at each step) and `e2e/specs/moderation.spec.ts` (two Members review Dune; a new Moderator approves one and rejects the other with a saved phrase; both authors see the status, the reason, and the notification). Helpers in `e2e/support/accounts.ts`. D-130 records the choices.
+- Next iteration: M4-T16 (M4 verification). The specs pass in all three projects against a seeded database; the queue is global, so they move their own reviews to its front. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
