@@ -13,7 +13,9 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@reprint/config": "workspace:*",
+    "@reprint/db": "workspace:*",
     "@types/node": "^24",
+    "drizzle-orm": "^0.45.3",
     "typescript": "^7.0.2"
   }
 }

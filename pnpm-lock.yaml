@@ -381,9 +381,15 @@ importers:
       '@reprint/config':
         specifier: workspace:*
         version: link:../packages/config
+      '@reprint/db':
+        specifier: workspace:*
+        version: link:../packages/db
       '@types/node':
         specifier: ^24
         version: 24.19.0
+      drizzle-orm:
+        specifier: ^0.45.3
+        version: 0.45.3(@opentelemetry/api@1.9.1)(postgres@3.4.9)
       typescript:
         specifier: ^7.0.2
         version: 7.0.2

@@ -363,7 +363,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T14 · Seed: reviews in every status with versions and consistent aggregates · deps: M4-T02, M3-T21, M2-T21 · PRD: §13
   - Accept: `pnpm db:reset` seeds reviews in Pending, Approved, Rejected (with and without reasons), and Unpublished states, including edited reviews with multiple versions
   - Accept: after seeding, `ratings.recompute` reports zero mismatches (integration test or script)
-- [ ] M4-T15 · E2E: write, edit, and delete a review; moderate a review · deps: M4-T12, M4-T10, M4-T14 · PRD: §12
+- [x] M4-T15 · E2E: write, edit, and delete a review; moderate a review · deps: M4-T12, M4-T10, M4-T14 · PRD: §12
   - Accept: `e2e/reviews.spec.ts` writes a review, edits it, and deletes it as a verified Member, with axe checks
   - Accept: `e2e/moderation.spec.ts` has a Moderator approve one review and reject another with a reason; the author sees the result and notification
 - [ ] M4-T16 · M4 verification: run the Reviews acceptance criteria end to end, fix gaps, update docs · deps: M4-T13, M4-T15 · PRD: §3, §7.6, §7.10

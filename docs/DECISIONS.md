@@ -879,3 +879,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: (1) Sample reviews are seeded by `seed:reviews` in `apps/api` (not a `packages/db` module), run by `db:seed` and `db:reset` after `seed:catalog`, because they need Books and must update Book totals through `applyReviewChange` in one transaction. (2) A repeating list of 21 scenarios gives 2 to 5 reviews on each of the first 40 Books (by slug) from verified, active non-staff accounts: Approved (single and edited, up to 3 versions), an Approved review with a Pending edit, Pending, Rejected with and without a reason, Rejected then resubmitted (Pending or Approved), and Unpublished. (3) Running it again with reviews present does nothing.
 - Why: PRD §13 asks for sample reviews in every status; the seed framework runs before any Book exists.
 - Affects: M4-T15, M5-T08, M6-T09
+
+### D-130 · E2E database helpers (M4-T15)
+- Status: Implementation
+- Decision: (1) The `e2e` package depends on `@reprint/db` (workspace) and `drizzle-orm` (already in the PRD §8 stack) so specs can set up state the product does not expose without a seed: `grantModerator` gives a freshly registered Member the Moderator role (CI's e2e database is migrated but not seeded), and `moveReviewToQueueFront` sets a test review's `submitted_at` to the year 2000 so it is on the first page of the oldest-first queue even on a seeded database. (2) Everything else in the specs goes through the UI: registration, email confirmation through Mailpit, writing, editing, deleting, and deciding reviews. (3) `ratings.recompute` mismatches after e2e runs are covered by the aggregate integration tests; the specs do not call it.
+- Why: PRD §12 lists the flows but not how a spec gets a Moderator or finds its review in a shared queue.
+- Affects: M4-T16, M7 e2e specs
