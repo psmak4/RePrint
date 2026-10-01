@@ -54,3 +54,22 @@ export function nextReviewStatus(
 export function canTransitionReview(from: ReviewStatus, to: ReviewStatus): boolean {
   return REVIEW_ACTIONS.some((action) => nextReviewStatus(from, action) === to)
 }
+
+/** The viewer's own Review of a Book, as `GET/PUT /books/:slug/my-review` return it (PRD §7.6). */
+export const myReviewSchema = z.object({
+  id: z.uuid(),
+  rating: z.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX),
+  headline: z.string().nullable(),
+  body: z.string(),
+  hasSpoilers: z.boolean(),
+  editionId: z.uuid().nullable(),
+  status: reviewStatusSchema,
+  /** The Moderator's reason, shown to the author only while the Review is Rejected. */
+  rejectionReason: z.string().nullable(),
+  submittedAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+})
+export type MyReview = z.infer<typeof myReviewSchema>
+
+/** `DELETE /books/:slug/my-review`: deleting is permanent (PRD §7.6). */
+export const deleteMyReviewResponseSchema = z.object({ status: z.literal('review_deleted') })

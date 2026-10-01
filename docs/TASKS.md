@@ -322,7 +322,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `audit_log` has PRD §9 columns; UPDATE and DELETE are refused by a trigger (and the app DB role gets INSERT/SELECT only in deployed environments) (integration test)
   - Accept: `recordAudit(tx, { actorId, action, targetType, targetId, before, after, ip })` writes in the caller's transaction (integration test)
   - Accept: `docs/DECISIONS.md` lists which actions are audited
-- [ ] M4-T04 · My review API: `GET/PUT/DELETE /v1/books/:slug/my-review` · deps: M4-T02, M2-T03 · PRD: §7.6, §10, §11
+- [x] M4-T04 · My review API: `GET/PUT/DELETE /v1/books/:slug/my-review` · deps: M4-T02, M2-T03 · PRD: §7.6, §10, §11
   - Accept: PUT creates or edits the viewer's review, sets it Pending, and appends a `review_versions` row; editing an Approved review hides it until re-approved (integration tests)
   - Accept: unverified Members get 403, Visitors get 401, and the 21st create/edit in a day returns 429 (integration tests)
   - Accept: GET returns the viewer's review with status and rejection reason; DELETE removes it permanently and updates aggregates (integration tests)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   canTransitionReview,
+  myReviewSchema,
   nextReviewStatus,
   REVIEW_ACTIONS,
   REVIEW_STATUSES,
@@ -103,5 +104,26 @@ describe('canTransitionReview', () => {
     for (const from of REVIEW_STATUSES)
       for (const to of REVIEW_STATUSES)
         expect(canTransitionReview(from, to)).toBe(allowed.some(([f, t]) => f === from && t === to))
+  })
+})
+
+describe('myReviewSchema', () => {
+  const base = {
+    id: '0192a3b4-0000-7000-8000-000000000001',
+    rating: 5,
+    headline: null,
+    body: 'x'.repeat(50),
+    hasSpoilers: false,
+    editionId: null,
+    status: 'rejected',
+    rejectionReason: 'Please remove the personal details.',
+    submittedAt: '2026-09-30T12:00:00.000Z',
+    updatedAt: '2026-09-30T12:00:00.000Z',
+  }
+
+  it('accepts a review with a rejection reason and rejects an unknown status or rating', () => {
+    expect(myReviewSchema.safeParse(base).success).toBe(true)
+    expect(myReviewSchema.safeParse({ ...base, status: 'hidden' }).success).toBe(false)
+    expect(myReviewSchema.safeParse({ ...base, rating: 6 }).success).toBe(false)
   })
 })
