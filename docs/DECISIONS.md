@@ -874,3 +874,8 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.10 describes the dashboard's contents but not who sees it or what the reports card shows before reports exist.
 - Affects: M4-T16, M7-T03
 
+### D-129 · Review seed (M4-T14)
+- Status: Implementation
+- Decision: (1) Sample reviews are seeded by `seed:reviews` in `apps/api` (not a `packages/db` module), run by `db:seed` and `db:reset` after `seed:catalog`, because they need Books and must update Book totals through `applyReviewChange` in one transaction. (2) A repeating list of 21 scenarios gives 2 to 5 reviews on each of the first 40 Books (by slug) from verified, active non-staff accounts: Approved (single and edited, up to 3 versions), an Approved review with a Pending edit, Pending, Rejected with and without a reason, Rejected then resubmitted (Pending or Approved), and Unpublished. (3) Running it again with reviews present does nothing.
+- Why: PRD §13 asks for sample reviews in every status; the seed framework runs before any Book exists.
+- Affects: M4-T15, M5-T08, M6-T09

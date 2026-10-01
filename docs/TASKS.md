@@ -360,7 +360,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T13 · Web: moderation dashboard (`/admin`) · deps: M4-T11 · PRD: §7.10
   - Accept: the dashboard shows the pending count and oldest pending age from `/mod/stats`, with open-report fields ready for M7 (component test)
   - Accept: the dashboard is linked from the admin nav and requires `reviews.moderate` (loader test: Moderator allowed, Member denied)
-- [ ] M4-T14 · Seed: reviews in every status with versions and consistent aggregates · deps: M4-T02, M3-T21, M2-T21 · PRD: §13
+- [x] M4-T14 · Seed: reviews in every status with versions and consistent aggregates · deps: M4-T02, M3-T21, M2-T21 · PRD: §13
   - Accept: `pnpm db:reset` seeds reviews in Pending, Approved, Rejected (with and without reasons), and Unpublished states, including edited reviews with multiple versions
   - Accept: after seeding, `ratings.recompute` reports zero mismatches (integration test or script)
 - [ ] M4-T15 · E2E: write, edit, and delete a review; moderate a review · deps: M4-T12, M4-T10, M4-T14 · PRD: §12

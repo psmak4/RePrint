@@ -16,6 +16,7 @@
     "start:worker": "node dist/worker.js",
     "seed:admin": "tsx --env-file-if-exists=../../.env src/scripts/seed-admin.ts",
     "seed:catalog": "tsx --env-file-if-exists=../../.env src/scripts/seed-catalog.ts",
+    "seed:reviews": "tsx --env-file-if-exists=../../.env src/scripts/seed-reviews.ts",
     "fixtures:record": "tsx src/catalog/sources/open-library/record-fixtures.ts",
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },
