@@ -313,7 +313,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: migration creates `reviews` (unique (`user_id`, `book_id`), rating check 1–5, status enum), `review_versions`, and `review_claims` with FK cascade from users and indexes; `pnpm db:check` passes
   - Accept: the shared `ReviewInput` schema enforces rating 1–5 integer, headline ≤ 120, body 50–10,000, `hasSpoilers`, and optional `editionId` (unit tests)
   - Accept: a shared status-transition function allows only the PRD transitions (new/edit → pending; pending → approved or rejected; approved → unpublished; rejected or unpublished → pending on edit) (unit tests)
-- [ ] M4-T02 · Ratings: weighted average, distribution, transactional aggregates, nightly recompute · deps: M4-T01, M2-T17 · PRD: §7.4, §7.6, §9
+- [x] M4-T02 · Ratings: weighted average, distribution, transactional aggregates, nightly recompute · deps: M4-T01, M2-T17 · PRD: §7.4, §7.6, §9
   - Accept: `weightedRating = (C × m + Σ ratings) / (C + n)` with C = 5, plus average (one decimal) and 5-bucket distribution, in `packages/shared` (unit tests incl. n = 0)
   - Accept: every review status change updates `review_count`, `rating_sum`, and `rating_counts` in the same transaction (integration test)
   - Accept: a nightly `ratings.recompute` job recalculates from scratch, logs and reports to Sentry any mismatch, and fixes it (integration test with deliberately corrupted aggregates)

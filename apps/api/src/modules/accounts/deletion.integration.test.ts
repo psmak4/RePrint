@@ -1,7 +1,16 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { authTokens, covers, newId, notifications, sessions, users } from '@reprint/db'
+import {
+  authTokens,
+  books,
+  covers,
+  newId,
+  notifications,
+  reviews,
+  sessions,
+  users,
+} from '@reprint/db'
 import { ACCOUNT_ERASE_AFTER_DAYS, problemDetailsSchema } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
@@ -15,6 +24,7 @@ import { startTestStack, type TestStack } from '../../testing/stack.js'
 import { createTestUser } from '../../testing/users.js'
 import { hashPassword } from '../auth/password.js'
 import { SESSION_COOKIE } from '../auth/session-cookie.js'
+import { applyReviewChange } from '../reviews/aggregates.js'
 
 const ORIGIN = 'http://www.reprint.test:5173'
 const PASSWORD = 'correct horse battery staple'
@@ -123,6 +133,22 @@ describe('DELETE /v1/me', () => {
     // The old cookie no longer signs anyone in.
     const after = await app.inject({ method: 'GET', url: '/v1/me', cookies })
     expect(after.statusCode).toBe(401)
+  })
+
+  it('drops the Member’s Approved reviews from the Book aggregates immediately (D-043)', async () => {
+    const { user, cookies } = await signedInMember()
+    const bookId = newId()
+    await stack.db.db.insert(books).values({ id: bookId, slug: 'a-book-0192a3', title: 'A Book' })
+    await stack.db.db.transaction(async (tx) => {
+      await tx
+        .insert(reviews)
+        .values({ userId: user.id, bookId, rating: 4, body: 'x'.repeat(60), status: 'approved' })
+      await applyReviewChange(tx, bookId, null, { status: 'approved', rating: 4 })
+    })
+
+    expect((await deleteAccount(cookies, PASSWORD)).statusCode).toBe(200)
+    const [book] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    expect(book).toMatchObject({ reviewCount: 0, ratingSum: 0, ratingCounts: [0, 0, 0, 0, 0] })
   })
 
   it('refuses a wrong password and changes nothing', async () => {
