@@ -849,3 +849,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.4 and §7.6 describe the controls but not where the save goes, how unverified Members are handled for an existing review, or the confirmation pattern.
 - Affects: M4-T10, M4-T15
 
+
+### D-125 · Rating summary and reviews list on the Book page (M4-T10)
+- Status: Implementation
+- Decision: (1) The Book loader reads `sort`, `rating`, and `page` from the page URL, validates them with `bookReviewsQuerySchema` (invalid values fall back to defaults), and loads `GET /v1/books/:slug/reviews`; if that call fails the page renders with a short notice in the list. (2) The distribution bars are links (`?rating=N#reviews`, page reset to 1; the active bar links back to the unfiltered list), so filtering works without JavaScript and is bookmarkable; the numbers also appear as screen-reader text. (3) Sort and star filter are a plain GET form (native selects), and pagination is Previous/Next links with "Page N of M". Default values are left out of URLs. (4) Review text is split into paragraphs on blank lines and rendered as text; spoiler reviews use `SpoilerToggle` (D-123). Dates use a fixed `en-US` UTC format so server and client output match. (5) The rating summary is hidden until the first Approved review; the "N people found this helpful" line appears only when the count is above 0 (voting itself is M5).
+- Why: PRD §7.4 and §7.6 describe the behavior but not the URL shape, the no-JS fallback, or the empty states.
+- Affects: M4-T15, M5-T02

@@ -39,6 +39,8 @@ const summary = (n: number, slug: string) => ({
 function respond(url: URL) {
   if (url.pathname === '/v1/books/dune-abc123') return Response.json(book)
   if (url.pathname === '/v1/books/dune-abc123/editions') return Response.json({ items: [] })
+  if (url.pathname === '/v1/books/dune-abc123/reviews')
+    return Response.json({ items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } })
   if (url.pathname === '/v1/authors/frank-herbert') {
     const others = [2, 3, 4, 5, 6, 7, 8].map((n) => summary(n, `other-${n}`))
     return Response.json({
@@ -61,6 +63,37 @@ function load(handler: (url: URL) => Response | Promise<Response>, slug = 'dune-
     params: { slug },
   } as never)
 }
+
+describe('book loader reviews', () => {
+  it('passes sort, rating, and page from the URL to the reviews API', async () => {
+    const seen: string[] = []
+    vi.stubGlobal('fetch', async (url: URL) => {
+      const u = new URL(String(url))
+      if (u.pathname.endsWith('/reviews')) seen.push(u.search)
+      return respond(u)
+    })
+    const result = await loader({
+      request: new Request('https://reprint.test/books/dune-abc123?sort=newest&rating=4&page=2'),
+      params: { slug: 'dune-abc123' },
+    } as never)
+    expect(seen).toEqual(['?sort=newest&page=2&rating=4'])
+    expect(result.reviewQuery).toEqual({ sort: 'newest', rating: 4, page: 2 })
+  })
+
+  it('falls back to defaults for invalid params and survives a reviews failure', async () => {
+    vi.stubGlobal('fetch', async (url: URL) => {
+      const u = new URL(String(url))
+      if (u.pathname.endsWith('/reviews')) return new Response(null, { status: 500 })
+      return respond(u)
+    })
+    const result = await loader({
+      request: new Request('https://reprint.test/books/dune-abc123?sort=bogus&rating=9'),
+      params: { slug: 'dune-abc123' },
+    } as never)
+    expect(result.reviewQuery).toEqual({ sort: 'most_helpful', page: 1 })
+    expect(result.reviews).toBeNull()
+  })
+})
 
 describe('book loader', () => {
   it('loads the Book, Editions, and up to 6 more Books by the author without this one', async () => {

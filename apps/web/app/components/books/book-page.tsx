@@ -1,9 +1,19 @@
-import type { BookDetail, BookSummary, Edition, MyReview, Viewer } from '@reprint/shared'
+import type {
+  BookDetail,
+  BookReviewsResponse,
+  BookSummary,
+  Edition,
+  MyReview,
+  Viewer,
+} from '@reprint/shared'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { groupContributors } from '../../lib/contributors.js'
+import type { ReviewListQuery } from '../../lib/review-links.js'
 import { MyReviewSection } from '../reviews/my-review-section.js'
+import { RatingSummary } from '../reviews/rating-summary.js'
+import { ReviewsList } from '../reviews/reviews-list.js'
 import { Cover } from './cover.js'
 import { RatingDisplay } from './rating-display.js'
 
@@ -20,12 +30,16 @@ export function BookPage({
   moreByAuthor,
   viewer = null,
   myReview = null,
+  reviews = null,
+  reviewQuery = { sort: 'most_helpful', page: 1 },
 }: {
   book: BookDetail
   editions: Edition[]
   moreByAuthor: MoreByAuthor | null
   viewer?: Viewer | null
   myReview?: MyReview | null
+  reviews?: BookReviewsResponse | null
+  reviewQuery?: ReviewListQuery
 }) {
   return (
     <article className="flex flex-col gap-8">
@@ -34,6 +48,13 @@ export function BookPage({
         <div className="flex flex-col gap-8 lg:col-span-8">
           <Description text={book.description} />
           <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
+          <RatingSummary slug={book.slug} rating={book.rating} query={reviewQuery} />
+          <ReviewsList
+            slug={book.slug}
+            reviews={reviews}
+            query={reviewQuery}
+            hasAnyReviews={book.rating.count > 0}
+          />
         </div>
         <aside className="flex flex-col gap-8 lg:col-span-4">
           <EditionsList editions={editions} />
