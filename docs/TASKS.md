@@ -318,7 +318,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every review status change updates `review_count`, `rating_sum`, and `rating_counts` in the same transaction (integration test)
   - Accept: a nightly `ratings.recompute` job recalculates from scratch, logs and reports to Sentry any mismatch, and fixes it (integration test with deliberately corrupted aggregates)
   - Accept: deleting an account drops its reviews from aggregates immediately (D-043), and `accounts.erase` keeps aggregates correct when it removes them (integration tests)
-- [ ] M4-T03 · Audit log: append-only table and `recordAudit()` service · deps: M2-T01 · PRD: §4, §7.11, §9
+- [x] M4-T03 · Audit log: append-only table and `recordAudit()` service · deps: M2-T01 · PRD: §4, §7.11, §9
   - Accept: `audit_log` has PRD §9 columns; UPDATE and DELETE are refused by a trigger (and the app DB role gets INSERT/SELECT only in deployed environments) (integration test)
   - Accept: `recordAudit(tx, { actorId, action, targetType, targetId, before, after, ip })` writes in the caller's transaction (integration test)
   - Accept: `docs/DECISIONS.md` lists which actions are audited
