@@ -16,6 +16,7 @@ import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
 import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
+import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import type { ImageStorage } from '../storage/index.js'
 
 /** What a job handler can use besides its payload. Later tasks add services here. */
@@ -106,6 +107,16 @@ export const jobs = {
     payload: z.object({ now: z.iso.datetime().optional() }),
     handler: async ({ now }, { log, db, storage }) =>
       eraseDeletedAccounts({ db, storage, log, now: now ? new Date(now) : undefined }),
+    schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'ratings.recompute': defineJob({
+    payload: z.object({}),
+    handler: async (_payload, { db, log }) => {
+      const { checked, mismatches } = await recomputeRatings({ db, log })
+      log.info({ checked, mismatches: mismatches.length }, 'ratings recomputed')
+      return { checked, mismatches: mismatches.length }
+    },
     schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
   }),

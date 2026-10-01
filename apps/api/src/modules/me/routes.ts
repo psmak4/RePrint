@@ -24,6 +24,7 @@ import { type AuthRoutesOptions, VERIFY_EMAIL_TTL_MS } from '../auth/register.js
 import { generateToken, hashToken } from '../auth/tokens.js'
 import { notify } from '../notifications/notify.js'
 import { rateLimit } from '../rate-limit/plugin.js'
+import { removeMemberFromAggregates } from '../reviews/aggregates.js'
 
 const ownAccount = {
   id: users.id,
@@ -259,6 +260,8 @@ export const meRoutes: FastifyPluginAsyncZod<MeRoutesOptions> = async (app, opti
         await tx.delete(sessions).where(eq(sessions.userId, user.id))
         // Unused links must not outlive the account's usefulness.
         await tx.delete(authTokens).where(eq(authTokens.userId, user.id))
+        // Their Approved reviews stop counting at once (D-043).
+        await removeMemberFromAggregates(tx, user.id)
       })
       await app.sessions.end(request, reply)
       try {
