@@ -1,4 +1,5 @@
 export const APP_NAME = 'RePrint'
+export * from './audit.js'
 export * from './auth.js'
 export * from './catalog.js'
 export * from './catalog-api.js'
