@@ -41,3 +41,16 @@ Link the site with base directory `apps/web`. Set `API_INTERNAL_URL`, `API_ORIGI
 ## Rollback
 
 Redeploy the previous commit: run the workflow manually from an earlier commit's ref, or use Render's and Netlify's "redeploy" for the earlier build. Migrations follow expand then contract (PRD §12), so old code runs against the new schema and the database is not rolled back.
+
+## Audit log database role (D-117)
+
+The `audit_log` trigger refuses UPDATE and DELETE on every database, including local. In staging and production, also run the app and worker as a role that cannot do more than the trigger allows. Migrations run through `DATABASE_URL_DIRECT` as the owner role; `DATABASE_URL` should be a separate role. After creating it (once per environment, by the owner), run:
+
+```sql
+REVOKE ALL ON audit_log FROM app_role;
+GRANT INSERT, SELECT ON audit_log TO app_role;
+-- Only for the daily privacy.clearOldIps job (D-042); the trigger still limits it to rows over 90 days old.
+GRANT UPDATE (ip) ON audit_log TO app_role;
+```
+
+Foreign-key `SET NULL` on `actor_id` (account erase) runs as the table owner, so it needs no grant. Re-run the `GRANT` lines after a migration that creates tables, since new tables need their own grants.
