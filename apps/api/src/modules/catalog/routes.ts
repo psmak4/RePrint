@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import {
   authorDetailSchema,
   bookDetailSchema,
@@ -19,6 +18,7 @@ import { federatedSearch } from '../../catalog/search/federated-search.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { publicCacheHook } from './public-cache.js'
 import {
   findAuthorBySlug,
   findBookBySlug,
@@ -29,21 +29,11 @@ import {
   loadEditions,
 } from './read.js'
 
-/** Shared caches may keep a public response for a minute and serve it stale for five more (PRD §10). */
-export const PUBLIC_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300'
 /** Refresh jobs run behind everything else. */
 const REFRESH_PRIORITY = 10
 /** How many of each the search box's dropdown shows. */
 const SUGGESTED_BOOKS = 5
 const SUGGESTED_AUTHORS = 3
-
-function matches(header: string | undefined, etag: string): boolean {
-  if (!header) return false
-  return header
-    .split(',')
-    .map((value) => value.trim().replace(/^W\//, ''))
-    .some((value) => value === '*' || value === etag.replace(/^W\//, ''))
-}
 
 export interface CatalogRoutesOptions extends AuthRoutesOptions {
   /** Missing only when the spec is generated; `GET /search` then answers Catalog results alone. */
@@ -60,16 +50,7 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
   const { db, jobs, catalog, redis } = options
 
   // Every route here is a public GET, so the whole plugin shares one caching rule (PRD §10).
-  app.addHook('onSend', async (request, reply, payload) => {
-    if (reply.statusCode !== 200 || typeof payload !== 'string') return payload
-    const etag = `W/"${createHash('sha1').update(payload).digest('base64url')}"`
-    reply.header('Cache-Control', PUBLIC_CACHE_CONTROL).header('ETag', etag)
-    if (matches(request.headers['if-none-match'], etag)) {
-      reply.code(304)
-      return ''
-    }
-    return payload
-  })
+  app.addHook('onSend', publicCacheHook)
 
   // Suggestions come from the Catalog alone, so keystrokes never reach a Source (PRD §6).
   app.get(

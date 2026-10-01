@@ -1,5 +1,10 @@
-import { books, editions, reviews, reviewVersions } from '@reprint/db'
+import { books, editions, reviews, reviewVersions, users } from '@reprint/db'
 import {
+  type BookReviewsQuery,
+  type BookReviewsResponse,
+  bookReviewsQuerySchema,
+  bookReviewsResponseSchema,
+  buildPageMeta,
   deleteMyReviewResponseSchema,
   type MyReview,
   myReviewSchema,
@@ -8,15 +13,24 @@ import {
   reviewInputSchema,
   slugParamsSchema,
 } from '@reprint/shared'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ne, type SQL } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
 import { requireAuth, requireVerified } from '../auth/guards.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { publicCacheHook } from '../catalog/public-cache.js'
 import { rateLimit } from '../rate-limit/plugin.js'
 import { applyReviewChange } from './aggregates.js'
 
 const UNIQUE_VIOLATION = '23505'
+
+/** Ties always fall back to newest, then ID, so pages never repeat or skip a review. */
+const REVIEW_ORDER: Record<BookReviewsQuery['sort'], SQL[]> = {
+  most_helpful: [desc(reviews.helpfulCount), desc(reviews.submittedAt), desc(reviews.id)],
+  newest: [desc(reviews.submittedAt), desc(reviews.id)],
+  highest: [desc(reviews.rating), desc(reviews.submittedAt), desc(reviews.id)],
+  lowest: [asc(reviews.rating), desc(reviews.submittedAt), desc(reviews.id)],
+}
 
 function toMyReview(row: typeof reviews.$inferSelect, rejectionReason: string | null): MyReview {
   return {
@@ -42,6 +56,65 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
     if (!book) throw new HttpProblem(404, 'Book not found.')
     return book.id
   }
+
+  // The public list is cached like the catalog's other public GETs (PRD §10).
+  const publicReviews: FastifyPluginAsyncZod = async (publicScope) => {
+    publicScope.addHook('onSend', publicCacheHook)
+    publicScope.get(
+      '/books/:slug/reviews',
+      {
+        schema: {
+          params: slugParamsSchema,
+          querystring: bookReviewsQuerySchema,
+          response: { 200: bookReviewsResponseSchema },
+        },
+      },
+      async (request): Promise<BookReviewsResponse> => {
+        if (!db) throw new Error('review routes need a database')
+        const { sort, rating, page, pageSize } = request.query
+        const bookId = await bookIdFor(request.params.slug)
+        // Approved only; reviews of a deleted account are gone from the public view (D-043).
+        const where = and(
+          eq(reviews.bookId, bookId),
+          eq(reviews.status, 'approved'),
+          ne(users.status, 'deleted'),
+          rating === undefined ? undefined : eq(reviews.rating, rating),
+        )
+        const [totalRow] = await db
+          .select({ total: count() })
+          .from(reviews)
+          .innerJoin(users, eq(users.id, reviews.userId))
+          .where(where)
+        const rows = await db
+          .select({
+            id: reviews.id,
+            rating: reviews.rating,
+            headline: reviews.headline,
+            body: reviews.body,
+            hasSpoilers: reviews.hasSpoilers,
+            helpfulCount: reviews.helpfulCount,
+            submittedAt: reviews.submittedAt,
+            username: users.username,
+            displayName: users.displayName,
+          })
+          .from(reviews)
+          .innerJoin(users, eq(users.id, reviews.userId))
+          .where(where)
+          .orderBy(...REVIEW_ORDER[sort])
+          .limit(pageSize)
+          .offset((page - 1) * pageSize)
+        return {
+          items: rows.map(({ username, displayName, submittedAt, ...row }) => ({
+            ...row,
+            submittedAt: submittedAt.toISOString(),
+            author: { username, displayName },
+          })),
+          meta: buildPageMeta({ page, pageSize }, totalRow?.total ?? 0),
+        }
+      },
+    )
+  }
+  await app.register(publicReviews)
 
   app.get(
     '/books/:slug/my-review',

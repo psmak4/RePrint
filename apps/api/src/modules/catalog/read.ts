@@ -13,6 +13,7 @@ import {
 import {
   type AuthorDetail,
   type AuthorSuggestion,
+  averageRating,
   type BookDetail,
   type BookSummary,
   CONTRIBUTION_ROLES,
@@ -47,13 +48,12 @@ async function coversById(db: Database, ids: (string | null)[]): Promise<Map<str
   return new Map(rows.map((row) => [row.id, row]))
 }
 
-/** The average is rounded to two decimals; the UI shows one (PRD §7.4). */
+/** The average is rounded to one decimal (PRD §7.4); `distribution[0]` is the one-star count. */
 export function ratingSummary(
   book: Pick<BookRow, 'reviewCount' | 'ratingSum' | 'ratingCounts'>,
 ): RatingSummary {
   return {
-    average:
-      book.reviewCount > 0 ? Math.round((book.ratingSum / book.reviewCount) * 100) / 100 : null,
+    average: averageRating(book),
     count: book.reviewCount,
     distribution: book.ratingCounts,
   }

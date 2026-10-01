@@ -319,3 +319,7 @@ Entry format:
 ### 2026-10-01 · CI back to GitHub-hosted (owner) · owner/github-hosted-ci
 - CI jobs run on `ubuntu-latest` again (D-119); the repo is going public for the rest of the build, so minutes are free. The self-hosted runner is being removed.
 - Next iteration: CI takes about 4 minutes again. Open PRs created before this change still target the self-hosted runner; if one is stuck "Queued", merge `main` into its branch (don't rebase) so it picks up this workflow.
+
+### 2026-10-01 · M4-T05 · PR pending
+- `GET /v1/books/:slug/reviews` in `apps/api/src/modules/reviews/routes.ts` (Approved only, four sorts, star filter, 10 per page, cached like other public GETs through the new `catalog/public-cache.ts`); `bookReviewsQuerySchema`, `publicReviewSchema`, and `bookReviewsResponseSchema` in `packages/shared/src/reviews.ts`; the Book response average is now one decimal. Integration tests in `book-reviews.integration.test.ts`; the route is in `route-coverage.test.ts`. D-120 records the choices.
+- Next iteration: M4-T06 (moderation queue API). One full `pnpm check` run showed `ready.integration.test.ts` ("503 when Redis is stopped") fail once with 200, then pass alone and on rerun; it looks flaky (the M4-T03 note saw something similar). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

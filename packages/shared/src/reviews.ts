@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { MAX_PAGE_SIZE, pageOf } from './pagination.js'
 
 /** Review status (PRD §5.3). */
 export const REVIEW_STATUSES = ['pending', 'approved', 'rejected', 'unpublished'] as const
@@ -73,3 +74,34 @@ export type MyReview = z.infer<typeof myReviewSchema>
 
 /** `DELETE /books/:slug/my-review`: deleting is permanent (PRD §7.6). */
 export const deleteMyReviewResponseSchema = z.object({ status: z.literal('review_deleted') })
+
+/** Reviews on a Book page: 10 per page (PRD §7.4). */
+export const BOOK_REVIEWS_PAGE_SIZE = 10
+export const REVIEW_SORTS = ['most_helpful', 'newest', 'highest', 'lowest'] as const
+export const reviewSortSchema = z.enum(REVIEW_SORTS)
+export type ReviewSort = z.infer<typeof reviewSortSchema>
+
+/** `GET /books/:slug/reviews?sort=&rating=&page=`; most helpful is the default (PRD §7.4). */
+export const bookReviewsQuerySchema = z.object({
+  sort: reviewSortSchema.default('most_helpful'),
+  rating: z.coerce.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(BOOK_REVIEWS_PAGE_SIZE),
+})
+export type BookReviewsQuery = z.infer<typeof bookReviewsQuerySchema>
+
+/** An Approved Review as readers see it (PRD §7.4, §7.6). */
+export const publicReviewSchema = z.object({
+  id: z.uuid(),
+  rating: z.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX),
+  headline: z.string().nullable(),
+  body: z.string(),
+  hasSpoilers: z.boolean(),
+  helpfulCount: z.number().int().min(0),
+  submittedAt: z.iso.datetime(),
+  author: z.object({ username: z.string(), displayName: z.string() }),
+})
+export type PublicReview = z.infer<typeof publicReviewSchema>
+
+export const bookReviewsResponseSchema = pageOf(publicReviewSchema)
+export type BookReviewsResponse = z.infer<typeof bookReviewsResponseSchema>
