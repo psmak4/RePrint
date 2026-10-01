@@ -1,8 +1,10 @@
 import type { ModQueueItem, ModQueueResponse } from '@reprint/shared'
-import { Link } from 'react-router'
+import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
 import type { ClaimState } from '../../routes/admin-reviews.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
+import { DecisionPanel, isTypingTarget, VersionComparison } from './review-decision.js'
 
 const text = copy.admin.reviews
 
@@ -97,7 +99,15 @@ function ClaimNotice({ claim }: { claim: ClaimState }) {
   )
 }
 
-function ReviewDetail({ item, claim }: { item: ModQueueItem; claim: ClaimState | null }) {
+function ReviewDetail({
+  item,
+  claim,
+  nextHref,
+}: {
+  item: ModQueueItem
+  claim: ClaimState | null
+  nextHref: string | null
+}) {
   const { reviewer } = item
   return (
     <article aria-label={text.detailLabel} className="flex flex-col gap-4">
@@ -139,8 +149,34 @@ function ReviewDetail({ item, claim }: { item: ModQueueItem; claim: ClaimState |
         <p className="font-medium">{item.headline ?? text.untitled}</p>
         <ReviewBody body={item.body} />
       </section>
+      <VersionComparison item={item} />
+      <DecisionPanel reviewId={item.id} enabled={claim?.state === 'mine'} nextHref={nextHref} />
     </article>
   )
+}
+
+/** `J` opens the next review in the queue and `K` the previous one, except while typing. */
+function useQueueShortcuts(
+  queue: ModQueueResponse,
+  selectedId: string | null,
+  cursor: string | null,
+) {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || isTypingTarget(event)) return
+      const key = event.key.toLowerCase()
+      if (key !== 'j' && key !== 'k') return
+      const index = queue.items.findIndex((item) => item.id === selectedId)
+      const target =
+        key === 'j' ? queue.items[index + 1] : index === -1 ? undefined : queue.items[index - 1]
+      if (!target) return
+      event.preventDefault()
+      navigate(queueHref(target.id, cursor))
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [queue, selectedId, cursor, navigate])
 }
 
 /** Two panes from `lg`: the oldest-first queue and the selected review (DESIGN.md). */
@@ -159,6 +195,11 @@ export function ReviewQueue({
   cursor: string | null
   now: string
 }) {
+  useQueueShortcuts(queue, selected?.id ?? null, cursor)
+  // After a decision the page moves on: to the next item, or else the one before it.
+  const position = queue.items.findIndex((item) => item.id === selected?.id)
+  const following = queue.items[position + 1] ?? (position > 0 ? queue.items[position - 1] : null)
+  const nextHref = following ? queueHref(following.id, cursor) : null
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-semibold">{text.title}</h2>
@@ -166,7 +207,7 @@ export function ReviewQueue({
         <QueueList queue={queue} selectedId={selected?.id ?? null} cursor={cursor} now={now} />
         <div className="min-w-0">
           {selected ? (
-            <ReviewDetail item={selected} claim={claim} />
+            <ReviewDetail item={selected} claim={claim} nextHref={nextHref} />
           ) : (
             <p className="text-muted-foreground">
               {requested ? text.notInQueue : text.selectPrompt}

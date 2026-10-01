@@ -353,7 +353,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T11 · Web: admin area shell and moderation review queue with claims · deps: M4-T06, M1-T12 · PRD: §7.10, §11
   - Accept: `/admin/*` routes require the relevant permission (others get 403 or a redirect), are `noindex`, and share an admin layout per `docs/DESIGN.md` (loader tests)
   - Accept: `/admin/reviews` lists Pending reviews oldest first; opening one claims it and shows Book, reviewer, rating, full text, spoiler flag, and reviewer history (component tests)
-- [ ] M4-T12 · Web: moderation actions, reason picker, side-by-side diff, keyboard shortcuts · deps: M4-T11, M4-T07 · PRD: §7.10, §12
+- [x] M4-T12 · Web: moderation actions, reason picker, side-by-side diff, keyboard shortcuts · deps: M4-T11, M4-T07 · PRD: §7.10, §12
   - Accept: Approve and Reject work, and Reject offers saved phrases or free text (component tests)
   - Accept: edited reviews show a side-by-side comparison with the last approved version (component test)
   - Accept: `A` approves, `R` rejects, and `J`/`K` move between items, but not while typing in a text field (component tests)

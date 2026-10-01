@@ -348,3 +348,8 @@ Entry format:
 ### 2026-10-01 · M4-T11 · PR pending
 - Admin shell (`routes/admin.tsx`, `components/admin/admin-layout.tsx`, `lib/admin.server.ts` `requireViewerPermission`) and the review queue page (`routes/admin-reviews.tsx`, `components/admin/review-queue.tsx`): queue list, `?review=<id>` opens and claims, reviewer history, full text. Loader tests in `admin.test.ts` and `admin-reviews.test.ts`, component tests (with axe) in `review-queue.test.tsx`. D-126 records the choices.
 - Next iteration: M4-T12 (actions, reason picker, side-by-side diff, shortcuts) builds on `ReviewDetail` in `review-queue.tsx`; decisions must POST JSON (`{}` if no reason) to `/v1/mod/reviews/:id/approve|reject`. Pages under `/admin` must call `requireViewerPermission` in their own loader. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T12 · PR pending
+- `DecisionPanel` and `VersionComparison` in `apps/web/app/components/admin/review-decision.tsx`, wired into `ReviewDetail`; `A`/`R` shortcuts live in the panel and `J`/`K` in `ReviewQueue`; the `/admin/reviews` route now has an `action` that POSTs approve and reject (JSON) to the API. Copy under `copy.admin.reviews`. Component tests in `review-queue.test.tsx` (with axe), action tests in `admin-reviews.test.ts`. D-127 records the choices.
+- Next iteration: M4-T13 (`/admin` dashboard; `/admin` still redirects to the review queue). M4-T15 e2e can click Approve/Reject by role name ("Approve", "Reject", then "Reject review"). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
