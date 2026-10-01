@@ -2,6 +2,10 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  GENRE_PAGE_SIZE,
+  genreBooksQuerySchema,
+  genreDetailResponseSchema,
+  genreTreeResponseSchema,
   searchQuerySchema,
   searchResponseSchema,
   searchSuggestQuerySchema,
@@ -18,6 +22,7 @@ import { federatedSearch } from '../../catalog/search/federated-search.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { findGenreBySlug, loadGenreBooks, loadGenreLinks, loadGenreTree } from './genres.js'
 import { publicCacheHook } from './public-cache.js'
 import {
   findAuthorBySlug,
@@ -150,6 +155,39 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
       const author = await findAuthorBySlug(db, request.params.slug)
       if (!author) throw new HttpProblem(404, 'We could not find that author.')
       return loadAuthorDetail(db, author)
+    },
+  )
+
+  app.get('/genres', { schema: { response: { 200: genreTreeResponseSchema } } }, async () => {
+    if (!db) throw new Error('catalog routes need a database')
+    return { items: await loadGenreTree(db) }
+  })
+
+  app.get(
+    '/genres/:slug',
+    {
+      schema: {
+        params: slugParamsSchema,
+        querystring: genreBooksQuerySchema,
+        response: { 200: genreDetailResponseSchema },
+      },
+    },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const genre = await findGenreBySlug(db, request.params.slug)
+      if (!genre) throw new HttpProblem(404, 'We could not find that genre.')
+      const { sort, page } = request.query
+      const [links, books] = await Promise.all([
+        loadGenreLinks(db, genre),
+        loadGenreBooks(db, genre, { sort, page }),
+      ])
+      return {
+        genre: { slug: genre.slug, name: genre.name, description: genre.description },
+        ...links,
+        ...books,
+        page,
+        pageSize: GENRE_PAGE_SIZE,
+      }
     },
   )
 }
