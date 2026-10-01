@@ -18,3 +18,6 @@ All modules run in one transaction, so a failure leaves the database unchanged.
 
 `pnpm db:seed` and `pnpm db:reset` (the root scripts) also run `pnpm --filter api seed:catalog`, which loads about 500 Books through the API's ingest service (D-114). It lives in `apps/api` because ingest does. Running `seed:catalog` alone is safe to repeat.
 
+## Review data
+
+The root scripts then run `pnpm --filter api seed:reviews` (D-129): about 150 reviews across 40 Books in every status, with edited reviews that have several versions. It lives in `apps/api` because it uses `applyReviewChange` to keep each Book's totals right. It does nothing when any review already exists.

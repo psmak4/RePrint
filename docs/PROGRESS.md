@@ -357,3 +357,6 @@ Entry format:
 - `/admin` is now the moderation dashboard (`routes/admin-index.tsx`, `components/admin/moderation-dashboard.tsx`): pending count and oldest age from `/v1/mod/stats`, a placeholder open-reports card for M7, and a "Dashboard" nav link. Loader tests in `admin-index.test.ts` (Moderator allowed, Member and Visitor denied, API failure), component tests (with axe) in `moderation-dashboard.test.tsx`. D-128 records the choices.
 - Next iteration: M4-T14 (seed reviews in every status). M7 fills the reports card. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+### 2026-10-01 · M4-T14 · PR pending
+- `seedReviews` in `apps/api/src/modules/reviews/seed-reviews.ts` with `pnpm --filter api seed:reviews`, chained after `seed:catalog` in `db:seed` and `db:reset` (146 reviews, 194 versions). `resetDatabase` is now exported from `@reprint/db`. Integration test `seed-reviews.integration.test.ts` checks every status, multi-version reviews, and zero `recomputeRatings` mismatches. D-129 records the choices.
+- Next iteration: M4-T15 (e2e for reviews and moderation). Seeded accounts: `member1`, `moderator1` (password in `docs/local-dev.md`); many Pending reviews exist already, so e2e specs should create their own Book review with a fresh Member. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

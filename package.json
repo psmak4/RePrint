@@ -24,8 +24,8 @@
     "db:check": "pnpm --filter @reprint/db db:check",
     "openapi:check": "turbo run openapi:check",
     "test:e2e": "pnpm --filter e2e test:e2e",
-    "db:seed": "pnpm --filter @reprint/db db:seed && pnpm --filter api seed:catalog",
-    "db:reset": "pnpm --filter @reprint/db db:reset && pnpm --filter api seed:catalog"
+    "db:seed": "pnpm --filter @reprint/db db:seed && pnpm --filter api seed:catalog && pnpm --filter api seed:reviews",
+    "db:reset": "pnpm --filter @reprint/db db:reset && pnpm --filter api seed:catalog && pnpm --filter api seed:reviews"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
