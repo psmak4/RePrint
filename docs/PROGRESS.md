@@ -368,3 +368,7 @@ Entry format:
 ### 2026-10-01 · M4-T16 · PR pending
 - M4 verification only; no code gaps found. `pnpm check` passed, `pnpm db:reset` then `pnpm test:e2e` passed (24 specs across chromium, webkit, mobile, axe included), and `recomputeRatings` against the e2e-used database reported 502 Books checked, 0 mismatches. Each criterion maps to a test (listed in the PR body).
 - Next iteration: M5-T01 is next in order unless an earlier `[ ]` task becomes eligible (M1-T20 waits on HUMAN M1-T19). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T01 · PR pending
+- `helpful_votes` table (migration 0009), `POST/DELETE /v1/reviews/:id/helpful` in `modules/reviews/routes.ts`, `helpfulVoteResponseSchema` in `packages/shared`, and the `accounts.erase` fix that lowers `helpful_count` before the votes cascade. Integration tests in `reviews/helpful.integration.test.ts` and `accounts/deletion.integration.test.ts`; route-coverage table extended. D-131 records the choices.
+- Next iteration: M5-T02 (web helpful button). The response is `{ helpful, helpfulCount }`; the book-reviews list does not yet say whether the viewer voted, so M5-T02 needs a viewer-vote field on `GET /v1/books/:slug/reviews` (it is a public cached route, so consider a separate authenticated lookup). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

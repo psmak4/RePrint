@@ -1,6 +1,6 @@
 import { covers, type Database, users } from '@reprint/db'
 import { ACCOUNT_ERASE_AFTER_DAYS } from '@reprint/shared'
-import { and, eq, inArray, isNotNull, lt } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm'
 import type { Logger } from 'pino'
 import type { ImageStorage } from '../../storage/index.js'
 
@@ -36,6 +36,17 @@ export async function eraseDeletedAccounts(options: {
         avatarIds.length > 0
           ? await tx.select({ key: covers.r2Key }).from(covers).where(inArray(covers.id, avatarIds))
           : []
+      // The votes go by cascade, so take them out of other Members' reviews' counts first.
+      await tx.execute(sql`
+        update reviews set helpful_count = reviews.helpful_count - v.n
+        from (
+          select review_id, count(*)::int as n from helpful_votes
+          where user_id in (${sql.join(
+            batch.map((row) => sql`${row.id}`),
+            sql`, `,
+          )}) group by review_id
+        ) v
+        where reviews.id = v.review_id`)
       await tx.delete(users).where(
         inArray(
           users.id,

@@ -75,6 +75,13 @@ export type MyReview = z.infer<typeof myReviewSchema>
 /** `DELETE /books/:slug/my-review`: deleting is permanent (PRD §7.6). */
 export const deleteMyReviewResponseSchema = z.object({ status: z.literal('review_deleted') })
 
+/** `POST/DELETE /reviews/:id/helpful`: the viewer's vote after the change, and the new total (PRD §7.6). */
+export const helpfulVoteResponseSchema = z.object({
+  helpful: z.boolean(),
+  helpfulCount: z.number().int().min(0),
+})
+export type HelpfulVoteResponse = z.infer<typeof helpfulVoteResponseSchema>
+
 /** Reviews on a Book page: 10 per page (PRD §7.4). */
 export const BOOK_REVIEWS_PAGE_SIZE = 10
 export const REVIEW_SORTS = ['most_helpful', 'newest', 'highest', 'lowest'] as const

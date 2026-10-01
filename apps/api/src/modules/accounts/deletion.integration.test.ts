@@ -5,6 +5,7 @@ import {
   authTokens,
   books,
   covers,
+  helpfulVotes,
   newId,
   notifications,
   reviews,
@@ -234,6 +235,36 @@ describe('accounts.erase job', () => {
     expect(left.map((row) => row.id)).toEqual([active.id])
     // Running again finds nothing.
     expect(await run()).toEqual({ erased: 0 })
+  })
+
+  it('keeps helpful_count correct when it deletes a Member’s votes', async () => {
+    const author = await createTestUser(stack.db.db)
+    const voter = await deletedUser(ACCOUNT_ERASE_AFTER_DAYS + 1)
+    const other = await createTestUser(stack.db.db)
+    const bookId = newId()
+    await stack.db.db.insert(books).values({ id: bookId, slug: 'erase-votes', title: 'A Book' })
+    const [review] = await stack.db.db
+      .insert(reviews)
+      .values({
+        userId: author.id,
+        bookId,
+        rating: 4,
+        body: 'x'.repeat(60),
+        status: 'approved',
+        helpfulCount: 2,
+      })
+      .returning()
+    if (!review) throw new Error('review not inserted')
+    await stack.db.db.insert(helpfulVotes).values([
+      { reviewId: review.id, userId: voter.id },
+      { reviewId: review.id, userId: other.id },
+    ])
+
+    expect(await run()).toEqual({ erased: 1 })
+    const [after] = await stack.db.db.select().from(reviews).where(eq(reviews.id, review.id))
+    expect(after?.helpfulCount).toBe(1)
+    const votes = await stack.db.db.select().from(helpfulVotes)
+    expect(votes.map((vote) => vote.userId)).toEqual([other.id])
   })
 
   it('runs daily through the registry schedule', () => {
