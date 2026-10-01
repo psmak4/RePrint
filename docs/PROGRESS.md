@@ -364,3 +364,7 @@ Entry format:
 ### 2026-10-01 · M4-T15 · PR pending
 - `e2e/specs/reviews.spec.ts` (register, verify, write with keyboard star input, edit, delete, axe at each step) and `e2e/specs/moderation.spec.ts` (two Members review Dune; a new Moderator approves one and rejects the other with a saved phrase; both authors see the status, the reason, and the notification). Helpers in `e2e/support/accounts.ts`. D-130 records the choices.
 - Next iteration: M4-T16 (M4 verification). The specs pass in all three projects against a seeded database; the queue is global, so they move their own reviews to its front. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T16 · PR pending
+- M4 verification only; no code gaps found. `pnpm check` passed, `pnpm db:reset` then `pnpm test:e2e` passed (24 specs across chromium, webkit, mobile, axe included), and `recomputeRatings` against the e2e-used database reported 502 Books checked, 0 mismatches. Each criterion maps to a test (listed in the PR body).
+- Next iteration: M5-T01 is next in order unless an earlier `[ ]` task becomes eligible (M1-T20 waits on HUMAN M1-T19). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
