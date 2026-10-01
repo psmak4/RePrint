@@ -6,6 +6,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   unique,
   uniqueIndex,
@@ -35,7 +36,7 @@ export const reviews = pgTable(
     hasSpoilers: boolean('has_spoilers').notNull().default(false),
     editionId: uuid('edition_id').references(() => editions.id, { onDelete: 'set null' }),
     status: text('status', { enum: REVIEW_STATUSES }).notNull().default('pending'),
-    /** M5 keeps this in step with `helpful_votes`. */
+    /** Kept in step with `helpful_votes` in the same transaction as each vote change. */
     helpfulCount: integer('helpful_count').notNull().default(0),
     /** When the current content was submitted (new or edited). */
     submittedAt: timestamptz('submitted_at').notNull().default(sql`now()`),
@@ -110,6 +111,28 @@ export const reviewClaims = pgTable(
     expiresAt: timestamptz('expires_at').notNull(),
   },
   (t) => [index('review_claims_moderator_id_idx').on(t.moderatorId)],
+)
+
+/**
+ * A Member marking someone else's Approved Review helpful (PRD §5.3, §9). Both FKs cascade, so a
+ * deleted Review or an erased account takes its votes along; `reviews.helpful_count` is kept in
+ * step by the code that inserts or deletes rows here.
+ */
+export const helpfulVotes = pgTable(
+  'helpful_votes',
+  {
+    reviewId: uuid('review_id')
+      .notNull()
+      .references(() => reviews.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamptz('created_at').notNull().default(sql`now()`),
+  },
+  (t) => [
+    primaryKey({ columns: [t.reviewId, t.userId] }),
+    index('helpful_votes_user_id_idx').on(t.userId),
+  ],
 )
 
 export type Review = typeof reviews.$inferSelect

@@ -21,6 +21,7 @@ const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
+const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
 const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
@@ -112,6 +113,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'DELETE /v1/books/{slug}/my-review': {
     allowed: [MY_REVIEW, 'deletes an Approved review permanently'],
     denied: [MY_REVIEW, 'denies Visitors, answers 404 without a review, and leaves'],
+  },
+  'POST /v1/reviews/{id}/helpful': {
+    allowed: [HELPFUL, 'lets a verified Member vote once on an Approved review'],
+    denied: [HELPFUL, 'denies Visitors, unverified Members, the author, and non-Approved reviews'],
+  },
+  'DELETE /v1/reviews/{id}/helpful': {
+    allowed: [HELPFUL, 'removes the vote and lowers the count'],
+    denied: [HELPFUL, 'denies Visitors and answers 404 for an unknown review'],
   },
   'GET /v1/books/{slug}/reviews': {
     allowed: [BOOK_REVIEWS, 'lists Approved reviews only, with the author'],

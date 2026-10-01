@@ -1,4 +1,4 @@
-import { books, editions, reviews, reviewVersions, users } from '@reprint/db'
+import { books, editions, helpfulVotes, reviews, reviewVersions, users } from '@reprint/db'
 import {
   type BookReviewsQuery,
   type BookReviewsResponse,
@@ -6,14 +6,17 @@ import {
   bookReviewsResponseSchema,
   buildPageMeta,
   deleteMyReviewResponseSchema,
+  type HelpfulVoteResponse,
+  helpfulVoteResponseSchema,
   type MyReview,
   myReviewSchema,
   nextReviewStatus,
   type ReviewStatus,
+  reviewIdParamsSchema,
   reviewInputSchema,
   slugParamsSchema,
 } from '@reprint/shared'
-import { and, asc, count, desc, eq, ne, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ne, type SQL, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
 import { requireAuth, requireVerified } from '../auth/guards.js'
@@ -262,6 +265,95 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
       return { status: 'review_deleted' as const }
     },
   )
+
+  // Helpful votes (PRD §7.6): verified Members, someone else's Approved review, once each.
+  app.post(
+    '/reviews/:id/helpful',
+    {
+      preHandler: [requireVerified],
+      schema: { params: reviewIdParamsSchema, response: { 200: helpfulVoteResponseSchema } },
+    },
+    async (request): Promise<HelpfulVoteResponse> => {
+      if (!db || !request.auth) throw new Error('review routes need a database')
+      const userId = request.auth.user.id
+      return db.transaction(async (tx) => {
+        const review = await lockVotableReview(tx, request.params.id)
+        if (review.userId === userId) {
+          throw new HttpProblem(403, 'You cannot mark your own review helpful.')
+        }
+        const inserted = await tx
+          .insert(helpfulVotes)
+          .values({ reviewId: review.id, userId })
+          .onConflictDoNothing()
+          .returning({ reviewId: helpfulVotes.reviewId })
+        // Voting twice changes nothing: the count moves only with a new row.
+        const helpfulCount =
+          inserted.length > 0 ? await bumpHelpful(tx, review.id, 1) : review.helpfulCount
+        return { helpful: true, helpfulCount }
+      })
+    },
+  )
+
+  app.delete(
+    '/reviews/:id/helpful',
+    {
+      preHandler: [requireAuth],
+      schema: { params: reviewIdParamsSchema, response: { 200: helpfulVoteResponseSchema } },
+    },
+    async (request): Promise<HelpfulVoteResponse> => {
+      if (!db || !request.auth) throw new Error('review routes need a database')
+      const userId = request.auth.user.id
+      return db.transaction(async (tx) => {
+        // Removing a vote stays possible after the review leaves Approved, so counts can't strand.
+        const [review] = await tx
+          .select({ id: reviews.id, helpfulCount: reviews.helpfulCount })
+          .from(reviews)
+          .where(eq(reviews.id, request.params.id))
+          .for('update')
+        if (!review) throw new HttpProblem(404, 'Review not found.')
+        const removed = await tx
+          .delete(helpfulVotes)
+          .where(and(eq(helpfulVotes.reviewId, review.id), eq(helpfulVotes.userId, userId)))
+          .returning({ reviewId: helpfulVotes.reviewId })
+        const helpfulCount =
+          removed.length > 0 ? await bumpHelpful(tx, review.id, -1) : review.helpfulCount
+        return { helpful: false, helpfulCount }
+      })
+    },
+  )
+}
+
+type Tx = Parameters<Parameters<NonNullable<AuthRoutesOptions['db']>['transaction']>[0]>[0]
+
+/** Locks an Approved review (of a Member who has not deleted their account) for a vote change. */
+async function lockVotableReview(tx: Tx, id: string) {
+  const [review] = await tx
+    .select({
+      id: reviews.id,
+      userId: reviews.userId,
+      status: reviews.status,
+      helpfulCount: reviews.helpfulCount,
+      authorStatus: users.status,
+    })
+    .from(reviews)
+    .innerJoin(users, eq(users.id, reviews.userId))
+    .where(eq(reviews.id, id))
+    .for('update', { of: reviews })
+  // A review that is not public looks the same as one that does not exist.
+  if (!review || review.status !== 'approved' || review.authorStatus === 'deleted') {
+    throw new HttpProblem(404, 'Review not found.')
+  }
+  return review
+}
+
+async function bumpHelpful(tx: Tx, reviewId: string, delta: 1 | -1): Promise<number> {
+  const [row] = await tx
+    .update(reviews)
+    .set({ helpfulCount: sql`${reviews.helpfulCount} + ${delta}` })
+    .where(eq(reviews.id, reviewId))
+    .returning({ helpfulCount: reviews.helpfulCount })
+  if (!row) throw new Error('failed to update helpful_count')
+  return row.helpfulCount
 }
 
 function isUniqueViolation(error: unknown): boolean {

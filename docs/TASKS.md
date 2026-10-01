@@ -372,7 +372,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M5 · Discovery
 
-- [ ] M5-T01 · Helpful votes: schema and `POST/DELETE /v1/reviews/:id/helpful` · deps: M4-T05 · PRD: §5.3, §7.6, §9, §10
+- [x] M5-T01 · Helpful votes: schema and `POST/DELETE /v1/reviews/:id/helpful` · deps: M4-T05 · PRD: §5.3, §7.6, §9, §10
   - Accept: verified Members can vote once on someone else's Approved review and remove the vote; `helpful_count` changes in the same transaction (integration tests)
   - Accept: voting on your own review, a non-Approved review, or while unverified is denied (integration tests)
   - Accept: `accounts.erase` keeps `helpful_count` correct when it deletes a Member's votes (integration test)
