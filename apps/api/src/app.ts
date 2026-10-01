@@ -25,6 +25,7 @@ import { notificationRoutes } from './modules/notifications/routes.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
+import { reviewRoutes } from './modules/reviews/routes.js'
 import { uploadRoutes } from './modules/uploads/routes.js'
 import { baseLoggerOptions } from './observability/logging.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
@@ -135,6 +136,12 @@ export async function buildApp(
     db: options.database,
     jobs: options.jobs,
     storage,
+  })
+  await app.register(reviewRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
   })
   await app.register(sessionRoutes, {
     prefix: '/v1',

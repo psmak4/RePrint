@@ -20,6 +20,7 @@ const CATALOG = 'modules/catalog/catalog.integration.test.ts'
 const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
+const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -96,6 +97,18 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'POST /v1/me/email/confirm': {
     allowed: [EMAIL, 'leaves the address alone'],
     denied: [EMAIL, 'rejects reused, expired, and unknown tokens'],
+  },
+  'GET /v1/books/{slug}/my-review': {
+    allowed: [MY_REVIEW, 'returns the viewer’s review, with the rejection reason'],
+    denied: [MY_REVIEW, 'denies Visitors, answers 404 without a review'],
+  },
+  'PUT /v1/books/{slug}/my-review': {
+    allowed: [MY_REVIEW, 'creates a Pending review with its first version'],
+    denied: [MY_REVIEW, 'denies Visitors with 401 and unverified Members with 403'],
+  },
+  'DELETE /v1/books/{slug}/my-review': {
+    allowed: [MY_REVIEW, 'deletes an Approved review permanently'],
+    denied: [MY_REVIEW, 'denies Visitors, answers 404 without a review, and leaves'],
   },
   'GET /v1/me/sessions': {
     allowed: [SESSIONS, 'lists active sessions'],
