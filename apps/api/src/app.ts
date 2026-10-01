@@ -21,6 +21,7 @@ import { catalogRoutes } from './modules/catalog/routes.js'
 import { avatarRoutes } from './modules/me/avatar.js'
 import { meRoutes } from './modules/me/routes.js'
 import { sessionRoutes } from './modules/me/sessions.js'
+import { moderationRoutes } from './modules/moderation/routes.js'
 import { notificationRoutes } from './modules/notifications/routes.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
@@ -138,6 +139,12 @@ export async function buildApp(
     storage,
   })
   await app.register(reviewRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(moderationRoutes, {
     prefix: '/v1',
     env,
     db: options.database,

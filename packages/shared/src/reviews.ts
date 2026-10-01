@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MAX_PAGE_SIZE, pageOf } from './pagination.js'
+import { cursorPageOf, MAX_PAGE_SIZE, pageOf } from './pagination.js'
 
 /** Review status (PRD §5.3). */
 export const REVIEW_STATUSES = ['pending', 'approved', 'rejected', 'unpublished'] as const
@@ -105,3 +105,63 @@ export type PublicReview = z.infer<typeof publicReviewSchema>
 
 export const bookReviewsResponseSchema = pageOf(publicReviewSchema)
 export type BookReviewsResponse = z.infer<typeof bookReviewsResponseSchema>
+
+/** A Moderator's claim on a queue item lasts this long (PRD §7.10). */
+export const REVIEW_CLAIM_MINUTES = 10
+
+export const reviewIdParamsSchema = z.object({ id: z.uuid() })
+
+/** The content of one version of a Review, as the queue's side-by-side comparison shows it. */
+export const reviewContentSchema = z.object({
+  rating: z.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX),
+  headline: z.string().nullable(),
+  body: z.string(),
+  hasSpoilers: z.boolean(),
+})
+
+/** One Pending Review in the moderation queue (PRD §7.10). */
+export const modQueueItemSchema = z.object({
+  id: z.uuid(),
+  book: z.object({ slug: z.string(), title: z.string() }),
+  reviewer: z.object({
+    username: z.string(),
+    displayName: z.string(),
+    /** Decisions on this Member's Review versions, plus open reports (0 until M7). */
+    approvedCount: z.number().int().min(0),
+    rejectedCount: z.number().int().min(0),
+    reportedCount: z.number().int().min(0),
+  }),
+  ...reviewContentSchema.shape,
+  editionId: z.uuid().nullable(),
+  /** 1 for a first submission, higher for an edit. */
+  version: z.number().int().min(1),
+  submittedAt: z.iso.datetime(),
+  /** The last approved version, for an edited Review that was approved before; else `null`. */
+  lastApproved: reviewContentSchema.extend({ decidedAt: z.iso.datetime().nullable() }).nullable(),
+  /** An unexpired claim, if any; `mine` tells the viewer whether it is theirs. */
+  claim: z
+    .object({
+      expiresAt: z.iso.datetime(),
+      mine: z.boolean(),
+      moderator: z.object({ username: z.string(), displayName: z.string() }),
+    })
+    .nullable(),
+})
+export type ModQueueItem = z.infer<typeof modQueueItemSchema>
+
+export const modQueueResponseSchema = cursorPageOf(modQueueItemSchema)
+export type ModQueueResponse = z.infer<typeof modQueueResponseSchema>
+
+export const claimReviewResponseSchema = z.object({
+  reviewId: z.uuid(),
+  expiresAt: z.iso.datetime(),
+})
+export type ClaimReviewResponse = z.infer<typeof claimReviewResponseSchema>
+
+/** `GET /mod/stats`: the Pending count and the age of the oldest Pending Review (PRD §7.10). */
+export const modStatsSchema = z.object({
+  pendingCount: z.number().int().min(0),
+  oldestPendingAt: z.iso.datetime().nullable(),
+  oldestPendingAgeSeconds: z.number().int().min(0).nullable(),
+})
+export type ModStats = z.infer<typeof modStatsSchema>
