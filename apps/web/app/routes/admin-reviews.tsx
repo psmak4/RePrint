@@ -5,13 +5,17 @@ import {
   type ModQueueResponse,
   modQueueResponseSchema,
   PERMISSIONS,
+  REVIEW_DECISION_REASON_MAX,
+  reviewDecisionResponseSchema,
   reviewIdParamsSchema,
 } from '@reprint/shared'
 import { data } from 'react-router'
+import { z } from 'zod'
 import { ReviewQueue } from '../components/admin/review-queue.js'
 import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
+import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
 import type { Route } from './+types/admin-reviews'
 
@@ -71,6 +75,33 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
   return { queue, selected, requested, claim, cursor, now: new Date().toISOString() }
+}
+
+const decisionActionSchema = z.object({
+  intent: z.enum(['approve', 'reject']),
+  reviewId: z.uuid(),
+  reason: z.string().trim().max(REVIEW_DECISION_REASON_MAX).optional(),
+})
+
+/** Approve or reject the opened review. The API checks the claim and writes the audit row (D-122). */
+export async function action({ request }: Route.ActionArgs) {
+  await requireViewerPermission(request, PERMISSIONS.reviewsModerate)
+  const parsed = decisionActionSchema.safeParse(await request.json().catch(() => null))
+  if (!parsed.success) {
+    return data({ formError: copy.admin.reviews.decideFailed }, { status: 400 })
+  }
+  const { intent, reviewId, reason } = parsed.data
+  // The API takes a JSON body even without a reason.
+  const result = await sendToApi(
+    request,
+    'POST',
+    `/v1/mod/reviews/${reviewId}/${intent}`,
+    reason ? { reason } : {},
+    copy.admin.reviews.decideFailed,
+  )
+  if (!result.ok) return failed(result)
+  const { status } = reviewDecisionResponseSchema.parse(result.body)
+  return { decided: status, reviewId }
 }
 
 async function claimReview(api: ReturnType<typeof apiClientFor>, id: string): Promise<ClaimState> {
