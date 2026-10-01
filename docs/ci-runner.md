@@ -1,6 +1,8 @@
-# Self-hosted CI runner
+# Self-hosted CI runner (fallback, not in use)
 
-CI runs on a self-hosted GitHub Actions runner on the owner's Mac (D-113). GitHub-hosted minutes for this private repo on the free plan ran out; self-hosted runners cost nothing and keep the repo private.
+> **Status (2026-10-01):** retired. CI runs on GitHub-hosted runners while the repo is public (D-119). Use this setup again only if the repo is private and Actions minutes run out. **Never register a self-hosted runner on a public repo:** a pull request from a fork could run code on your machine. To re-enable, register the runner as below and change every `runs-on` in `.github/workflows/ci.yml` to `[self-hosted, reprint-ci]`.
+
+CI ran on a self-hosted GitHub Actions runner on the owner's Mac (D-113). GitHub-hosted minutes for this private repo on the free plan ran out; self-hosted runners cost nothing and keep the repo private.
 
 ## Requirements
 

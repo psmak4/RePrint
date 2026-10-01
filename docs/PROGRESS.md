@@ -315,3 +315,7 @@ Entry format:
 ### 2026-09-30 · M4-T04 · PR pending
 - `apps/api/src/modules/reviews/routes.ts` (`reviewRoutes`: `GET/PUT/DELETE /v1/books/:slug/my-review`), registered in `app.ts`; `myReviewSchema` and `deleteMyReviewResponseSchema` in `packages/shared/src/reviews.ts`; integration tests in `my-review.integration.test.ts` (create, edit with versions, Approved→Pending drops totals, Rejected→Pending, Edition check, 401/403/404/429, delete). D-118 records the choices.
 - Next iteration: M4-T05 (`GET /v1/books/:slug/reviews` and the one-decimal rating summary). Moderator decisions (M4-T07) must set `review_versions.status`, `decided_by`, `decision_reason`, and `decided_at` on the latest version, which is what `GET my-review` reads for `rejectionReason`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · CI back to GitHub-hosted (owner) · owner/github-hosted-ci
+- CI jobs run on `ubuntu-latest` again (D-119); the repo is going public for the rest of the build, so minutes are free. The self-hosted runner is being removed.
+- Next iteration: CI takes about 4 minutes again. Open PRs created before this change still target the self-hosted runner; if one is stuck "Queued", merge `main` into its branch (don't rebase) so it picks up this workflow.
