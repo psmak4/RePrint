@@ -376,7 +376,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: verified Members can vote once on someone else's Approved review and remove the vote; `helpful_count` changes in the same transaction (integration tests)
   - Accept: voting on your own review, a non-Approved review, or while unverified is denied (integration tests)
   - Accept: `accounts.erase` keeps `helpful_count` correct when it deletes a Member's votes (integration test)
-- [ ] M5-T02 · Web: helpful button with "N people found this helpful" · deps: M5-T01, M4-T10 · PRD: §7.6
+- [x] M5-T02 · Web: helpful button with "N people found this helpful" · deps: M5-T01, M4-T10 · PRD: §7.6
   - Accept: the button toggles the vote with an optimistic TanStack Query update and rolls back on error (component tests)
   - Accept: the count text reads "N people found this helpful", and the button is hidden on the viewer's own reviews
 - [ ] M5-T03 · Genres API: `GET /v1/genres` and `/v1/genres/:slug` · deps: M4-T02, M3-T03 · PRD: §7.5, §10

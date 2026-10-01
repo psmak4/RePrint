@@ -122,6 +122,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     allowed: [HELPFUL, 'removes the vote and lowers the count'],
     denied: [HELPFUL, 'denies Visitors and answers 404 for an unknown review'],
   },
+  'GET /v1/books/{slug}/helpful-votes': {
+    allowed: [HELPFUL, 'lists the review IDs the Member marked helpful on a Book'],
+    denied: [HELPFUL, 'denies Visitors and answers 404 for an unknown Book'],
+  },
   'GET /v1/books/{slug}/reviews': {
     allowed: [BOOK_REVIEWS, 'lists Approved reviews only, with the author'],
     denied: [BOOK_REVIEWS, 'returns 404 Problem Details for an unknown Book'],

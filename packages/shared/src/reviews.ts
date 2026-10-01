@@ -82,6 +82,10 @@ export const helpfulVoteResponseSchema = z.object({
 })
 export type HelpfulVoteResponse = z.infer<typeof helpfulVoteResponseSchema>
 
+/** `GET /books/:slug/helpful-votes`: IDs of this Book's reviews the signed-in Member marked helpful. */
+export const myHelpfulVotesResponseSchema = z.object({ reviewIds: z.array(z.uuid()) })
+export type MyHelpfulVotesResponse = z.infer<typeof myHelpfulVotesResponseSchema>
+
 /** Reviews on a Book page: 10 per page (PRD §7.4). */
 export const BOOK_REVIEWS_PAGE_SIZE = 10
 export const REVIEW_SORTS = ['most_helpful', 'newest', 'highest', 'lowest'] as const

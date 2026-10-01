@@ -179,6 +179,9 @@ export const copy = {
       ratingOf: (rating: number) => `${rating} out of 5 stars`,
       helpful: (count: number) =>
         `${count} ${count === 1 ? 'person' : 'people'} found this helpful`,
+      markHelpful: 'Mark as helpful',
+      markedHelpful: 'Marked as helpful',
+      helpfulFailed: "We couldn't save your vote. Please try again.",
       pagesLabel: 'Review pages',
       previous: 'Previous',
       next: 'Next',

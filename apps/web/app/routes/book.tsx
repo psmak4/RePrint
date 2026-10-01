@@ -6,6 +6,7 @@ import {
   bookReviewsQuerySchema,
   bookReviewsResponseSchema,
   deleteMyReviewResponseSchema,
+  myHelpfulVotesResponseSchema,
   myReviewSchema,
   reviewInputSchema,
   slugSchema,
@@ -79,7 +80,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     loadReviews(api, book.slug, reviewQuery),
   ])
   const viewer = session.viewer
-  const myReview = viewer ? await loadMyReview(api, book.slug) : null
+  const [myReview, votedReviewIds] = viewer
+    ? await Promise.all([loadMyReview(api, book.slug), loadVotedReviewIds(api, book.slug)])
+    : [null, []]
 
   const authors = groupContributors(book.contributions)
     .find((group) => group.role === 'author')
@@ -100,6 +103,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     viewer,
     myReview,
     reviews,
+    votedReviewIds,
     reviewQuery,
     canonicalUrl,
     metaDescription,
@@ -121,6 +125,18 @@ async function loadReviews(
   } catch (error) {
     logger.warn({ err: error }, 'could not load reviews')
     return null
+  }
+}
+
+// Without the list, the buttons just start unpressed.
+async function loadVotedReviewIds(api: ReturnType<typeof apiClientFor>, slug: string) {
+  try {
+    const response = await api.get(`/v1/books/${slug}/helpful-votes`)
+    if (!response.ok) return []
+    return myHelpfulVotesResponseSchema.parse(await response.json()).reviewIds
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load helpful votes')
+    return []
   }
 }
 
@@ -203,6 +219,7 @@ export default function Book({ loaderData }: Route.ComponentProps) {
       myReview={loaderData.myReview}
       reviews={loaderData.reviews}
       reviewQuery={loaderData.reviewQuery}
+      votedReviewIds={loaderData.votedReviewIds}
     />
   )
 }

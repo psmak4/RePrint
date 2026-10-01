@@ -8,7 +8,9 @@ import {
   deleteMyReviewResponseSchema,
   type HelpfulVoteResponse,
   helpfulVoteResponseSchema,
+  type MyHelpfulVotesResponse,
   type MyReview,
+  myHelpfulVotesResponseSchema,
   myReviewSchema,
   nextReviewStatus,
   type ReviewStatus,
@@ -291,6 +293,25 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
           inserted.length > 0 ? await bumpHelpful(tx, review.id, 1) : review.helpfulCount
         return { helpful: true, helpfulCount }
       })
+    },
+  )
+
+  // Private to the Member, so it stays out of the public cached review list.
+  app.get(
+    '/books/:slug/helpful-votes',
+    {
+      preHandler: [requireAuth],
+      schema: { params: slugParamsSchema, response: { 200: myHelpfulVotesResponseSchema } },
+    },
+    async (request): Promise<MyHelpfulVotesResponse> => {
+      if (!db || !request.auth) throw new Error('review routes need a database')
+      const bookId = await bookIdFor(request.params.slug)
+      const rows = await db
+        .select({ reviewId: helpfulVotes.reviewId })
+        .from(helpfulVotes)
+        .innerJoin(reviews, eq(reviews.id, helpfulVotes.reviewId))
+        .where(and(eq(helpfulVotes.userId, request.auth.user.id), eq(reviews.bookId, bookId)))
+      return { reviewIds: rows.map((row) => row.reviewId) }
     },
   )
 

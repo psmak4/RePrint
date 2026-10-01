@@ -1,7 +1,13 @@
-import { type BookReviewsResponse, type PublicReview, REVIEW_SORTS } from '@reprint/shared'
+import {
+  type BookReviewsResponse,
+  type PublicReview,
+  REVIEW_SORTS,
+  type Viewer,
+} from '@reprint/shared'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
+import { HelpfulVote } from './helpful-vote.js'
 import { SpoilerToggle } from './spoiler-toggle.js'
 
 const text = copy.reviews.list
@@ -26,7 +32,15 @@ export function ReviewBody({ body }: { body: string }) {
   )
 }
 
-function ReviewItem({ review }: { review: PublicReview }) {
+function ReviewItem({
+  review,
+  viewer,
+  voted,
+}: {
+  review: PublicReview
+  viewer: Viewer | null
+  voted: boolean
+}) {
   const body = <ReviewBody body={review.body} />
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4">
@@ -45,9 +59,12 @@ function ReviewItem({ review }: { review: PublicReview }) {
         <time dateTime={review.submittedAt}>{dateFormat.format(new Date(review.submittedAt))}</time>
       </p>
       {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
-      {review.helpfulCount > 0 ? (
-        <p className="text-sm text-muted-foreground">{text.helpful(review.helpfulCount)}</p>
-      ) : null}
+      <HelpfulVote
+        reviewId={review.id}
+        count={review.helpfulCount}
+        voted={voted}
+        canVote={viewer?.verified === true && viewer.username !== review.author.username}
+      />
     </li>
   )
 }
@@ -148,11 +165,15 @@ export function ReviewsList({
   reviews,
   query,
   hasAnyReviews,
+  viewer = null,
+  votedReviewIds = [],
 }: {
   slug: string
   reviews: BookReviewsResponse | null
   query: ReviewListQuery
   hasAnyReviews: boolean
+  viewer?: Viewer | null
+  votedReviewIds?: string[]
 }) {
   return (
     <section id="reviews" aria-labelledby="reviews-heading" className="flex flex-col gap-4">
@@ -173,7 +194,12 @@ export function ReviewsList({
           ) : (
             <ul className="flex flex-col gap-4">
               {reviews.items.map((review) => (
-                <ReviewItem key={review.id} review={review} />
+                <ReviewItem
+                  key={review.id}
+                  review={review}
+                  viewer={viewer}
+                  voted={votedReviewIds.includes(review.id)}
+                />
               ))}
             </ul>
           )}
