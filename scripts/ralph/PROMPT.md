@@ -68,7 +68,7 @@ Walk through the task's `Accept:` bullets one at a time, and prove each by runni
 3. Open the PR with `gh pr create`.
    - Title: `[<task id>] <task title>`.
    - Body: summary; PRD sections covered; how each `Accept:` bullet was verified; any new tasks or decisions added.
-4. Wait for CI with `gh pr checks --watch`.
+4. Wait for CI with `gh pr checks <PR number> --watch` **in the foreground** (Bash timeout 600000 ms). CI runs one job at a time on a self-hosted runner (D-113), so it often takes 15–25 minutes: when the command times out, run it again until every check has finished. Never wait in the background or end your turn to "wait for a notification". This is a non-interactive run, so ending your turn ends the session and the task is lost.
    - If CI fails, fix it and push. Allow up to 3 fix rounds.
    - If the repo has no CI checks yet (early M1), local `pnpm check` is the gate.
 5. When the checks are green, run `scripts/ralph/merge-pr.sh <PR number>`. It re-checks that every required job in `docs/ci.md` passed on the PR's head commit, then squash-merges and deletes the branch. If it refuses, fix what it reports (counts as a fix round). Confirm it printed `MERGED`.
