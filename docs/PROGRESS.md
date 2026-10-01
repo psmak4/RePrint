@@ -353,3 +353,7 @@ Entry format:
 - `DecisionPanel` and `VersionComparison` in `apps/web/app/components/admin/review-decision.tsx`, wired into `ReviewDetail`; `A`/`R` shortcuts live in the panel and `J`/`K` in `ReviewQueue`; the `/admin/reviews` route now has an `action` that POSTs approve and reject (JSON) to the API. Copy under `copy.admin.reviews`. Component tests in `review-queue.test.tsx` (with axe), action tests in `admin-reviews.test.ts`. D-127 records the choices.
 - Next iteration: M4-T13 (`/admin` dashboard; `/admin` still redirects to the review queue). M4-T15 e2e can click Approve/Reject by role name ("Approve", "Reject", then "Reject review"). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+### 2026-10-01 · M4-T13 · PR pending
+- `/admin` is now the moderation dashboard (`routes/admin-index.tsx`, `components/admin/moderation-dashboard.tsx`): pending count and oldest age from `/v1/mod/stats`, a placeholder open-reports card for M7, and a "Dashboard" nav link. Loader tests in `admin-index.test.ts` (Moderator allowed, Member and Visitor denied, API failure), component tests (with axe) in `moderation-dashboard.test.tsx`. D-128 records the choices.
+- Next iteration: M4-T14 (seed reviews in every status). M7 fills the reports card. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

@@ -868,3 +868,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.10 names the actions, phrases, and shortcuts without the phrase list, what `R` does, or where the page goes next.
 - Affects: M4-T13, M4-T15
 
+### D-128 · Moderation dashboard (M4-T13)
+- Status: Implementation
+- Decision: (1) `/admin` (the admin index route) shows the dashboard to holders of `reviews.moderate`; it loads `GET /v1/mod/stats` and shows the Pending count and the age of the oldest Pending review (same "N hours" wording as the queue). (2) The nav gets a "Dashboard" link (exact match) ahead of "Review queue" for the same permission. (3) The open-reports card is a placeholder with a dash and "Reports are not available yet." until M7 adds report counts and the oldest report age. Other admin permissions (such as `users.view` alone) still open the area but have no dashboard until their pages exist, so `/admin` answers them with 403.
+- Why: PRD §7.10 describes the dashboard's contents but not who sees it or what the reports card shows before reports exist.
+- Affects: M4-T16, M7-T03
+

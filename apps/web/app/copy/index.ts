@@ -423,6 +423,17 @@ export const copy = {
     navLabel: 'Administration sections',
     navToggle: 'Admin menu',
     reviewsNav: 'Review queue',
+    dashboardNav: 'Dashboard',
+    dashboard: {
+      title: 'Moderation dashboard',
+      loadFailed: 'We could not load the moderation dashboard. Please try again in a moment.',
+      pendingLabel: 'Pending reviews',
+      oldest: (age: string) => `Oldest has waited ${age}`,
+      nothingWaiting: 'No reviews are waiting.',
+      openQueue: 'Open the review queue',
+      reportsLabel: 'Open reports',
+      reportsUnavailable: 'Reports are not available yet.',
+    },
     reviews: {
       title: 'Review queue',
       listLabel: 'Pending reviews',

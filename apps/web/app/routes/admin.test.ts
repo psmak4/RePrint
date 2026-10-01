@@ -4,7 +4,6 @@ const loadSession = vi.fn()
 vi.mock('../lib/auth.server.js', () => ({ loadSession: (r: Request) => loadSession(r) }))
 
 import { loader, meta } from './admin.js'
-import { loader as indexLoader } from './admin-index.js'
 
 const args = { request: new Request('https://reprint.test/admin/reviews') } as never
 const viewer = (permissions: string[]) => ({
@@ -37,7 +36,10 @@ describe('admin layout loader', () => {
   it('lists the review queue for a Moderator', async () => {
     loadSession.mockResolvedValue(viewer(['reviews.moderate']))
     expect(await loader(args)).toEqual({
-      items: [{ to: '/admin/reviews', label: 'Review queue' }],
+      items: [
+        { to: '/admin', label: 'Dashboard' },
+        { to: '/admin/reviews', label: 'Review queue' },
+      ],
     })
   })
 
@@ -48,20 +50,5 @@ describe('admin layout loader', () => {
 
   it('is noindex', () => {
     expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
-  })
-})
-
-describe('admin index loader', () => {
-  it('sends a Moderator to the review queue', async () => {
-    loadSession.mockResolvedValue(viewer(['reviews.moderate']))
-    const error = (await thrown(() => indexLoader(args))) as Response
-    expect(error.status).toBe(302)
-    expect(error.headers.get('location')).toBe('/admin/reviews')
-  })
-
-  it('refuses a Member', async () => {
-    loadSession.mockResolvedValue(viewer([]))
-    const error = (await thrown(() => indexLoader(args))) as { init?: { status?: number } }
-    expect(error.init?.status).toBe(403)
   })
 })
