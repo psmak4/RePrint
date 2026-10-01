@@ -339,7 +339,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: moderators cannot decide their own reviews (403) or reviews claimed by someone else (409) (integration tests)
   - Accept: the author gets an in-app notification and, if enabled, the review decision email (integration test with Mailpit)
   - Accept: every decision writes an `audit_log` row
-- [ ] M4-T08 · Web: star rating input and spoiler toggle components · deps: M1-T12 · PRD: §7.6, §11, §12
+- [x] M4-T08 · Web: star rating input and spoiler toggle components · deps: M1-T12 · PRD: §7.6, §11, §12
   - Accept: `StarRatingInput` is a radio group operable with arrow keys and labelled "N stars" (component tests with keyboard events)
   - Accept: `SpoilerToggle` hides content behind a "Show spoilers" button with `aria-expanded` and a text alternative (component tests)
   - Accept: axe finds no serious or critical issues in either component (component-level axe check)

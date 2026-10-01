@@ -141,6 +141,17 @@ export const copy = {
       loadFailed: "We couldn't load this book right now. Please try again in a moment.",
     },
   },
+  reviews: {
+    starRating: {
+      groupLabel: 'Your rating',
+      starLabel: (n: number) => `${n} ${n === 1 ? 'star' : 'stars'}`,
+    },
+    spoilers: {
+      notice: 'This review contains spoilers.',
+      show: 'Show spoilers',
+      hide: 'Hide spoilers',
+    },
+  },
   author: {
     photoAlt: (name: string) => `Photo of ${name}`,
     born: (year: string) => `Born ${year}`,

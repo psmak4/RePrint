@@ -837,3 +837,8 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.10 and §7.12 name the actions, notification, and email but not the response shape, the reason limit, claim-less decisions, or what happens when the email cannot be queued.
 - Affects: M4-T11, M4-T12, M7-T02
 
+### D-123 · Review input components and `axe-core` in component tests (M4-T08)
+- Status: Implementation
+- Decision: (1) `StarRatingInput` is a controlled `role="radiogroup"` of five native radio inputs (Biome requires native elements) with a visible star glyph: one star is tabbable, and an explicit key handler (arrows, Home/End, wrap-around) moves focus and selects so it behaves the same in jsdom tests; each is labelled "N stars". (2) `SpoilerToggle` renders its children only while open, so hidden text is not in the accessibility tree. (3) `axe-core@^4` is added to `apps/web` devDependencies for the component-level axe checks; it is already the engine behind `@axe-core/playwright` (PRD §8, §12), so no new vendor. jsdom logs a harmless "HTMLCanvasElement getContext not implemented" notice from axe.
+- Why: PRD §7.6 and §11 require a radio group operable by keyboard and spoilers behind a "Show spoilers" button, and M4-T08 requires a component-level axe check; the PRD does not say how.
+- Affects: M4-T09, M4-T10
