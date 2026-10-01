@@ -3,6 +3,8 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  bookReviewsQuerySchema,
+  bookReviewsResponseSchema,
   deleteMyReviewResponseSchema,
   myReviewSchema,
   reviewInputSchema,
@@ -17,6 +19,7 @@ import { failed, loadSession, sendToApi } from '../lib/auth.server.js'
 import { groupContributors } from '../lib/contributors.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { logger } from '../lib/logger.server.js'
+import type { ReviewListQuery } from '../lib/review-links.js'
 import type { Route } from './+types/book'
 
 const MORE_BY_AUTHOR_LIMIT = 6
@@ -59,10 +62,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const book = bookDetailSchema.parse(await response.json())
 
   const byline = groupContributors(book.contributions)[0]?.people[0]
-  const [editions, moreByAuthor, session] = await Promise.all([
+  const url = new URL(request.url)
+  const parsedQuery = bookReviewsQuerySchema.safeParse({
+    sort: url.searchParams.get('sort') || undefined,
+    rating: url.searchParams.get('rating') || undefined,
+    page: url.searchParams.get('page') || undefined,
+  })
+  const reviewQuery: ReviewListQuery = parsedQuery.success
+    ? { sort: parsedQuery.data.sort, rating: parsedQuery.data.rating, page: parsedQuery.data.page }
+    : { sort: 'most_helpful', page: 1 }
+
+  const [editions, moreByAuthor, session, reviews] = await Promise.all([
     loadEditions(api, book.slug),
     byline ? loadMoreByAuthor(api, byline.slug, book.id) : null,
     loadSession(request),
+    loadReviews(api, book.slug, reviewQuery),
   ])
   const viewer = session.viewer
   const myReview = viewer ? await loadMyReview(api, book.slug) : null
@@ -79,7 +93,35 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     : copy.books.page.metaDescription(book.title, authors ?? '')
   const canonicalUrl = new URL(`/books/${book.slug}`, request.url).toString()
 
-  return { book, editions, moreByAuthor, viewer, myReview, canonicalUrl, metaDescription }
+  return {
+    book,
+    editions,
+    moreByAuthor,
+    viewer,
+    myReview,
+    reviews,
+    reviewQuery,
+    canonicalUrl,
+    metaDescription,
+  }
+}
+
+// The list is an extra: if it fails, the rest of the page still renders with a short notice.
+async function loadReviews(
+  api: ReturnType<typeof apiClientFor>,
+  slug: string,
+  query: ReviewListQuery,
+) {
+  try {
+    const params = new URLSearchParams({ sort: query.sort, page: String(query.page) })
+    if (query.rating) params.set('rating', String(query.rating))
+    const response = await api.get(`/v1/books/${slug}/reviews?${params}`)
+    if (!response.ok) return null
+    return bookReviewsResponseSchema.parse(await response.json())
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load reviews')
+    return null
+  }
 }
 
 // A Member without a Review gets 404 (D-118); any other failure just hides the panel's "your review" part.
@@ -159,6 +201,8 @@ export default function Book({ loaderData }: Route.ComponentProps) {
       moreByAuthor={loaderData.moreByAuthor}
       viewer={loaderData.viewer}
       myReview={loaderData.myReview}
+      reviews={loaderData.reviews}
+      reviewQuery={loaderData.reviewQuery}
     />
   )
 }

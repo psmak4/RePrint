@@ -347,7 +347,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the form uses React Hook Form with the shared schema (rating, headline counter, body 50–10,000 counter, spoilers checkbox, optional Edition read) and shows server errors (component tests)
   - Accept: the book page shows "Write a review" or the viewer's own review with its status; rejected reviews show the reason and can be edited and resubmitted (component tests)
   - Accept: delete asks for confirmation and removes the review; unverified Members see a verify prompt instead of the form
-- [ ] M4-T10 · Web: rating summary chart and approved reviews list · deps: M4-T09, M4-T05 · PRD: §7.4, §7.6, §11
+- [x] M4-T10 · Web: rating summary chart and approved reviews list · deps: M4-T09, M4-T05 · PRD: §7.4, §7.6, §11
   - Accept: the rating summary shows average (one decimal), count, and a 5-bar distribution with a text alternative; clicking a bar filters the list (component tests)
   - Accept: the list supports sort, star filter, and pagination (10) via URL params; spoiler reviews are hidden behind the toggle; body text renders as paragraphs with links not clickable (component tests)
 - [ ] M4-T11 · Web: admin area shell and moderation review queue with claims · deps: M4-T06, M1-T12 · PRD: §7.10, §11

@@ -340,3 +340,7 @@ Entry format:
 - `MyReviewSection` and `ReviewForm` in `apps/web/app/components/reviews/` (React Hook Form + `reviewInputSchema`, counters, Edition select, server errors, status badge, rejection reason, inline delete confirmation, verify and login prompts); the Book route loader now returns `viewer` and `myReview`, and its `action` saves or deletes through the API. Component tests in `my-review-section.test.tsx`, loader and action tests in `book.test.ts`. D-124 records the choices.
 - Next iteration: M4-T10 (rating summary chart and approved reviews list). The Book page has no reviews list yet; it should load `GET /v1/books/:slug/reviews` in the loader using URL params (`sort`, `rating`, `page`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-10-01 · M4-T10 · PR pending
+- `RatingSummary` and `ReviewsList` in `apps/web/app/components/reviews/` (5-bar distribution as filter links with a text alternative; sort/filter form; paragraphs, spoiler toggle, Previous/Next paging at 10); `lib/review-links.ts` builds the URLs; the Book loader reads `sort`/`rating`/`page` and loads the reviews. Component tests (with axe) in `reviews-list.test.tsx`, loader tests in `book.test.ts`. D-125 records the choices.
+- Next iteration: M4-T11 (admin shell and moderation queue). M5-T02 adds the helpful button to `ReviewItem` in `reviews-list.tsx`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
