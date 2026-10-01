@@ -335,3 +335,8 @@ Entry format:
 ### 2026-10-01 · M4-T08 · PR pending
 - `apps/web/app/components/reviews/star-rating-input.tsx` and `spoiler-toggle.tsx`, copy under `copy.reviews`, component tests (keyboard, aria, axe) in `reviews-components.test.tsx`. `axe-core` added to `apps/web` devDependencies. D-123 records the choices.
 - Next iteration: M4-T09 (review form and "my review" panel). `StarRatingInput` takes `value`/`onChange` (works with React Hook Form `Controller`), plus `labelledBy`, `describedBy`, `invalid`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T09 · PR pending
+- `MyReviewSection` and `ReviewForm` in `apps/web/app/components/reviews/` (React Hook Form + `reviewInputSchema`, counters, Edition select, server errors, status badge, rejection reason, inline delete confirmation, verify and login prompts); the Book route loader now returns `viewer` and `myReview`, and its `action` saves or deletes through the API. Component tests in `my-review-section.test.tsx`, loader and action tests in `book.test.ts`. D-124 records the choices.
+- Next iteration: M4-T10 (rating summary chart and approved reviews list). The Book page has no reviews list yet; it should load `GET /v1/books/:slug/reviews` in the loader using URL params (`sort`, `rating`, `page`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

@@ -63,7 +63,7 @@ export type ApiPostResult =
  */
 export async function sendToApi(
   request: Request,
-  method: 'POST' | 'PATCH' | 'DELETE',
+  method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
   path: string,
   body: unknown,
   fallback: string,

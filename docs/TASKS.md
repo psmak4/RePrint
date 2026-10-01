@@ -343,7 +343,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `StarRatingInput` is a radio group operable with arrow keys and labelled "N stars" (component tests with keyboard events)
   - Accept: `SpoilerToggle` hides content behind a "Show spoilers" button with `aria-expanded` and a text alternative (component tests)
   - Accept: axe finds no serious or critical issues in either component (component-level axe check)
-- [ ] M4-T09 · Web: write/edit review form and "my review" panel on the book page · deps: M4-T08, M4-T04, M3-T18 · PRD: §7.4, §7.6
+- [x] M4-T09 · Web: write/edit review form and "my review" panel on the book page · deps: M4-T08, M4-T04, M3-T18 · PRD: §7.4, §7.6
   - Accept: the form uses React Hook Form with the shared schema (rating, headline counter, body 50–10,000 counter, spoilers checkbox, optional Edition read) and shows server errors (component tests)
   - Accept: the book page shows "Write a review" or the viewer's own review with its status; rejected reviews show the reason and can be edited and resubmitted (component tests)
   - Accept: delete asks for confirmation and removes the review; unverified Members see a verify prompt instead of the form

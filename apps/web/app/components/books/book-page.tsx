@@ -1,8 +1,9 @@
-import type { BookDetail, BookSummary, Edition } from '@reprint/shared'
+import type { BookDetail, BookSummary, Edition, MyReview, Viewer } from '@reprint/shared'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { groupContributors } from '../../lib/contributors.js'
+import { MyReviewSection } from '../reviews/my-review-section.js'
 import { Cover } from './cover.js'
 import { RatingDisplay } from './rating-display.js'
 
@@ -17,10 +18,14 @@ export function BookPage({
   book,
   editions,
   moreByAuthor,
+  viewer = null,
+  myReview = null,
 }: {
   book: BookDetail
   editions: Edition[]
   moreByAuthor: MoreByAuthor | null
+  viewer?: Viewer | null
+  myReview?: MyReview | null
 }) {
   return (
     <article className="flex flex-col gap-8">
@@ -28,6 +33,7 @@ export function BookPage({
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="flex flex-col gap-8 lg:col-span-8">
           <Description text={book.description} />
+          <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
         </div>
         <aside className="flex flex-col gap-8 lg:col-span-4">
           <EditionsList editions={editions} />
