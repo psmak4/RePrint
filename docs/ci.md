@@ -26,7 +26,7 @@ Later tasks add jobs here as their commands appear. Each one must also be added 
 
 ## Where CI runs
 
-All jobs run on the owner's self-hosted runner (label `reprint-ci`), not GitHub-hosted runners (D-113). Setup, isolation, and troubleshooting: `docs/ci-runner.md`. If a PR's checks sit in "Queued", the runner is offline.
+All jobs run on GitHub-hosted `ubuntu-latest` runners (D-119). The repo is public while the app is being built, so these minutes are free. If the repo goes private again and minutes run short, switch to the self-hosted runner described in `docs/ci-runner.md` (D-113). Never use a self-hosted runner while the repo is public.
 
 ## `pnpm check`
 
