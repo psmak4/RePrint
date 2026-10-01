@@ -366,7 +366,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T15 · E2E: write, edit, and delete a review; moderate a review · deps: M4-T12, M4-T10, M4-T14 · PRD: §12
   - Accept: `e2e/reviews.spec.ts` writes a review, edits it, and deletes it as a verified Member, with axe checks
   - Accept: `e2e/moderation.spec.ts` has a Moderator approve one review and reject another with a reason; the author sees the result and notification
-- [ ] M4-T16 · M4 verification: run the Reviews acceptance criteria end to end, fix gaps, update docs · deps: M4-T13, M4-T15 · PRD: §3, §7.6, §7.10
+- [x] M4-T16 · M4 verification: run the Reviews acceptance criteria end to end, fix gaps, update docs · deps: M4-T13, M4-T15 · PRD: §3, §7.6, §7.10
   - Accept: `pnpm check` and `pnpm test:e2e` pass
   - Accept: every acceptance criterion in `docs/milestones/M4-reviews.md` is checked off in the PR body with the command that proved it
 
