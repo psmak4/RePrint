@@ -8,6 +8,7 @@ import {
   passwordChangedProps,
   passwordResetProps,
   renderEmail,
+  reviewDecisionProps,
   verifyEmailProps,
 } from '@reprint/email'
 import type { Logger } from 'pino'
@@ -79,6 +80,7 @@ export const emailSendPayload = z.discriminatedUnion('template', [
     to: z.email(),
     props: accountDeletionScheduledProps,
   }),
+  z.object({ template: z.literal('review-decision'), to: z.email(), props: reviewDecisionProps }),
 ])
 
 /** Every background job. To add one, add an entry here (see `README.md`). */
