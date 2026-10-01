@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { BookReviewsResponse, PublicReview } from '@reprint/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
@@ -29,7 +30,12 @@ const page = (items: PublicReview[], totalPages = 1): BookReviewsResponse => ({
 const base: ReviewListQuery = { sort: 'most_helpful', page: 1 }
 
 function renderInRouter(node: React.ReactNode) {
-  const Stub = createRoutesStub([{ path: '/books/:slug', Component: () => node }])
+  const Stub = createRoutesStub([
+    {
+      path: '/books/:slug',
+      Component: () => <QueryClientProvider client={new QueryClient()}>{node}</QueryClientProvider>,
+    },
+  ])
   return render(<Stub initialEntries={['/books/dune']} />)
 }
 

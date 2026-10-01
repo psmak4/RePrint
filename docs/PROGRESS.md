@@ -372,3 +372,7 @@ Entry format:
 ### 2026-10-01 · M5-T01 · PR pending
 - `helpful_votes` table (migration 0009), `POST/DELETE /v1/reviews/:id/helpful` in `modules/reviews/routes.ts`, `helpfulVoteResponseSchema` in `packages/shared`, and the `accounts.erase` fix that lowers `helpful_count` before the votes cascade. Integration tests in `reviews/helpful.integration.test.ts` and `accounts/deletion.integration.test.ts`; route-coverage table extended. D-131 records the choices.
 - Next iteration: M5-T02 (web helpful button). The response is `{ helpful, helpfulCount }`; the book-reviews list does not yet say whether the viewer voted, so M5-T02 needs a viewer-vote field on `GET /v1/books/:slug/reviews` (it is a public cached route, so consider a separate authenticated lookup). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T02 · PR pending
+- `HelpfulVote` (`components/reviews/helpful-vote.tsx`) with an optimistic TanStack Query mutation and rollback; web resource route `routes/review-helpful.tsx`; `QueryClientProvider` in the root `App`; `@tanstack/react-query` added to `apps/web`. New API `GET /v1/books/:slug/helpful-votes` feeds the viewer's votes into the Book loader. Tests in `helpful-vote.test.tsx`, `review-helpful.test.ts`, `book.test.ts`, and `helpful.integration.test.ts`. D-132 records the choices.
+- Next iteration: M5-T03 (Genres API). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -1,5 +1,9 @@
 import { books, helpfulVotes, newId, reviews } from '@reprint/db'
-import { helpfulVoteResponseSchema, type ReviewStatus } from '@reprint/shared'
+import {
+  helpfulVoteResponseSchema,
+  myHelpfulVotesResponseSchema,
+  type ReviewStatus,
+} from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -171,5 +175,36 @@ describe('DELETE /v1/reviews/:id/helpful', () => {
     expect((await vote('DELETE', review.id)).statusCode).toBe(401)
     const voter = await member()
     expect((await vote('DELETE', newId(), voter.cookies)).statusCode).toBe(404)
+  })
+})
+
+describe('GET /v1/books/:slug/helpful-votes', () => {
+  it('lists the review IDs the Member marked helpful on a Book', async () => {
+    const { review } = await newReview()
+    const other = await newReview()
+    const voter = await member()
+    await vote('POST', review.id, voter.cookies)
+    await vote('POST', other.review.id, voter.cookies)
+    const [book] = await stack.db.db.select().from(books).where(eq(books.id, review.bookId))
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/v1/books/${book?.slug}/helpful-votes`,
+      cookies: voter.cookies,
+    })
+    expect(response.statusCode).toBe(200)
+    expect(myHelpfulVotesResponseSchema.parse(response.json()).reviewIds).toEqual([review.id])
+  })
+
+  it('denies Visitors and answers 404 for an unknown Book', async () => {
+    const voter = await member()
+    const visitor = await app.inject({ method: 'GET', url: '/v1/books/some-book/helpful-votes' })
+    expect(visitor.statusCode).toBe(401)
+    const unknown = await app.inject({
+      method: 'GET',
+      url: '/v1/books/no-such-book/helpful-votes',
+      cookies: voter.cookies,
+    })
+    expect(unknown.statusCode).toBe(404)
   })
 })

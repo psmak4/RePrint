@@ -188,6 +188,17 @@ describe('book loader for Members', () => {
     expect(result.myReview?.status).toBe('pending')
   })
 
+  it('loads the review IDs the Member marked helpful, and none for a Visitor', async () => {
+    const member = await load((url) => {
+      if (url.pathname === '/v1/auth/session') return Response.json({ signupsOpen: false, viewer })
+      if (url.pathname === '/v1/books/dune-abc123/helpful-votes')
+        return Response.json({ reviewIds: [id(7)] })
+      return respond(url)
+    })
+    expect(member.votedReviewIds).toEqual([id(7)])
+    expect((await load(respond)).votedReviewIds).toEqual([])
+  })
+
   it('has no review for a Member who has not written one, or for a Visitor', async () => {
     const member = await load((url) =>
       url.pathname === '/v1/auth/session'

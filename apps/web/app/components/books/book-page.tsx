@@ -32,6 +32,7 @@ export function BookPage({
   myReview = null,
   reviews = null,
   reviewQuery = { sort: 'most_helpful', page: 1 },
+  votedReviewIds = [],
 }: {
   book: BookDetail
   editions: Edition[]
@@ -40,6 +41,7 @@ export function BookPage({
   myReview?: MyReview | null
   reviews?: BookReviewsResponse | null
   reviewQuery?: ReviewListQuery
+  votedReviewIds?: string[]
 }) {
   return (
     <article className="flex flex-col gap-8">
@@ -54,6 +56,8 @@ export function BookPage({
             reviews={reviews}
             query={reviewQuery}
             hasAnyReviews={book.rating.count > 0}
+            viewer={viewer}
+            votedReviewIds={votedReviewIds}
           />
         </div>
         <aside className="flex flex-col gap-8 lg:col-span-4">
