@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loader, meta } from './book.js'
+import { action, loader, meta } from './book.js'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -127,5 +127,109 @@ describe('book loader', () => {
       throw new Error('down')
     }).catch((thrown) => thrown)
     expect(down.init.status).toBe(502)
+  })
+})
+
+describe('book loader for Members', () => {
+  const viewer = { id: id(5), username: 'ada', displayName: 'Ada', verified: true, permissions: [] }
+  const mine = {
+    id: id(6),
+    rating: 5,
+    headline: null,
+    body: 'x'.repeat(60),
+    hasSpoilers: false,
+    editionId: null,
+    status: 'pending',
+    rejectionReason: null,
+    submittedAt: '2026-10-01T00:00:00.000Z',
+    updatedAt: '2026-10-01T00:00:00.000Z',
+  }
+
+  it('loads the viewer and their review', async () => {
+    const result = await load((url) => {
+      if (url.pathname === '/v1/auth/session') return Response.json({ signupsOpen: false, viewer })
+      if (url.pathname === '/v1/books/dune-abc123/my-review') return Response.json(mine)
+      return respond(url)
+    })
+    expect(result.viewer?.username).toBe('ada')
+    expect(result.myReview?.status).toBe('pending')
+  })
+
+  it('has no review for a Member who has not written one, or for a Visitor', async () => {
+    const member = await load((url) =>
+      url.pathname === '/v1/auth/session'
+        ? Response.json({ signupsOpen: false, viewer })
+        : respond(url),
+    )
+    expect(member.viewer).not.toBeNull()
+    expect(member.myReview).toBeNull()
+    const visitor = await load(respond)
+    expect(visitor.viewer).toBeNull()
+    expect(visitor.myReview).toBeNull()
+  })
+})
+
+describe('book action', () => {
+  const calls: { method: string; url: string; body: unknown }[] = []
+  function act(body: unknown, reply: () => Response) {
+    calls.length = 0
+    vi.stubGlobal('fetch', async (url: URL, init: RequestInit) => {
+      calls.push({
+        method: init.method ?? 'GET',
+        url: String(url),
+        body: init.body ? JSON.parse(String(init.body)) : null,
+      })
+      return reply()
+    })
+    return action({
+      request: new Request('https://reprint.test/books/dune-abc123', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
+      params: { slug: 'dune-abc123' },
+    } as never)
+  }
+  const input = { intent: 'save', rating: 5, body: 'y'.repeat(60), hasSpoilers: false }
+
+  it('saves a review with PUT and no intent field', async () => {
+    const result = await act(input, () => Response.json({}, { status: 201 }))
+    expect(result).toEqual({ saved: true })
+    expect(calls[0]?.method).toBe('PUT')
+    expect(calls[0]?.url).toContain('/v1/books/dune-abc123/my-review')
+    expect(calls[0]?.body).toEqual({ rating: 5, body: 'y'.repeat(60), hasSpoilers: false })
+  })
+
+  it('passes API field errors back to the form', async () => {
+    const result = (await act(input, () =>
+      Response.json(
+        {
+          type: 'about:blank',
+          title: 'Bad',
+          status: 400,
+          detail: 'Bad',
+          errors: [{ path: 'body.editionId', message: 'Pick an Edition of this Book.' }],
+        },
+        { status: 400 },
+      ),
+    )) as { data: unknown; init: { status: number } }
+    expect(result.init.status).toBe(400)
+    expect(result.data).toEqual({ fieldErrors: { editionId: 'Pick an Edition of this Book.' } })
+  })
+
+  it('deletes with DELETE', async () => {
+    const result = await act({ intent: 'delete' }, () =>
+      Response.json({ status: 'review_deleted' }),
+    )
+    expect(result).toEqual({ deleted: true })
+    expect(calls[0]?.method).toBe('DELETE')
+  })
+
+  it('rejects a body that is not a valid review', async () => {
+    const result = (await act({ intent: 'save', rating: 9 }, () => Response.json({}))) as {
+      init: { status: number }
+    }
+    expect(result.init.status).toBe(400)
+    expect(calls).toHaveLength(0)
   })
 })

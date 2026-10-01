@@ -3,12 +3,17 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  deleteMyReviewResponseSchema,
+  myReviewSchema,
+  reviewInputSchema,
   slugSchema,
 } from '@reprint/shared'
 import { data } from 'react-router'
+import { z } from 'zod'
 import { BookPage, type MoreByAuthor } from '../components/books/book-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
+import { failed, loadSession, sendToApi } from '../lib/auth.server.js'
 import { groupContributors } from '../lib/contributors.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { logger } from '../lib/logger.server.js'
@@ -54,10 +59,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const book = bookDetailSchema.parse(await response.json())
 
   const byline = groupContributors(book.contributions)[0]?.people[0]
-  const [editions, moreByAuthor] = await Promise.all([
+  const [editions, moreByAuthor, session] = await Promise.all([
     loadEditions(api, book.slug),
     byline ? loadMoreByAuthor(api, byline.slug, book.id) : null,
+    loadSession(request),
   ])
+  const viewer = session.viewer
+  const myReview = viewer ? await loadMyReview(api, book.slug) : null
 
   const authors = groupContributors(book.contributions)
     .find((group) => group.role === 'author')
@@ -71,7 +79,43 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     : copy.books.page.metaDescription(book.title, authors ?? '')
   const canonicalUrl = new URL(`/books/${book.slug}`, request.url).toString()
 
-  return { book, editions, moreByAuthor, canonicalUrl, metaDescription }
+  return { book, editions, moreByAuthor, viewer, myReview, canonicalUrl, metaDescription }
+}
+
+// A Member without a Review gets 404 (D-118); any other failure just hides the panel's "your review" part.
+async function loadMyReview(api: ReturnType<typeof apiClientFor>, slug: string) {
+  try {
+    const response = await api.get(`/v1/books/${slug}/my-review`)
+    if (!response.ok) return null
+    return myReviewSchema.parse(await response.json())
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load my review')
+    return null
+  }
+}
+
+const reviewActionSchema = z.discriminatedUnion('intent', [
+  reviewInputSchema.extend({ intent: z.literal('save') }),
+  z.object({ intent: z.literal('delete') }),
+])
+
+/** Saves or deletes the viewer's own Review of this Book (PRD §7.6). */
+export async function action({ request, params }: Route.ActionArgs) {
+  const slug = slugSchema.safeParse(params.slug)
+  if (!slug.success) throw data('Not found', { status: 404 })
+  const parsed = reviewActionSchema.safeParse(await request.json().catch(() => null))
+  if (!parsed.success) return data({ formError: copy.reviews.form.failed }, { status: 400 })
+  const path = `/v1/books/${slug.data}/my-review`
+  if (parsed.data.intent === 'delete') {
+    const result = await sendToApi(request, 'DELETE', path, null, copy.reviews.form.failed)
+    if (!result.ok) return failed(result)
+    deleteMyReviewResponseSchema.parse(result.body)
+    return { deleted: true }
+  }
+  const { intent: _intent, ...input } = parsed.data
+  const result = await sendToApi(request, 'PUT', path, input, copy.reviews.form.failed)
+  if (!result.ok) return failed(result)
+  return { saved: true }
 }
 
 // The side lists are extras: if they fail, the Book still renders without them.
@@ -113,6 +157,8 @@ export default function Book({ loaderData }: Route.ComponentProps) {
       book={loaderData.book}
       editions={loaderData.editions}
       moreByAuthor={loaderData.moreByAuthor}
+      viewer={loaderData.viewer}
+      myReview={loaderData.myReview}
     />
   )
 }
