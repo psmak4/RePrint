@@ -326,7 +326,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: PUT creates or edits the viewer's review, sets it Pending, and appends a `review_versions` row; editing an Approved review hides it until re-approved (integration tests)
   - Accept: unverified Members get 403, Visitors get 401, and the 21st create/edit in a day returns 429 (integration tests)
   - Accept: GET returns the viewer's review with status and rejection reason; DELETE removes it permanently and updates aggregates (integration tests)
-- [ ] M4-T05 · `GET /v1/books/:slug/reviews` and the rating summary on the Book response · deps: M4-T04 · PRD: §7.4, §7.6, §10
+- [x] M4-T05 · `GET /v1/books/:slug/reviews` and the rating summary on the Book response · deps: M4-T04 · PRD: §7.4, §7.6, §10
   - Accept: only Approved reviews are listed, 10 per page, with `sort=most_helpful|newest|highest|lowest` (most helpful breaks ties by newest) and a `rating=` filter (integration tests)
   - Accept: `GET /v1/books/:slug` includes average (one decimal), count, and a 5-bar distribution from Approved reviews only (integration test)
 - [ ] M4-T06 · Moderation queue API: `GET /v1/mod/reviews`, claims, `GET /v1/mod/stats` · deps: M4-T05, M4-T03 · PRD: §4, §7.10, §10

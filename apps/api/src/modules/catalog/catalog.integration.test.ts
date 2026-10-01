@@ -83,7 +83,7 @@ describe('GET /v1/books/:slug', () => {
       .where(eq(books.id, bookId))
     const response = await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
     expect(bookDetailSchema.parse(response.json()).rating).toEqual({
-      average: 4.33,
+      average: 4.3,
       count: 3,
       distribution: [0, 0, 1, 1, 1],
     })

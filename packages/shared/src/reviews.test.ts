@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bookReviewsQuerySchema,
   canTransitionReview,
   myReviewSchema,
   nextReviewStatus,
@@ -125,5 +126,27 @@ describe('myReviewSchema', () => {
     expect(myReviewSchema.safeParse(base).success).toBe(true)
     expect(myReviewSchema.safeParse({ ...base, status: 'hidden' }).success).toBe(false)
     expect(myReviewSchema.safeParse({ ...base, rating: 6 }).success).toBe(false)
+  })
+})
+
+describe('bookReviewsQuerySchema', () => {
+  it('defaults to most helpful, 10 per page, no star filter', () => {
+    expect(bookReviewsQuerySchema.parse({})).toEqual({
+      sort: 'most_helpful',
+      page: 1,
+      pageSize: 10,
+    })
+  })
+
+  it('coerces the query string and rejects unknown sorts and out-of-range stars', () => {
+    expect(bookReviewsQuerySchema.parse({ sort: 'lowest', rating: '2', page: '3' })).toMatchObject({
+      sort: 'lowest',
+      rating: 2,
+      page: 3,
+    })
+    expect(bookReviewsQuerySchema.safeParse({ sort: 'oldest' }).success).toBe(false)
+    expect(bookReviewsQuerySchema.safeParse({ rating: '0' }).success).toBe(false)
+    expect(bookReviewsQuerySchema.safeParse({ rating: '6' }).success).toBe(false)
+    expect(bookReviewsQuerySchema.safeParse({ pageSize: '51' }).success).toBe(false)
   })
 })

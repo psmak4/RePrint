@@ -21,6 +21,7 @@ const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
+const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -109,6 +110,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'DELETE /v1/books/{slug}/my-review': {
     allowed: [MY_REVIEW, 'deletes an Approved review permanently'],
     denied: [MY_REVIEW, 'denies Visitors, answers 404 without a review, and leaves'],
+  },
+  'GET /v1/books/{slug}/reviews': {
+    allowed: [BOOK_REVIEWS, 'lists Approved reviews only, with the author'],
+    denied: [BOOK_REVIEWS, 'returns 404 Problem Details for an unknown Book'],
   },
   'GET /v1/me/sessions': {
     allowed: [SESSIONS, 'lists active sessions'],
