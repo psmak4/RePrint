@@ -382,7 +382,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T03 · Genres API: `GET /v1/genres` and `/v1/genres/:slug` · deps: M4-T02, M3-T03 · PRD: §7.5, §10
   - Accept: `/genres` returns the Genre tree; `/genres/:slug` lists Books in the Genre and its child Genres, paginated (integration tests)
   - Accept: `sort=top_rated` uses the weighted average; `most_reviewed` and `newest_review` work (integration tests)
-- [ ] M5-T04 · Series API: `GET /v1/series/:slug` · deps: M3-T10 · PRD: §7.5, §10
+- [x] M5-T04 · Series API: `GET /v1/series/:slug` · deps: M3-T10 · PRD: §7.5, §10
   - Accept: Books are returned in reading order with position (decimal or empty, empty last) and RePrint rating (integration test)
   - Accept: unknown slugs return 404 Problem Details
 - [ ] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5

@@ -20,6 +20,7 @@ const CATALOG = 'modules/catalog/catalog.integration.test.ts'
 const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
 const GENRES = 'modules/catalog/genres.integration.test.ts'
+const SERIES = 'modules/catalog/series.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
@@ -170,6 +171,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/genres/{slug}': {
     allowed: [GENRES, 'lists Books in the Genre and its child Genres'],
     denied: [GENRES, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'GET /v1/series/{slug}': {
+    allowed: [SERIES, 'lists Books in reading order with decimal positions'],
+    denied: [SERIES, 'returns 404 Problem Details for an unknown slug'],
   },
   'GET /v1/search/suggest': {
     allowed: [SEARCH, 'returns Books and Authors from the Catalog'],
