@@ -22,4 +22,8 @@ export default [
     route('profile', 'routes/settings-profile.tsx'),
     route('security', 'routes/settings-security.tsx'),
   ]),
+  route('admin', 'routes/admin.tsx', [
+    index('routes/admin-index.tsx'),
+    route('reviews', 'routes/admin-reviews.tsx'),
+  ]),
 ] satisfies RouteConfig

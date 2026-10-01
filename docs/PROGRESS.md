@@ -344,3 +344,7 @@ Entry format:
 ### 2026-10-01 · M4-T10 · PR pending
 - `RatingSummary` and `ReviewsList` in `apps/web/app/components/reviews/` (5-bar distribution as filter links with a text alternative; sort/filter form; paragraphs, spoiler toggle, Previous/Next paging at 10); `lib/review-links.ts` builds the URLs; the Book loader reads `sort`/`rating`/`page` and loads the reviews. Component tests (with axe) in `reviews-list.test.tsx`, loader tests in `book.test.ts`. D-125 records the choices.
 - Next iteration: M4-T11 (admin shell and moderation queue). M5-T02 adds the helpful button to `ReviewItem` in `reviews-list.tsx`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T11 · PR pending
+- Admin shell (`routes/admin.tsx`, `components/admin/admin-layout.tsx`, `lib/admin.server.ts` `requireViewerPermission`) and the review queue page (`routes/admin-reviews.tsx`, `components/admin/review-queue.tsx`): queue list, `?review=<id>` opens and claims, reviewer history, full text. Loader tests in `admin.test.ts` and `admin-reviews.test.ts`, component tests (with axe) in `review-queue.test.tsx`. D-126 records the choices.
+- Next iteration: M4-T12 (actions, reason picker, side-by-side diff, shortcuts) builds on `ReviewDetail` in `review-queue.tsx`; decisions must POST JSON (`{}` if no reason) to `/v1/mod/reviews/:id/approve|reject`. Pages under `/admin` must call `requireViewerPermission` in their own loader. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
