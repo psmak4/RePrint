@@ -299,3 +299,7 @@ Entry format:
 ### 2026-09-30 · M3-T23 · PR pending
 - M3 verification: no code changes. `pnpm check` (including the vocabulary guard, openapi drift, gitleaks, audit), `pnpm db:reset` (500 Books, 3 merge candidates), and `pnpm test:e2e` (18 passed across chromium, webkit, mobile) all pass. Each M3 acceptance criterion maps to an existing test (listed in the PR body); no gaps found.
 - Next iteration: M4-T01 (Reviews schema and shared review rules). M1-T20 and M1-T22 stay unbuilt while M1-T19/T21 are skipped. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-09-30 · M4-T01 · PR pending
+- `packages/db/src/schema/reviews.ts` (`reviews`, `review_versions`, `review_claims`) and migration `0007_reviews.sql`; `packages/shared/src/reviews.ts` (`reviewInputSchema`, `REVIEW_STATUSES`, `nextReviewStatus`, `canTransitionReview`) with unit tests; `reviews.integration.test.ts` covers the constraints, cascades, and RESTRICT. D-115 records the choices.
+- Next iteration: M4-T02 (ratings and aggregates). It owes the aggregate update on account deletion (D-088). `accounts.erase` already cascades to reviews, so M4-T02 must adjust the Book aggregates there too. After changing `packages/shared`, run `pnpm --filter @reprint/shared build` before `@reprint/db` integration tests (they read `dist`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
