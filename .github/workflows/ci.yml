@@ -1,7 +1,7 @@
 # Job names are the required status checks for `main`. Keep them stable and in sync with docs/ci.md.
-# Jobs run on the owner's self-hosted runner (label `reprint-ci`, D-113): GitHub-hosted minutes for this
-# private repo ran out. Setup and operation: docs/ci-runner.md. To go back to GitHub-hosted runners,
-# change every `runs-on` to `ubuntu-latest` (the e2e job's isolated ports work on either).
+# Jobs run on GitHub-hosted runners (D-119). The repo is public while the app is being built, so standard
+# runners are free. Fallback when minutes are limited again: the self-hosted runner in docs/ci-runner.md
+# (only while the repo is private; never use a self-hosted runner on a public repo).
 name: CI
 
 on:
@@ -25,7 +25,7 @@ env:
 jobs:
   lint:
     name: lint
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -37,7 +37,7 @@ jobs:
 
   typecheck:
     name: typecheck
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -46,7 +46,7 @@ jobs:
 
   db-check:
     name: db-check
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -55,7 +55,7 @@ jobs:
 
   unit:
     name: unit
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -64,7 +64,7 @@ jobs:
 
   integration:
     name: integration
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -73,7 +73,7 @@ jobs:
 
   build:
     name: build
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -83,7 +83,7 @@ jobs:
 
   gitleaks:
     name: gitleaks
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -93,7 +93,7 @@ jobs:
 
   audit:
     name: audit
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
@@ -102,10 +102,10 @@ jobs:
 
   e2e:
     name: e2e
-    runs-on: [self-hosted, reprint-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    # An isolated stack (D-113): its own Compose project and shifted ports, so a local stack or a
-    # loop session on the same machine is never touched.
+    # An isolated stack (D-113): its own Compose project and shifted ports. Harmless on GitHub-hosted
+    # runners, and it keeps the job safe on a shared machine if the self-hosted fallback is used.
     env:
       COMPOSE: docker compose -p reprint-ci -f docker-compose.yml -f docker-compose.ci.yml
       DATABASE_URL: postgres://reprint:reprint@localhost:15432/reprint
@@ -125,7 +125,13 @@ jobs:
       - name: Migrate the database
         run: pnpm db:migrate
       - name: Install Playwright browsers
-        run: pnpm --filter e2e exec playwright install chromium webkit
+        # Linux runners also need WebKit's system libraries (--with-deps); macOS (self-hosted fallback) doesn't.
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            pnpm --filter e2e exec playwright install --with-deps chromium webkit
+          else
+            pnpm --filter e2e exec playwright install chromium webkit
+          fi
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
