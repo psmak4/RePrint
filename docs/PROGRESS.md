@@ -332,3 +332,6 @@ Entry format:
 - `POST /v1/mod/reviews/:id/approve|reject` in `apps/api/src/modules/moderation/routes.ts` (one transaction: version decision, review status, `applyReviewChange`, claim removal, notification, audit); `reviewDecisionRequestSchema`/`reviewDecisionResponseSchema` in `packages/shared`; new `review-decision` email template wired into `email.send`; integration tests in `moderation/decisions.integration.test.ts` and a Mailpit delivery test in `email/email.integration.test.ts`. D-122 records the choices.
 - Next iteration: M4-T08 (web star rating and spoiler toggle components). Decision requests must send a JSON body (`{}` if no reason). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+### 2026-10-01 · M4-T08 · PR pending
+- `apps/web/app/components/reviews/star-rating-input.tsx` and `spoiler-toggle.tsx`, copy under `copy.reviews`, component tests (keyboard, aria, axe) in `reviews-components.test.tsx`. `axe-core` added to `apps/web` devDependencies. D-123 records the choices.
+- Next iteration: M4-T09 (review form and "my review" panel). `StarRatingInput` takes `value`/`onChange` (works with React Hook Form `Controller`), plus `labelledBy`, `describedBy`, `invalid`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
