@@ -897,3 +897,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: (1) The viewer's own votes come from a new authenticated `GET /v1/books/:slug/helpful-votes` (`{ reviewIds }`), loaded in the Book route loader, because the public book-reviews list is cached and shared. (2) The button calls a web resource route (`POST`/`DELETE /reviews/:id/helpful`) that forwards to the API with the session cookie, like the other client-side calls. (3) `QueryClientProvider` lives in the root `App`; the vote state is a per-review query seeded from the loader (`initialData`, infinite stale time) with an optimistic `onMutate` and rollback `onError`. (4) Only verified Members see the button, and not on their own reviews; everyone else still sees "N people found this helpful" when N > 0.
 - Why: PRD §7.6 and §8 fix the behavior and TanStack Query; they leave where the viewer's votes come from open.
 - Affects: M5-T08, M6-T06
+
+### D-133 · Genre endpoints (M5-T03)
+- Status: Implementation
+- Decision: (1) `GET /v1/genres` returns `{ items }`, a tree of every Genre (roots first, each level by name, nesting to any depth). (2) `GET /v1/genres/:slug?sort=&page=` returns the Genre, its parent link, child links, and 20 Books per page (`hasMore`, no total). It covers the Genre and every Genre below it, not only direct children. (3) `top_rated` is `(5 × m + Σ ratings) / (5 + n)` computed in SQL, with `m` the mean over every Book in the Catalog (0 when nothing is rated), so unreviewed Books sit at `m`; `most_reviewed` is `review_count`; `newest_review` is the latest `decided_at` of an Approved review, Books with none last. Ties go to the more reviewed Book, then the Book ID. (4) Both routes are public and use the Catalog plugin's cache headers.
+- Why: PRD §7.5 and §7.6 name the sorts and the weighted average; they leave paging, nesting depth, and tie-breaks open.
+- Affects: M5-T05, M5-T05a, M5-T06
+

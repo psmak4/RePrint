@@ -379,7 +379,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T02 · Web: helpful button with "N people found this helpful" · deps: M5-T01, M4-T10 · PRD: §7.6
   - Accept: the button toggles the vote with an optimistic TanStack Query update and rolls back on error (component tests)
   - Accept: the count text reads "N people found this helpful", and the button is hidden on the viewer's own reviews
-- [ ] M5-T03 · Genres API: `GET /v1/genres` and `/v1/genres/:slug` · deps: M4-T02, M3-T03 · PRD: §7.5, §10
+- [x] M5-T03 · Genres API: `GET /v1/genres` and `/v1/genres/:slug` · deps: M4-T02, M3-T03 · PRD: §7.5, §10
   - Accept: `/genres` returns the Genre tree; `/genres/:slug` lists Books in the Genre and its child Genres, paginated (integration tests)
   - Accept: `sort=top_rated` uses the weighted average; `most_reviewed` and `newest_review` work (integration tests)
 - [ ] M5-T04 · Series API: `GET /v1/series/:slug` · deps: M3-T10 · PRD: §7.5, §10

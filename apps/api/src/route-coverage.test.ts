@@ -19,6 +19,7 @@ const DELETION = 'modules/accounts/deletion.integration.test.ts'
 const CATALOG = 'modules/catalog/catalog.integration.test.ts'
 const FEDERATED = 'modules/catalog/federated-search.integration.test.ts'
 const SEARCH = 'modules/catalog/search.integration.test.ts'
+const GENRES = 'modules/catalog/genres.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
@@ -161,6 +162,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/authors/{slug}': {
     allowed: [CATALOG, 'lists the Author’s Books grouped by Role'],
     denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'GET /v1/genres': {
+    allowed: [GENRES, 'returns the Genre tree with children under their parent'],
+    denied: [GENRES, 'rejects an unknown sort with 400'],
+  },
+  'GET /v1/genres/{slug}': {
+    allowed: [GENRES, 'lists Books in the Genre and its child Genres'],
+    denied: [GENRES, 'returns 404 Problem Details for an unknown slug'],
   },
   'GET /v1/search/suggest': {
     allowed: [SEARCH, 'returns Books and Authors from the Catalog'],

@@ -376,3 +376,8 @@ Entry format:
 ### 2026-10-01 · M5-T02 · PR pending
 - `HelpfulVote` (`components/reviews/helpful-vote.tsx`) with an optimistic TanStack Query mutation and rollback; web resource route `routes/review-helpful.tsx`; `QueryClientProvider` in the root `App`; `@tanstack/react-query` added to `apps/web`. New API `GET /v1/books/:slug/helpful-votes` feeds the viewer's votes into the Book loader. Tests in `helpful-vote.test.tsx`, `review-helpful.test.ts`, `book.test.ts`, and `helpful.integration.test.ts`. D-132 records the choices.
 - Next iteration: M5-T03 (Genres API). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T03 · PR pending
+- `GET /v1/genres` (tree) and `GET /v1/genres/:slug` (Books in the Genre and all Genres below it; `sort=top_rated|most_reviewed|newest_review`, `page`) in `modules/catalog/genres.ts` and `routes.ts`; schemas in `packages/shared/src/genres-api.ts`. Integration tests in `genres.integration.test.ts` (they delete their own `zz-%` Genres because `reset` keeps Genre reference data). D-133 records the choices.
+- Next iteration: M5-T04 (Series API). The weighted-rating SQL in `genres.ts` can be reused by M5-T06's Top rated row. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.
+
