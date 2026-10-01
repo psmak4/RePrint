@@ -9,14 +9,20 @@ import {
   modQueueResponseSchema,
   modStatsSchema,
   REVIEW_CLAIM_MINUTES,
+  type ReviewDecisionResponse,
+  reviewDecisionRequestSchema,
+  reviewDecisionResponseSchema,
   reviewIdParamsSchema,
 } from '@reprint/shared'
 import { and, asc, count, eq, gt, inArray, min, ne, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { HttpProblem } from '../../errors.js'
+import { recordAudit } from '../audit/audit.js'
 import { requirePermission } from '../auth/guards.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { notify } from '../notifications/notify.js'
+import { applyReviewChange } from '../reviews/aggregates.js'
 
 /** Timestamps travel as Postgres text so microseconds survive the round trip through a cursor. */
 const TIMESTAMPTZ_TEXT = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?[+-]\d{2}(:\d{2})?$/
@@ -40,7 +46,8 @@ function decodeCursor(cursor: string): z.infer<typeof cursorPayloadSchema> {
 }
 
 export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
-  const { db } = options
+  const { db, jobs, env } = options
+  const webBase = (env.WEB_URL ?? env.WEB_ORIGINS[0] ?? '').replace(/\/$/, '')
   const moderate = requirePermission('reviews.moderate')
 
   app.get(
@@ -241,6 +248,127 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
       })
     },
   )
+
+  for (const decision of ['approved', 'rejected'] as const) {
+    app.post(
+      `/mod/reviews/:id/${decision === 'approved' ? 'approve' : 'reject'}`,
+      {
+        preHandler: [moderate],
+        schema: {
+          params: reviewIdParamsSchema,
+          body: reviewDecisionRequestSchema,
+          response: { 200: reviewDecisionResponseSchema },
+        },
+      },
+      async (request): Promise<ReviewDecisionResponse> => {
+        if (!db || !request.auth) throw new Error('moderation routes need a database')
+        const moderatorId = request.auth.user.id
+        const reviewId = request.params.id
+        const reason = request.body.reason || null
+
+        const outcome = await db.transaction(async (tx) => {
+          const [review] = await tx
+            .select({
+              id: reviews.id,
+              userId: reviews.userId,
+              bookId: reviews.bookId,
+              rating: reviews.rating,
+              status: reviews.status,
+              bookSlug: books.slug,
+              bookTitle: books.title,
+              username: users.username,
+              email: users.email,
+              emailReviewDecisions: users.emailReviewDecisions,
+            })
+            .from(reviews)
+            .innerJoin(books, eq(books.id, reviews.bookId))
+            .innerJoin(users, eq(users.id, reviews.userId))
+            .where(eq(reviews.id, reviewId))
+            .for('update', { of: reviews })
+          if (!review) throw new HttpProblem(404, 'Review not found.')
+          if (review.userId === moderatorId) {
+            throw new HttpProblem(403, 'You cannot moderate your own Review.')
+          }
+          if (review.status !== 'pending') {
+            throw new HttpProblem(409, 'This Review is no longer waiting for a decision.')
+          }
+          const [claim] = await tx
+            .select({ moderatorId: reviewClaims.moderatorId })
+            .from(reviewClaims)
+            .where(and(eq(reviewClaims.reviewId, reviewId), gt(reviewClaims.expiresAt, sql`now()`)))
+          if (claim && claim.moderatorId !== moderatorId) {
+            throw new HttpProblem(409, 'Another Moderator is handling this Review.')
+          }
+
+          // The newest version is the one under review.
+          const [version] = await tx
+            .select({ id: reviewVersions.id })
+            .from(reviewVersions)
+            .where(eq(reviewVersions.reviewId, reviewId))
+            .orderBy(sql`${reviewVersions.version} desc`)
+            .limit(1)
+          if (!version) throw new Error(`review ${reviewId} has no versions`)
+
+          const decidedAt = new Date()
+          await tx
+            .update(reviewVersions)
+            .set({ status: decision, decidedBy: moderatorId, decisionReason: reason, decidedAt })
+            .where(eq(reviewVersions.id, version.id))
+          await tx
+            .update(reviews)
+            .set({ status: decision, decidedAt, updatedAt: decidedAt })
+            .where(eq(reviews.id, reviewId))
+          await applyReviewChange(
+            tx,
+            review.bookId,
+            { status: 'pending', rating: review.rating },
+            { status: decision, rating: review.rating },
+          )
+          await tx.delete(reviewClaims).where(eq(reviewClaims.reviewId, reviewId))
+          await notify(
+            tx,
+            review.userId,
+            decision === 'approved' ? 'review_approved' : 'review_rejected',
+            {
+              reviewId,
+              bookSlug: review.bookSlug,
+              bookTitle: review.bookTitle,
+              ...(reason ? { reason } : {}),
+            },
+          )
+          await recordAudit(tx, {
+            actorId: moderatorId,
+            action: decision === 'approved' ? 'review.approve' : 'review.reject',
+            targetType: 'review',
+            targetId: reviewId,
+            before: { status: 'pending' },
+            after: { status: decision, ...(reason ? { reason } : {}) },
+            ip: request.ip,
+          })
+          return review
+        })
+
+        if (outcome.emailReviewDecisions && jobs) {
+          try {
+            await jobs.enqueue('email.send', {
+              template: 'review-decision',
+              to: outcome.email,
+              props: {
+                username: outcome.username,
+                bookTitle: outcome.bookTitle,
+                decision,
+                ...(reason ? { reason } : {}),
+                bookUrl: `${webBase}/books/${outcome.bookSlug}`,
+              },
+            })
+          } catch (error) {
+            request.log.error({ err: error }, 'could not queue the review decision email')
+          }
+        }
+        return { reviewId, status: decision }
+      },
+    )
+  }
 
   app.get(
     '/mod/stats',

@@ -23,6 +23,7 @@ const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
+const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -170,6 +171,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'POST /v1/mod/reviews/{id}/claim': {
     allowed: [MOD_QUEUE, 'claims a Pending review for 10 minutes'],
     denied: [MOD_QUEUE, 'denies Members with 403 and Visitors with 401 on every route'],
+  },
+  'POST /v1/mod/reviews/{id}/approve': {
+    allowed: [MOD_DECISIONS, 'approves a Pending review'],
+    denied: [MOD_DECISIONS, 'denies Members with 403 and Visitors with 401 on both routes'],
+  },
+  'POST /v1/mod/reviews/{id}/reject': {
+    allowed: [MOD_DECISIONS, 'rejects with a reason'],
+    denied: [MOD_DECISIONS, 'denies Members with 403 and Visitors with 401 on both routes'],
   },
   'GET /v1/mod/stats': {
     allowed: [MOD_QUEUE, 'reports the pending count and the age of the oldest'],

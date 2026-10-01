@@ -158,6 +158,21 @@ export const claimReviewResponseSchema = z.object({
 })
 export type ClaimReviewResponse = z.infer<typeof claimReviewResponseSchema>
 
+/** The longest reason a Moderator can give with a decision. */
+export const REVIEW_DECISION_REASON_MAX = 500
+
+/** `POST /mod/reviews/:id/approve` and `/reject`; the reason is optional (PRD §7.10). */
+export const reviewDecisionRequestSchema = z
+  .object({ reason: z.string().trim().max(REVIEW_DECISION_REASON_MAX).optional() })
+  .default({})
+export type ReviewDecisionRequest = z.infer<typeof reviewDecisionRequestSchema>
+
+export const reviewDecisionResponseSchema = z.object({
+  reviewId: z.uuid(),
+  status: z.enum(['approved', 'rejected']),
+})
+export type ReviewDecisionResponse = z.infer<typeof reviewDecisionResponseSchema>
+
 /** `GET /mod/stats`: the Pending count and the age of the oldest Pending Review (PRD §7.10). */
 export const modStatsSchema = z.object({
   pendingCount: z.number().int().min(0),

@@ -103,6 +103,30 @@ describe('email.send job', () => {
     expect(detail.Text).toContain(verifyUrl)
   })
 
+  it('delivers a review decision with the moderator reason to Mailpit', async () => {
+    const id = await jobQueue.enqueue('email.send', {
+      template: 'review-decision',
+      to: 'reviewer@example.test',
+      props: {
+        username: 'ada_l',
+        bookTitle: 'Dune',
+        decision: 'rejected',
+        reason: 'Please remove the spoilers.',
+        bookUrl: 'https://www.reprint.test/books/dune',
+      },
+    })
+    const job = await jobQueue.queue.getJob(id)
+    await job?.waitUntilFinished(events, 30_000)
+
+    const [message] = await messagesFor('reviewer@example.test')
+    expect(message?.Subject).toBe('A moderator decided on your review')
+    const detail = (await (await fetch(`${apiUrl}/api/v1/message/${message?.ID}`)).json()) as {
+      Text: string
+    }
+    expect(detail.Text).toContain('Please remove the spoilers.')
+    expect(detail.Text).toContain('https://www.reprint.test/books/dune')
+  })
+
   it('refuses an invalid payload before it is queued', async () => {
     await expect(
       // biome-ignore lint/suspicious/noExplicitAny: deliberately violates the payload type

@@ -22,5 +22,6 @@ export {
   passwordChangedProps,
 } from './templates/password-changed.js'
 export { type PasswordResetProps, passwordResetProps } from './templates/password-reset.js'
+export { type ReviewDecisionProps, reviewDecisionProps } from './templates/review-decision.js'
 export { type VerifyEmailProps, verifyEmailProps } from './templates/verify-email.js'
 export { type EmailProps, type EmailTemplateName, emailTemplates } from './templates.js'

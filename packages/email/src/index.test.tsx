@@ -65,6 +65,24 @@ describe('renderEmail', () => {
     expect(changed.text).toContain('new@example.test')
   })
 
+  it('renders the review-decision template for both decisions', async () => {
+    const base = {
+      username: 'ada_l',
+      bookTitle: 'Dune',
+      bookUrl: 'https://www.reprint.test/b/dune',
+    }
+    const approved = await renderEmail('review-decision', { ...base, decision: 'approved' })
+    expect(approved.subject).toBe('A moderator decided on your review')
+    expect(approved.text).toContain('approved your review of Dune')
+    const rejected = await renderEmail('review-decision', {
+      ...base,
+      decision: 'rejected',
+      reason: 'Off topic.',
+    })
+    expect(rejected.subject).toBe('A moderator decided on your review')
+    expect(rejected.text).toContain('Reason: Off topic.')
+  })
+
   it('renders the account-deletion-scheduled template', async () => {
     const email = await renderEmail('account-deletion-scheduled', {
       username: 'ada_l',

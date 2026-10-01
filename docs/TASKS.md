@@ -334,7 +334,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `POST /mod/reviews/:id/claim` claims for 10 minutes; a claim by another moderator returns 409 until it expires (integration tests)
   - Accept: all `/mod/*` routes require `reviews.moderate` via a preHandler; a Member gets 403 (denied test per route)
   - Accept: `/mod/stats` returns pending count and age of the oldest pending review
-- [ ] M4-T07 · Approve and reject: decisions, notifications, decision emails, audit · deps: M4-T06, M2-T18 · PRD: §4, §7.6, §7.10, §7.12
+- [x] M4-T07 · Approve and reject: decisions, notifications, decision emails, audit · deps: M4-T06, M2-T18 · PRD: §4, §7.6, §7.10, §7.12
   - Accept: `POST /mod/reviews/:id/approve` and `/reject` (optional reason) update status, the version's `decided_by`/`decision_reason`, and aggregates in one transaction (integration tests)
   - Accept: moderators cannot decide their own reviews (403) or reviews claimed by someone else (409) (integration tests)
   - Accept: the author gets an in-app notification and, if enabled, the review decision email (integration test with Mailpit)

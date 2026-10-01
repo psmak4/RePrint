@@ -30,6 +30,11 @@ import {
   passwordResetProps,
   passwordResetSubject,
 } from './templates/password-reset.js'
+import {
+  ReviewDecision,
+  reviewDecisionProps,
+  reviewDecisionSubject,
+} from './templates/review-decision.js'
 import { VerifyEmail, verifyEmailProps, verifyEmailSubject } from './templates/verify-email.js'
 
 /** Every email RePrint sends. To add one, add an entry here and a case in the `email.send` job payload. */
@@ -73,6 +78,11 @@ export const emailTemplates = {
     props: accountDeletionScheduledProps,
     subject: () => accountDeletionScheduledSubject,
     component: AccountDeletionScheduled,
+  },
+  'review-decision': {
+    props: reviewDecisionProps,
+    subject: () => reviewDecisionSubject,
+    component: ReviewDecision,
   },
 } as const
 

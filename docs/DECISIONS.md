@@ -831,3 +831,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.10 and §10 name the endpoints but not the item shape, cursor format, claim conflict behavior, or what the queue shows for the moderator's own reviews.
 - Affects: M4-T07, M4-T11, M7-T01, M7-T02
 
+### D-122 · Approve and reject (M4-T07)
+- Status: Implementation
+- Decision: (1) `POST /v1/mod/reviews/:id/approve` and `/reject` take an optional `reason` (trimmed, up to 500 characters; saved phrases are a client concern, M4-T12) and return `{ reviewId, status }`. One transaction locks the review row, then sets the newest version's `status`, `decided_by`, `decision_reason`, and `decided_at`; sets the review's status and `decided_at`; calls `applyReviewChange`; deletes the claim; inserts the author's `review_approved` or `review_rejected` notification (data: `reviewId`, `bookSlug`, `bookTitle`, and `reason` when given); and writes the `review.approve` or `review.reject` audit row with `request.ip`. (2) Errors: own review 403, unknown ID 404, review not Pending 409, an unexpired claim held by another Moderator 409. Deciding without a claim is allowed, and an expired claim does not block. (3) The decision email (`review-decision` template, one neutral subject for both outcomes, with the reason on a rejection) is queued after the commit when the author's `email_review_decisions` is on; a queue failure is logged and does not undo the decision, as with other emails. The Book link uses `WEB_URL`.
+- Why: PRD §7.10 and §7.12 name the actions, notification, and email but not the response shape, the reason limit, claim-less decisions, or what happens when the email cannot be queued.
+- Affects: M4-T11, M4-T12, M7-T02
+
