@@ -323,3 +323,8 @@ Entry format:
 ### 2026-10-01 · M4-T05 · PR pending
 - `GET /v1/books/:slug/reviews` in `apps/api/src/modules/reviews/routes.ts` (Approved only, four sorts, star filter, 10 per page, cached like other public GETs through the new `catalog/public-cache.ts`); `bookReviewsQuerySchema`, `publicReviewSchema`, and `bookReviewsResponseSchema` in `packages/shared/src/reviews.ts`; the Book response average is now one decimal. Integration tests in `book-reviews.integration.test.ts`; the route is in `route-coverage.test.ts`. D-120 records the choices.
 - Next iteration: M4-T06 (moderation queue API). One full `pnpm check` run showed `ready.integration.test.ts` ("503 when Redis is stopped") fail once with 200, then pass alone and on rerun; it looks flaky (the M4-T03 note saw something similar). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M4-T06 · PR pending
+- `apps/api/src/modules/moderation/routes.ts` (`GET /v1/mod/reviews` with cursor paging, `POST /v1/mod/reviews/:id/claim`, `GET /v1/mod/stats`), registered in `app.ts`; queue, claim, and stats schemas in `packages/shared/src/reviews.ts`; integration tests in `moderation/queue.integration.test.ts`; the three routes are in `route-coverage.test.ts`. D-121 records the choices.
+- Next iteration: M4-T07 (approve and reject). It must check the claim (409 if another Moderator holds an unexpired one), refuse the moderator's own review (403), set `decided_by`/`decision_reason`/`decided_at` on the latest version, call `applyReviewChange` and `recordAudit` in the same transaction, and delete the claim. M7-T01 must fill `reportedCount` in the queue. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

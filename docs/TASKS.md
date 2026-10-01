@@ -329,7 +329,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M4-T05 · `GET /v1/books/:slug/reviews` and the rating summary on the Book response · deps: M4-T04 · PRD: §7.4, §7.6, §10
   - Accept: only Approved reviews are listed, 10 per page, with `sort=most_helpful|newest|highest|lowest` (most helpful breaks ties by newest) and a `rating=` filter (integration tests)
   - Accept: `GET /v1/books/:slug` includes average (one decimal), count, and a 5-bar distribution from Approved reviews only (integration test)
-- [ ] M4-T06 · Moderation queue API: `GET /v1/mod/reviews`, claims, `GET /v1/mod/stats` · deps: M4-T05, M4-T03 · PRD: §4, §7.10, §10
+- [x] M4-T06 · Moderation queue API: `GET /v1/mod/reviews`, claims, `GET /v1/mod/stats` · deps: M4-T05, M4-T03 · PRD: §4, §7.10, §10
   - Accept: the queue lists Pending reviews oldest first with cursor pagination, the reviewer's approved/rejected/reported counts, and the last approved version for edited reviews (integration tests)
   - Accept: `POST /mod/reviews/:id/claim` claims for 10 minutes; a claim by another moderator returns 409 until it expires (integration tests)
   - Accept: all `/mod/*` routes require `reviews.moderate` via a preHandler; a Member gets 403 (denied test per route)

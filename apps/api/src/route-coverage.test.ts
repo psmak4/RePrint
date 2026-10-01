@@ -22,6 +22,7 @@ const SEARCH = 'modules/catalog/search.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
+const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -161,6 +162,18 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'POST /v1/books/resolve': {
     allowed: [RESOLVE, 'stores the Book with its Editions and Authors'],
     denied: [RESOLVE, 'returns 404 Problem Details for an unknown or expired ref'],
+  },
+  'GET /v1/mod/reviews': {
+    allowed: [MOD_QUEUE, 'lists Pending reviews oldest first'],
+    denied: [MOD_QUEUE, 'denies Members with 403 and Visitors with 401 on every route'],
+  },
+  'POST /v1/mod/reviews/{id}/claim': {
+    allowed: [MOD_QUEUE, 'claims a Pending review for 10 minutes'],
+    denied: [MOD_QUEUE, 'denies Members with 403 and Visitors with 401 on every route'],
+  },
+  'GET /v1/mod/stats': {
+    allowed: [MOD_QUEUE, 'reports the pending count and the age of the oldest'],
+    denied: [MOD_QUEUE, 'denies Members with 403 and Visitors with 401 on every route'],
   },
   'POST /v1/me/avatar': {
     allowed: [AVATAR, 'stores a 256 px WebP'],
