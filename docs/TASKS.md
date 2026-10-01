@@ -309,7 +309,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M4 · Reviews
 
-- [ ] M4-T01 · Reviews schema and shared review rules · deps: M3-T02, M2-T01 · PRD: §5.3, §7.6, §9
+- [x] M4-T01 · Reviews schema and shared review rules · deps: M3-T02, M2-T01 · PRD: §5.3, §7.6, §9
   - Accept: migration creates `reviews` (unique (`user_id`, `book_id`), rating check 1–5, status enum), `review_versions`, and `review_claims` with FK cascade from users and indexes; `pnpm db:check` passes
   - Accept: the shared `ReviewInput` schema enforces rating 1–5 integer, headline ≤ 120, body 50–10,000, `hasSpoilers`, and optional `editionId` (unit tests)
   - Accept: a shared status-transition function allows only the PRD transitions (new/edit → pending; pending → approved or rejected; approved → unpublished; rejected or unpublished → pending on edit) (unit tests)
