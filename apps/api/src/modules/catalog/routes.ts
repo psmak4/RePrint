@@ -23,6 +23,7 @@ import { federatedSearch } from '../../catalog/search/federated-search.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { addViewerShelves } from '../library/viewer-shelf.js'
 import { findGenreBySlug, loadGenreBooks, loadGenreLinks, loadGenreTree } from './genres.js'
 import { publicCacheHook } from './public-cache.js'
 import {
@@ -95,7 +96,7 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
     { schema: { querystring: searchQuerySchema, response: { 200: searchResponseSchema } } },
     async (request) => {
       if (!db || !catalog || !redis) throw new Error('search needs a database, Redis, and a Source')
-      return federatedSearch(
+      const result = await federatedSearch(
         {
           db,
           redis,
@@ -108,6 +109,12 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
         },
         request.query,
       )
+      await addViewerShelves(
+        db,
+        request,
+        result.items.flatMap((item) => (item.kind === 'book' ? [item.book] : [])),
+      )
+      return result
     },
   )
 
@@ -134,7 +141,9 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
             request.log.warn({ err: error, bookId: book.id }, 'could not queue book refresh'),
           )
       }
-      return loadBookDetail(db, book)
+      const detail = await loadBookDetail(db, book)
+      await addViewerShelves(db, request, [detail])
+      return detail
     },
   )
 
@@ -200,9 +209,15 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
       if (!db) throw new Error('catalog routes need a database')
       const found = await findSeriesBySlug(db, request.params.slug)
       if (!found) throw new HttpProblem(404, 'We could not find that series.')
+      const items = await loadSeriesEntries(db, found)
+      await addViewerShelves(
+        db,
+        request,
+        items.map((item) => item.book),
+      )
       return {
         series: { slug: found.slug, name: found.name, description: found.description },
-        items: await loadSeriesEntries(db, found),
+        items,
       }
     },
   )

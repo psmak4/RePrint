@@ -936,3 +936,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.7 and §10 name the routes and the one-entry rule; they leave the response shape, whether re-shelving resets the date added, and delete idempotency open.
 - Affects: M6-T02, M6-T04, M6-T08
 
+
+### D-139 · Viewer shelf on Book responses (M6-T02)
+- Status: Implementation
+- Decision: `viewerShelf` (`want_to_read|reading|read|null`, optional) is on the Book summary (search, Series, Discover, and the other lists that reuse it) and on the Book detail. Only `GET /books/:slug`, `/search`, `/series/:slug`, and `/discover` fill it: a signed-in viewer gets the Shelf or `null`, a Visitor gets no field. Genre pages and Author pages do not fill it yet. Discover rows stay cached in Redis without it; the field is added per request. A response filled for a signed-in viewer is `Cache-Control: private, max-age=0, must-revalidate`; Visitor responses stay public. Every response from the public cache hook now adds `Vary: Cookie`, so a shared cache never serves one viewer's copy to another or a Visitor copy to a Member.
+- Why: PRD §7.5 and §7.7 want the current shelf on cards; they leave the field name, Visitor shape, and caching open.
+- Affects: M6-T03

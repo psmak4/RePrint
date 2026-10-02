@@ -2768,6 +2768,21 @@
                               "distribution"
                             ],
                             "additionalProperties": false
+                          },
+                          "viewerShelf": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "want_to_read",
+                                  "reading",
+                                  "read"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -3143,6 +3158,21 @@
                                       "distribution"
                                     ],
                                     "additionalProperties": false
+                                  },
+                                  "viewerShelf": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "want_to_read",
+                                          "reading",
+                                          "read"
+                                        ]
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -3954,6 +3984,21 @@
                         "distribution"
                       ],
                       "additionalProperties": false
+                    },
+                    "viewerShelf": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "want_to_read",
+                            "reading",
+                            "read"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -4565,6 +4610,21 @@
                                     "distribution"
                                   ],
                                   "additionalProperties": false
+                                },
+                                "viewerShelf": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "want_to_read",
+                                        "reading",
+                                        "read"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -4964,6 +5024,21 @@
                               "distribution"
                             ],
                             "additionalProperties": false
+                          },
+                          "viewerShelf": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "want_to_read",
+                                  "reading",
+                                  "read"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -5276,6 +5351,21 @@
                                   "distribution"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "viewerShelf": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "want_to_read",
+                                      "reading",
+                                      "read"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -5534,6 +5624,21 @@
                                   "distribution"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "viewerShelf": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "want_to_read",
+                                      "reading",
+                                      "read"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -5767,6 +5872,21 @@
                                   "distribution"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "viewerShelf": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "want_to_read",
+                                      "reading",
+                                      "read"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -6000,6 +6120,21 @@
                                   "distribution"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "viewerShelf": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "want_to_read",
+                                      "reading",
+                                      "read"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -6326,6 +6461,21 @@
                                     "distribution"
                                   ],
                                   "additionalProperties": false
+                                },
+                                "viewerShelf": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "want_to_read",
+                                        "reading",
+                                        "read"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
