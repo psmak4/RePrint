@@ -11,11 +11,16 @@ const now = '2026-10-01T03:30:00.000Z'
 
 type Stats = Parameters<typeof ModerationDashboard>[0]['stats']
 
-// The dashboard shows report counts from M7-T06; until then the fixtures carry none.
-const noReports = { openReportCount: 0, oldestOpenReportAt: null, oldestOpenReportAgeSeconds: null }
+const noReports: Pick<
+  Stats,
+  'openReportCount' | 'oldestOpenReportAt' | 'oldestOpenReportAgeSeconds'
+> = { openReportCount: 0, oldestOpenReportAt: null, oldestOpenReportAgeSeconds: null }
 
-function renderDashboard(pending: Omit<Stats, keyof typeof noReports>) {
-  const stats: Stats = { ...pending, ...noReports }
+function renderDashboard(
+  pending: Omit<Stats, keyof typeof noReports>,
+  reports: Partial<typeof noReports> = {},
+) {
+  const stats: Stats = { ...pending, ...noReports, ...reports }
   const Stub = createRoutesStub([
     { path: '/admin', Component: () => <ModerationDashboard stats={stats} now={now} /> },
   ])
@@ -41,10 +46,26 @@ describe('ModerationDashboard', () => {
     expect(screen.getByText('No reviews are waiting.')).toBeTruthy()
   })
 
-  it('has a slot for open reports until M7', () => {
+  it('says so when no reports are open', () => {
     renderDashboard({ pendingCount: 0, oldestPendingAt: null, oldestPendingAgeSeconds: null })
-    expect(screen.getByText('Open reports')).toBeTruthy()
-    expect(screen.getAllByText('Reports are not available yet.').length).toBeGreaterThan(0)
+    expect(screen.getByText('Open reports').nextElementSibling?.textContent).toBe('0')
+    expect(screen.getByText('No reports are open.')).toBeTruthy()
+  })
+
+  it('shows the open report count and the age of the oldest report', () => {
+    renderDashboard(
+      { pendingCount: 0, oldestPendingAt: null, oldestPendingAgeSeconds: null },
+      {
+        openReportCount: 5,
+        oldestOpenReportAt: '2026-09-29T03:30:00.000Z',
+        oldestOpenReportAgeSeconds: 172800,
+      },
+    )
+    expect(screen.getByText('Open reports').nextElementSibling?.textContent).toBe('5')
+    expect(screen.getByText('Oldest has waited 2 days')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Open the reports queue' }).getAttribute('href')).toBe(
+      '/admin/reports',
+    )
   })
 
   it('has no serious or critical axe issues', async () => {

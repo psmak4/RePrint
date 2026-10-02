@@ -5,7 +5,7 @@ import { ageText } from './review-queue.js'
 
 const text = copy.admin.dashboard
 
-/** Counts and oldest-item ages for each moderation queue (PRD §7.10). Reports are filled in by M7. */
+/** Counts and oldest-item ages for each moderation queue (PRD §7.10). */
 export function ModerationDashboard({ stats, now }: { stats: ModStats; now: string }) {
   return (
     <section aria-labelledby="dashboard-heading" className="flex flex-col gap-4">
@@ -29,8 +29,17 @@ export function ModerationDashboard({ stats, now }: { stats: ModStats; now: stri
         </div>
         <div className="rounded-md border border-border p-4">
           <dt className="text-sm text-muted-foreground">{text.reportsLabel}</dt>
-          <dd className="mt-1 text-3xl font-semibold">{'–'}</dd>
-          <dd className="mt-1 text-sm text-muted-foreground">{text.reportsUnavailable}</dd>
+          <dd className="mt-1 text-3xl font-semibold">{stats.openReportCount}</dd>
+          <dd className="mt-1 text-sm text-muted-foreground">
+            {stats.oldestOpenReportAt
+              ? text.oldest(ageText(stats.oldestOpenReportAt, now))
+              : text.nothingReported}
+          </dd>
+          <dd className="mt-3 text-sm">
+            <Link to="/admin/reports" className="underline">
+              {text.openReports}
+            </Link>
+          </dd>
         </div>
       </dl>
     </section>

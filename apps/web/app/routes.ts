@@ -10,6 +10,7 @@ export default [
   route('books/:slug', 'routes/book.tsx'),
   route('books/:slug/shelf', 'routes/book-shelf.tsx'),
   route('reviews/:id/helpful', 'routes/review-helpful.tsx'),
+  route('reviews/:id/report', 'routes/review-report.tsx'),
   route('authors/:slug', 'routes/author.tsx'),
   route('genres', 'routes/genres.tsx'),
   route('genres/:slug', 'routes/genre.tsx'),
@@ -33,5 +34,6 @@ export default [
   route('admin', 'routes/admin.tsx', [
     index('routes/admin-index.tsx'),
     route('reviews', 'routes/admin-reviews.tsx'),
+    route('reports', 'routes/admin-reports.tsx'),
   ]),
 ] satisfies RouteConfig

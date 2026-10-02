@@ -463,7 +463,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: suspensions with an end date lift automatically after it passes (integration test with a clock override); unsuspend lifts manually
   - Accept: `/revoke-sessions` and `/resend-verification` work; all four require `users.suspend` (or `users.view` for resend, per `docs/DECISIONS.md`) and are audited (allowed and denied tests)
   - Accept: a suspended user's Approved reviews stay visible (integration test)
-- [ ] M7-T06 · Web: report dialog and reports queue (`/admin/reports`) · deps: M7-T02, M7-T05, M4-T11 · PRD: §7.9, §7.10
+- [x] M7-T06 · Web: report dialog and reports queue (`/admin/reports`) · deps: M7-T02, M7-T05, M4-T11 · PRD: §7.9, §7.10
   - Accept: the report dialog offers the five reasons, requires a note for "other", and is available only to verified Members on others' Approved reviews (component tests)
   - Accept: `/admin/reports` shows each review with its reports and reasons, with Dismiss and Unpublish (reason) actions; "Suspend author" appears only for Admins (component tests)
   - Accept: the `/admin` dashboard now shows the open report count and oldest open report age (component test)

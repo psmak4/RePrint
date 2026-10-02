@@ -14,7 +14,7 @@ export function meta() {
   ]
 }
 
-/** The review queue counts from `GET /v1/mod/stats`; open reports arrive with M7 (D-128). */
+/** The review queue counts from `GET /v1/mod/stats`. */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireViewerPermission(request, PERMISSIONS.reviewsModerate)
   let response: Response
