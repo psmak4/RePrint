@@ -481,7 +481,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T10 · Admin cover upload, Primary Edition choice, and `POST /v1/admin/books/:id/refresh` · deps: M7-T09, M2-T16 · PRD: §5.1, §6, §7.11, §10
   - Accept: an uploaded cover follows the M2 upload rules, is stored in R2/local storage as a Cover with origin `upload`, and is locked (integration test)
   - Accept: Admins can set the Primary Edition (locked); refresh enqueues an interactive-priority re-fetch that respects locks (integration tests)
-- [ ] M7-T11 · Merge queue and `POST /v1/admin/books/merge` · deps: M7-T09, M6-T01, M5-T01 · PRD: §5.4, §7.11, §10
+- [x] M7-T11 · Merge queue and `POST /v1/admin/books/merge` · deps: M7-T09, M6-T01, M5-T01 · PRD: §5.4, §7.11, §10
   - Accept: `GET /v1/admin/books/merge-candidates` lists open candidates (endpoint per `docs/DECISIONS.md`); candidates can be dismissed
   - Accept: merge moves reviews, shelf entries, Editions, Source links, and contributions to the remaining Book, recomputes aggregates, and redirects the old slug (integration tests)
   - Accept: merge fails with 409 if any Member reviewed both Books (integration test); merges are audited

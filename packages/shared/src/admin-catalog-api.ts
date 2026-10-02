@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { contributionRoleSchema, coverSchema, fieldOriginsSchema } from './catalog.js'
+import { cursorPageOf, cursorQuerySchema } from './pagination.js'
 
 /** Schemas for the Admin Catalog editing endpoint (PRD §5.2, §5.4, §7.11, D-155). */
 
@@ -82,3 +83,58 @@ export const adminBookCoverResponseSchema = adminBookSchema
 /** `POST /admin/books/:id/refresh` queues the re-fetch and returns at once. */
 export const adminBookRefreshResponseSchema = z.object({ status: z.literal('refresh_queued') })
 export type AdminBookRefreshResponse = z.infer<typeof adminBookRefreshResponseSchema>
+
+/** What an Admin sees of a Book in the merge queue (PRD §5.4, §7.11, D-157). */
+export const adminMergeBookSchema = z.object({
+  id: z.uuid(),
+  slug: z.string(),
+  title: z.string(),
+  authors: z.array(z.string()),
+  editionCount: z.number().int().min(0),
+  reviewCount: z.number().int().min(0),
+  shelfEntryCount: z.number().int().min(0),
+  cover: coverSchema.nullable(),
+})
+export type AdminMergeBook = z.infer<typeof adminMergeBookSchema>
+
+export const adminMergeCandidateSchema = z.object({
+  id: z.uuid(),
+  reason: z.string(),
+  createdAt: z.iso.datetime(),
+  bookA: adminMergeBookSchema,
+  bookB: adminMergeBookSchema,
+})
+export type AdminMergeCandidate = z.infer<typeof adminMergeCandidateSchema>
+
+/** `GET /admin/books/merge-candidates`: open candidates, oldest first. */
+export const adminMergeCandidatesQuerySchema = cursorQuerySchema
+export const adminMergeCandidatesResponseSchema = cursorPageOf(adminMergeCandidateSchema)
+export type AdminMergeCandidatesResponse = z.infer<typeof adminMergeCandidatesResponseSchema>
+
+export const adminMergeCandidateParamsSchema = z.object({ id: z.uuid() })
+
+export const adminMergeCandidateDismissResponseSchema = z.object({
+  status: z.literal('dismissed'),
+})
+
+/**
+ * `POST /admin/books/merge`. `fromBookId` is merged into `intoBookId`: the first is removed, and its
+ * old slug redirects to the second.
+ */
+export const adminBookMergeSchema = z
+  .object({ fromBookId: z.uuid(), intoBookId: z.uuid() })
+  .refine((value) => value.fromBookId !== value.intoBookId, {
+    message: 'Choose two different Books.',
+    path: ['intoBookId'],
+  })
+export type AdminBookMerge = z.infer<typeof adminBookMergeSchema>
+
+export const adminBookMergeResponseSchema = z.object({
+  book: adminBookSchema,
+  moved: z.object({
+    reviews: z.number().int().min(0),
+    shelfEntries: z.number().int().min(0),
+    editions: z.number().int().min(0),
+  }),
+})
+export type AdminBookMergeResponse = z.infer<typeof adminBookMergeResponseSchema>

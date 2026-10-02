@@ -11,7 +11,7 @@ import {
   reviewInputSchema,
   slugSchema,
 } from '@reprint/shared'
-import { data } from 'react-router'
+import { data, redirect } from 'react-router'
 import { z } from 'zod'
 import { BookPage, type MoreByAuthor } from '../components/books/book-page.js'
 import { copy } from '../copy/index.js'
@@ -61,6 +61,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(copy.books.page.loadFailed, { status: 502 })
   }
   const book = bookDetailSchema.parse(await response.json())
+  // An old slug of a merged Book answers with the remaining Book; send the visitor to its address.
+  if (book.slug !== slug.data) {
+    throw redirect(`/books/${book.slug}${new URL(request.url).search}`, 301)
+  }
 
   const byline = groupContributors(book.contributions)[0]?.people[0]
   const url = new URL(request.url)
