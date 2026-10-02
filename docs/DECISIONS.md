@@ -930,3 +930,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §13 asks for featured Genres, a featured review, and helpful votes in the sample data; Top rated needs Books with 5 or more Approved reviews, which the review seed (D-129) does not produce.
 - Affects: M5-T09
 
+### D-138 · Shelving endpoints (M6-T01)
+- Status: Implementation
+- Decision: `shelf_entries` (`id`, `user_id`, `book_id`, `shelf`, `added_at`, `updated_at`) is unique on (`user_id`, `book_id`); both FKs cascade. `PUT /v1/books/:slug/shelf` with `{ shelf }` upserts, so choosing another Shelf keeps the row and its `added_at` and only moves `shelf` and `updated_at`; `DELETE` removes the entry and succeeds even when none exists. Both return `{ shelf }` (`null` after removal), need only `requireAuth` (unverified Members may shelve), use the `authenticatedWrite` rate limit, and answer 404 for an unknown Book slug. The routes live in `modules/library/`.
+- Why: PRD §7.7 and §10 name the routes and the one-entry rule; they leave the response shape, whether re-shelving resets the date added, and delete idempotency open.
+- Affects: M6-T02, M6-T04, M6-T08
+

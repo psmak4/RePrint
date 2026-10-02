@@ -406,7 +406,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M6 · Libraries and profiles
 
-- [ ] M6-T01 · Shelves: schema and `PUT/DELETE /v1/books/:slug/shelf` · deps: M3-T11, M2-T02 · PRD: §5.3, §7.7, §9, §10
+- [x] M6-T01 · Shelves: schema and `PUT/DELETE /v1/books/:slug/shelf` · deps: M3-T11, M2-T02 · PRD: §5.3, §7.7, §9, §10
   - Accept: `shelf_entries` enforces one entry per Member per Book; PUT sets or replaces the shelf (`want_to_read|reading|read`), and DELETE removes it (integration tests)
   - Accept: unverified Members can shelve; Visitors get 401 (allowed and denied tests)
   - Accept: shelving never creates or changes a review, and reviewing never shelves (integration test)
