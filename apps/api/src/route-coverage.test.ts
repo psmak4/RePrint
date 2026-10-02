@@ -33,6 +33,7 @@ const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
 const ADMIN_AUDIT = 'modules/admin/audit.integration.test.ts'
 const ADMIN_BOOKS = 'modules/admin/books.integration.test.ts'
+const ADMIN_FEATURED = 'modules/admin/featured.integration.test.ts'
 const ADMIN_GENRES = 'modules/admin/genres.integration.test.ts'
 const ADMIN_MERGE = 'modules/admin/merge.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
@@ -281,6 +282,20 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'PATCH /v1/admin/books/{id}': {
     allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/featured': {
+    allowed: [
+      ADMIN_FEATURED,
+      'shows the picks, every live Genre, and Approved reviews to pick from',
+    ],
+    denied: [ADMIN_FEATURED, 'denies Members with 403 and Visitors with 401'],
+  },
+  'PUT /v1/admin/featured': {
+    allowed: [
+      ADMIN_FEATURED,
+      'sets the Genres in order and the review, rebuilds Discover, and audits it',
+    ],
+    denied: [ADMIN_FEATURED, 'lets a Moderator set the review but not the Genres'],
   },
   'GET /v1/admin/genres': {
     allowed: [ADMIN_GENRES, 'lists every Genre with its Book and rule counts, archived ones too'],

@@ -13,6 +13,7 @@ import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
 import { adminAuditRoutes } from './modules/admin/audit.js'
 import { adminBookRoutes } from './modules/admin/books.js'
+import { adminFeaturedRoutes } from './modules/admin/featured.js'
 import { adminGenreRoutes } from './modules/admin/genres.js'
 import { adminMergeRoutes } from './modules/admin/merge.js'
 import { adminSuspensionRoutes } from './modules/admin/suspensions.js'
@@ -206,6 +207,13 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+  })
+  await app.register(adminFeaturedRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    redis: options.redis,
   })
   await app.register(adminGenreRoutes, {
     prefix: '/v1',

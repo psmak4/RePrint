@@ -91,14 +91,15 @@ export async function buildFeaturedGenres(db: Database): Promise<GenreLink[] | n
   return rows.length > 0 ? rows : null
 }
 
-/** The first picked review that is still Approved, with its Book; `null` when there is none. */
-export async function buildFeaturedReview(db: Database): Promise<FeaturedReview | null> {
-  const picks = await db
-    .select({ refId: featuredItems.refId })
-    .from(featuredItems)
-    .where(eq(featuredItems.kind, 'review'))
-    .orderBy(asc(featuredItems.position), asc(featuredItems.createdAt))
-  if (picks.length === 0) return null
+/**
+ * The given reviews that are publicly visible (Approved, not auto-hidden, author not deleted), each
+ * with its Book, in the order given. Others are skipped.
+ */
+export async function loadFeaturedReviews(
+  db: Database,
+  reviewIds: string[],
+): Promise<FeaturedReview[]> {
+  if (reviewIds.length === 0) return []
   const rows = await db
     .select({
       id: reviews.id,
@@ -116,29 +117,43 @@ export async function buildFeaturedReview(db: Database): Promise<FeaturedReview 
     .innerJoin(users, eq(users.id, reviews.userId))
     .where(
       and(
-        inArray(
-          reviews.id,
-          picks.map((pick) => pick.refId),
-        ),
+        inArray(reviews.id, reviewIds),
         eq(reviews.status, 'approved'),
         isNull(reviews.hiddenAt),
         ne(users.status, 'deleted'),
       ),
     )
+  const ordered = reviewIds.flatMap((id) => rows.filter((candidate) => candidate.id === id))
+  const summaries = await loadBookSummaries(db, [...new Set(ordered.map((row) => row.bookId))])
+  return ordered.flatMap(({ bookId, username, displayName, submittedAt, ...review }) => {
+    const book = summaries.find((summary) => summary.id === bookId)
+    if (!book) return []
+    return [
+      {
+        review: {
+          ...review,
+          submittedAt: submittedAt.toISOString(),
+          author: { username, displayName },
+        },
+        book,
+      },
+    ]
+  })
+}
+
+/** The first picked review that is still Approved, with its Book; `null` when there is none. */
+export async function buildFeaturedReview(db: Database): Promise<FeaturedReview | null> {
+  const picks = await db
+    .select({ refId: featuredItems.refId })
+    .from(featuredItems)
+    .where(eq(featuredItems.kind, 'review'))
+    .orderBy(asc(featuredItems.position), asc(featuredItems.createdAt))
   // A pick that was unpublished or erased is skipped; the next pick in order takes its place.
-  const row = picks.flatMap((pick) => rows.filter((candidate) => candidate.id === pick.refId))[0]
-  if (!row) return null
-  const [book] = await loadBookSummaries(db, [row.bookId])
-  if (!book) return null
-  const { bookId: _bookId, username, displayName, submittedAt, ...review } = row
-  return {
-    review: {
-      ...review,
-      submittedAt: submittedAt.toISOString(),
-      author: { username, displayName },
-    },
-    book,
-  }
+  const [first] = await loadFeaturedReviews(
+    db,
+    picks.map((pick) => pick.refId),
+  )
+  return first ?? null
 }
 
 export const DISCOVER_ROW_KEYS = [

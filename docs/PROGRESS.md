@@ -516,3 +516,7 @@ Entry format:
 ### 2026-10-02 · M7-T14 · PR pending
 - `/admin/catalog` (stats dashboard), `/admin/catalog/merge` (side-by-side pairs, confirmed Merge in either direction, Dismiss), and `/admin/catalog/genres` (Genre add/edit/archive/restore and Subject rules) with routes `admin-catalog*.tsx` and components `catalog-dashboard`, `merge-queue`, `genre-manager`; the admin nav gains the three links for `catalog.manage`. Merge cards link to `/admin/books/:id`. Loader/action and component tests (incl. axe). D-160 records the choices.
 - Next iteration: M7-T15 (featured content, `PUT /v1/admin/featured`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-02 · M7-T15 · PR pending
+- `GET` and `PUT /v1/admin/featured` in `modules/admin/featured.ts` (`featured.manage`; `featured.genres` for Genres, Admin only); migration `0017` adds both permissions; `loadFeaturedReviews` in `discover/rows.ts` is shared with the Discover row. Shared schemas in `packages/shared/src/admin-featured-api.ts`; `openapi.json` regenerated. Web: `/admin/featured` (`routes/admin-featured.tsx`, `components/admin/featured-manager.tsx`) and a "Featured content" nav link. Integration, loader/action, and component tests (incl. axe). D-161 records the choices.
+- Next iteration: M7-T16 (IP retention job). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.

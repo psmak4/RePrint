@@ -11,6 +11,7 @@ const ADMIN_AREA_PERMISSIONS = [
   PERMISSIONS.usersView,
   PERMISSIONS.auditView,
   PERMISSIONS.catalogManage,
+  PERMISSIONS.featuredManage,
 ]
 
 export function meta() {
@@ -37,6 +38,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     items.push({ to: '/admin/catalog', label: copy.admin.catalogNav })
     items.push({ to: '/admin/catalog/merge', label: copy.admin.mergeNav })
     items.push({ to: '/admin/catalog/genres', label: copy.admin.genresNav })
+  }
+  if (viewer.permissions.includes(PERMISSIONS.featuredManage)) {
+    items.push({ to: '/admin/featured', label: copy.admin.featuredNav })
   }
   return { items }
 }

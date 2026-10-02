@@ -43,5 +43,6 @@ export default [
     route('catalog', 'routes/admin-catalog.tsx'),
     route('catalog/merge', 'routes/admin-catalog-merge.tsx'),
     route('catalog/genres', 'routes/admin-catalog-genres.tsx'),
+    route('featured', 'routes/admin-featured.tsx'),
   ]),
 ] satisfies RouteConfig

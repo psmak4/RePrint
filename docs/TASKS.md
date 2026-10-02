@@ -494,7 +494,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T14 · Web: merge queue, Genre and rule management, Catalog dashboard · deps: M7-T11, M7-T12, M7-T13 · PRD: §6, §7.11
   - Accept: `/admin/catalog/merge` shows candidate pairs side by side with Merge and Dismiss (component tests)
   - Accept: `/admin/catalog/genres` manages Genres and rules; `/admin/catalog` shows size and monthly growth (component tests)
-- [ ] M7-T15 · Featured content: `PUT /v1/admin/featured` and admin UI · deps: M5-T06, M4-T11 · PRD: §7.2, §7.11, §10
+- [x] M7-T15 · Featured content: `PUT /v1/admin/featured` and admin UI · deps: M5-T06, M4-T11 · PRD: §7.2, §7.11, §10
   - Accept: the endpoint sets 12 featured Genres and one featured review (must be Approved), triggers a Discover rebuild, and is audited (integration tests)
   - Accept: permissions follow `docs/DECISIONS.md` (allowed and denied tests); `/admin/featured` manages both (component test)
 - [ ] M7-T16 · IP retention: clear session and audit IPs after 90 days · deps: M4-T03, M2-T15 · PRD: §11
