@@ -417,7 +417,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: one `ShelfSelector` control shows the current shelf and offers the three shelves plus "Remove" (component tests)
   - Accept: on a "not yet on RePrint" search result, shelving resolves the Book first, then shelves it (component test with mocked API)
   - Accept: Visitors are prompted to sign in instead
-- [ ] M6-T04 · Library API: `GET /v1/users/:username/library` · deps: M6-T01 · PRD: §7.7, §10
+- [x] M6-T04 · Library API: `GET /v1/users/:username/library` · deps: M6-T01 · PRD: §7.7, §10
   - Accept: returns entries with `shelf=` filter, counts per shelf, `sort=added_desc|added_asc|title|author`, and pagination (integration tests)
   - Accept: a private library returns 404 to others and works for its owner (allowed and denied tests)
 - [ ] M6-T05 · Web: library page (`/u/:username/library`) · deps: M6-T04, M6-T03 · PRD: §7.7
