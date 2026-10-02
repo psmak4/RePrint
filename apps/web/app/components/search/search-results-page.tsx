@@ -5,12 +5,14 @@ import {
   type SearchCandidate,
   type SearchQuery,
   type SearchResponse,
+  type Viewer,
 } from '@reprint/shared'
 import { Button, Input, Label } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
 import { BookCard, type BookCardData } from '../books/book-card.js'
+import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
 
 const LANGUAGES = [
   'en',
@@ -243,14 +245,18 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
   )
 }
 
-function Results({ results }: { results: SearchResponse }) {
+function Results({ results, signedIn }: { results: SearchResponse; signedIn: boolean }) {
   return (
     <ul className="flex flex-col gap-3">
       {results.items.map((item) => {
         if (item.kind === 'book') {
           return (
             <li key={`book-${item.book.id}`}>
-              <BookCard book={fromSummary(item.book)} href={`/books/${item.book.slug}`} />
+              <BookCard
+                book={fromSummary(item.book)}
+                href={`/books/${item.book.slug}`}
+                shelf={<BookShelfSelector book={item.book} signedIn={signedIn} />}
+              />
             </li>
           )
         }
@@ -260,6 +266,13 @@ function Results({ results }: { results: SearchResponse }) {
               <BookCard
                 book={fromCandidate(item.candidate)}
                 href={resolveHref(item.candidate.ref)}
+                shelf={
+                  <ShelfSelector
+                    target={{ kind: 'candidate', ref: item.candidate.ref }}
+                    title={item.candidate.title}
+                    signedIn={signedIn}
+                  />
+                }
               />
             </li>
           )
@@ -285,11 +298,13 @@ export function SearchResultsPage({
   results,
   failed,
   genres = [],
+  viewer = null,
 }: {
   query: SearchQuery
   results: SearchResponse | null
   failed: boolean
   genres?: GenreNode[]
+  viewer?: Viewer | null
 }) {
   const c = copy.search
   return (
@@ -330,7 +345,7 @@ export function SearchResultsPage({
               <p role="status" className="text-sm text-muted-foreground">
                 {c.resultCount(results.items.length)}
               </p>
-              <Results results={results} />
+              <Results results={results} signedIn={viewer !== null} />
             </>
           )}
           <Pagination query={query} hasMore={results.hasMore} />

@@ -4,12 +4,13 @@ import {
   genreTreeResponseSchema,
   searchResponseSchema,
 } from '@reprint/shared'
-import { data, redirect } from 'react-router'
+import { data, redirect, useRouteLoaderData } from 'react-router'
 import { SearchResultsPage } from '../components/search/search-results-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
 import { isSearchable, parseSearchParams, resolveHref, searchHref } from '../lib/search-links.js'
+import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/search'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -59,5 +60,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function Search({ loaderData }: Route.ComponentProps) {
-  return <SearchResultsPage {...loaderData} />
+  const session = useRouteLoaderData<typeof rootLoader>('root')
+  return <SearchResultsPage {...loaderData} viewer={session?.viewer ?? null} />
 }

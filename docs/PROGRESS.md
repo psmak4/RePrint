@@ -419,3 +419,7 @@ Entry format:
 ### 2026-10-01 · M6-T02 · PR pending
 - `viewerShelf` added to the shared Book summary and Book detail schemas and filled by `addViewerShelves` (`modules/library/viewer-shelf.ts`) on `GET /books/:slug`, `/search`, `/series/:slug`, and `/discover`; signed-in responses are `Cache-Control: private`, and the public cache hook now adds `Vary: Cookie`. Integration tests in `viewer-shelf.integration.test.ts`. D-139 records the choices.
 - Next iteration: M6-T03 (web `ShelfSelector`). The field is absent for Visitors and `null` for Members with no Shelf; Genre and Author pages do not carry it yet. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-01 · M6-T03 · PR pending
+- `ShelfSelector` and `BookShelfSelector` (`components/books/shelf-selector.tsx`) on the Book page header, search results (including not-yet-stored results, which are resolved first), Discover rows, and the Series page, through `BookCard`'s new `shelf` slot. New resource routes `books/:slug/shelf` (`routes/book-shelf.tsx`) and a `POST /resolve` action. Page tests now wrap renders in a `QueryClientProvider`. Tests in `shelf-selector.test.tsx`, `book-shelf.test.ts`, `resolve.test.ts`. D-140 records the choices.
+- Next iteration: M6-T04 (Library API). Genre and Author pages have no shelf control yet. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

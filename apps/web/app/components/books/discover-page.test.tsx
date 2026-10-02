@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { BookSummary, DiscoverResponse, Viewer } from '@reprint/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
@@ -66,7 +67,11 @@ function renderPage(discover: DiscoverResponse, who: Viewer | null = null) {
   const Stub = createRoutesStub([
     { path: '/', Component: () => <DiscoverPage discover={discover} viewer={who} /> },
   ])
-  return render(<Stub />)
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <Stub />
+    </QueryClientProvider>,
+  )
 }
 
 describe('DiscoverPage', () => {

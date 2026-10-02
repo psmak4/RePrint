@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { SearchQuery, SearchResponse } from '@reprint/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -57,7 +58,11 @@ function renderPage(props: Partial<Parameters<typeof SearchResultsPage>[0]> = {}
       Component: () => <SearchResultsPage query={query} results={base} failed={false} {...props} />,
     },
   ])
-  render(<Stub initialEntries={['/search?q=dune']} />)
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <Stub initialEntries={['/search?q=dune']} />
+    </QueryClientProvider>,
+  )
 }
 
 describe('SearchResultsPage', () => {

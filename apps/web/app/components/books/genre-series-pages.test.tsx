@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { BookSummary, GenreDetailResponse, SeriesDetailResponse } from '@reprint/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
@@ -29,7 +30,11 @@ const summary = (n: number, title: string, count: number, average: number | null
 
 function renderInRouter(ui: React.ReactNode) {
   const Stub = createRoutesStub([{ path: '/', Component: () => ui }])
-  return render(<Stub />)
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <Stub />
+    </QueryClientProvider>,
+  )
 }
 
 const detail: GenreDetailResponse = {
