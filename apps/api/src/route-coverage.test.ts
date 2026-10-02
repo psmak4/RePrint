@@ -274,6 +274,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     ],
     denied: [ADMIN_AUDIT, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
+  'GET /v1/admin/books/{id}': {
+    allowed: [ADMIN_BOOKS, 'returns the editable view with locks and the Book’s Editions'],
+    denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
   'PATCH /v1/admin/books/{id}': {
     allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],

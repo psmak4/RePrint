@@ -11,7 +11,7 @@ import {
   editions,
   genres,
 } from '@reprint/db'
-import { adminBookSchema, type BookCandidate } from '@reprint/shared'
+import { adminBookDetailSchema, adminBookSchema, type BookCandidate } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import sharp from 'sharp'
@@ -99,6 +99,33 @@ const patch = (id: string, payload: object, cookies?: Record<string, string>) =>
     payload,
     headers: { origin: ORIGIN },
   })
+
+describe('GET /v1/admin/books/:id', () => {
+  const get = (id: string, cookies?: Record<string, string>) =>
+    app.inject({ method: 'GET', url: `/v1/admin/books/${id}`, cookies })
+
+  it('returns the editable view with locks and the Book’s Editions', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    await patch(bookId, { title: 'Dune (edited)' }, admin.cookies)
+    const res = await get(bookId, admin.cookies)
+    expect(res.statusCode).toBe(200)
+    const body = adminBookDetailSchema.parse(res.json())
+    expect(body.title).toBe('Dune (edited)')
+    expect(body.lockedFields).toContain('title')
+    expect(body.editions.length).toBeGreaterThan(0)
+    expect((await get('0192a3b4-0000-7000-8000-000000000001', admin.cookies)).statusCode).toBe(404)
+  })
+
+  it('denies Moderators and Members with 403 and Visitors with 401', async () => {
+    const bookId = await dune()
+    const moderator = await person(['moderator'])
+    const member = await person()
+    expect((await get(bookId, moderator.cookies)).statusCode).toBe(403)
+    expect((await get(bookId, member.cookies)).statusCode).toBe(403)
+    expect((await get(bookId)).statusCode).toBe(401)
+  })
+})
 
 describe('PATCH /v1/admin/books/:id', () => {
   it('edits fields, locks them, and audits before and after values', async () => {

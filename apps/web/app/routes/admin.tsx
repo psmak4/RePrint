@@ -10,6 +10,7 @@ const ADMIN_AREA_PERMISSIONS = [
   PERMISSIONS.reportsResolve,
   PERMISSIONS.usersView,
   PERMISSIONS.auditView,
+  PERMISSIONS.catalogManage,
 ]
 
 export function meta() {

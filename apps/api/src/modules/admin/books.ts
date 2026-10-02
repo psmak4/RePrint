@@ -14,9 +14,11 @@ import {
 } from '@reprint/db'
 import {
   type AdminBook,
+  type AdminBookDetail,
   type AdminBookEdit,
   type AdminBookRefreshResponse,
   adminBookCoverResponseSchema,
+  adminBookDetailSchema,
   adminBookEditSchema,
   adminBookParamsSchema,
   adminBookRefreshResponseSchema,
@@ -209,6 +211,31 @@ export const adminBookRoutes: FastifyPluginAsyncZod<AdminBookRoutesOptions> = as
   const manage = requirePermission('catalog.manage')
   await app.register(multipart, { limits: { fileSize: env.UPLOAD_MAX_BYTES, files: 1, fields: 0 } })
 
+  app.get(
+    '/admin/books/:id',
+    {
+      preHandler: [manage],
+      schema: { params: adminBookParamsSchema, response: { 200: adminBookDetailSchema } },
+    },
+    async (request): Promise<AdminBookDetail> => {
+      if (!db) throw new Error('admin routes need a database')
+      const book = await db.transaction((tx) => loadBook(tx, request.params.id))
+      if (!book) throw new HttpProblem(404, 'Book not found.')
+      const editionRows = await db
+        .select({
+          id: editions.id,
+          isbn13: editions.isbn13,
+          format: editions.format,
+          language: editions.language,
+          publisherName: editions.publisherName,
+          publishedDate: editions.publishedDate,
+        })
+        .from(editions)
+        .where(eq(editions.bookId, book.id))
+        .orderBy(asc(editions.publishedDate), asc(editions.id))
+      return { ...book, editions: editionRows }
+    },
+  )
   app.patch(
     '/admin/books/:id',
     {

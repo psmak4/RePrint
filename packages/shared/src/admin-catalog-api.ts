@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { contributionRoleSchema, coverSchema, fieldOriginsSchema } from './catalog.js'
+import { contributionRoleSchema, coverSchema, fieldOriginsSchema, formatSchema } from './catalog.js'
 import { cursorPageOf, cursorQuerySchema } from './pagination.js'
 
 /** Schemas for the Admin Catalog editing endpoint (PRD §5.2, §5.4, §7.11, D-155). */
@@ -73,6 +73,21 @@ export const adminBookSchema = z.object({
   fieldOrigins: fieldOriginsSchema,
 })
 export type AdminBook = z.infer<typeof adminBookSchema>
+
+/** `GET /admin/books/:id`: the editable view plus the Editions the Primary Edition can be chosen from. */
+export const adminBookDetailSchema = adminBookSchema.extend({
+  editions: z.array(
+    z.object({
+      id: z.uuid(),
+      isbn13: z.string().nullable(),
+      format: formatSchema,
+      language: z.string().nullable(),
+      publisherName: z.string().nullable(),
+      publishedDate: z.string().nullable(),
+    }),
+  ),
+})
+export type AdminBookDetail = z.infer<typeof adminBookDetailSchema>
 
 /** The widest an uploaded Book cover is stored; narrower images are kept as they are. */
 export const BOOK_COVER_MAX_WIDTH = 600
