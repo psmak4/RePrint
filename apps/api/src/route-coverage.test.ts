@@ -29,6 +29,7 @@ const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
+const LIBRARY = 'modules/library/library.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -133,6 +134,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'DELETE /v1/books/{slug}/shelf': {
     allowed: [SHELF, 'removes a Book from the Shelf'],
     denied: [SHELF, 'returns 401 to Visitors on delete'],
+  },
+  'GET /v1/users/{username}/library': {
+    allowed: [LIBRARY, 'lists entries newest first with counts per Shelf'],
+    denied: [LIBRARY, 'hides a private library from Visitors and other Members, but not its owner'],
   },
   'GET /v1/books/{slug}/helpful-votes': {
     allowed: [HELPFUL, 'lists the review IDs the Member marked helpful on a Book'],
