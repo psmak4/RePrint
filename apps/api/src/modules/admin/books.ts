@@ -44,7 +44,7 @@ export interface AdminBookRoutesOptions extends AuthRoutesOptions {
 /** An Admin's refresh goes ahead of the background refreshes queued by page views (priority 10). */
 const ADMIN_REFRESH_PRIORITY = 1
 
-type Tx = Parameters<Parameters<Database['transaction']>[0]>[0]
+export type Tx = Parameters<Parameters<Database['transaction']>[0]>[0]
 
 function invalid(path: string, message: string): HttpProblem {
   return new HttpProblem(400, 'The request did not pass validation.', {
@@ -53,7 +53,7 @@ function invalid(path: string, message: string): HttpProblem {
 }
 
 /** The Book as an Admin sees it: editable fields, and which fields are locked. */
-async function loadBook(tx: Tx, id: string, lock = false): Promise<AdminBook | null> {
+export async function loadBook(tx: Tx, id: string, lock = false): Promise<AdminBook | null> {
   const query = tx.select().from(books).where(eq(books.id, id))
   const [book] = await (lock ? query.for('update') : query)
   if (!book) return null

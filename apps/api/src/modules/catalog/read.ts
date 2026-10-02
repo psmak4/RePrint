@@ -2,6 +2,7 @@ import {
   authors,
   bookGenres,
   bookSeries,
+  bookSlugRedirects,
   books,
   contributions,
   covers,
@@ -145,7 +146,15 @@ export async function loadBookSummaries(db: Database, ids: string[]): Promise<Bo
 
 export async function findBookBySlug(db: Database, slug: string): Promise<BookRow | null> {
   const [row] = await db.select().from(books).where(eq(books.slug, slug)).limit(1)
-  return row ?? null
+  if (row) return row
+  // The slug of a Book that was merged into another finds the remaining Book (D-157).
+  const [merged] = await db
+    .select({ book: books })
+    .from(bookSlugRedirects)
+    .innerJoin(books, eq(books.id, bookSlugRedirects.bookId))
+    .where(eq(bookSlugRedirects.slug, slug))
+    .limit(1)
+  return merged?.book ?? null
 }
 
 export async function loadBookDetail(db: Database, book: BookRow): Promise<BookDetail> {

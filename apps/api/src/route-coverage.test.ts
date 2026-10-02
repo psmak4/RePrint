@@ -33,6 +33,7 @@ const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
 const ADMIN_AUDIT = 'modules/admin/audit.integration.test.ts'
 const ADMIN_BOOKS = 'modules/admin/books.integration.test.ts'
+const ADMIN_MERGE = 'modules/admin/merge.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
@@ -275,6 +276,18 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'PATCH /v1/admin/books/{id}': {
     allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/books/merge-candidates': {
+    allowed: [ADMIN_MERGE, 'lists open merge candidates oldest first with both Books'],
+    denied: [ADMIN_MERGE, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/books/merge-candidates/{id}/dismiss': {
+    allowed: [ADMIN_MERGE, 'dismisses a candidate and audits it'],
+    denied: [ADMIN_MERGE, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/books/merge': {
+    allowed: [ADMIN_MERGE, 'merges Books, moves their data, and audits the merge'],
+    denied: [ADMIN_MERGE, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
   'POST /v1/admin/books/{id}/cover': {
     allowed: [ADMIN_BOOKS, 'stores a WebP of at most 600 px as an upload cover'],

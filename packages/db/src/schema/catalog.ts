@@ -311,3 +311,20 @@ export const mergeCandidates = pgTable(
     check('merge_candidates_status_check', sql`${t.status} in ('pending', 'merged', 'dismissed')`),
   ],
 )
+
+/**
+ * The old slug of a Book that was merged into another (PRD §7.11, D-157). Looking up the old slug
+ * finds the remaining Book, so links and bookmarks keep working. The slug is the key; it was unique
+ * among Books, and a Book's slug never changes, so it cannot be reused.
+ */
+export const bookSlugRedirects = pgTable(
+  'book_slug_redirects',
+  {
+    slug: text('slug').primaryKey(),
+    bookId: uuid('book_id')
+      .notNull()
+      .references(() => books.id, { onDelete: 'cascade' }),
+    createdAt: timestamptz('created_at').notNull().default(sql`now()`),
+  },
+  (t) => [index('book_slug_redirects_book_id_idx').on(t.bookId)],
+)

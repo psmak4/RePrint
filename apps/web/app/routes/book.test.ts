@@ -103,6 +103,16 @@ describe('book loader', () => {
     expect(result.moreByAuthor?.books.map((b) => b.slug)).not.toContain('dune-abc123')
   })
 
+  it('redirects the old slug of a merged Book to the remaining Book with a 301', async () => {
+    const merged = (url: URL) =>
+      url.pathname === '/v1/books/old-dune-000000' ? Response.json(book) : respond(url)
+    const thrown = await load(merged, 'old-dune-000000').catch((error: unknown) => error)
+    expect(thrown).toBeInstanceOf(Response)
+    const response = thrown as Response
+    expect(response.status).toBe(301)
+    expect(response.headers.get('Location')).toBe('/books/dune-abc123')
+  })
+
   it('gives the canonical URL and meta description', async () => {
     const result = await load(respond)
     expect(result.canonicalUrl).toBe('https://reprint.test/books/dune-abc123')
