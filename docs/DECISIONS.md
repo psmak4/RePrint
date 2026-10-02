@@ -968,3 +968,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.8 and §10 name the routes and totals; they leave the response shapes, what counts as a helpful vote received, and which accounts have a profile open.
 - Affects: M6-T07, M6-T08
 
+
+### D-144 · Profile page (M6-T07)
+- Status: Implementation
+- Decision: `/u/:username` loads the profile and the first page of Approved Reviews in parallel (`?page=` in the URL; a bad value falls back to page 1). The Reviews tab is the page itself; the Library tab is a link to `/u/:username/library`, shown when `libraryPublic` is true or the viewer is the owner (case-insensitive match on the root session's username). Each review shows its Book card, rating, headline, date, and body (spoilers behind the usual toggle); there is no Helpful button here. A missing avatar shows the display name's initial. The page has a canonical URL, a meta description, and Open Graph tags; any 404 from the profile route renders the 404 page.
+- Why: PRD §7.8 names the tabs and totals but not the tab mechanics, review layout, or pagination.
+- Affects: M6-T10

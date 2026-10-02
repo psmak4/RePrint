@@ -426,7 +426,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T06 · Profiles API: `GET /v1/users/:username` and `/v1/users/:username/reviews` · deps: M6-T04, M5-T01 · PRD: §7.8, §10
   - Accept: the profile returns avatar, display name, username, bio, join date, approved review total, and helpful votes received; deleted or unknown users return 404 (integration tests)
   - Accept: `/reviews` lists Approved reviews newest first, paginated (integration test)
-- [ ] M6-T07 · Web: public profile page (`/u/:username`) · deps: M6-T06, M6-T05 · PRD: §7.8
+- [x] M6-T07 · Web: public profile page (`/u/:username`) · deps: M6-T06, M6-T05 · PRD: §7.8
   - Accept: the page shows the profile header and totals, and tabs for Reviews and Library (Library only when public) (component tests)
   - Accept: unknown or deleted usernames render the 404 page, and the page has a canonical URL and meta description (loader tests)
 - [ ] M6-T08 · Data export: `GET /v1/me/export` (JSON) and a settings download button · deps: M6-T04, M5-T01, M2-T20 · PRD: §11

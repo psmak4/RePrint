@@ -436,3 +436,7 @@ Entry format:
 - `GET /v1/users/:username` and `/v1/users/:username/reviews` in `modules/profiles/routes.ts`; shared schemas in `packages/shared/src/profiles-api.ts`; `openapi.json` regenerated. Integration tests in `profiles.integration.test.ts`; route-coverage table extended. D-143 records the choices.
 - Next iteration: M6-T07 (web profile page). The profile carries `libraryPublic` (show the Library tab when true or when the viewer is the owner); a review item has its `book` summary and no `author`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
 
+
+### 2026-10-01 · M6-T07 · PR pending
+- Web profile page: `routes/profile.tsx` (loader, canonical URL, meta), `components/profile/profile-page.tsx`, `copy.profile`, and the `u/:username` route. Tests in `routes/profile.test.ts` and `profile-page.test.tsx` (with axe). D-144 records the choices.
+- Next iteration: M6-T08 (data export). The Library page does not yet link back to the profile. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
