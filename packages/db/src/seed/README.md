@@ -26,3 +26,7 @@ The root scripts then run `pnpm --filter api seed:reviews` (D-129): about 150 re
 
 Then `pnpm --filter api seed:discover` (D-137) tops up eight Books to six Approved reviews, adds Helpful votes, and picks featured Genres and a featured review. It does nothing when any featured item exists. Discover rows are cached in Redis for up to an hour, so after a reset they appear once the `discover.rebuild` job runs.
 
+
+## Library data
+
+Then `pnpm --filter api seed:libraries` (D-146) gives 14 Members Libraries across all three Shelves: the first four stay private, the rest are public. Each Library holds Books the Member reviewed and Books they did not. It does nothing when any Shelf entry exists.

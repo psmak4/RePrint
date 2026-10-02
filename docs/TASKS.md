@@ -432,7 +432,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T08 · Data export: `GET /v1/me/export` (JSON) and a settings download button · deps: M6-T04, M5-T01, M2-T20 · PRD: §11
   - Accept: the export includes the account, profile, reviews with versions, helpful votes, library, notifications, and sessions, and nobody else's data (integration test)
   - Accept: only the signed-in owner can download it (allowed and denied tests); the settings page offers the download (component test)
-- [ ] M6-T09 · Seed: libraries for seeded Members, including private libraries · deps: M6-T01, M3-T21, M2-T21 · PRD: §13
+- [x] M6-T09 · Seed: libraries for seeded Members, including private libraries · deps: M6-T01, M3-T21, M2-T21 · PRD: §13
   - Accept: `pnpm db:reset` seeds shelf entries across all three shelves, with some private libraries
   - Accept: seeded libraries include Books the owner reviewed and Books they didn't, exercising the "independent of reviews" rule
 - [ ] M6-T10 · E2E: shelve and view a library · deps: M6-T05, M6-T07, M6-T09 · PRD: §12

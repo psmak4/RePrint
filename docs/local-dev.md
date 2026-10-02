@@ -50,6 +50,8 @@ Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`
 
 It then loads about 500 Books (one recorded Open Library Book plus generated sample Books with Editions, Authors, Series, and every Genre) through the ingest service. `pnpm --filter api seed:catalog` re-runs just that step and is safe to repeat (D-114).
 
+`pnpm --filter api seed:libraries` gives 14 seeded Members Libraries on all three Shelves (the first four private), mixing reviewed and unreviewed Books (D-146).
+
 | Accounts | Sign in with | Notes |
 | --- | --- | --- |
 | 2 Admins | `admin1@example.test`, `admin2@example.test` | Member + Admin roles |

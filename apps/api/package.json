@@ -18,6 +18,7 @@
     "seed:catalog": "tsx --env-file-if-exists=../../.env src/scripts/seed-catalog.ts",
     "seed:reviews": "tsx --env-file-if-exists=../../.env src/scripts/seed-reviews.ts",
     "seed:discover": "tsx --env-file-if-exists=../../.env src/scripts/seed-discover.ts",
+    "seed:libraries": "tsx --env-file-if-exists=../../.env src/scripts/seed-libraries.ts",
     "fixtures:record": "tsx src/catalog/sources/open-library/record-fixtures.ts",
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },

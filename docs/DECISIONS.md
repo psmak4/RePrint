@@ -981,3 +981,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §11 requires a JSON download but names no endpoint or contents.
 - Affects: M7-T01 (adds reports to the export)
 
+
+### D-146 · Library seed (M6-T09)
+- Status: Implementation
+- Decision: `pnpm --filter api seed:libraries` (run by `db:seed` and `db:reset` after `seed:discover`) gives the first 14 reviewers (username order) a Library of 6 to 13 Books: 2 to 4 they reviewed and 4 to 9 they did not, chosen from the first 120 Books by slug, with Shelves cycled from a random start so every Library covers all three. It sets `libraryPublic` explicitly: the first four are private, the rest public. It lives in `apps/api` beside the other Book-dependent seeds and does nothing when any Shelf entry exists.
+- Why: PRD §13 asks for sample data but not its shape; the mix exercises the "independent of reviews" rule and the private Library state.
+- Affects: M6-T10
