@@ -389,3 +389,7 @@ Entry format:
 ### 2026-10-01 · M5-T05 · PR pending
 - Web pages `/genres` (`routes/genres.tsx`), `/genres/:slug` (`routes/genre.tsx`, sort and page read from the URL, bad values fall back to defaults) and `/series/:slug` (`routes/series.tsx`); components in `components/books/genre-pages.tsx` and `series-page.tsx`; copy under `copy.genres` and `copy.series`. Tests in `genre-series-pages.test.tsx` (with axe) and `routes/genres.test.ts`.
 - Next iteration: M5-T05a (Genre select on `/search`); `GenresIndexPage` shows the tree and `GET /v1/genres` is the data source. The Series page does not show the viewer's shelf status yet; M6-T03 adds the shelf selector. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T05a · PR pending
+- `/search` Filters now has a Genre select (`#filter-genre`, tree flattened with "– " prefixes for child Genres) filled from `GET /v1/genres`; the search loader fetches the tree in parallel with the search on the Books tab only and falls back to an empty list if it fails. The "Genre: slug / Remove genre filter" line and its copy are gone ("Any" clears the filter). Tests in `search.test.ts` and `search-results-page.test.tsx`.
+- Next iteration: M5-T06 (Discover rows). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

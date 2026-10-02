@@ -119,12 +119,43 @@ describe('SearchResultsPage', () => {
     expect(screen.queryByRole('form', { name: copy.search.filtersLabel })).toBeNull()
   })
 
-  it('offers a way to remove a Genre filter from the URL and says it is Catalog-only', () => {
-    renderPage({ query: { ...query, genre: 'science-fiction' } })
-    expect(screen.getByRole('link', { name: copy.search.genreRemove }).getAttribute('href')).toBe(
-      '/search?q=dune',
-    )
+  it('has a Genre select filled from the Genre tree that keeps the choice from the URL', () => {
+    const genres = [
+      {
+        slug: 'fiction',
+        name: 'Fiction',
+        description: null,
+        featured: true,
+        children: [
+          {
+            slug: 'science-fiction',
+            name: 'Science Fiction',
+            description: null,
+            featured: false,
+            children: [],
+          },
+        ],
+      },
+    ]
+    renderPage({ query: { ...query, genre: 'science-fiction' }, genres })
+    const select = screen.getByLabelText(copy.search.genre) as HTMLSelectElement
+    expect(select.name).toBe('genre')
+    expect(select.value).toBe('science-fiction')
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual([copy.search.anyOption, 'Fiction', '– Science Fiction'])
+    expect(screen.queryByRole('link', { name: /remove genre/i })).toBeNull()
     expect(screen.getByText(copy.search.catalogOnly)).toBeTruthy()
+  })
+
+  it('defaults the Genre select to Any and hides it on the Authors tab', () => {
+    renderPage()
+    expect((screen.getByLabelText(copy.search.genre) as HTMLSelectElement).value).toBe('')
+    cleanup()
+    renderPage({ query: { ...query, type: 'authors' } })
+    expect(screen.queryByLabelText(copy.search.genre)).toBeNull()
   })
 
   it('shows the empty, prompt, and failure states', () => {
