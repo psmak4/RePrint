@@ -500,6 +500,11 @@ export const copy = {
         working: 'Please wait…',
         failed: 'We could not update your sessions. Please try again.',
       },
+      export: {
+        title: 'Download your data',
+        lead: 'Get a JSON file with your account, profile, reviews and their versions, helpful votes, library, notifications, and signed-in devices.',
+        download: 'Download my data',
+      },
       delete: {
         title: 'Delete account',
         lead: 'Deleting your account signs you out everywhere and disables it right away.',

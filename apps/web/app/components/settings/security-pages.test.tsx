@@ -164,3 +164,12 @@ describe('delete account', () => {
     expect(bodies[0]).toEqual({ intent: 'delete-account', password: 'my password 1234' })
   })
 })
+
+describe('data export', () => {
+  it('offers the download as a link to the export route', () => {
+    renderPage()
+    const link = screen.getByRole('link', { name: c.export.download })
+    expect(link.getAttribute('href')).toBe('/settings/export')
+    expect(link.hasAttribute('download')).toBe(true)
+  })
+})

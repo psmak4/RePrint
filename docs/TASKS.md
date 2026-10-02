@@ -429,7 +429,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T07 · Web: public profile page (`/u/:username`) · deps: M6-T06, M6-T05 · PRD: §7.8
   - Accept: the page shows the profile header and totals, and tabs for Reviews and Library (Library only when public) (component tests)
   - Accept: unknown or deleted usernames render the 404 page, and the page has a canonical URL and meta description (loader tests)
-- [ ] M6-T08 · Data export: `GET /v1/me/export` (JSON) and a settings download button · deps: M6-T04, M5-T01, M2-T20 · PRD: §11
+- [x] M6-T08 · Data export: `GET /v1/me/export` (JSON) and a settings download button · deps: M6-T04, M5-T01, M2-T20 · PRD: §11
   - Accept: the export includes the account, profile, reviews with versions, helpful votes, library, notifications, and sessions, and nobody else's data (integration test)
   - Accept: only the signed-in owner can download it (allowed and denied tests); the settings page offers the download (component test)
 - [ ] M6-T09 · Seed: libraries for seeded Members, including private libraries · deps: M6-T01, M3-T21, M2-T21 · PRD: §13
