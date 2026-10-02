@@ -20,6 +20,7 @@ import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
 import { liftExpiredSuspensions } from '../modules/admin/suspensions.js'
+import { clearOldIps } from '../modules/audit/retention.js'
 import { rebuildDiscover } from '../modules/discover/cache.js'
 import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import type { ImageStorage } from '../storage/index.js'
@@ -136,6 +137,17 @@ export const jobs = {
       return result
     },
     schedule: { everyMs: 5 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'privacy.clearOldIps': defineJob({
+    // `now` overrides the clock so tests can clear without waiting 90 days.
+    payload: z.object({ now: z.iso.datetime().optional() }),
+    handler: async ({ now }, { db, log }) => {
+      const cleared = await clearOldIps(db, now ? new Date(now) : undefined)
+      log.info(cleared, 'old IPs cleared')
+      return cleared
+    },
+    schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
   }),
   'ratings.recompute': defineJob({

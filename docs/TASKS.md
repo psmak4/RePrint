@@ -497,7 +497,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T15 · Featured content: `PUT /v1/admin/featured` and admin UI · deps: M5-T06, M4-T11 · PRD: §7.2, §7.11, §10
   - Accept: the endpoint sets 12 featured Genres and one featured review (must be Approved), triggers a Discover rebuild, and is audited (integration tests)
   - Accept: permissions follow `docs/DECISIONS.md` (allowed and denied tests); `/admin/featured` manages both (component test)
-- [ ] M7-T16 · IP retention: clear session and audit IPs after 90 days · deps: M4-T03, M2-T15 · PRD: §11
+- [x] M7-T16 · IP retention: clear session and audit IPs after 90 days · deps: M4-T03, M2-T15 · PRD: §11
   - Accept: a daily job nulls `ip` on sessions and `audit_log` rows older than 90 days (integration test with a clock override)
   - Accept: the audit trigger allows only this IP-clearing update and still rejects every other UPDATE or DELETE (integration test)
 - [ ] M7-T17 · E2E: report and unpublish; admin assigns a role and suspends a user · deps: M7-T06, M7-T07 · PRD: §12
