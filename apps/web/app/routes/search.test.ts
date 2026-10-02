@@ -17,15 +17,47 @@ function ask(fetchMock: typeof fetch, search: string) {
   return loader({ request: new Request(`http://web.test/search${search}`) } as never)
 }
 
+const tree = {
+  items: [
+    {
+      slug: 'fiction',
+      name: 'Fiction',
+      description: null,
+      featured: true,
+      children: [
+        {
+          slug: 'science-fiction',
+          name: 'Science Fiction',
+          description: null,
+          featured: false,
+          children: [],
+        },
+      ],
+    },
+  ],
+}
+
+/** Answers `/v1/genres` with the tree and everything else with `search`. */
+function routed(search: unknown) {
+  return vi.fn(async (url: URL) =>
+    String(url).includes('/v1/genres') ? Response.json(tree) : Response.json(search),
+  )
+}
+
+function searchCall(fetchMock: ReturnType<typeof routed>): URL {
+  const call = fetchMock.mock.calls.find(([url]) => String(url).includes('/v1/search'))
+  return new URL(String(call?.[0]))
+}
+
 describe('search loader', () => {
   it('forwards the query, filters, sort, and page to the API', async () => {
-    const fetchMock = vi.fn(async (_url: URL) => Response.json(empty))
+    const fetchMock = routed(empty)
     const result = (await ask(
       fetchMock as never,
       '?q=dune&decade=1960&sort=newest&page=2&bogus=1',
     )) as { query: { q: string } }
     expect(result.query.q).toBe('dune')
-    const url = new URL(String(fetchMock.mock.calls[0]?.[0]))
+    const url = searchCall(fetchMock)
     expect(url.pathname).toBe('/v1/search')
     expect(Object.fromEntries(url.searchParams)).toEqual({
       q: 'dune',
@@ -36,17 +68,49 @@ describe('search loader', () => {
   })
 
   it('drops bad parameters instead of failing', async () => {
-    const fetchMock = vi.fn(async (_url: URL) => Response.json(empty))
+    const fetchMock = routed(empty)
     await ask(fetchMock as never, '?q=dune&decade=1961&minRating=9&language=')
-    const url = new URL(String(fetchMock.mock.calls[0]?.[0]))
+    const url = searchCall(fetchMock)
     expect(Object.fromEntries(url.searchParams)).toEqual({ q: 'dune' })
   })
 
-  it('does not call the API for a query under 2 characters', async () => {
-    const fetchMock = vi.fn()
+  it('does not search for a query under 2 characters', async () => {
+    const fetchMock = routed(empty)
     const result = (await ask(fetchMock as never, '?q=d')) as { results: unknown }
     expect(result.results).toBeNull()
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/v1/search'))).toBe(false)
+  })
+
+  it('loads the Genre list for the filter select on the Books tab', async () => {
+    const result = (await ask(routed(empty) as never, '?q=dune&genre=science-fiction')) as {
+      genres: { slug: string }[]
+      query: { genre: string }
+    }
+    expect(result.genres.map((genre) => genre.slug)).toEqual(['fiction'])
+    expect(result.query.genre).toBe('science-fiction')
+  })
+
+  it('skips the Genre list on the Authors tab', async () => {
+    const fetchMock = routed(empty)
+    const result = (await ask(fetchMock as never, '?q=herbert&type=authors')) as {
+      genres: unknown[]
+    }
+    expect(result.genres).toEqual([])
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/v1/genres'))).toBe(false)
+  })
+
+  it('still searches when the Genre list cannot load', async () => {
+    const fetchMock = vi.fn(async (url: URL) =>
+      String(url).includes('/v1/genres')
+        ? new Response(null, { status: 500 })
+        : Response.json(empty),
+    )
+    const result = (await ask(fetchMock as never, '?q=dune')) as {
+      failed: boolean
+      genres: unknown[]
+    }
+    expect(result.failed).toBe(false)
+    expect(result.genres).toEqual([])
   })
 
   it('redirects an ISBN with a stored Book straight to it', async () => {

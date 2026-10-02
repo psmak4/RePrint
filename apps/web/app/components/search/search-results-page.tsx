@@ -1,5 +1,6 @@
 import {
   type BookSummary,
+  type GenreNode,
   SEARCH_SORTS,
   type SearchCandidate,
   type SearchQuery,
@@ -99,7 +100,15 @@ function Tabs({ query }: { query: SearchQuery }) {
   )
 }
 
-function Filters({ query }: { query: SearchQuery }) {
+/** The Genre tree as a flat, depth-first list; child Genres are indented with a dash prefix. */
+function flattenGenres(nodes: GenreNode[], depth = 0): { slug: string; label: string }[] {
+  return nodes.flatMap((node) => [
+    { slug: node.slug, label: `${'– '.repeat(depth)}${node.name}` },
+    ...flattenGenres(node.children, depth + 1),
+  ])
+}
+
+function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] }) {
   const c = copy.search
   return (
     <form
@@ -109,8 +118,22 @@ function Filters({ query }: { query: SearchQuery }) {
       className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-surface p-4"
     >
       <input type="hidden" name="q" value={query.q} />
-      {/* The Genre list arrives with the Genres API (M5-T03); until then a Genre filter from the URL is kept and can be removed. */}
-      {query.genre ? <input type="hidden" name="genre" value={query.genre} /> : null}
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="filter-genre">{c.genre}</Label>
+        <select
+          id="filter-genre"
+          name="genre"
+          defaultValue={query.genre ?? ''}
+          className={SELECT_CLASS}
+        >
+          <option value="">{c.anyOption}</option>
+          {flattenGenres(genres).map((genre) => (
+            <option key={genre.slug} value={genre.slug}>
+              {genre.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="filter-language">{c.language}</Label>
         <select
@@ -261,10 +284,12 @@ export function SearchResultsPage({
   query,
   results,
   failed,
+  genres = [],
 }: {
   query: SearchQuery
   results: SearchResponse | null
   failed: boolean
+  genres?: GenreNode[]
 }) {
   const c = copy.search
   return (
@@ -281,18 +306,7 @@ export function SearchResultsPage({
         </form>
       </search>
       <Tabs query={query} />
-      {query.type === 'books' ? <Filters query={query} /> : null}
-      {query.genre ? (
-        <p className="flex items-center gap-2 text-sm">
-          <span>{c.genreActive(query.genre)}</span>
-          <Link
-            to={searchHref(query, { genre: undefined, page: 1 })}
-            className="text-link underline"
-          >
-            {c.genreRemove}
-          </Link>
-        </p>
-      ) : null}
+      {query.type === 'books' ? <Filters query={query} genres={genres} /> : null}
       {failed ? (
         <p role="alert" className="text-danger">
           {c.loadFailed}

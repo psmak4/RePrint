@@ -388,7 +388,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5
   - Accept: `/genres` lists all Genres; `/genres/:slug` shows Books with sort options in the URL (component and loader tests)
   - Accept: `/series/:slug` shows Books in order with positions and ratings (component test)
-- [ ] M5-T05a · Web: Genre filter select on the search results page · deps: M5-T03, M3-T17 · PRD: §7.3
+- [x] M5-T05a · Web: Genre filter select on the search results page · deps: M5-T03, M3-T17 · PRD: §7.3
   - Accept: the `/search` filter form has a Genre select filled from `GET /v1/genres`, keeps the choice in the URL, and replaces the "remove Genre filter" link (component and loader tests)
 - [ ] M5-T06 · Discover rows: `featured_items`, row builders, 10-minute rebuild job, `GET /v1/discover` · deps: M5-T03, M4-T05 · PRD: §7.2, §9, §10
   - Accept: rows are built for Recently reviewed (one card per Book), Top rated (weighted, ≥ 5 approved reviews), Most reviewed this month (last 30 days), Browse by genre (12 featured Genres), and Featured review (integration tests)

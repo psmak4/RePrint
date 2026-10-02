@@ -68,8 +68,7 @@ export const copy = {
     anyOption: 'Any',
     decadeOption: (year: number) => `${year}s`,
     minRatingOption: (stars: number) => `${stars} stars and up`,
-    genreActive: (slug: string) => `Genre: ${slug}`,
-    genreRemove: 'Remove genre filter',
+    genre: 'Genre',
     catalogOnly: 'Genre, language, and rating filters show only books already on RePrint.',
     sorts: {
       relevance: 'Relevance',
