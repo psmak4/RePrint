@@ -435,7 +435,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T09 · Seed: libraries for seeded Members, including private libraries · deps: M6-T01, M3-T21, M2-T21 · PRD: §13
   - Accept: `pnpm db:reset` seeds shelf entries across all three shelves, with some private libraries
   - Accept: seeded libraries include Books the owner reviewed and Books they didn't, exercising the "independent of reviews" rule
-- [ ] M6-T10 · E2E: shelve and view a library · deps: M6-T05, M6-T07, M6-T09 · PRD: §12
+- [x] M6-T10 · E2E: shelve and view a library · deps: M6-T05, M6-T07, M6-T09 · PRD: §12
   - Accept: `e2e/library.spec.ts` shelves a Book from the book page and from search results, changes the shelf, views the library tabs and profile, with axe checks
   - Accept: the spec confirms a private library is hidden from another signed-in Member
 - [ ] M6-T11 · M6 verification: run the Libraries and profiles acceptance criteria end to end, fix gaps, update docs · deps: M6-T08, M6-T10 · PRD: §3, §7.7, §7.8, §11

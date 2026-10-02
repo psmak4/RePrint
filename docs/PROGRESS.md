@@ -449,3 +449,7 @@ Entry format:
 ### 2026-10-01 · M6-T09 · PR pending
 - `seedLibraries` (`modules/library/seed-libraries.ts`), `pnpm --filter api seed:libraries` wired into `db:seed` and `db:reset`. Integration test in `seed-libraries.integration.test.ts`. D-146 records the choices.
 - Next iteration: M6-T10 (e2e). Seeded private Libraries belong to the first four reviewers by username; public ones to the next ten. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M6-T10 · PR pending
+- `e2e/specs/library.spec.ts` (specs live in `e2e/specs/`): shelves Dune from the Book page and from search results, changes the Shelf from the library, checks tab counts, profile → Library link, and that a private Library is hidden from another signed-in Member (and its profile has no Library tab) but still open to its owner. axe on each page; passes in chromium, webkit, and mobile.
+- Next iteration: M6-T11 (M6 verification). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
