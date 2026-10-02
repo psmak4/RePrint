@@ -14,6 +14,7 @@ export default [
   route('genres', 'routes/genres.tsx'),
   route('genres/:slug', 'routes/genre.tsx'),
   route('series/:slug', 'routes/series.tsx'),
+  route('u/:username/library', 'routes/library.tsx'),
   route('resolve', 'routes/resolve.tsx'),
   route('search', 'routes/search.tsx'),
   route('search/suggest', 'routes/search-suggest.tsx'),

@@ -955,3 +955,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.7 and §10 name the route, filters, and sorts; they leave the response shape, counts, caching, and which accounts count open.
 - Affects: M6-T05, M6-T07, M6-T08
 
+
+### D-142 · Library page (M6-T05)
+- Status: Implementation
+- Decision: `/u/:username/library` reads `shelf`, `sort`, and `page` from the URL (bad values fall back to the defaults) and renders Shelf tabs (All, Reading, Want to Read, Read) with counts, a GET sort form, and numbered pagination. Cards are in a grid (1 column at base, 2 at `sm`, 3 at `lg`). The owner (the root session's username matches, case-insensitively) gets a `ShelfSelector` on each card seeded from the entry's Shelf; a change or "Remove" takes effect on the next load and the card stays in place until then. When the API answers 404 the page renders "This library is private, or it doesn't exist" with HTTP status 404, so a private Library and an unknown account look the same (D-141). The page is `noindex`.
+- Why: PRD §7.7 and `docs/DESIGN.md` leave the grid, the owner's inline control, and the private wording open.
+- Affects: M6-T07, M6-T10
