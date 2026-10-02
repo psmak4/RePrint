@@ -120,6 +120,13 @@
       "when": 1790924555078,
       "tag": "0016_low_mandrill",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790983942793,
+      "tag": "0017_featured_permissions",
+      "breakpoints": true
     }
   ]
 }

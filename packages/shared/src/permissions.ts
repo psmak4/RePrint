@@ -10,11 +10,13 @@ export const PERMISSIONS = {
   reviewsModerate: 'reviews.moderate',
   reportsResolve: 'reports.resolve',
   usersView: 'users.view',
+  featuredManage: 'featured.manage',
   // Admin
   usersSuspend: 'users.suspend',
   rolesAssign: 'roles.assign',
   auditView: 'audit.view',
   catalogManage: 'catalog.manage',
+  featuredGenres: 'featured.genres',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
@@ -54,6 +56,7 @@ export const MODERATOR_PERMISSIONS: readonly Permission[] = [
   PERMISSIONS.reviewsModerate,
   PERMISSIONS.reportsResolve,
   PERMISSIONS.usersView,
+  PERMISSIONS.featuredManage,
 ]
 
 /** The permission grants of the PRD §4 table. The accounts data migration seeds exactly these. */
