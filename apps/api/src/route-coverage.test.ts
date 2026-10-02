@@ -28,6 +28,7 @@ const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
 const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
+const SHELF = 'modules/library/shelf.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -124,6 +125,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'DELETE /v1/reviews/{id}/helpful': {
     allowed: [HELPFUL, 'removes the vote and lowers the count'],
     denied: [HELPFUL, 'denies Visitors and answers 404 for an unknown review'],
+  },
+  'PUT /v1/books/{slug}/shelf': {
+    allowed: [SHELF, 'puts a Book on a Shelf and replaces it'],
+    denied: [SHELF, 'returns 401 to Visitors'],
+  },
+  'DELETE /v1/books/{slug}/shelf': {
+    allowed: [SHELF, 'removes a Book from the Shelf'],
+    denied: [SHELF, 'returns 401 to Visitors on delete'],
   },
   'GET /v1/books/{slug}/helpful-votes': {
     allowed: [HELPFUL, 'lists the review IDs the Member marked helpful on a Book'],

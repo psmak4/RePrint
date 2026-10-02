@@ -411,3 +411,8 @@ Entry format:
 ### 2026-10-01 · M5-T09 · PR pending
 - M5 verification. Added `e2e/specs/discover.spec.ts` (Discover home, Genres index → Genre page with a sort, Series page created through the DB; axe on each, all three projects). `pnpm check` and `pnpm test:e2e` pass (33 tests), and the new spec also passes on a `db:reset` seeded database. Criteria 1–6 are covered by the M5-T01..T08 integration and component tests.
 - Next iteration: M6-T01 (Shelves). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M6-T01 · PR pending
+- `shelf_entries` table (migration 0011), shared `Shelf` schemas (`packages/shared/src/shelves.ts`), and `PUT/DELETE /v1/books/:slug/shelf` in `modules/library/routes.ts`. Integration tests in `shelf.integration.test.ts`; route-coverage table extended. D-138 records the choices.
+- Next iteration: M6-T02 (`viewerShelf` on Book, search, Series, Discover responses; those are public cached routes, so mind `Cache-Control: private`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them (`pnpm --filter @reprint/shared build`, `pnpm --filter @reprint/db build`) before API tests.
+
