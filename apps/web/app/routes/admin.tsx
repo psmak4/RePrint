@@ -33,6 +33,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (viewer.permissions.includes(PERMISSIONS.auditView)) {
     items.push({ to: '/admin/audit', label: copy.admin.auditNav })
   }
+  if (viewer.permissions.includes(PERMISSIONS.catalogManage)) {
+    items.push({ to: '/admin/catalog', label: copy.admin.catalogNav })
+    items.push({ to: '/admin/catalog/merge', label: copy.admin.mergeNav })
+    items.push({ to: '/admin/catalog/genres', label: copy.admin.genresNav })
+  }
   return { items }
 }
 

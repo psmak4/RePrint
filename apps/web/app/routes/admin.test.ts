@@ -65,4 +65,15 @@ describe('admin layout loader', () => {
   it('is noindex', () => {
     expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
   })
+
+  it('lists the Catalog sections for a holder of catalog.manage', async () => {
+    loadSession.mockResolvedValue(viewer(['catalog.manage']))
+    expect(await loader(args)).toEqual({
+      items: [
+        { to: '/admin/catalog', label: 'Catalog' },
+        { to: '/admin/catalog/merge', label: 'Merge queue' },
+        { to: '/admin/catalog/genres', label: 'Genres and rules' },
+      ],
+    })
+  })
 })

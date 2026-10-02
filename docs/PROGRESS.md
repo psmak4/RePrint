@@ -512,3 +512,7 @@ Entry format:
 ### 2026-10-02 · M7-T13 · PR pending
 - `/admin/books/:id` (`routes/admin-book.tsx`, `components/admin/book-editor.tsx`): edit title, description, Genres, Series, Contributions, and Primary Edition (only changed groups are sent), upload a Cover, trigger a refresh, and see locked fields with their origins. Added `GET /v1/admin/books/:id` (with Editions) and `adminBookDetailSchema`; `openapi.json` regenerated; route-coverage table extended. Loader/action and component tests (incl. axe). D-159 records the choices.
 - Next iteration: M7-T14 (merge queue, Genre and rule management, Catalog dashboard web pages). Nothing links to `/admin/books/:id` yet; add the entry points with the Catalog nav. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-02 · M7-T14 · PR pending
+- `/admin/catalog` (stats dashboard), `/admin/catalog/merge` (side-by-side pairs, confirmed Merge in either direction, Dismiss), and `/admin/catalog/genres` (Genre add/edit/archive/restore and Subject rules) with routes `admin-catalog*.tsx` and components `catalog-dashboard`, `merge-queue`, `genre-manager`; the admin nav gains the three links for `catalog.manage`. Merge cards link to `/admin/books/:id`. Loader/action and component tests (incl. axe). D-160 records the choices.
+- Next iteration: M7-T15 (featured content, `PUT /v1/admin/featured`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
