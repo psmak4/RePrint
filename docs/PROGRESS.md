@@ -385,3 +385,7 @@ Entry format:
 ### 2026-10-01 · M5-T04 · PR pending
 - `GET /v1/series/:slug` in `modules/catalog/series.ts` and `routes.ts`; schema in `packages/shared/src/series-api.ts`; `openapi.json` regenerated. Integration tests in `series.integration.test.ts` (reading order with decimal and empty positions, empty Series, 404); route-coverage table extended. D-134 records the choices.
 - Next iteration: M5-T05 (web Genres index, Genre page, Series page). The Series response is `{ series, items: [{ position, book }] }` with no paging. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.
+
+### 2026-10-01 · M5-T05 · PR pending
+- Web pages `/genres` (`routes/genres.tsx`), `/genres/:slug` (`routes/genre.tsx`, sort and page read from the URL, bad values fall back to defaults) and `/series/:slug` (`routes/series.tsx`); components in `components/books/genre-pages.tsx` and `series-page.tsx`; copy under `copy.genres` and `copy.series`. Tests in `genre-series-pages.test.tsx` (with axe) and `routes/genres.test.ts`.
+- Next iteration: M5-T05a (Genre select on `/search`); `GenresIndexPage` shows the tree and `GET /v1/genres` is the data source. The Series page does not show the viewer's shelf status yet; M6-T03 adds the shelf selector. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
