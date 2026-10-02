@@ -470,7 +470,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T07 · Web: admin users list and detail with actions · deps: M7-T04, M7-T05, M4-T11 · PRD: §7.11
   - Accept: `/admin/users` searches and filters with state in the URL (component and loader tests)
   - Accept: `/admin/users/:id` shows the detail sections and actions for roles, suspend (reason, end date), unsuspend, end all sessions, and resend verification, gated by permission (component tests)
-- [ ] M7-T08 · Audit log: `GET /v1/admin/audit`, `/v1/admin/audit.csv`, and `/admin/audit` page · deps: M4-T03, M4-T11 · PRD: §7.11, §10
+- [x] M7-T08 · Audit log: `GET /v1/admin/audit`, `/v1/admin/audit.csv`, and `/admin/audit` page · deps: M4-T03, M4-T11 · PRD: §7.11, §10
   - Accept: the API filters by actor, action, target, and date range with cursor pagination; `audit.view` is required (allowed and denied tests)
   - Accept: the CSV export streams the filtered rows with a header row, with values escaped for CSV injection (integration test)
   - Accept: the web page shows filters and before/after values (component test)

@@ -55,9 +55,11 @@ describe('admin layout loader', () => {
     expect(await loader(args)).toEqual({ items: [{ to: '/admin/users', label: 'Users' }] })
   })
 
-  it('opens the area for audit.view alone but lists no links', async () => {
+  it('opens the area for audit.view alone and lists only the audit log', async () => {
     loadSession.mockResolvedValue(viewer(['audit.view']))
-    expect(await loader(args)).toEqual({ items: [] })
+    expect(await loader(args)).toEqual({
+      items: [{ to: '/admin/audit', label: 'Audit log' }],
+    })
   })
 
   it('is noindex', () => {

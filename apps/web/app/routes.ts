@@ -31,11 +31,13 @@ export default [
     route('profile', 'routes/settings-profile.tsx'),
     route('security', 'routes/settings-security.tsx'),
   ]),
+  route('admin/audit.csv', 'routes/admin-audit-csv.ts'),
   route('admin', 'routes/admin.tsx', [
     index('routes/admin-index.tsx'),
     route('reviews', 'routes/admin-reviews.tsx'),
     route('reports', 'routes/admin-reports.tsx'),
     route('users', 'routes/admin-users.tsx'),
     route('users/:id', 'routes/admin-user.tsx'),
+    route('audit', 'routes/admin-audit.tsx'),
   ]),
 ] satisfies RouteConfig

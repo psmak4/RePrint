@@ -486,3 +486,8 @@ Entry format:
 ### 2026-10-02 · M7-T07 · PR pending
 - `/admin/users` (`routes/admin-users.tsx`, `components/admin/users-list.tsx`) and `/admin/users/:id` (`routes/admin-user.tsx`, `components/admin/user-detail.tsx`) with role, suspend, unsuspend, end sessions, and resend actions; "Users" nav link. Loader/action and component tests alongside (incl. axe). D-153 records the choices.
 - Next iteration: M7-T08 (audit log API and `/admin/audit` page; add the nav link for `audit.view` in `routes/admin.tsx`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-02 · M7-T08 · PR pending
+- `GET /v1/admin/audit` and `/v1/admin/audit.csv` in `modules/admin/audit.ts` (`audit.view`); shared schemas in `packages/shared/src/admin-audit-api.ts`; `openapi.json` regenerated. Web: `/admin/audit` (`routes/admin-audit.tsx`, `components/admin/audit-log.tsx`), the CSV resource route `routes/admin-audit-csv.ts`, and an "Audit log" nav link. Integration tests in `admin/audit.integration.test.ts`; route-coverage table extended. D-154 records the choices.
+- Next iteration: M7-T09 (admin Catalog editing). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
