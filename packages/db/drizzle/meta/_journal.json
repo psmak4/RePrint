@@ -71,6 +71,13 @@
       "when": 1790897655529,
       "tag": "0009_complete_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790900119048,
+      "tag": "0010_whole_master_chief",
+      "breakpoints": true
     }
   ]
 }

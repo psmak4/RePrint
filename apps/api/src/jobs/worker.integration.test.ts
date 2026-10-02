@@ -79,6 +79,7 @@ describe('worker (dist/worker.js)', () => {
     expect(schedulers.map((scheduler) => scheduler.name).sort()).toEqual([
       'accounts.erase',
       'catalog.purgeSourceRecords',
+      'discover.rebuild',
       'ratings.recompute',
       'system.heartbeat',
     ])

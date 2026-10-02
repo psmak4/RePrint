@@ -17,7 +17,7 @@ Add an entry to `jobs` in `registry.ts`:
 
 - **Names** are `<area>.<action>`, lowercase, for example `system.heartbeat`.
 - **`payload`** is a Zod schema. It is checked when the job is enqueued and again before the handler runs, so a bad payload never reaches a handler.
-- **`handler`** gets the parsed payload and a context (`{ log, mailer, db, storage }`; later tasks add services there). Throwing marks the job failed. Handlers must be safe to run twice.
+- **`handler`** gets the parsed payload and a context (`{ log, mailer, db, redis, storage, catalog }`; later tasks add services there). Throwing marks the job failed. Handlers must be safe to run twice.
 - **Types** come from the registry: `JobName`, `JobPayload<'name'>`, and `JobResult<'name'>`.
 
 ## Enqueue a job

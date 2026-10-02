@@ -23,6 +23,7 @@ async function main(): Promise<void> {
     log,
     mailer,
     db: database.db,
+    redis,
     storage: createImageStorage(env),
     catalog,
     onJobError: captureError,
