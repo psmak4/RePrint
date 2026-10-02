@@ -14,6 +14,7 @@ export const PERMISSIONS = {
   usersSuspend: 'users.suspend',
   rolesAssign: 'roles.assign',
   auditView: 'audit.view',
+  catalogManage: 'catalog.manage',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

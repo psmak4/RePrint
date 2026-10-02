@@ -474,7 +474,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the API filters by actor, action, target, and date range with cursor pagination; `audit.view` is required (allowed and denied tests)
   - Accept: the CSV export streams the filtered rows with a header row, with values escaped for CSV injection (integration test)
   - Accept: the web page shows filters and before/after values (component test)
-- [ ] M7-T09 · Admin Catalog editing: `PATCH /v1/admin/books/:id` · deps: M3-T09, M4-T03 · PRD: §5.2, §5.4, §7.11, §10
+- [x] M7-T09 · Admin Catalog editing: `PATCH /v1/admin/books/:id` · deps: M3-T09, M4-T03 · PRD: §5.2, §5.4, §7.11, §10
   - Accept: Admins can edit title, description, Genres, Series (with position), and contributions; edited fields get `field_origins` = admin and are added to `locked_fields` (integration tests)
   - Accept: a later refresh leaves locked fields untouched (integration test); the permission is per `docs/DECISIONS.md`, and non-admins get 403
   - Accept: each edit writes an audit row with before and after values

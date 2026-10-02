@@ -99,6 +99,13 @@
       "when": 1790918703586,
       "tag": "0013_lush_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790921285734,
+      "tag": "0014_catalog_manage_permission",
+      "breakpoints": true
     }
   ]
 }
