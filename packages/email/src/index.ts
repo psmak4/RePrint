@@ -4,6 +4,7 @@ export {
   type AccountDeletionScheduledProps,
   accountDeletionScheduledProps,
 } from './templates/account-deletion-scheduled.js'
+export { type AccountSuspendedProps, accountSuspendedProps } from './templates/account-suspended.js'
 export {
   type EmailAlreadyRegisteredProps,
   emailAlreadyRegisteredProps,

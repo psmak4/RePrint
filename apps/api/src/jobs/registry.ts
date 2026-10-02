@@ -1,6 +1,7 @@
 import type { Database } from '@reprint/db'
 import {
   accountDeletionScheduledProps,
+  accountSuspendedProps,
   emailAlreadyRegisteredProps,
   emailChangeConfirmProps,
   emailChangedProps,
@@ -18,6 +19,7 @@ import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
 import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
+import { liftExpiredSuspensions } from '../modules/admin/suspensions.js'
 import { rebuildDiscover } from '../modules/discover/cache.js'
 import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import type { ImageStorage } from '../storage/index.js'
@@ -83,6 +85,11 @@ export const emailSendPayload = z.discriminatedUnion('template', [
     to: z.email(),
     props: accountDeletionScheduledProps,
   }),
+  z.object({
+    template: z.literal('account-suspended'),
+    to: z.email(),
+    props: accountSuspendedProps,
+  }),
   z.object({ template: z.literal('review-decision'), to: z.email(), props: reviewDecisionProps }),
 ])
 
@@ -113,6 +120,17 @@ export const jobs = {
     handler: async ({ now }, { log, db, storage }) =>
       eraseDeletedAccounts({ db, storage, log, now: now ? new Date(now) : undefined }),
     schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'users.lift_suspensions': defineJob({
+    // `now` overrides the clock so tests can lift without waiting.
+    payload: z.object({ now: z.iso.datetime().optional() }),
+    handler: async ({ now }, { db, log }) => {
+      const result = await liftExpiredSuspensions(db, now ? new Date(now) : undefined)
+      if (result.lifted > 0) log.info(result, 'suspensions lifted')
+      return result
+    },
+    schedule: { everyMs: 5 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
   }),
   'ratings.recompute': defineJob({

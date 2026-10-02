@@ -21,6 +21,8 @@ export const users = pgTable(
     emailReviewDecisions: boolean('email_review_decisions').notNull().default(true),
     status: text('status', { enum: USER_STATUSES }).notNull().default('active'),
     suspendedUntil: timestamptz('suspended_until'),
+    /** Why an Admin suspended the account (shown to Admins and in the suspension email). */
+    suspendedReason: text('suspended_reason'),
     deletedAt: timestamptz('deleted_at'),
     ...timestamps(),
   },

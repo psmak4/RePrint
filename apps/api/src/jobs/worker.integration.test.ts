@@ -82,6 +82,7 @@ describe('worker (dist/worker.js)', () => {
       'discover.rebuild',
       'ratings.recompute',
       'system.heartbeat',
+      'users.lift_suspensions',
     ])
   })
 

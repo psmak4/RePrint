@@ -5,6 +5,11 @@ import {
   accountDeletionScheduledSubject,
 } from './templates/account-deletion-scheduled.js'
 import {
+  AccountSuspended,
+  accountSuspendedProps,
+  accountSuspendedSubject,
+} from './templates/account-suspended.js'
+import {
   EmailAlreadyRegistered,
   emailAlreadyRegisteredProps,
   emailAlreadyRegisteredSubject,
@@ -78,6 +83,11 @@ export const emailTemplates = {
     props: accountDeletionScheduledProps,
     subject: () => accountDeletionScheduledSubject,
     component: AccountDeletionScheduled,
+  },
+  'account-suspended': {
+    props: accountSuspendedProps,
+    subject: () => accountSuspendedSubject,
+    component: AccountSuspended,
   },
   'review-decision': {
     props: reviewDecisionProps,

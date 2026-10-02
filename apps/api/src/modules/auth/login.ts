@@ -3,6 +3,7 @@ import { loginRequestSchema, loginResponseSchema, logoutResponseSchema } from '@
 import { eq } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
+import { liftExpiredSuspensions } from '../admin/suspensions.js'
 import { rateLimit } from '../rate-limit/plugin.js'
 import { requireAuth } from './guards.js'
 import { hashPassword, verifyPassword } from './password.js'
@@ -59,6 +60,11 @@ export const loginRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app,
       // Deleted accounts get the generic answer: the 30-day window is not something to reveal (D-043).
       if (!user || !passwordOk || user.status === 'deleted') throw badCredentials()
 
+      if (user.status === 'suspended' && user.suspendedUntil && user.suspendedUntil <= new Date()) {
+        // The scheduled job lifts these every few minutes; do it now so the Member isn't kept out.
+        await liftExpiredSuspensions(db, undefined, user.id)
+        user.status = 'active'
+      }
       if (user.status === 'suspended') {
         // Only after a correct password, so this message can't be used to find accounts (D-047).
         const until = user.suspendedUntil

@@ -1013,3 +1013,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §4 and §7.11 name the endpoints and the last-Admin rule but not the payloads, idempotence, or the locking.
 - Affects: M7-T07, M7-T17
 
+
+### D-151 · Suspensions, session revocation, and verification resend (M7-T05)
+
+- Status: Implementation
+- Decision: (1) `POST /v1/admin/users/:id/suspend` (`{ reason, until? }`), `/unsuspend`, and `/revoke-sessions` need `users.suspend`; `/resend-verification` needs `users.view`, because it only mails the account's own address and shows no data (Moderators may use it). Suspending sets `status`, `suspended_until`, and the new nullable `users.suspended_reason`, deletes every session, writes `user.suspend`, and queues the `account-suspended` email (reason and end date) after the commit. `until` must be in the future; an Admin cannot suspend themselves (409), and suspending a deleted or already suspended account is a 409, as is unsuspending an account that is not suspended. Revoking writes `session.revoke` with target type `user` and the number of sessions ended. A resend deletes the earlier unused link, writes `user.resend_verification`, and sends nothing (`sent: false`, no audit row) for a verified account; suspended and deleted accounts are a 409. (2) A suspension with an end date is lifted by the `users.lift_suspensions` job (every 5 minutes, `now` override for tests) and also at login, so a Member is not kept out until the next run. Automatic lifts write no audit row, since no Moderator or Admin acted. (3) The detail response gains `suspendedReason`, shown in the full view only.
+- Why: PRD §4, §7.11, and §10 name the actions but not the permissions of the resend, the lift mechanism, or the payloads.
+- Affects: M7-T07, M7-T17
