@@ -76,7 +76,7 @@ function orderBy(sort: GenreSort) {
       return sql`b.review_count desc, b.id`
     case 'newest_review':
       return sql`(select max(r.decided_at) from reviews r
-        where r.book_id = b.id and r.status = 'approved') desc nulls last, b.review_count desc, b.id`
+        where r.book_id = b.id and r.status = 'approved' and r.hidden_at is null) desc nulls last, b.review_count desc, b.id`
     default:
       return sql`((${WEIGHTED_RATING_C}::float8 * site.mean + b.rating_sum) / (${WEIGHTED_RATING_C} + b.review_count)) desc,
         b.review_count desc, b.id`

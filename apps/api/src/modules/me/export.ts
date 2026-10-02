@@ -3,6 +3,7 @@ import {
   covers,
   helpfulVotes,
   notifications,
+  reviewReports,
   reviews,
   reviewVersions,
   sessions,
@@ -53,68 +54,85 @@ export const exportRoutes: FastifyPluginAsyncZod<ExportRoutesOptions> = async (a
         .where(eq(users.id, userId))
       if (!account) throw new HttpProblem(401, 'Sign in to continue.')
 
-      const [reviewRows, voteRows, shelfRows, notificationRows, sessionRows] = await Promise.all([
-        db
-          .select({
-            id: reviews.id,
-            slug: books.slug,
-            title: books.title,
-            rating: reviews.rating,
-            headline: reviews.headline,
-            body: reviews.body,
-            hasSpoilers: reviews.hasSpoilers,
-            status: reviews.status,
-            helpfulCount: reviews.helpfulCount,
-            submittedAt: reviews.submittedAt,
-            decidedAt: reviews.decidedAt,
-          })
-          .from(reviews)
-          .innerJoin(books, eq(books.id, reviews.bookId))
-          .where(eq(reviews.userId, userId))
-          .orderBy(asc(reviews.submittedAt), asc(reviews.id)),
-        db
-          .select({
-            reviewId: helpfulVotes.reviewId,
-            slug: books.slug,
-            title: books.title,
-            createdAt: helpfulVotes.createdAt,
-          })
-          .from(helpfulVotes)
-          .innerJoin(reviews, eq(reviews.id, helpfulVotes.reviewId))
-          .innerJoin(books, eq(books.id, reviews.bookId))
-          .where(eq(helpfulVotes.userId, userId))
-          .orderBy(asc(helpfulVotes.createdAt), asc(helpfulVotes.reviewId)),
-        db
-          .select({
-            slug: books.slug,
-            title: books.title,
-            shelf: shelfEntries.shelf,
-            addedAt: shelfEntries.addedAt,
-            updatedAt: shelfEntries.updatedAt,
-          })
-          .from(shelfEntries)
-          .innerJoin(books, eq(books.id, shelfEntries.bookId))
-          .where(eq(shelfEntries.userId, userId))
-          .orderBy(asc(shelfEntries.addedAt), asc(shelfEntries.id)),
-        db
-          .select()
-          .from(notifications)
-          .where(eq(notifications.userId, userId))
-          .orderBy(asc(notifications.createdAt), asc(notifications.id)),
-        // Token hashes stay out: they authenticate the session.
-        db
-          .select({
-            id: sessions.id,
-            ip: sessions.ip,
-            userAgent: sessions.userAgent,
-            createdAt: sessions.createdAt,
-            lastSeenAt: sessions.lastSeenAt,
-            expiresAt: sessions.expiresAt,
-          })
-          .from(sessions)
-          .where(eq(sessions.userId, userId))
-          .orderBy(asc(sessions.createdAt), asc(sessions.id)),
-      ])
+      const [reviewRows, voteRows, reportRows, shelfRows, notificationRows, sessionRows] =
+        await Promise.all([
+          db
+            .select({
+              id: reviews.id,
+              slug: books.slug,
+              title: books.title,
+              rating: reviews.rating,
+              headline: reviews.headline,
+              body: reviews.body,
+              hasSpoilers: reviews.hasSpoilers,
+              status: reviews.status,
+              helpfulCount: reviews.helpfulCount,
+              submittedAt: reviews.submittedAt,
+              decidedAt: reviews.decidedAt,
+            })
+            .from(reviews)
+            .innerJoin(books, eq(books.id, reviews.bookId))
+            .where(eq(reviews.userId, userId))
+            .orderBy(asc(reviews.submittedAt), asc(reviews.id)),
+          db
+            .select({
+              reviewId: helpfulVotes.reviewId,
+              slug: books.slug,
+              title: books.title,
+              createdAt: helpfulVotes.createdAt,
+            })
+            .from(helpfulVotes)
+            .innerJoin(reviews, eq(reviews.id, helpfulVotes.reviewId))
+            .innerJoin(books, eq(books.id, reviews.bookId))
+            .where(eq(helpfulVotes.userId, userId))
+            .orderBy(asc(helpfulVotes.createdAt), asc(helpfulVotes.reviewId)),
+          db
+            .select({
+              id: reviewReports.id,
+              reviewId: reviewReports.reviewId,
+              slug: books.slug,
+              title: books.title,
+              reason: reviewReports.reason,
+              note: reviewReports.note,
+              status: reviewReports.status,
+              createdAt: reviewReports.createdAt,
+            })
+            .from(reviewReports)
+            .innerJoin(reviews, eq(reviews.id, reviewReports.reviewId))
+            .innerJoin(books, eq(books.id, reviews.bookId))
+            .where(eq(reviewReports.reporterId, userId))
+            .orderBy(asc(reviewReports.createdAt), asc(reviewReports.id)),
+          db
+            .select({
+              slug: books.slug,
+              title: books.title,
+              shelf: shelfEntries.shelf,
+              addedAt: shelfEntries.addedAt,
+              updatedAt: shelfEntries.updatedAt,
+            })
+            .from(shelfEntries)
+            .innerJoin(books, eq(books.id, shelfEntries.bookId))
+            .where(eq(shelfEntries.userId, userId))
+            .orderBy(asc(shelfEntries.addedAt), asc(shelfEntries.id)),
+          db
+            .select()
+            .from(notifications)
+            .where(eq(notifications.userId, userId))
+            .orderBy(asc(notifications.createdAt), asc(notifications.id)),
+          // Token hashes stay out: they authenticate the session.
+          db
+            .select({
+              id: sessions.id,
+              ip: sessions.ip,
+              userAgent: sessions.userAgent,
+              createdAt: sessions.createdAt,
+              lastSeenAt: sessions.lastSeenAt,
+              expiresAt: sessions.expiresAt,
+            })
+            .from(sessions)
+            .where(eq(sessions.userId, userId))
+            .orderBy(asc(sessions.createdAt), asc(sessions.id)),
+        ])
 
       const versionRows =
         reviewRows.length === 0
@@ -179,6 +197,15 @@ export const exportRoutes: FastifyPluginAsyncZod<ExportRoutesOptions> = async (a
         helpfulVotes: voteRows.map((row) => ({
           reviewId: row.reviewId,
           book: { slug: row.slug, title: row.title },
+          createdAt: iso(row.createdAt),
+        })),
+        reports: reportRows.map((row) => ({
+          id: row.id,
+          reviewId: row.reviewId,
+          book: { slug: row.slug, title: row.title },
+          reason: row.reason,
+          note: row.note,
+          status: row.status,
           createdAt: iso(row.createdAt),
         })),
         library: shelfRows.map((row) => ({

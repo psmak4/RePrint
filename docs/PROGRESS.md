@@ -457,3 +457,7 @@ Entry format:
 ### 2026-10-01 · M6-T11 · PR pending
 - M6 verification: `pnpm check` and `pnpm test:e2e` (39 passed across chromium, webkit, mobile) pass on `main`. Each acceptance criterion in `docs/milestones/M6-libraries-and-profiles.md` is mapped to its proving test in the PR body. No gaps found; no code changed.
 - Next iteration: M7-T01 (reports; also add reports to the data export). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-02 · M7-T01 · PR pending
+- `review_reports` and `reviews.hidden_at` (migration `0012`), `POST /v1/reviews/:id/reports` in `modules/reviews/routes.ts`, shared `reviewReportInputSchema` and reason/status enums in `packages/shared/src/reviews.ts`. Auto-hide at 3 open reports; hidden reviews are filtered from the Book review list, profile reviews and totals, Discover, and the Genre `newest_review` sort (not from aggregates, D-046). The export gained `reports`; `accounts.erase` removes reports by cascade (tested). Integration tests in `reports.integration.test.ts`; route-coverage table extended. D-147 records the choices.
+- Next iteration: M7-T02 (reports queue API: dismiss must clear `hidden_at` and close the reports; unpublish must also close them). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.

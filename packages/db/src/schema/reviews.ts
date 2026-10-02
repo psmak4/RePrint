@@ -1,4 +1,4 @@
-import { REVIEW_STATUSES } from '@reprint/shared'
+import { REPORT_STATUSES, REVIEW_REPORT_REASONS, REVIEW_STATUSES } from '@reprint/shared'
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -42,6 +42,8 @@ export const reviews = pgTable(
     submittedAt: timestamptz('submitted_at').notNull().default(sql`now()`),
     /** When a Moderator last decided this Review; null while Pending. */
     decidedAt: timestamptz('decided_at'),
+    /** Set when the Review gets its 3rd open report; hidden from public lists until decided (D-040). */
+    hiddenAt: timestamptz('hidden_at'),
     ...timestamps(),
   },
   (t) => [
@@ -135,7 +137,46 @@ export const helpfulVotes = pgTable(
   ],
 )
 
+/**
+ * A Member's report on an Approved Review (PRD §5.3, §7.9, §9). One per reporter per Review.
+ * Both FKs cascade: an erased reporter's reports go with their account, and a deleted Review
+ * takes its reports along. `resolved_by` is kept as null if the Moderator is erased.
+ */
+export const reviewReports = pgTable(
+  'review_reports',
+  {
+    id: uuidv7Pk(),
+    reviewId: uuid('review_id')
+      .notNull()
+      .references(() => reviews.id, { onDelete: 'cascade' }),
+    reporterId: uuid('reporter_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    reason: text('reason', { enum: REVIEW_REPORT_REASONS }).notNull(),
+    note: text('note'),
+    status: text('status', { enum: REPORT_STATUSES }).notNull().default('open'),
+    resolvedBy: uuid('resolved_by').references(() => users.id, { onDelete: 'set null' }),
+    resolution: text('resolution'),
+    resolvedAt: timestamptz('resolved_at'),
+    createdAt: timestamptz('created_at').notNull().default(sql`now()`),
+  },
+  (t) => [
+    unique('review_reports_review_id_reporter_id_unique').on(t.reviewId, t.reporterId),
+    index('review_reports_reporter_id_idx').on(t.reporterId),
+    index('review_reports_resolved_by_idx').on(t.resolvedBy),
+    // The reports queue: open reports, oldest first.
+    index('review_reports_open_queue_idx').on(t.createdAt).where(sql`${t.status} = 'open'`),
+    check(
+      'review_reports_reason_check',
+      sql`${t.reason} in ('unmarked_spoiler', 'offensive', 'spam', 'off_topic', 'other')`,
+    ),
+    check('review_reports_status_check', sql`${t.status} in ('open', 'dismissed', 'actioned')`),
+    check('review_reports_note_length_check', sql`char_length(${t.note}) <= 500`),
+  ],
+)
+
 export type Review = typeof reviews.$inferSelect
 export type NewReview = typeof reviews.$inferInsert
 export type ReviewVersion = typeof reviewVersions.$inferSelect
 export type ReviewClaim = typeof reviewClaims.$inferSelect
+export type ReviewReport = typeof reviewReports.$inferSelect

@@ -11,11 +11,11 @@ import {
   type GenreLink,
   WEIGHTED_RATING_C,
 } from '@reprint/shared'
-import { and, asc, eq, inArray, ne, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
 import { loadBookSummaries } from '../catalog/read.js'
 
-/** Approved reviews by Members whose account still exists (D-043). */
-const PUBLIC_REVIEW = sql`r.status = 'approved'
+/** Approved, not auto-hidden (D-040) reviews by Members whose account still exists (D-043). */
+const PUBLIC_REVIEW = sql`r.status = 'approved' and r.hidden_at is null
   and not exists (select 1 from users u where u.id = r.user_id and u.status = 'deleted')`
 
 /** The site-wide mean rating `m` over every Book; 0 when nothing is rated yet (D-133). */
@@ -121,6 +121,7 @@ export async function buildFeaturedReview(db: Database): Promise<FeaturedReview 
           picks.map((pick) => pick.refId),
         ),
         eq(reviews.status, 'approved'),
+        isNull(reviews.hiddenAt),
         ne(users.status, 'deleted'),
       ),
     )

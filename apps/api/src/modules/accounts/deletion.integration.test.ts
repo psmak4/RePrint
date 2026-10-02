@@ -8,6 +8,7 @@ import {
   helpfulVotes,
   newId,
   notifications,
+  reviewReports,
   reviews,
   sessions,
   users,
@@ -272,6 +273,42 @@ describe('accounts.erase job', () => {
     expect(after?.helpfulCount).toBe(1)
     const votes = await stack.db.db.select().from(helpfulVotes)
     expect(votes.map((vote) => vote.userId)).toEqual([other.id])
+  })
+
+  it('deletes the reports a Member filed, and those on their reviews', async () => {
+    const author = await deletedUser(ACCOUNT_ERASE_AFTER_DAYS + 1)
+    const reporter = await deletedUser(ACCOUNT_ERASE_AFTER_DAYS + 1)
+    const other = await createTestUser(stack.db.db)
+    const bookId = newId()
+    const secondBookId = newId()
+    await stack.db.db.insert(books).values([
+      { id: bookId, slug: 'erase-reports', title: 'A Book' },
+      { id: secondBookId, slug: 'erase-reports-2', title: 'Another Book' },
+    ])
+    const inserted = await stack.db.db
+      .insert(reviews)
+      .values([
+        { userId: author.id, bookId, rating: 4, body: 'x'.repeat(60), status: 'approved' },
+        {
+          userId: other.id,
+          bookId: secondBookId,
+          rating: 4,
+          body: 'x'.repeat(60),
+          status: 'approved',
+        },
+      ])
+      .returning()
+    const [mine, theirs] = inserted
+    if (!mine || !theirs) throw new Error('reviews not inserted')
+    await stack.db.db.insert(reviewReports).values([
+      { reviewId: mine.id, reporterId: other.id, reason: 'spam' },
+      { reviewId: theirs.id, reporterId: reporter.id, reason: 'spam' },
+      { reviewId: theirs.id, reporterId: other.id, reason: 'off_topic' },
+    ])
+
+    expect(await run()).toEqual({ erased: 2 })
+    const left = await stack.db.db.select().from(reviewReports)
+    expect(left.map((row) => row.reason)).toEqual(['off_topic'])
   })
 
   it('runs daily through the registry schedule', () => {
