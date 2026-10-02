@@ -138,3 +138,93 @@ export const adminBookMergeResponseSchema = z.object({
   }),
 })
 export type AdminBookMergeResponse = z.infer<typeof adminBookMergeResponseSchema>
+
+/** Genre, Subject-rule, and Catalog stats endpoints (PRD §5.4, §6, §7.11, D-158). */
+
+export const adminGenreSlugSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(80)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Use lowercase letters, digits, and single hyphens.')
+
+export const adminGenreParamsSchema = z.object({ id: z.uuid() })
+
+export const adminGenreCreateSchema = z.object({
+  slug: adminGenreSlugSchema,
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(1000).nullable().default(null),
+  parentId: z.uuid().nullable().default(null),
+})
+export type AdminGenreCreate = z.infer<typeof adminGenreCreateSchema>
+
+/** `PATCH /admin/genres/:id`. `archived: true` archives and `false` restores. */
+export const adminGenreEditSchema = z
+  .object({
+    slug: adminGenreSlugSchema,
+    name: z.string().trim().min(1).max(100),
+    description: z.string().trim().max(1000).nullable(),
+    parentId: z.uuid().nullable(),
+    archived: z.boolean(),
+  })
+  .partial()
+  .refine((value) => Object.values(value).some((field) => field !== undefined), {
+    message: 'Change at least one field.',
+  })
+export type AdminGenreEdit = z.infer<typeof adminGenreEditSchema>
+
+export const adminGenreSchema = z.object({
+  id: z.uuid(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  parentId: z.uuid().nullable(),
+  featured: z.boolean(),
+  archived: z.boolean(),
+  bookCount: z.number().int(),
+  ruleCount: z.number().int(),
+})
+export type AdminGenre = z.infer<typeof adminGenreSchema>
+
+export const adminGenresResponseSchema = z.object({ items: z.array(adminGenreSchema) })
+export type AdminGenresResponse = z.infer<typeof adminGenresResponseSchema>
+
+export const adminSubjectRuleCreateSchema = z.object({
+  /** A case-insensitive substring of a Subject label. */
+  pattern: z.string().trim().min(1).max(200),
+  genreId: z.uuid(),
+  priority: z.number().int().min(0).max(1000).default(50),
+})
+export type AdminSubjectRuleCreate = z.infer<typeof adminSubjectRuleCreateSchema>
+
+export const adminSubjectRuleParamsSchema = z.object({ id: z.uuid() })
+
+export const adminSubjectRuleSchema = z.object({
+  id: z.uuid(),
+  pattern: z.string(),
+  priority: z.number().int(),
+  genre: z.object({ id: z.uuid(), slug: z.string(), name: z.string() }),
+})
+export type AdminSubjectRule = z.infer<typeof adminSubjectRuleSchema>
+
+export const adminSubjectRulesResponseSchema = z.object({ items: z.array(adminSubjectRuleSchema) })
+export type AdminSubjectRulesResponse = z.infer<typeof adminSubjectRulesResponseSchema>
+
+/** `GET /admin/catalog/stats`: Catalog size and monthly growth, oldest month first. */
+export const adminCatalogStatsSchema = z.object({
+  totals: z.object({
+    books: z.number().int(),
+    editions: z.number().int(),
+    authors: z.number().int(),
+  }),
+  monthly: z.array(
+    z.object({
+      /** First day of the month, `YYYY-MM`, UTC. */
+      month: z.string().regex(/^\d{4}-\d{2}$/),
+      books: z.number().int(),
+      editions: z.number().int(),
+      authors: z.number().int(),
+    }),
+  ),
+})
+export type AdminCatalogStats = z.infer<typeof adminCatalogStatsSchema>

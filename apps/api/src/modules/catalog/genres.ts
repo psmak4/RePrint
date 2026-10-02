@@ -7,19 +7,27 @@ import {
   type GenreSort,
   WEIGHTED_RATING_C,
 } from '@reprint/shared'
-import { asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, isNull, sql } from 'drizzle-orm'
 import { loadBookSummaries } from './read.js'
 
 type GenreRow = typeof genres.$inferSelect
 
 export async function findGenreBySlug(db: Database, slug: string): Promise<GenreRow | null> {
-  const [row] = await db.select().from(genres).where(eq(genres.slug, slug)).limit(1)
+  const [row] = await db
+    .select()
+    .from(genres)
+    .where(and(eq(genres.slug, slug), isNull(genres.archivedAt)))
+    .limit(1)
   return row ?? null
 }
 
 /** Every Genre as a tree: roots first, each level sorted by name. */
 export async function loadGenreTree(db: Database): Promise<GenreNode[]> {
-  const rows = await db.select().from(genres).orderBy(asc(genres.name), asc(genres.id))
+  const rows = await db
+    .select()
+    .from(genres)
+    .where(isNull(genres.archivedAt))
+    .orderBy(asc(genres.name), asc(genres.id))
   const nodes = new Map<string, GenreNode>(
     rows.map((row) => [
       row.id,
@@ -59,7 +67,7 @@ export async function loadGenreLinks(
     db
       .select({ slug: genres.slug, name: genres.name })
       .from(genres)
-      .where(eq(genres.parentId, genre.id))
+      .where(and(eq(genres.parentId, genre.id), isNull(genres.archivedAt)))
       .orderBy(asc(genres.name), asc(genres.id)),
   ])
   return { parent: parentRow[0] ?? null, children: childRows }

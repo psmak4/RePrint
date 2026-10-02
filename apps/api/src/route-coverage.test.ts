@@ -33,6 +33,7 @@ const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
 const ADMIN_AUDIT = 'modules/admin/audit.integration.test.ts'
 const ADMIN_BOOKS = 'modules/admin/books.integration.test.ts'
+const ADMIN_GENRES = 'modules/admin/genres.integration.test.ts'
 const ADMIN_MERGE = 'modules/admin/merge.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
@@ -276,6 +277,34 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'PATCH /v1/admin/books/{id}': {
     allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/genres': {
+    allowed: [ADMIN_GENRES, 'lists every Genre with its Book and rule counts, archived ones too'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/genres': {
+    allowed: [ADMIN_GENRES, 'creates a Genre and audits it'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'PATCH /v1/admin/genres/{id}': {
+    allowed: [ADMIN_GENRES, 'edits fields, archives, restores, and audits before and after'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/subject-rules': {
+    allowed: [ADMIN_GENRES, 'lists, creates, and removes rules, auditing each change'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/subject-rules': {
+    allowed: [ADMIN_GENRES, 'lists, creates, and removes rules, auditing each change'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'DELETE /v1/admin/subject-rules/{id}': {
+    allowed: [ADMIN_GENRES, 'lists, creates, and removes rules, auditing each change'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/catalog/stats': {
+    allowed: [ADMIN_GENRES, 'returns Catalog size and twelve months of growth'],
+    denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
   'GET /v1/admin/books/merge-candidates': {
     allowed: [ADMIN_MERGE, 'lists open merge candidates oldest first with both Books'],
