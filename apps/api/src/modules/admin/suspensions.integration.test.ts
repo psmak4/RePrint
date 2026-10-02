@@ -1,4 +1,4 @@
-import { auditLog, authTokens, newId, sessions, users } from '@reprint/db'
+import { auditLog, authTokens, books, newId, reviews, sessions, users } from '@reprint/db'
 import {
   adminUserDetailSchema,
   adminUserResendVerificationResponseSchema,
@@ -194,6 +194,28 @@ describe('POST /v1/admin/users/:id/suspend', () => {
     expect((await post(`${target.id}/suspend`, undefined, body)).statusCode).toBe(401)
     expect((await reload(target.id)).status).toBe('active')
     expect(await audits('user.suspend')).toHaveLength(0)
+  })
+})
+
+describe("suspended Members' reviews", () => {
+  it('keeps their Approved reviews on the Book page', async () => {
+    const admin = await person(['admin'])
+    const target = await createTestUser(stack.db.db)
+    const bookId = newId()
+    await stack.db.db.insert(books).values({ id: bookId, slug: 'a-book', title: 'A Book' })
+    await stack.db.db.insert(reviews).values({
+      userId: target.id,
+      bookId,
+      rating: 4,
+      body: 'A thoughtful review that is comfortably longer than fifty characters.',
+      status: 'approved',
+    })
+
+    await post(`${target.id}/suspend`, admin.cookies, { reason: 'Spam.' })
+
+    const response = await app.inject({ method: 'GET', url: '/v1/books/a-book/reviews' })
+    expect(response.statusCode).toBe(200)
+    expect(response.json().items).toHaveLength(1)
   })
 })
 
