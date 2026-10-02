@@ -21,6 +21,7 @@ import { catalogRoutes } from './modules/catalog/routes.js'
 import { discoverRoutes } from './modules/discover/routes.js'
 import { libraryRoutes } from './modules/library/routes.js'
 import { avatarRoutes } from './modules/me/avatar.js'
+import { exportRoutes } from './modules/me/export.js'
 import { meRoutes } from './modules/me/routes.js'
 import { sessionRoutes } from './modules/me/sessions.js'
 import { moderationRoutes } from './modules/moderation/routes.js'
@@ -135,6 +136,13 @@ export async function buildApp(
     jobs: options.jobs,
   })
   await app.register(meRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    storage,
+  })
+  await app.register(exportRoutes, {
     prefix: '/v1',
     env,
     db: options.database,

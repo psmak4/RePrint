@@ -974,3 +974,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: `/u/:username` loads the profile and the first page of Approved Reviews in parallel (`?page=` in the URL; a bad value falls back to page 1). The Reviews tab is the page itself; the Library tab is a link to `/u/:username/library`, shown when `libraryPublic` is true or the viewer is the owner (case-insensitive match on the root session's username). Each review shows its Book card, rating, headline, date, and body (spoilers behind the usual toggle); there is no Helpful button here. A missing avatar shows the display name's initial. The page has a canonical URL, a meta description, and Open Graph tags; any 404 from the profile route renders the 404 page.
 - Why: PRD §7.8 names the tabs and totals but not the tab mechanics, review layout, or pagination.
 - Affects: M6-T10
+
+### D-145 · Data export (M6-T08)
+- Status: Implementation
+- Decision: `GET /v1/me/export` returns one JSON document (`memberExportSchema`) with `account`, `profile`, `reviews` (each with its versions, any status), `helpfulVotes` the Member cast, `library`, `notifications`, and `sessions`. Books appear as `{ slug, title }`. It leaves out password and token hashes, Moderator IDs on decisions, and other Members' data. The response is `Cache-Control: no-store` with `Content-Disposition: attachment`. Settings → Security offers a plain download link to the web resource route `/settings/export`, which proxies the API.
+- Why: PRD §11 requires a JSON download but names no endpoint or contents.
+- Affects: M7-T01 (adds reports to the export)
+

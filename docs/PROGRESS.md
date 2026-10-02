@@ -440,3 +440,8 @@ Entry format:
 ### 2026-10-01 · M6-T07 · PR pending
 - Web profile page: `routes/profile.tsx` (loader, canonical URL, meta), `components/profile/profile-page.tsx`, `copy.profile`, and the `u/:username` route. Tests in `routes/profile.test.ts` and `profile-page.test.tsx` (with axe). D-144 records the choices.
 - Next iteration: M6-T08 (data export). The Library page does not yet link back to the profile. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M6-T08 · PR pending
+- `GET /v1/me/export` (`modules/me/export.ts`, schema in `packages/shared/src/export.ts`), the web resource route `routes/settings-export.tsx`, and a "Download your data" section (`export-section.tsx`) on Settings → Security. Integration tests in `export.integration.test.ts`; route-coverage table extended. D-145 records the choices.
+- Next iteration: M6-T09 (seed libraries). M7-T01 should add reports to the export. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+

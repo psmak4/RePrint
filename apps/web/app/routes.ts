@@ -24,6 +24,7 @@ export default [
   route('reset-password', 'routes/reset-password.tsx'),
   route('confirm-email-change', 'routes/confirm-email-change.tsx'),
   route('settings/avatar', 'routes/settings-avatar.tsx'),
+  route('settings/export', 'routes/settings-export.tsx'),
   route('settings', 'routes/settings.tsx', [
     index('routes/settings-index.tsx'),
     route('profile', 'routes/settings-profile.tsx'),

@@ -14,6 +14,7 @@ const RESET = 'modules/auth/password-reset.integration.test.ts'
 const ME = 'modules/me/routes.integration.test.ts'
 const EMAIL = 'modules/me/email-change.integration.test.ts'
 const SESSIONS = 'modules/me/sessions.integration.test.ts'
+const EXPORT = 'modules/me/export.integration.test.ts'
 const AVATAR = 'modules/me/avatar.integration.test.ts'
 const DELETION = 'modules/accounts/deletion.integration.test.ts'
 const CATALOG = 'modules/catalog/catalog.integration.test.ts'
@@ -155,6 +156,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/books/{slug}/reviews': {
     allowed: [BOOK_REVIEWS, 'lists Approved reviews only, with the author'],
     denied: [BOOK_REVIEWS, 'returns 404 Problem Details for an unknown Book'],
+  },
+  'GET /v1/me/export': {
+    allowed: [EXPORT, 'downloads the Member'],
+    denied: [EXPORT, 'returns 401 Problem Details for a Visitor'],
   },
   'GET /v1/me/sessions': {
     allowed: [SESSIONS, 'lists active sessions'],
