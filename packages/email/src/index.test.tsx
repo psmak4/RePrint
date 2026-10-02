@@ -65,7 +65,7 @@ describe('renderEmail', () => {
     expect(changed.text).toContain('new@example.test')
   })
 
-  it('renders the review-decision template for both decisions', async () => {
+  it('renders the review-decision template for each decision', async () => {
     const base = {
       username: 'ada_l',
       bookTitle: 'Dune',
@@ -81,6 +81,13 @@ describe('renderEmail', () => {
     })
     expect(rejected.subject).toBe('A moderator decided on your review')
     expect(rejected.text).toContain('Reason: Off topic.')
+    const unpublished = await renderEmail('review-decision', {
+      ...base,
+      decision: 'unpublished',
+      reason: 'Targets a reader.',
+    })
+    expect(unpublished.text).toContain('unpublished your review of Dune')
+    expect(unpublished.text).toContain('Reason: Targets a reader.')
   })
 
   it('renders the account-deletion-scheduled template', async () => {

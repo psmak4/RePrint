@@ -1,4 +1,4 @@
-import { books, reviewClaims, reviews, reviewVersions, users } from '@reprint/db'
+import { books, reviewClaims, reviewReports, reviews, reviewVersions, users } from '@reprint/db'
 import {
   type ClaimReviewResponse,
   claimReviewResponseSchema,
@@ -10,45 +10,52 @@ import {
   modStatsSchema,
   REVIEW_CLAIM_MINUTES,
   type ReviewDecisionResponse,
+  type ReviewUnpublishResponse,
   reviewDecisionRequestSchema,
   reviewDecisionResponseSchema,
   reviewIdParamsSchema,
+  reviewUnpublishRequestSchema,
+  reviewUnpublishResponseSchema,
 } from '@reprint/shared'
 import { and, asc, count, eq, gt, inArray, min, ne, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { z } from 'zod'
 import { HttpProblem } from '../../errors.js'
 import { recordAudit } from '../audit/audit.js'
 import { requirePermission } from '../auth/guards.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
 import { notify } from '../notifications/notify.js'
 import { applyReviewChange } from '../reviews/aggregates.js'
-
-/** Timestamps travel as Postgres text so microseconds survive the round trip through a cursor. */
-const TIMESTAMPTZ_TEXT = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?[+-]\d{2}(:\d{2})?$/
-const cursorPayloadSchema = z.object({
-  at: z.string().regex(TIMESTAMPTZ_TEXT),
-  id: z.uuid(),
-})
-
-function encodeCursor(at: string, id: string): string {
-  return Buffer.from(JSON.stringify({ at, id })).toString('base64url')
-}
-
-function decodeCursor(cursor: string): z.infer<typeof cursorPayloadSchema> {
-  try {
-    return cursorPayloadSchema.parse(JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')))
-  } catch {
-    throw new HttpProblem(400, 'The request did not pass validation.', {
-      errors: [{ path: 'query.cursor', message: 'That cursor is not valid.' }],
-    })
-  }
-}
+import { decodeCursor, encodeCursor } from './cursor.js'
+import { moderationReportRoutes } from './reports.js'
 
 export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
   const { db, jobs, env } = options
   const webBase = (env.WEB_URL ?? env.WEB_ORIGINS[0] ?? '').replace(/\/$/, '')
   const moderate = requirePermission('reviews.moderate')
+
+  async function sendDecisionEmail(
+    log: { error: (obj: object, msg: string) => void },
+    author: { email: string; username: string; bookTitle: string; bookSlug: string },
+    decision: 'approved' | 'rejected' | 'unpublished',
+    reason: string | null,
+  ) {
+    if (!jobs) return
+    try {
+      await jobs.enqueue('email.send', {
+        template: 'review-decision',
+        to: author.email,
+        props: {
+          username: author.username,
+          bookTitle: author.bookTitle,
+          decision,
+          ...(reason ? { reason } : {}),
+          bookUrl: `${webBase}/books/${author.bookSlug}`,
+        },
+      })
+    } catch (error) {
+      log.error({ err: error }, 'could not queue the review decision email')
+    }
+  }
 
   app.get(
     '/mod/reviews',
@@ -103,7 +110,7 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
       const reviewIds = page.map((row) => row.id)
       const userIds = [...new Set(page.map((row) => row.userId))]
 
-      const [versionRows, historyRows, claimRows] = await Promise.all([
+      const [versionRows, historyRows, claimRows, reportRows] = await Promise.all([
         // The newest version of each Review is the Pending one; the newest approved one before it
         // is what an edit is compared with.
         db
@@ -150,6 +157,13 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
           .where(
             and(inArray(reviewClaims.reviewId, reviewIds), gt(reviewClaims.expiresAt, sql`now()`)),
           ),
+        // Reports filed on each reviewer's Reviews, whatever their outcome (D-148).
+        db
+          .select({ userId: reviews.userId, total: count() })
+          .from(reviewReports)
+          .innerJoin(reviews, eq(reviews.id, reviewReports.reviewId))
+          .where(inArray(reviews.userId, userIds))
+          .groupBy(reviews.userId),
       ])
       const currentVersions = await db
         .select({
@@ -177,8 +191,7 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
             displayName: row.displayName,
             approvedCount: counts(row.userId, 'approved'),
             rejectedCount: counts(row.userId, 'rejected'),
-            // Reports arrive in M7 (D-121).
-            reportedCount: 0,
+            reportedCount: reportRows.find((entry) => entry.userId === row.userId)?.total ?? 0,
           },
           rating: row.rating,
           headline: row.headline,
@@ -348,45 +361,153 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
           return review
         })
 
-        if (outcome.emailReviewDecisions && jobs) {
-          try {
-            await jobs.enqueue('email.send', {
-              template: 'review-decision',
-              to: outcome.email,
-              props: {
-                username: outcome.username,
-                bookTitle: outcome.bookTitle,
-                decision,
-                ...(reason ? { reason } : {}),
-                bookUrl: `${webBase}/books/${outcome.bookSlug}`,
-              },
-            })
-          } catch (error) {
-            request.log.error({ err: error }, 'could not queue the review decision email')
-          }
+        if (outcome.emailReviewDecisions) {
+          await sendDecisionEmail(request.log, outcome, decision, reason)
         }
         return { reviewId, status: decision }
       },
     )
   }
 
+  app.post(
+    '/mod/reviews/:id/unpublish',
+    {
+      preHandler: [moderate],
+      schema: {
+        params: reviewIdParamsSchema,
+        body: reviewUnpublishRequestSchema,
+        response: { 200: reviewUnpublishResponseSchema },
+      },
+    },
+    async (request): Promise<ReviewUnpublishResponse> => {
+      if (!db || !request.auth) throw new Error('moderation routes need a database')
+      const moderatorId = request.auth.user.id
+      const reviewId = request.params.id
+      const { reason } = request.body
+
+      const outcome = await db.transaction(async (tx) => {
+        const [review] = await tx
+          .select({
+            id: reviews.id,
+            userId: reviews.userId,
+            bookId: reviews.bookId,
+            rating: reviews.rating,
+            headline: reviews.headline,
+            body: reviews.body,
+            hasSpoilers: reviews.hasSpoilers,
+            editionId: reviews.editionId,
+            status: reviews.status,
+            bookSlug: books.slug,
+            bookTitle: books.title,
+            username: users.username,
+            email: users.email,
+            emailReviewDecisions: users.emailReviewDecisions,
+          })
+          .from(reviews)
+          .innerJoin(books, eq(books.id, reviews.bookId))
+          .innerJoin(users, eq(users.id, reviews.userId))
+          .where(eq(reviews.id, reviewId))
+          .for('update', { of: reviews })
+        if (!review) throw new HttpProblem(404, 'Review not found.')
+        if (review.userId === moderatorId) {
+          throw new HttpProblem(403, 'You cannot moderate your own Review.')
+        }
+        if (review.status !== 'approved') {
+          throw new HttpProblem(409, 'Only an Approved Review can be unpublished.')
+        }
+
+        // Like a decision, an unpublish is its own version, so the history shows who took it down.
+        const [latest] = await tx
+          .select({ version: sql<number>`max(${reviewVersions.version})::int` })
+          .from(reviewVersions)
+          .where(eq(reviewVersions.reviewId, reviewId))
+        const decidedAt = new Date()
+        await tx.insert(reviewVersions).values({
+          reviewId,
+          version: (latest?.version ?? 0) + 1,
+          rating: review.rating,
+          headline: review.headline,
+          body: review.body,
+          hasSpoilers: review.hasSpoilers,
+          editionId: review.editionId,
+          status: 'unpublished',
+          decidedBy: moderatorId,
+          decisionReason: reason,
+          decidedAt,
+        })
+        await tx
+          .update(reviews)
+          .set({ status: 'unpublished', hiddenAt: null, decidedAt, updatedAt: decidedAt })
+          .where(eq(reviews.id, reviewId))
+        await applyReviewChange(
+          tx,
+          review.bookId,
+          { status: 'approved', rating: review.rating },
+          { status: 'unpublished', rating: review.rating },
+        )
+        const closed = await tx
+          .update(reviewReports)
+          .set({
+            status: 'actioned',
+            resolvedBy: moderatorId,
+            resolution: reason,
+            resolvedAt: decidedAt,
+          })
+          .where(and(eq(reviewReports.reviewId, reviewId), eq(reviewReports.status, 'open')))
+          .returning({ id: reviewReports.id })
+        await notify(tx, review.userId, 'review_unpublished', {
+          reviewId,
+          bookSlug: review.bookSlug,
+          bookTitle: review.bookTitle,
+          reason,
+        })
+        await recordAudit(tx, {
+          actorId: moderatorId,
+          action: 'review.unpublish',
+          targetType: 'review',
+          targetId: reviewId,
+          before: { status: 'approved' },
+          after: { status: 'unpublished', reason, closedReports: closed.length },
+          ip: request.ip,
+        })
+        return { review, closedReports: closed.length }
+      })
+
+      if (outcome.review.emailReviewDecisions) {
+        await sendDecisionEmail(request.log, outcome.review, 'unpublished', reason)
+      }
+      return { reviewId, status: 'unpublished', closedReports: outcome.closedReports }
+    },
+  )
+
   app.get(
     '/mod/stats',
     { preHandler: [moderate], schema: { response: { 200: modStatsSchema } } },
     async (): Promise<ModStats> => {
       if (!db) throw new Error('moderation routes need a database')
-      const [row] = await db
-        .select({ pendingCount: count(), oldest: min(reviews.submittedAt) })
+      const [pending] = await db
+        .select({ total: count(), oldest: min(reviews.submittedAt) })
         .from(reviews)
         .where(eq(reviews.status, 'pending'))
-      const oldest = row?.oldest ?? null
+      const [reported] = await db
+        .select({ total: count(), oldest: min(reviewReports.createdAt) })
+        .from(reviewReports)
+        .where(eq(reviewReports.status, 'open'))
+      const age = (at: Date | null) =>
+        at ? Math.max(0, Math.floor((Date.now() - at.getTime()) / 1000)) : null
+      const oldestPending = pending?.oldest ? new Date(pending.oldest) : null
+      const oldestReport = reported?.oldest ? new Date(reported.oldest) : null
       return {
-        pendingCount: row?.pendingCount ?? 0,
-        oldestPendingAt: oldest ? new Date(oldest).toISOString() : null,
-        oldestPendingAgeSeconds: oldest
-          ? Math.max(0, Math.floor((Date.now() - new Date(oldest).getTime()) / 1000))
-          : null,
+        pendingCount: pending?.total ?? 0,
+        oldestPendingAt: oldestPending?.toISOString() ?? null,
+        oldestPendingAgeSeconds: age(oldestPending),
+        openReportCount: reported?.total ?? 0,
+        oldestOpenReportAt: oldestReport?.toISOString() ?? null,
+        oldestOpenReportAgeSeconds: age(oldestReport),
       }
     },
   )
+
+  // The parent already carries the `/v1` prefix, so pass only the dependencies.
+  await app.register(moderationReportRoutes, { env, db, jobs })
 }

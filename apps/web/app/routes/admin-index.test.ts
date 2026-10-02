@@ -17,6 +17,9 @@ const stats = {
   pendingCount: 3,
   oldestPendingAt: '2026-10-01T00:00:00.000Z',
   oldestPendingAgeSeconds: 7200,
+  openReportCount: 0,
+  oldestOpenReportAt: null,
+  oldestOpenReportAgeSeconds: null,
 }
 
 beforeEach(() => loadSession.mockReset())

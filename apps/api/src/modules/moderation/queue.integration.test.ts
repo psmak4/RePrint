@@ -283,6 +283,13 @@ describe('GET /v1/mod/stats', () => {
   it('returns nulls when nothing is pending', async () => {
     const mod = await person(['moderator'])
     const body = modStatsSchema.parse((await stats(mod.cookies)).json())
-    expect(body).toEqual({ pendingCount: 0, oldestPendingAt: null, oldestPendingAgeSeconds: null })
+    expect(body).toEqual({
+      pendingCount: 0,
+      oldestPendingAt: null,
+      oldestPendingAgeSeconds: null,
+      openReportCount: 0,
+      oldestOpenReportAt: null,
+      oldestOpenReportAgeSeconds: null,
+    })
   })
 })

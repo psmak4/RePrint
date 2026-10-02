@@ -173,7 +173,7 @@ export const modQueueItemSchema = z.object({
   reviewer: z.object({
     username: z.string(),
     displayName: z.string(),
-    /** Decisions on this Member's Review versions, plus open reports (0 until M7). */
+    /** Decisions on this Member's Review versions, plus the reports filed on their Reviews. */
     approvedCount: z.number().int().min(0),
     rejectedCount: z.number().int().min(0),
     reportedCount: z.number().int().min(0),
@@ -220,10 +220,61 @@ export const reviewDecisionResponseSchema = z.object({
 })
 export type ReviewDecisionResponse = z.infer<typeof reviewDecisionResponseSchema>
 
-/** `GET /mod/stats`: the Pending count and the age of the oldest Pending Review (PRD §7.10). */
+/** `GET /mod/stats`: both queues' counts and the age of the oldest item in each (PRD §7.10). */
 export const modStatsSchema = z.object({
   pendingCount: z.number().int().min(0),
   oldestPendingAt: z.iso.datetime().nullable(),
   oldestPendingAgeSeconds: z.number().int().min(0).nullable(),
+  openReportCount: z.number().int().min(0),
+  oldestOpenReportAt: z.iso.datetime().nullable(),
+  oldestOpenReportAgeSeconds: z.number().int().min(0).nullable(),
 })
 export type ModStats = z.infer<typeof modStatsSchema>
+
+/** `POST /mod/reviews/:id/unpublish`: the reason is required and goes to the author (PRD §7.10). */
+export const reviewUnpublishRequestSchema = z.object({
+  reason: z.string().trim().min(1, 'Give a reason.').max(REVIEW_DECISION_REASON_MAX),
+})
+export type ReviewUnpublishRequest = z.infer<typeof reviewUnpublishRequestSchema>
+
+export const reviewUnpublishResponseSchema = z.object({
+  reviewId: z.uuid(),
+  status: z.literal('unpublished'),
+  closedReports: z.number().int().min(0),
+})
+export type ReviewUnpublishResponse = z.infer<typeof reviewUnpublishResponseSchema>
+
+/** One Review with its open reports in the Reports queue (PRD §7.10). */
+export const modReportItemSchema = z.object({
+  review: z.object({
+    id: z.uuid(),
+    status: reviewStatusSchema,
+    hidden: z.boolean(),
+    book: z.object({ slug: z.string(), title: z.string() }),
+    author: z.object({ id: z.uuid(), username: z.string(), displayName: z.string() }),
+    ...reviewContentSchema.shape,
+  }),
+  openCount: z.number().int().min(1),
+  oldestReportedAt: z.iso.datetime(),
+  reports: z.array(
+    z.object({
+      id: z.uuid(),
+      reason: reviewReportReasonSchema,
+      note: z.string().nullable(),
+      createdAt: z.iso.datetime(),
+      reporter: z.object({ username: z.string(), displayName: z.string() }),
+    }),
+  ),
+})
+export type ModReportItem = z.infer<typeof modReportItemSchema>
+
+export const modReportsResponseSchema = cursorPageOf(modReportItemSchema)
+export type ModReportsResponse = z.infer<typeof modReportsResponseSchema>
+
+export const reportReviewIdParamsSchema = z.object({ reviewId: z.uuid() })
+
+export const reportDismissResponseSchema = z.object({
+  reviewId: z.uuid(),
+  closedReports: z.number().int().min(1),
+})
+export type ReportDismissResponse = z.infer<typeof reportDismissResponseSchema>
