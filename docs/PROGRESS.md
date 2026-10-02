@@ -381,3 +381,7 @@ Entry format:
 - `GET /v1/genres` (tree) and `GET /v1/genres/:slug` (Books in the Genre and all Genres below it; `sort=top_rated|most_reviewed|newest_review`, `page`) in `modules/catalog/genres.ts` and `routes.ts`; schemas in `packages/shared/src/genres-api.ts`. Integration tests in `genres.integration.test.ts` (they delete their own `zz-%` Genres because `reset` keeps Genre reference data). D-133 records the choices.
 - Next iteration: M5-T04 (Series API). The weighted-rating SQL in `genres.ts` can be reused by M5-T06's Top rated row. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.
 
+
+### 2026-10-01 · M5-T04 · PR pending
+- `GET /v1/series/:slug` in `modules/catalog/series.ts` and `routes.ts`; schema in `packages/shared/src/series-api.ts`; `openapi.json` regenerated. Integration tests in `series.integration.test.ts` (reading order with decimal and empty positions, empty Series, 404); route-coverage table extended. D-134 records the choices.
+- Next iteration: M5-T05 (web Genres index, Genre page, Series page). The Series response is `{ series, items: [{ position, book }] }` with no paging. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.

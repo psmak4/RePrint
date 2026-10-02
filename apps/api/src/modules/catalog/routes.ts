@@ -10,6 +10,7 @@ import {
   searchResponseSchema,
   searchSuggestQuerySchema,
   searchSuggestResponseSchema,
+  seriesDetailResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
@@ -33,6 +34,7 @@ import {
   loadBookSummaries,
   loadEditions,
 } from './read.js'
+import { findSeriesBySlug, loadSeriesEntries } from './series.js'
 
 /** Refresh jobs run behind everything else. */
 const REFRESH_PRIORITY = 10
@@ -187,6 +189,20 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
         ...books,
         page,
         pageSize: GENRE_PAGE_SIZE,
+      }
+    },
+  )
+
+  app.get(
+    '/series/:slug',
+    { schema: { params: slugParamsSchema, response: { 200: seriesDetailResponseSchema } } },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const found = await findSeriesBySlug(db, request.params.slug)
+      if (!found) throw new HttpProblem(404, 'We could not find that series.')
+      return {
+        series: { slug: found.slug, name: found.name, description: found.description },
+        items: await loadSeriesEntries(db, found),
       }
     },
   )

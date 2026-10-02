@@ -904,3 +904,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.5 and §7.6 name the sorts and the weighted average; they leave paging, nesting depth, and tie-breaks open.
 - Affects: M5-T05, M5-T05a, M5-T06
 
+
+### D-134 · Series endpoint (M5-T04)
+- Status: Implementation
+- Decision: `GET /v1/series/:slug` returns `{ series: { slug, name, description }, items: [{ position, book }] }` with every Book in the Series (no paging, since a Series is short), each `book` a Book summary that carries the RePrint rating. Order is position ascending (decimal allowed), empty positions last, then title, then Book ID. The route is public and uses the Catalog plugin's cache headers. The viewer's shelf status is left to M6.
+- Why: PRD §7.5 and §10 name the page and its fields; they leave the response shape, paging, and ordering ties open.
+- Affects: M5-T05, M6
