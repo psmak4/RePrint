@@ -11,12 +11,14 @@ import {
   reviewDecisionProps,
   verifyEmailProps,
 } from '@reprint/email'
+import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
 import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
+import { rebuildDiscover } from '../modules/discover/cache.js'
 import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import type { ImageStorage } from '../storage/index.js'
 
@@ -25,6 +27,7 @@ export interface JobContext {
   log: Logger
   mailer: Mailer
   db: Database
+  redis: Redis
   storage: ImageStorage
   /** The Catalog's Source; `background` runs its calls behind interactive requests (PRD §6). */
   catalog: {
@@ -121,6 +124,17 @@ export const jobs = {
     },
     schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'discover.rebuild': defineJob({
+    payload: z.object({}),
+    handler: async (_payload, { db, redis, log }) => {
+      const rows = await rebuildDiscover(db, redis)
+      const shown = Object.entries(rows).filter(([, value]) => value !== null).length
+      log.info({ shown }, 'discover rebuilt')
+      return { shown }
+    },
+    schedule: { everyMs: 10 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 30_000 },
   }),
   'catalog.refresh': defineJob({
     payload: z.object({ bookId: z.uuid() }),

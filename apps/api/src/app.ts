@@ -18,6 +18,7 @@ import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
 import { resolveRoutes } from './modules/catalog/resolve.js'
 import { catalogRoutes } from './modules/catalog/routes.js'
+import { discoverRoutes } from './modules/discover/routes.js'
 import { avatarRoutes } from './modules/me/avatar.js'
 import { meRoutes } from './modules/me/routes.js'
 import { sessionRoutes } from './modules/me/sessions.js'
@@ -180,6 +181,13 @@ export async function buildApp(
             recordCache: options.catalog.recordCache,
           }
         : undefined,
+  })
+  await app.register(discoverRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    redis: options.redis,
   })
   await app.register(resolveRoutes, {
     prefix: '/v1',

@@ -393,3 +393,8 @@ Entry format:
 ### 2026-10-01 · M5-T05a · PR pending
 - `/search` Filters now has a Genre select (`#filter-genre`, tree flattened with "– " prefixes for child Genres) filled from `GET /v1/genres`; the search loader fetches the tree in parallel with the search on the Books tab only and falls back to an empty list if it fails. The "Genre: slug / Remove genre filter" line and its copy are gone ("Any" clears the filter). Tests in `search.test.ts` and `search-results-page.test.tsx`.
 - Next iteration: M5-T06 (Discover rows). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T06 · PR pending
+- `featured_items` table (migration 0010), `GET /v1/discover` (`modules/discover/`: `rows.ts` builders, `cache.ts` Redis rows, `routes.ts`), and the `discover.rebuild` job (every 10 minutes). `JobContext` and `startWorker` now take a `redis` client. Schema in `packages/shared/src/discover-api.ts`. Integration tests in `discover.integration.test.ts`; route-coverage table extended. D-135 records the choices.
+- Next iteration: M5-T07 (web Discover home page). A hidden row is `null` in the response; the featured review comes with its Book. Nothing seeds `featured_items` yet (M5-T08), so locally only the three Book rows appear. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.
+

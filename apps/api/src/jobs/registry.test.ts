@@ -1,4 +1,5 @@
 import type { Database } from '@reprint/db'
+import type { Redis } from 'ioredis'
 import { pino } from 'pino'
 import { describe, expect, it } from 'vitest'
 import type { ImageStorage } from '../storage/index.js'
@@ -8,6 +9,7 @@ import { isJobName, type JobContext, jobs } from './registry.js'
 // These handlers never touch the database or storage.
 const unusedServices = {
   db: {} as Database,
+  redis: {} as Redis,
   storage: {} as ImageStorage,
   catalog: {} as JobContext['catalog'],
 }

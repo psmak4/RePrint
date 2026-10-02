@@ -61,6 +61,7 @@ beforeAll(async () => {
     log: pino({ level: 'silent' }),
     mailer,
     db: stack.db.db,
+    redis: stack.redis,
     storage: new LocalImageStorage(tmpdir(), 'http://localhost/uploads'),
     // The email job never touches the Source.
     catalog: undefined as never,

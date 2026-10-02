@@ -1,5 +1,6 @@
 import type { Database } from '@reprint/db'
 import { type ConnectionOptions, type Job, Worker } from 'bullmq'
+import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import type { Mailer } from '../email/mailer.js'
 import type { ImageStorage } from '../storage/index.js'
@@ -34,18 +35,20 @@ export async function startWorker(options: {
   log: Logger
   mailer: Mailer
   db: Database
+  /** For jobs that fill caches; the caller owns and closes it. */
+  redis: Redis
   storage: ImageStorage
   catalog: JobContext['catalog']
   /** Called for every failed job (the entry point wires this to Sentry). */
   onJobError?: (error: unknown) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log, mailer, db, storage, catalog, onJobError } = options
+  const { redisUrl, log, mailer, db, redis, storage, catalog, onJobError } = options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
   const worker = new Worker(
     QUEUE_NAME,
-    (job) => processJob(job, { mailer, db, storage, catalog }, log),
+    (job) => processJob(job, { mailer, db, redis, storage, catalog }, log),
     {
       connection: connection as ConnectionOptions,
       concurrency: 5,

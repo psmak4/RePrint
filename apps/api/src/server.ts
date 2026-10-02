@@ -37,6 +37,7 @@ async function main(): Promise<void> {
         log: pino({ ...baseLoggerOptions(env), base: { service: 'worker' } }),
         mailer,
         db: database.db,
+        redis,
         storage: createImageStorage(env),
         catalog,
         onJobError: captureError,
