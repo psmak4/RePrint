@@ -31,6 +31,7 @@ const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
+const ADMIN_AUDIT = 'modules/admin/audit.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
@@ -258,6 +259,17 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/mod/reports': {
     allowed: [MOD_REPORTS, 'groups open reports by review, oldest first, with reasons'],
     denied: [MOD_REPORTS, 'denies Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/audit': {
+    allowed: [ADMIN_AUDIT, 'lists entries newest first with actor and before/after for Admins'],
+    denied: [ADMIN_AUDIT, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/audit.csv': {
+    allowed: [
+      ADMIN_AUDIT,
+      'streams the filtered rows with a header row, escaped, and guards against formula injection',
+    ],
+    denied: [ADMIN_AUDIT, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
   'GET /v1/admin/users': {
     allowed: [ADMIN_USERS, 'lists users newest first with roles and counts for Admins'],
