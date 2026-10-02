@@ -400,7 +400,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T08 · Seed: featured Genres, a featured review, helpful votes · deps: M5-T06, M5-T01, M4-T14 · PRD: §13
   - Accept: after `pnpm db:reset` and a Discover rebuild, every Discover row is visible locally
   - Accept: seeded helpful votes make "Most helpful" sorting differ from "Newest" on at least one seeded Book
-- [ ] M5-T09 · M5 verification: run the Discovery acceptance criteria end to end, fix gaps, update docs · deps: M5-T02, M5-T05, M5-T07, M5-T08 · PRD: §3, §7.2, §7.5, §7.6
+- [x] M5-T09 · M5 verification: run the Discovery acceptance criteria end to end, fix gaps, update docs · deps: M5-T02, M5-T05, M5-T07, M5-T08 · PRD: §3, §7.2, §7.5, §7.6
   - Accept: `pnpm check` and `pnpm test:e2e` pass (existing specs extended to visit Discover, Genre, and Series pages with axe)
   - Accept: every acceptance criterion in `docs/milestones/M5-discovery.md` is checked off in the PR body with the command that proved it
 
