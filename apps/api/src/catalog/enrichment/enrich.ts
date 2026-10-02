@@ -4,11 +4,12 @@ import {
   books,
   type Database,
   editions,
+  genres,
   subjectGenreRules,
   subjects,
 } from '@reprint/db'
 import type { FieldOrigins } from '@reprint/shared'
-import { and, eq, notInArray } from 'drizzle-orm'
+import { and, eq, isNull, notInArray } from 'drizzle-orm'
 import { isLocked } from '../ingest/fields.js'
 import { mapSubjectsToGenres } from './genres.js'
 import { choosePrimaryEdition } from './primary-edition.js'
@@ -43,7 +44,16 @@ async function applyGenreMapping(tx: Tx, bookId: string): Promise<string[]> {
     .innerJoin(subjects, eq(subjects.id, bookSubjects.subjectId))
     .where(eq(bookSubjects.bookId, bookId))
     .orderBy(subjects.label)
-  const rules = await tx.select().from(subjectGenreRules)
+  const rules = await tx
+    .select({
+      id: subjectGenreRules.id,
+      pattern: subjectGenreRules.pattern,
+      genreId: subjectGenreRules.genreId,
+      priority: subjectGenreRules.priority,
+    })
+    .from(subjectGenreRules)
+    .innerJoin(genres, eq(genres.id, subjectGenreRules.genreId))
+    .where(isNull(genres.archivedAt))
   const genreIds = mapSubjectsToGenres(
     labels.map((row) => row.label),
     rules,

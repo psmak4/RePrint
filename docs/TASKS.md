@@ -485,7 +485,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `GET /v1/admin/books/merge-candidates` lists open candidates (endpoint per `docs/DECISIONS.md`); candidates can be dismissed
   - Accept: merge moves reviews, shelf entries, Editions, Source links, and contributions to the remaining Book, recomputes aggregates, and redirects the old slug (integration tests)
   - Accept: merge fails with 409 if any Member reviewed both Books (integration test); merges are audited
-- [ ] M7-T12 · Genre list and Subject rule management, Catalog growth stats · deps: M7-T09 · PRD: §5.4, §6, §7.11
+- [x] M7-T12 · Genre list and Subject rule management, Catalog growth stats · deps: M7-T09 · PRD: §5.4, §6, §7.11
   - Accept: Admin endpoints create, edit, and archive Genres (slug, parent, description) and add or remove Subject-to-Genre rules with priority (allowed and denied tests; endpoints per `docs/DECISIONS.md`)
   - Accept: a stats endpoint returns Catalog size (Books, Editions, Authors) and monthly growth (integration test)
 - [ ] M7-T13 · Web: admin Catalog book edit and refresh pages · deps: M7-T10 · PRD: §7.11

@@ -85,7 +85,7 @@ export async function buildFeaturedGenres(db: Database): Promise<GenreLink[] | n
     .select({ slug: genres.slug, name: genres.name })
     .from(featuredItems)
     .innerJoin(genres, eq(genres.id, featuredItems.refId))
-    .where(eq(featuredItems.kind, 'genre'))
+    .where(and(eq(featuredItems.kind, 'genre'), isNull(genres.archivedAt)))
     .orderBy(asc(featuredItems.position), asc(genres.name))
     .limit(DISCOVER_FEATURED_GENRES)
   return rows.length > 0 ? rows : null

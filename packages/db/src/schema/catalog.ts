@@ -219,6 +219,8 @@ export const genres = pgTable(
     description: text('description'),
     parentId: uuid('parent_id').references((): AnyPgColumn => genres.id, { onDelete: 'set null' }),
     featured: boolean('featured').notNull().default(false),
+    /** An archived Genre is hidden from browsing and mapping; Books keep it (D-158). */
+    archivedAt: timestamptz('archived_at'),
     ...timestamps(),
   },
   (t) => [index('genres_parent_id_idx').on(t.parentId)],
