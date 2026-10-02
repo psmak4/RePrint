@@ -40,5 +40,8 @@ export default [
     route('users/:id', 'routes/admin-user.tsx'),
     route('audit', 'routes/admin-audit.tsx'),
     route('books/:id', 'routes/admin-book.tsx'),
+    route('catalog', 'routes/admin-catalog.tsx'),
+    route('catalog/merge', 'routes/admin-catalog-merge.tsx'),
+    route('catalog/genres', 'routes/admin-catalog-genres.tsx'),
   ]),
 ] satisfies RouteConfig

@@ -491,7 +491,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T13 · Web: admin Catalog book edit and refresh pages · deps: M7-T10 · PRD: §7.11
   - Accept: `/admin/books/:id` edits the allowed fields, shows locked fields and their origins, uploads a cover, sets the Primary Edition, and triggers a refresh (component tests)
   - Accept: only holders of `catalog.manage` can open the page; others get 403 (loader tests)
-- [ ] M7-T14 · Web: merge queue, Genre and rule management, Catalog dashboard · deps: M7-T11, M7-T12, M7-T13 · PRD: §6, §7.11
+- [x] M7-T14 · Web: merge queue, Genre and rule management, Catalog dashboard · deps: M7-T11, M7-T12, M7-T13 · PRD: §6, §7.11
   - Accept: `/admin/catalog/merge` shows candidate pairs side by side with Merge and Dismiss (component tests)
   - Accept: `/admin/catalog/genres` manages Genres and rules; `/admin/catalog` shows size and monthly growth (component tests)
 - [ ] M7-T15 · Featured content: `PUT /v1/admin/featured` and admin UI · deps: M5-T06, M4-T11 · PRD: §7.2, §7.11, §10
