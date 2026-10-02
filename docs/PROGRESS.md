@@ -520,3 +520,7 @@ Entry format:
 ### 2026-10-02 · M7-T15 · PR pending
 - `GET` and `PUT /v1/admin/featured` in `modules/admin/featured.ts` (`featured.manage`; `featured.genres` for Genres, Admin only); migration `0017` adds both permissions; `loadFeaturedReviews` in `discover/rows.ts` is shared with the Discover row. Shared schemas in `packages/shared/src/admin-featured-api.ts`; `openapi.json` regenerated. Web: `/admin/featured` (`routes/admin-featured.tsx`, `components/admin/featured-manager.tsx`) and a "Featured content" nav link. Integration, loader/action, and component tests (incl. axe). D-161 records the choices.
 - Next iteration: M7-T16 (IP retention job). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-02 · M7-T16 · PR pending
+- `privacy.clearOldIps` daily job (`jobs/registry.ts`) over `clearOldIps` in `modules/audit/retention.ts`: nulls `ip` on `sessions` and `audit_log` rows older than 90 days; the existing audit trigger already allowed only that update, so no migration. Integration tests in `audit/retention.integration.test.ts`; the worker schedule list test gained the job. D-162 records the choices. Note: `ready.integration.test.ts` (Redis stopped, 503) was flaky once locally and passed on rerun.
+- Next iteration: M7-T17 (E2E: report and unpublish; admin role and suspend). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

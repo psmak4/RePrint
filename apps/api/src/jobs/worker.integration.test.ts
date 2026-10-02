@@ -80,6 +80,7 @@ describe('worker (dist/worker.js)', () => {
       'accounts.erase',
       'catalog.purgeSourceRecords',
       'discover.rebuild',
+      'privacy.clearOldIps',
       'ratings.recompute',
       'system.heartbeat',
       'users.lift_suspensions',
