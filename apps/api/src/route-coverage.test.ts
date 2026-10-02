@@ -31,6 +31,7 @@ const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
+const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
 const LIBRARY = 'modules/library/library.integration.test.ts'
 const PROFILES = 'modules/profiles/profiles.integration.test.ts'
@@ -256,6 +257,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/mod/reports': {
     allowed: [MOD_REPORTS, 'groups open reports by review, oldest first, with reasons'],
     denied: [MOD_REPORTS, 'denies Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/users': {
+    allowed: [ADMIN_USERS, 'lists users newest first with roles and counts for Admins'],
+    denied: [ADMIN_USERS, 'denies Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/users/{id}': {
+    allowed: [ADMIN_USERS, 'returns the full detail to Admins'],
+    denied: [ADMIN_USERS, 'denies Members with 403 and Visitors with 401'],
   },
   'POST /v1/mod/reports/{reviewId}/dismiss': {
     allowed: [MOD_REPORTS, 'closes the reports, un-hides the review, and audits it'],

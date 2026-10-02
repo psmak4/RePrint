@@ -452,7 +452,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/mod/reports` groups open reports by review with reasons, cursor-paginated; `reports.resolve` is required (allowed and denied tests)
   - Accept: dismiss closes the reports and un-hides the review; `POST /mod/reviews/:id/unpublish` (reason required) sets Unpublished, updates aggregates, closes the reports, and notifies the author (integration tests)
   - Accept: `/mod/stats` adds open report count and oldest open report age; each action writes an audit row
-- [ ] M7-T03 · Admin users API: `GET /v1/admin/users` and `/v1/admin/users/:id` · deps: M4-T03, M2-T21 · PRD: §4, §7.11, §10
+- [x] M7-T03 · Admin users API: `GET /v1/admin/users` and `/v1/admin/users/:id` · deps: M4-T03, M2-T21 · PRD: §4, §7.11, §10
   - Accept: search by email or username with filters for role, status (active, unverified, suspended, deleted), and join date, cursor-paginated (integration tests)
   - Accept: detail returns profile, roles, sessions, reviews by status, reports filed and received, and audit history for Admins; Moderators get the limited view per `docs/DECISIONS.md`; Members get 403 (tests for each)
 - [ ] M7-T04 · Role management: `PUT/DELETE /v1/admin/users/:id/roles/:role` · deps: M7-T03 · PRD: §4, §7.11, §10
