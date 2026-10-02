@@ -1,4 +1,5 @@
 import type { Cover as CoverData } from '@reprint/shared'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { Cover } from './cover.js'
@@ -15,7 +16,16 @@ export type BookCardData = {
   rating: { average: number | null; count: number } | null
 }
 
-export function BookCard({ book, href }: { book: BookCardData; href: string }) {
+export function BookCard({
+  book,
+  href,
+  shelf,
+}: {
+  book: BookCardData
+  href: string
+  /** The shelf control, when the page offers one. */
+  shelf?: ReactNode
+}) {
   const authors = book.authorNames.join(', ')
   return (
     <article className="flex gap-4 rounded-lg border border-border bg-surface p-4">
@@ -36,6 +46,7 @@ export function BookCard({ book, href }: { book: BookCardData; href: string }) {
         <div className="mt-1">
           <RatingDisplay rating={book.rating ?? { average: null, count: 0 }} />
         </div>
+        {shelf ? <div className="mt-1">{shelf}</div> : null}
       </div>
     </article>
   )

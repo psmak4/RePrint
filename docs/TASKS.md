@@ -413,7 +413,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T02 · Viewer shelf status in Book, search, Series, and Discover responses · deps: M6-T01, M5-T06, M5-T04, M3-T14 · PRD: §7.5, §7.7
   - Accept: signed-in responses include `viewerShelf` on each Book; Visitor responses do not (integration tests)
   - Accept: responses that include viewer data are not publicly cached (`Cache-Control: private` or `Vary: Cookie`) (integration test)
-- [ ] M6-T03 · Web: shelf selector on the book page, search results, Discover cards, and Series page · deps: M6-T02, M5-T07, M5-T05, M3-T17 · PRD: §7.7, §12
+- [x] M6-T03 · Web: shelf selector on the book page, search results, Discover cards, and Series page · deps: M6-T02, M5-T07, M5-T05, M3-T17 · PRD: §7.7, §12
   - Accept: one `ShelfSelector` control shows the current shelf and offers the three shelves plus "Remove" (component tests)
   - Accept: on a "not yet on RePrint" search result, shelving resolves the Book first, then shelves it (component test with mocked API)
   - Accept: Visitors are prompted to sign in instead

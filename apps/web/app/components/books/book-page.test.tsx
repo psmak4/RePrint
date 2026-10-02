@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { BookDetail, BookSummary, Edition } from '@reprint/shared'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -61,7 +62,11 @@ function renderPage(
       ),
     },
   ])
-  return render(<Stub />)
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <Stub />
+    </QueryClientProvider>,
+  )
 }
 
 describe('BookPage header', () => {

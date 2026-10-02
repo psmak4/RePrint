@@ -16,6 +16,7 @@ import { RatingSummary } from '../reviews/rating-summary.js'
 import { ReviewsList } from '../reviews/reviews-list.js'
 import { Cover } from './cover.js'
 import { RatingDisplay } from './rating-display.js'
+import { BookShelfSelector } from './shelf-selector.js'
 
 const { page: text } = copy.books
 
@@ -45,7 +46,7 @@ export function BookPage({
 }) {
   return (
     <article className="flex flex-col gap-8">
-      <BookHeader book={book} />
+      <BookHeader book={book} signedIn={viewer !== null} />
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="flex flex-col gap-8 lg:col-span-8">
           <Description text={book.description} />
@@ -69,7 +70,7 @@ export function BookPage({
   )
 }
 
-function BookHeader({ book }: { book: BookDetail }) {
+function BookHeader({ book, signedIn }: { book: BookDetail; signedIn: boolean }) {
   const groups = groupContributors(book.contributions)
   const edition = book.primaryEdition
   const meta = [
@@ -119,6 +120,7 @@ function BookHeader({ book }: { book: BookDetail }) {
           </ul>
         ) : null}
         <RatingDisplay rating={book.rating} />
+        <BookShelfSelector book={book} signedIn={signedIn} />
         {book.genres.length > 0 ? (
           <ul aria-label={text.genresLabel} className="mt-1 flex flex-wrap gap-2">
             {book.genres.map((genre) => (

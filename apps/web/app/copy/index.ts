@@ -66,6 +66,16 @@ export const copy = {
     featuredReviewOn: 'Review of',
     readMore: 'Read the full review',
   },
+  shelves: {
+    label: (title: string) => `Shelf for ${title}`,
+    none: 'Add to shelf',
+    want_to_read: 'Want to Read',
+    reading: 'Reading',
+    read: 'Read',
+    remove: 'Remove',
+    failed: "We couldn't update your shelf. Please try again.",
+    signIn: 'Sign in to shelve',
+  },
   search: {
     title: (q: string) => (q ? `Search: ${q}` : 'Search'),
     heading: 'Search results',

@@ -1,12 +1,19 @@
-import type { SeriesDetailResponse } from '@reprint/shared'
+import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
 import { copy } from '../../copy/index.js'
 import { BookCard } from './book-card.js'
 import { summaryCard } from './genre-pages.js'
+import { BookShelfSelector } from './shelf-selector.js'
 
 const text = copy.series
 
 /** `/series/:slug`: Books in reading order, each with its position and rating (PRD §7.5). */
-export function SeriesPage({ detail }: { detail: SeriesDetailResponse }) {
+export function SeriesPage({
+  detail,
+  viewer = null,
+}: {
+  detail: SeriesDetailResponse
+  viewer?: Viewer | null
+}) {
   const { series, items } = detail
   return (
     <div className="flex flex-col gap-6">
@@ -27,7 +34,11 @@ export function SeriesPage({ detail }: { detail: SeriesDetailResponse }) {
                 <span className="text-sm font-semibold text-muted-foreground">
                   {position === null ? text.noPosition : text.position(position)}
                 </span>
-                <BookCard book={summaryCard(book)} href={`/books/${book.slug}`} />
+                <BookCard
+                  book={summaryCard(book)}
+                  href={`/books/${book.slug}`}
+                  shelf={<BookShelfSelector book={book} signedIn={viewer !== null} />}
+                />
               </li>
             ))}
           </ol>

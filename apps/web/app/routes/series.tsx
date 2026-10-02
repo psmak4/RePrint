@@ -1,9 +1,10 @@
 import { APP_NAME, seriesDetailResponseSchema, slugSchema } from '@reprint/shared'
-import { data } from 'react-router'
+import { data, useRouteLoaderData } from 'react-router'
 import { SeriesPage } from '../components/books/series-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/series'
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -36,5 +37,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export default function Series({ loaderData }: Route.ComponentProps) {
-  return <SeriesPage detail={loaderData} />
+  const session = useRouteLoaderData<typeof rootLoader>('root')
+  return <SeriesPage detail={loaderData} viewer={session?.viewer ?? null} />
 }

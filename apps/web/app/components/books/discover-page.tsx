@@ -5,10 +5,21 @@ import { ReviewBody } from '../reviews/reviews-list.js'
 import { SpoilerToggle } from '../reviews/spoiler-toggle.js'
 import { BookCard } from './book-card.js'
 import { summaryCard } from './genre-pages.js'
+import { BookShelfSelector } from './shelf-selector.js'
 
 const text = copy.home
 
-function BookRow({ id, heading, books }: { id: string; heading: string; books: BookSummary[] }) {
+function BookRow({
+  id,
+  heading,
+  books,
+  signedIn,
+}: {
+  id: string
+  heading: string
+  books: BookSummary[]
+  signedIn: boolean
+}) {
   return (
     <section aria-labelledby={id} className="flex flex-col gap-3">
       <h2 id={id} className="text-2xl font-semibold">
@@ -17,7 +28,11 @@ function BookRow({ id, heading, books }: { id: string; heading: string; books: B
       <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {books.map((book) => (
           <li key={book.id}>
-            <BookCard book={summaryCard(book)} href={`/books/${book.slug}`} />
+            <BookCard
+              book={summaryCard(book)}
+              href={`/books/${book.slug}`}
+              shelf={<BookShelfSelector book={book} signedIn={signedIn} />}
+            />
           </li>
         ))}
       </ul>
@@ -99,16 +114,23 @@ export function DiscoverPage({
       {discover.recentlyReviewed ? (
         <BookRow
           id="discover-recent"
+          signedIn={viewer !== null}
           heading={text.recentlyReviewed}
           books={discover.recentlyReviewed}
         />
       ) : null}
       {discover.topRated ? (
-        <BookRow id="discover-top" heading={text.topRated} books={discover.topRated} />
+        <BookRow
+          id="discover-top"
+          signedIn={viewer !== null}
+          heading={text.topRated}
+          books={discover.topRated}
+        />
       ) : null}
       {discover.mostReviewedThisMonth ? (
         <BookRow
           id="discover-month"
+          signedIn={viewer !== null}
           heading={text.mostReviewedThisMonth}
           books={discover.mostReviewedThisMonth}
         />

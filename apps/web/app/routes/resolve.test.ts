@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loader } from './resolve.js'
+import { action, loader } from './resolve.js'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -50,6 +50,33 @@ describe('resolve loader', () => {
     const fetchMock = vi.fn()
     const result = await ask(fetchMock as never, '?ref=nope')
     expect(result.data?.state).toBe('notFound')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('resolve action', () => {
+  const post = (body: unknown, fetchMock: typeof fetch) => {
+    vi.stubGlobal('fetch', fetchMock)
+    return action({
+      request: new Request('http://web.test/resolve', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      }),
+    } as never)
+  }
+
+  it('stores the candidate and returns its slug', async () => {
+    const fetchMock = vi.fn(async (..._args: unknown[]) => Response.json({ slug: 'dune' }))
+    expect(await post({ ref }, fetchMock as never)).toEqual({ slug: 'dune' })
+    expect(new URL(String(fetchMock.mock.calls[0]?.[0])).pathname).toBe('/v1/books/resolve')
+  })
+
+  it('rejects a malformed ref without calling the API', async () => {
+    const fetchMock = vi.fn()
+    await expect(post({ ref: 'x' }, fetchMock as never)).rejects.toMatchObject({
+      init: { status: 400 },
+    })
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })
