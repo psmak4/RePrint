@@ -448,7 +448,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: verified Members can report someone else's Approved review once, with a reason enum and a note (≤ 500 chars) required for "other" (integration tests, incl. denied: own review, duplicate, unverified)
   - Accept: the 3rd open report hides the review from public lists until a moderator decides (integration test)
   - Accept: 21 reports in a day return 429; the export and `accounts.erase` include reports
-- [ ] M7-T02 · Reports queue API: `GET /v1/mod/reports`, dismiss, unpublish · deps: M7-T01, M4-T07 · PRD: §7.10, §7.12, §10
+- [x] M7-T02 · Reports queue API: `GET /v1/mod/reports`, dismiss, unpublish · deps: M7-T01, M4-T07 · PRD: §7.10, §7.12, §10
   - Accept: `/mod/reports` groups open reports by review with reasons, cursor-paginated; `reports.resolve` is required (allowed and denied tests)
   - Accept: dismiss closes the reports and un-hides the review; `POST /mod/reviews/:id/unpublish` (reason required) sets Unpublished, updates aggregates, closes the reports, and notifies the author (integration tests)
   - Accept: `/mod/stats` adds open report count and oldest open report age; each action writes an audit row

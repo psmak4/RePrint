@@ -9,7 +9,13 @@ afterEach(cleanup)
 
 const now = '2026-10-01T03:30:00.000Z'
 
-function renderDashboard(stats: Parameters<typeof ModerationDashboard>[0]['stats']) {
+type Stats = Parameters<typeof ModerationDashboard>[0]['stats']
+
+// The dashboard shows report counts from M7-T06; until then the fixtures carry none.
+const noReports = { openReportCount: 0, oldestOpenReportAt: null, oldestOpenReportAgeSeconds: null }
+
+function renderDashboard(pending: Omit<Stats, keyof typeof noReports>) {
+  const stats: Stats = { ...pending, ...noReports }
   const Stub = createRoutesStub([
     { path: '/admin', Component: () => <ModerationDashboard stats={stats} now={now} /> },
   ])
