@@ -20,6 +20,7 @@ import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
 import { registerSessions } from './modules/auth/session-plugin.js'
 import { verificationRoutes } from './modules/auth/verification.js'
+import { configureUploadUrls } from './modules/catalog/read.js'
 import { resolveRoutes } from './modules/catalog/resolve.js'
 import { catalogRoutes } from './modules/catalog/routes.js'
 import { discoverRoutes } from './modules/discover/routes.js'
@@ -90,6 +91,7 @@ export async function buildApp(
   })
 
   const storage = options.storage ?? createImageStorage(env)
+  configureUploadUrls((key) => storage.url(key))
 
   registerErrorHandling(app)
   await app.register(helmet, {
@@ -195,6 +197,7 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+    storage,
   })
   await app.register(adminSuspensionRoutes, {
     prefix: '/v1',

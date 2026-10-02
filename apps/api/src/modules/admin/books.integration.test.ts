@@ -1,12 +1,27 @@
-import { auditLog, authors, bookGenres, books, contributions, genres } from '@reprint/db'
-import type { BookCandidate } from '@reprint/shared'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import {
+  auditLog,
+  authors,
+  bookGenres,
+  books,
+  contributions,
+  covers,
+  editions,
+  genres,
+} from '@reprint/db'
+import { adminBookSchema, type BookCandidate } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import sharp from 'sharp'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildApp } from '../../app.js'
 import { ingestBook } from '../../catalog/ingest/ingest.js'
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
 import { loadEnv } from '../../config/env.js'
+import { jobs } from '../../jobs/registry.js'
+import { LocalImageStorage } from '../../storage/index.js'
 import { startTestStack, type TestStack } from '../../testing/stack.js'
 import { createTestUser } from '../../testing/users.js'
 import { SESSION_COOKIE } from '../auth/session-cookie.js'
@@ -16,9 +31,13 @@ const stub = createStubSource()
 
 let stack: TestStack
 let app: FastifyInstance
+let uploadDir: string
+const enqueue = vi.fn(async (_name: string, _payload: object, _options?: object) => '1')
+const IMAGE_BASE = 'http://img.reprint.test/v1/uploads'
 
 beforeAll(async () => {
   stack = await startTestStack()
+  uploadDir = await mkdtemp(join(tmpdir(), 'reprint-covers-'))
   const env = loadEnv({
     NODE_ENV: 'test',
     LOG_LEVEL: 'silent',
@@ -26,7 +45,12 @@ beforeAll(async () => {
     DATABASE_URL: stack.databaseUrl,
     REDIS_URL: stack.redisUrl,
   })
-  app = await buildApp(env, { database: stack.db.db, redis: stack.redis })
+  app = await buildApp(env, {
+    database: stack.db.db,
+    redis: stack.redis,
+    storage: new LocalImageStorage(uploadDir, IMAGE_BASE),
+    jobs: { enqueue } as never,
+  })
   app.get('/test/start/:userId', async (request, reply) => {
     const { userId } = request.params as { userId: string }
     await app.sessions.start(request, reply, userId)
@@ -38,9 +62,14 @@ beforeAll(async () => {
 afterAll(async () => {
   await app?.close()
   await stack?.stop()
+  await rm(uploadDir, { recursive: true, force: true })
 })
 
-beforeEach(() => stack.reset())
+beforeEach(async () => {
+  await stack.reset()
+  await rm(uploadDir, { recursive: true, force: true })
+  enqueue.mockClear()
+})
 
 async function person(roles: string[] = ['member']) {
   const user = await createTestUser(stack.db.db, { roles })
@@ -209,5 +238,196 @@ describe('PATCH /v1/admin/books/:id', () => {
     expect((await patch(bookId, { title: 'X' })).statusCode).toBe(401)
     const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
     expect(row?.title).toBe('Dune')
+  })
+})
+
+function coverUpload(id: string, file: Buffer, cookies?: Record<string, string>) {
+  const boundary = '----reprint-test-boundary'
+  const head = Buffer.from(
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="cover.png"\r\nContent-Type: image/png\r\n\r\n`,
+  )
+  return app.inject({
+    method: 'POST',
+    url: `/v1/admin/books/${id}/cover`,
+    cookies,
+    headers: {
+      origin: ORIGIN,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    payload: Buffer.concat([head, file, Buffer.from(`\r\n--${boundary}--\r\n`)]),
+  })
+}
+
+const png = (width = 1200, height = 1800) =>
+  sharp({ create: { width, height, channels: 3, background: { r: 200, g: 40, b: 40 } } })
+    .png()
+    .toBuffer()
+
+describe('POST /v1/admin/books/:id/cover', () => {
+  it('stores a WebP of at most 600 px as an upload cover, locks it, and audits it', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    const response = await coverUpload(bookId, await png(), admin.cookies)
+
+    expect(response.statusCode).toBe(200)
+    const body = adminBookSchema.parse(response.json())
+    const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    const [cover] = await stack.db.db
+      .select()
+      .from(covers)
+      .where(eq(covers.id, row?.coverId ?? ''))
+    expect(cover).toMatchObject({ origin: 'upload', width: 600, height: 900 })
+    expect(body.cover).toMatchObject({ origin: 'upload', url: `${IMAGE_BASE}/${cover?.r2Key}` })
+    expect(body.lockedFields).toContain('cover')
+    expect(body.fieldOrigins.cover?.source).toBe('admin')
+    const meta = await sharp(await readFile(join(uploadDir, cover?.r2Key ?? ''))).metadata()
+    expect(meta).toMatchObject({ format: 'webp', width: 600 })
+    expect(meta.exif).toBeUndefined()
+
+    const [entry] = await stack.db.db.select().from(auditLog)
+    expect(entry).toMatchObject({ action: 'cover.upload', targetId: bookId })
+  })
+
+  it('keeps the uploaded cover through a refresh and replaces an earlier upload', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    await coverUpload(bookId, await png(), admin.cookies)
+    const [first] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    await ingestBook(stack.db.db, { source: stub, candidate: await candidate() })
+    const [afterRefresh] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    expect(afterRefresh?.coverId).toBe(first?.coverId)
+
+    await coverUpload(bookId, await png(300, 400), admin.cookies)
+    const stored = await stack.db.db.select().from(covers).where(eq(covers.origin, 'upload'))
+    expect(stored).toHaveLength(1)
+    expect(stored[0]?.id).not.toBe(first?.coverId)
+    expect(stored[0]).toMatchObject({ width: 300, height: 400 })
+  })
+
+  it('rejects a file that is not an image and one over the size limit', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    const text = await coverUpload(bookId, Buffer.from('not an image'), admin.cookies)
+    expect(text.statusCode).toBe(400)
+    expect(text.json().errors[0].path).toBe('body.file')
+    const big = await coverUpload(bookId, Buffer.alloc(6_000_000, 1), admin.cookies)
+    expect(big.statusCode).toBe(413)
+    const missing = await coverUpload(
+      '019a0000-0000-7000-8000-000000000000',
+      await png(),
+      admin.cookies,
+    )
+    expect(missing.statusCode).toBe(404)
+    expect(await stack.db.db.select().from(covers).where(eq(covers.origin, 'upload'))).toHaveLength(
+      0,
+    )
+  })
+
+  it('denies Moderators and Members with 403 and Visitors with 401', async () => {
+    const bookId = await dune()
+    const moderator = await person(['moderator'])
+    const member = await person()
+    expect((await coverUpload(bookId, await png(), moderator.cookies)).statusCode).toBe(403)
+    expect((await coverUpload(bookId, await png(), member.cookies)).statusCode).toBe(403)
+    expect((await coverUpload(bookId, await png())).statusCode).toBe(401)
+  })
+})
+
+describe('Primary Edition choice through PATCH /v1/admin/books/:id', () => {
+  it('sets one of the Book’s Editions, locks it, and keeps it through a refresh', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    const [other] = await stack.db.db
+      .insert(editions)
+      .values({ bookId, isbn13: '9782070360024', format: 'paperback', language: 'fr' })
+      .returning()
+    if (!other) throw new Error('could not add an Edition')
+    const [before] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+
+    const response = await patch(bookId, { primaryEditionId: other.id }, admin.cookies)
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({ primaryEditionId: other.id })
+    expect(response.json().lockedFields).toEqual(['primaryEdition'])
+
+    await ingestBook(stack.db.db, { source: stub, candidate: await candidate() })
+    const [after] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    expect(after?.primaryEditionId).toBe(other.id)
+
+    const [entry] = await stack.db.db.select().from(auditLog)
+    expect(entry).toMatchObject({ action: 'book.primary_edition', targetId: bookId })
+    expect(entry?.before).toEqual({ primaryEdition: before?.primaryEditionId })
+    expect(entry?.after).toEqual({ primaryEdition: other.id })
+  })
+
+  it('rejects an Edition that belongs to another Book', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    const response = await patch(
+      bookId,
+      { primaryEditionId: '019a0000-0000-7000-8000-000000000000' },
+      admin.cookies,
+    )
+    expect(response.statusCode).toBe(400)
+    expect(response.json().errors[0].path).toBe('body.primaryEditionId')
+  })
+})
+
+describe('POST /v1/admin/books/:id/refresh', () => {
+  const refresh = (id: string, cookies?: Record<string, string>) =>
+    app.inject({
+      method: 'POST',
+      url: `/v1/admin/books/${id}/refresh`,
+      cookies,
+      headers: { origin: ORIGIN },
+    })
+
+  it('queues an interactive-priority refresh and audits it', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    const response = await refresh(bookId, admin.cookies)
+    expect(response.statusCode).toBe(202)
+    expect(response.json()).toEqual({ status: 'refresh_queued' })
+    expect(enqueue).toHaveBeenCalledWith(
+      'catalog.refresh',
+      { bookId, interactive: true },
+      { priority: 1 },
+    )
+    const [entry] = await stack.db.db.select().from(auditLog)
+    expect(entry).toMatchObject({ action: 'book.refresh', targetId: bookId })
+  })
+
+  it('runs the job with Source calls at interactive priority and keeps locked fields', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    await patch(bookId, { title: 'Locked Title' }, admin.cookies)
+    const interactive = vi.fn(<T>(fn: () => Promise<T>, _timeoutMs: number) => fn())
+    const background = vi.fn(<T>(fn: () => Promise<T>) => fn())
+    const outcome = await jobs['catalog.refresh'].handler({ bookId, interactive: true }, {
+      db: stack.db.db,
+      log: { info: () => {} } as never,
+      catalog: { source: stub, interactive, background },
+    } as never)
+    expect(outcome).toEqual({ outcome: 'refreshed' })
+    expect(interactive).toHaveBeenCalled()
+    expect(background).not.toHaveBeenCalled()
+    const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    expect(row?.title).toBe('Locked Title')
+  })
+
+  it('returns 404 for an unknown Book and queues nothing', async () => {
+    const admin = await person(['admin'])
+    const response = await refresh('019a0000-0000-7000-8000-000000000000', admin.cookies)
+    expect(response.statusCode).toBe(404)
+    expect(enqueue).not.toHaveBeenCalled()
+  })
+
+  it('denies Moderators and Members with 403 and Visitors with 401', async () => {
+    const bookId = await dune()
+    const moderator = await person(['moderator'])
+    const member = await person()
+    expect((await refresh(bookId, moderator.cookies)).statusCode).toBe(403)
+    expect((await refresh(bookId, member.cookies)).statusCode).toBe(403)
+    expect((await refresh(bookId)).statusCode).toBe(401)
+    expect(enqueue).not.toHaveBeenCalled()
   })
 })

@@ -29,6 +29,13 @@ type CoverRow = typeof covers.$inferSelect
 type EditionRow = typeof editions.$inferSelect
 type BookRow = typeof books.$inferSelect
 
+let uploadUrlOf: ((key: string) => string) | null = null
+
+/** Tells `toCover` where uploaded images are served from; the API sets it once from its storage driver. */
+export function configureUploadUrls(urlOf: (key: string) => string): void {
+  uploadUrlOf = urlOf
+}
+
 export function toCover(row: CoverRow | null | undefined): Cover | null {
   if (!row) return null
   return {
@@ -37,7 +44,7 @@ export function toCover(row: CoverRow | null | undefined): Cover | null {
     width: row.width,
     height: row.height,
     // Uploads are served from RePrint storage; the web app resolves other origins from `originRef`.
-    url: null,
+    url: row.r2Key && uploadUrlOf ? uploadUrlOf(row.r2Key) : null,
   }
 }
 

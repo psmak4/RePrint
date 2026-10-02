@@ -495,3 +495,8 @@ Entry format:
 ### 2026-10-02 · M7-T09 · PR pending
 - `PATCH /v1/admin/books/:id` in `modules/admin/books.ts` (`catalog.manage`, new permission via migration `0014`); shared schemas in `packages/shared/src/admin-catalog-api.ts`; `openapi.json` regenerated. Integration tests in `admin/books.integration.test.ts` (edit, lock, refresh keeps locks, validation, denied); route-coverage table extended. D-155 records the choices.
 - Next iteration: M7-T10 (cover upload, Primary Edition choice, refresh). Reuse `loadBook`/the lock names (`title`, `description`, `genres`, `series`, `contributions`, `primaryEdition`, `cover`) from D-155. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-02 · M7-T10 · PR pending
+- `POST /v1/admin/books/:id/cover` and `POST /v1/admin/books/:id/refresh` in `modules/admin/books.ts` (+ `cover-image.ts`); Primary Edition is set by `PATCH` with `primaryEditionId`. The `catalog.refresh` job takes `interactive` and the job context gained `catalog.interactive`. Uploaded covers now get a `url` in Book responses (`configureUploadUrls`). Shared schemas in `packages/shared/src/admin-catalog-api.ts`; `openapi.json` regenerated. Integration tests in `admin/books.integration.test.ts`; route-coverage table extended. D-156 records the choices.
+- Next iteration: M7-T11 (merge queue and merge). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+

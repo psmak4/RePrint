@@ -276,6 +276,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
+  'POST /v1/admin/books/{id}/cover': {
+    allowed: [ADMIN_BOOKS, 'stores a WebP of at most 600 px as an upload cover'],
+    denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/books/{id}/refresh': {
+    allowed: [ADMIN_BOOKS, 'queues an interactive-priority refresh and audits it'],
+    denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
   'GET /v1/admin/users': {
     allowed: [ADMIN_USERS, 'lists users newest first with roles and counts for Admins'],
     denied: [ADMIN_USERS, 'denies Members with 403 and Visitors with 401'],

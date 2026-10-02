@@ -35,6 +35,8 @@ export interface JobContext {
   catalog: {
     source: SourceAdapter
     background: <T>(fn: () => Promise<T>) => Promise<T>
+    /** Runs Source calls at interactive priority, for refreshes an Admin asked for. */
+    interactive: <T>(fn: () => Promise<T>, timeoutMs: number) => Promise<T>
   }
 }
 
@@ -92,6 +94,9 @@ export const emailSendPayload = z.discriminatedUnion('template', [
   }),
   z.object({ template: z.literal('review-decision'), to: z.email(), props: reviewDecisionProps }),
 ])
+
+/** Each Source call of an Admin's refresh may take this long. */
+const ADMIN_REFRESH_TIMEOUT_MS = 15_000
 
 /** Every background job. To add one, add an entry here (see `README.md`). */
 export const jobs = {
@@ -155,13 +160,16 @@ export const jobs = {
     retry: { attempts: 3, backoffMs: 30_000 },
   }),
   'catalog.refresh': defineJob({
-    payload: z.object({ bookId: z.uuid() }),
-    handler: async ({ bookId }, { db, log, catalog }) => {
+    // `interactive` marks an Admin's refresh, which goes ahead of background refreshes (PRD §6).
+    payload: z.object({ bookId: z.uuid(), interactive: z.boolean().optional() }),
+    handler: async ({ bookId, interactive }, { db, log, catalog }) => {
       const outcome = await refreshBook({
         db,
         source: catalog.source,
         bookId,
-        call: catalog.background,
+        call: interactive
+          ? (fn) => catalog.interactive(fn, ADMIN_REFRESH_TIMEOUT_MS)
+          : catalog.background,
       })
       log.info({ bookId, outcome }, 'book refreshed')
       return { outcome }
