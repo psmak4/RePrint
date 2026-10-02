@@ -407,3 +407,7 @@ Entry format:
 - `seed:discover` (`modules/discover/seed-discover.ts`, `scripts/seed-discover.ts`) added to `db:seed` and `db:reset`: eight Books get six Approved reviews each (recent, so Top rated and "this month" show), Helpful votes, six featured Genres, and a featured review. `seed-reviews.ts` now exports `loadSeedAccounts`, `pick`, `reviewText`, `DAY_MS` for reuse. Integration test in `seed-discover.integration.test.ts`. D-137 records the choices.
 - Next iteration: M5-T09 (M5 verification). After `db:reset`, wait for the `discover.rebuild` job or clear the `discover:v1:*` Redis keys to see rows. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-10-01 · M5-T09 · PR pending
+- M5 verification. Added `e2e/specs/discover.spec.ts` (Discover home, Genres index → Genre page with a sort, Series page created through the DB; axe on each, all three projects). `pnpm check` and `pnpm test:e2e` pass (33 tests), and the new spec also passes on a `db:reset` seeded database. Criteria 1–6 are covered by the M5-T01..T08 integration and component tests.
+- Next iteration: M6-T01 (Shelves). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
