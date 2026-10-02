@@ -21,3 +21,8 @@ All modules run in one transaction, so a failure leaves the database unchanged.
 ## Review data
 
 The root scripts then run `pnpm --filter api seed:reviews` (D-129): about 150 reviews across 40 Books in every status, with edited reviews that have several versions. It lives in `apps/api` because it uses `applyReviewChange` to keep each Book's totals right. It does nothing when any review already exists.
+
+## Discover data
+
+Then `pnpm --filter api seed:discover` (D-137) tops up eight Books to six Approved reviews, adds Helpful votes, and picks featured Genres and a featured review. It does nothing when any featured item exists. Discover rows are cached in Redis for up to an hour, so after a reset they appear once the `discover.rebuild` job runs.
+

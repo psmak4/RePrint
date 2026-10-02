@@ -397,7 +397,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T07 · Web: Discover home page · deps: M5-T06, M3-T15 · PRD: §7.2
   - Accept: `/` renders each row returned by `/v1/discover` with BookCards, a genre grid with a link to all Genres, and the featured review with its Book (component tests)
   - Accept: Visitors see sign-in prompts, and Members do not; empty or hidden rows leave no gaps (component tests)
-- [ ] M5-T08 · Seed: featured Genres, a featured review, helpful votes · deps: M5-T06, M5-T01, M4-T14 · PRD: §13
+- [x] M5-T08 · Seed: featured Genres, a featured review, helpful votes · deps: M5-T06, M5-T01, M4-T14 · PRD: §13
   - Accept: after `pnpm db:reset` and a Discover rebuild, every Discover row is visible locally
   - Accept: seeded helpful votes make "Most helpful" sorting differ from "Newest" on at least one seeded Book
 - [ ] M5-T09 · M5 verification: run the Discovery acceptance criteria end to end, fix gaps, update docs · deps: M5-T02, M5-T05, M5-T07, M5-T08 · PRD: §3, §7.2, §7.5, §7.6
