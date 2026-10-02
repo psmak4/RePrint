@@ -39,5 +39,6 @@ export default [
     route('users', 'routes/admin-users.tsx'),
     route('users/:id', 'routes/admin-user.tsx'),
     route('audit', 'routes/admin-audit.tsx'),
+    route('books/:id', 'routes/admin-book.tsx'),
   ]),
 ] satisfies RouteConfig

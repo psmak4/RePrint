@@ -1071,3 +1071,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §5.4, §6, and §7.11 name Genre and rule management and growth stats but not archive semantics, hierarchy limits, or the response shapes.
 - Affects: M7-T14, M7-T15
 
+
+### D-159 · Admin Book edit page (M7-T13)
+
+- Status: Implementation
+- Decision: (1) `GET /v1/admin/books/:id` (`catalog.manage`) returns the editable view from D-155 plus the Book's Editions (`id`, `isbn13`, `format`, `language`, `publisherName`, `publishedDate`), so the page can offer the Primary Edition choice; 404 for an unknown Book. (2) `/admin/books/:id` loads that and `GET /v1/admin/genres` (archived Genres are hidden from the choices). Any holder of `catalog.manage` can open the admin area, and the page itself checks the permission (403 otherwise). (3) The form sends only the field groups that changed, because every field sent is locked (D-155); Contributions already on the Book keep their `authorId` and only their role is editable, and a new row creates a new Author by name. A Primary Edition cannot be cleared back to automatic once set. (4) The Cover goes up as multipart through the route action; refresh posts JSON. No nav link is added yet; M7-T14 adds the Catalog section links.
+- Why: PRD §7.11 lists the editable fields but not the read endpoint, how locks show, or how the form avoids locking untouched fields.
+- Affects: M7-T14
