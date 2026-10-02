@@ -385,7 +385,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M5-T04 · Series API: `GET /v1/series/:slug` · deps: M3-T10 · PRD: §7.5, §10
   - Accept: Books are returned in reading order with position (decimal or empty, empty last) and RePrint rating (integration test)
   - Accept: unknown slugs return 404 Problem Details
-- [ ] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5
+- [x] M5-T05 · Web: Genres index, Genre page, Series page · deps: M5-T03, M5-T04, M3-T15 · PRD: §7.5
   - Accept: `/genres` lists all Genres; `/genres/:slug` shows Books with sort options in the URL (component and loader tests)
   - Accept: `/series/:slug` shows Books in order with positions and ratings (component test)
 - [ ] M5-T05a · Web: Genre filter select on the search results page · deps: M5-T03, M3-T17 · PRD: §7.3
