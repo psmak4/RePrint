@@ -469,3 +469,8 @@ Entry format:
 ### 2026-10-02 · M7-T03 · PR pending
 - `GET /v1/admin/users` and `/v1/admin/users/:id` in `modules/admin/users.ts` (new `admin` module); shared schemas in `packages/shared/src/admin-users-api.ts`; `openapi.json` regenerated. Integration tests in `admin/users.integration.test.ts`; route-coverage table extended. D-149 records the choices (limited view is keyed on `audit.view`).
 - Next iteration: M7-T04 (role management). Register new admin routes in `app.ts` next to `adminUserRoutes`; the detail response already lists `roles`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-02 · M7-T04 · PR pending
+- `PUT` and `DELETE /v1/admin/users/:id/roles/:role` in `modules/admin/users.ts`; shared `adminUserRoleParamsSchema` and `adminUserRolesResponseSchema` in `packages/shared/src/admin-users-api.ts`; `openapi.json` regenerated. Integration tests in `admin/users.integration.test.ts`; route-coverage table extended. D-150 records the choices (idempotent, only `moderator` and `admin` can be named, last-Admin check locks the Admin grants).
+- Next iteration: M7-T05 (suspensions). Add the routes to `adminUserRoutes` or a sibling registered next to it in `app.ts`; a suspension reason is not stored yet (D-149). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+

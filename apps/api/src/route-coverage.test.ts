@@ -266,6 +266,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     allowed: [ADMIN_USERS, 'returns the full detail to Admins'],
     denied: [ADMIN_USERS, 'denies Members with 403 and Visitors with 401'],
   },
+  'PUT /v1/admin/users/{id}/roles/{role}': {
+    allowed: [ADMIN_USERS, 'grants a role and records before and after values'],
+    denied: [ADMIN_USERS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'DELETE /v1/admin/users/{id}/roles/{role}': {
+    allowed: [ADMIN_USERS, 'removes a role and records it'],
+    denied: [ADMIN_USERS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
   'POST /v1/mod/reports/{reviewId}/dismiss': {
     allowed: [MOD_REPORTS, 'closes the reports, un-hides the review, and audits it'],
     denied: [MOD_REPORTS, 'denies Members with 403 and Visitors with 401'],

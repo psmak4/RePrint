@@ -1,6 +1,7 @@
 import { auditLog, reviewReports, reviews, roles, sessions, userRoles, users } from '@reprint/db'
 import {
   type AdminUserDetail,
+  type AdminUserRolesResponse,
   type AdminUserStatus,
   type AdminUserSummary,
   type AdminUsersResponse,
@@ -8,6 +9,8 @@ import {
   type AuditTargetType,
   adminUserDetailSchema,
   adminUserParamsSchema,
+  adminUserRoleParamsSchema,
+  adminUserRolesResponseSchema,
   adminUsersQuerySchema,
   adminUsersResponseSchema,
   hasPermission,
@@ -15,8 +18,10 @@ import {
   type ReviewStatus,
 } from '@reprint/shared'
 import { and, count, desc, eq, gt, gte, ilike, inArray, lt, or, sql } from 'drizzle-orm'
+import type { FastifyRequest } from 'fastify'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
+import { recordAudit } from '../audit/audit.js'
 import { requirePermission } from '../auth/guards.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
 import { deviceName } from '../me/sessions.js'
@@ -31,14 +36,19 @@ function displayStatus(row: { status: string; emailVerifiedAt: Date | null }): A
   return row.emailVerifiedAt ? 'active' : 'unverified'
 }
 
+function isRoleName(name: string): name is AdminUserSummary['roles'][number] {
+  return name === 'member' || name === 'moderator' || name === 'admin'
+}
+
 function escapeLike(text: string): string {
   return text.replace(/[\\%_]/g, (char) => `\\${char}`)
 }
 
-/** Admin user search and detail (PRD §7.11). Role changes and suspensions come in later tasks. */
+/** Admin user search, detail, and role changes (PRD §7.11). Suspensions come in a later task. */
 export const adminUserRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
   const { db } = options
   const view = requirePermission('users.view')
+  const assign = requirePermission('roles.assign')
 
   app.get(
     '/admin/users',
@@ -221,6 +231,91 @@ export const adminUserRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (
         admin,
       }
     },
+  )
+
+  /** Grants or removes a role in one transaction with its audit row (PRD §4, D-150). */
+  async function changeRole(
+    request: FastifyRequest<{ Params: { id: string; role: 'moderator' | 'admin' } }>,
+    grant: boolean,
+  ): Promise<AdminUserRolesResponse> {
+    if (!db || !request.auth) throw new Error('admin routes need a database')
+    const actorId = request.auth.user.id
+    const { id, role } = request.params
+    return db.transaction(async (tx) => {
+      const [target] = await tx.select().from(users).where(eq(users.id, id)).for('update')
+      if (!target) throw new HttpProblem(404, 'User not found.')
+      if (target.status === 'deleted') {
+        throw new HttpProblem(409, 'Roles cannot be changed on a deleted account.')
+      }
+      const [roleRow] = await tx.select().from(roles).where(eq(roles.name, role))
+      if (!roleRow) throw new Error(`role ${role} is not seeded`)
+
+      const held = async () => {
+        const rows = await tx
+          .select({ name: roles.name })
+          .from(userRoles)
+          .innerJoin(roles, eq(roles.id, userRoles.roleId))
+          .where(eq(userRoles.userId, id))
+          .orderBy(roles.name)
+        return rows.map((row) => row.name).filter(isRoleName)
+      }
+      const before = await held()
+      if (before.includes(role) === grant) return { userId: id, roles: before, changed: false }
+
+      if (!grant && role === 'admin' && id === actorId) {
+        // Lock every Admin grant so two Admins removing themselves at once cannot both pass.
+        const admins = await tx
+          .select({ userId: userRoles.userId })
+          .from(userRoles)
+          .where(eq(userRoles.roleId, roleRow.id))
+          .for('update')
+        if (admins.every((row) => row.userId === actorId)) {
+          throw new HttpProblem(409, 'You are the last Admin, so you cannot remove your own role.')
+        }
+      }
+
+      if (grant) await tx.insert(userRoles).values({ userId: id, roleId: roleRow.id })
+      else {
+        await tx
+          .delete(userRoles)
+          .where(and(eq(userRoles.userId, id), eq(userRoles.roleId, roleRow.id)))
+      }
+      const after = await held()
+      await recordAudit(tx, {
+        actorId,
+        action: grant ? 'role.grant' : 'role.remove',
+        targetType: 'user',
+        targetId: id,
+        before: { roles: before },
+        after: { roles: after },
+        ip: request.ip,
+      })
+      return { userId: id, roles: after, changed: true }
+    })
+  }
+
+  app.put(
+    '/admin/users/:id/roles/:role',
+    {
+      preHandler: [assign],
+      schema: {
+        params: adminUserRoleParamsSchema,
+        response: { 200: adminUserRolesResponseSchema },
+      },
+    },
+    (request) => changeRole(request, true),
+  )
+
+  app.delete(
+    '/admin/users/:id/roles/:role',
+    {
+      preHandler: [assign],
+      schema: {
+        params: adminUserRoleParamsSchema,
+        response: { 200: adminUserRolesResponseSchema },
+      },
+    },
+    (request) => changeRole(request, false),
   )
 
   async function rolesFor(ids: string[]): Promise<Map<string, AdminUserSummary['roles']>> {

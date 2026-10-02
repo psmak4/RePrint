@@ -1,5 +1,9 @@
 import { auditLog, books, newId, reviewReports, reviews, sessions, users } from '@reprint/db'
-import { adminUserDetailSchema, adminUsersResponseSchema } from '@reprint/shared'
+import {
+  adminUserDetailSchema,
+  adminUserRolesResponseSchema,
+  adminUsersResponseSchema,
+} from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -227,5 +231,111 @@ describe('GET /v1/admin/users/:id', () => {
     const member = await person()
     expect((await detail(member.user.id, member.cookies)).statusCode).toBe(403)
     expect((await detail(member.user.id)).statusCode).toBe(401)
+  })
+})
+
+describe('PUT and DELETE /v1/admin/users/:id/roles/:role', () => {
+  const put = (id: string, role: string, cookies?: Record<string, string>) =>
+    app.inject({
+      method: 'PUT',
+      url: `/v1/admin/users/${id}/roles/${role}`,
+      cookies,
+      headers: { origin: ORIGIN },
+    })
+  const remove = (id: string, role: string, cookies?: Record<string, string>) =>
+    app.inject({
+      method: 'DELETE',
+      url: `/v1/admin/users/${id}/roles/${role}`,
+      cookies,
+      headers: { origin: ORIGIN },
+    })
+  const audits = (action: 'role.grant' | 'role.remove') =>
+    stack.db.db.select().from(auditLog).where(eq(auditLog.action, action))
+
+  it('grants a role and records before and after values', async () => {
+    const admin = await person(['admin'])
+    const target = await createTestUser(stack.db.db)
+
+    const response = await put(target.id, 'moderator', admin.cookies)
+    expect(response.statusCode).toBe(200)
+    expect(adminUserRolesResponseSchema.parse(response.json())).toEqual({
+      userId: target.id,
+      roles: ['member', 'moderator'],
+      changed: true,
+    })
+    const [entry] = await audits('role.grant')
+    expect(entry).toMatchObject({
+      actorId: admin.user.id,
+      targetType: 'user',
+      targetId: target.id,
+      before: { roles: ['member'] },
+      after: { roles: ['member', 'moderator'] },
+    })
+  })
+
+  it('removes a role and records it', async () => {
+    const admin = await person(['admin'])
+    const target = await createTestUser(stack.db.db, { roles: ['member', 'moderator'] })
+
+    const response = await remove(target.id, 'moderator', admin.cookies)
+    expect(response.statusCode).toBe(200)
+    expect(adminUserRolesResponseSchema.parse(response.json()).roles).toEqual(['member'])
+    const [entry] = await audits('role.remove')
+    expect(entry).toMatchObject({
+      before: { roles: ['member', 'moderator'] },
+      after: { roles: ['member'] },
+    })
+  })
+
+  it('does nothing and writes no audit row when the role is already in that state', async () => {
+    const admin = await person(['admin'])
+    const target = await createTestUser(stack.db.db, { roles: ['member', 'moderator'] })
+
+    const again = await put(target.id, 'moderator', admin.cookies)
+    expect(adminUserRolesResponseSchema.parse(again.json()).changed).toBe(false)
+    const none = await remove(target.id, 'admin', admin.cookies)
+    expect(adminUserRolesResponseSchema.parse(none.json()).changed).toBe(false)
+    expect(await audits('role.grant')).toHaveLength(0)
+    expect(await audits('role.remove')).toHaveLength(0)
+  })
+
+  it('refuses to remove your own Admin role when you are the last Admin', async () => {
+    const admin = await person(['member', 'admin'])
+
+    const response = await remove(admin.user.id, 'admin', admin.cookies)
+    expect(response.statusCode).toBe(409)
+    expect(await audits('role.remove')).toHaveLength(0)
+    const check = await detail(admin.user.id, admin.cookies)
+    expect(adminUserDetailSchema.parse(check.json()).user.roles).toContain('admin')
+  })
+
+  it('lets an Admin remove their own role when another Admin exists', async () => {
+    const admin = await person(['member', 'admin'])
+    await createTestUser(stack.db.db, { roles: ['admin'] })
+
+    const response = await remove(admin.user.id, 'admin', admin.cookies)
+    expect(response.statusCode).toBe(200)
+    expect(adminUserRolesResponseSchema.parse(response.json()).roles).toEqual(['member'])
+  })
+
+  it('rejects the member role, unknown users, and deleted accounts', async () => {
+    const admin = await person(['admin'])
+    const target = await createTestUser(stack.db.db)
+    const deleted = await createTestUser(stack.db.db, { status: 'deleted' })
+
+    expect((await put(target.id, 'member', admin.cookies)).statusCode).toBe(400)
+    expect((await put(newId(), 'moderator', admin.cookies)).statusCode).toBe(404)
+    expect((await put(deleted.id, 'moderator', admin.cookies)).statusCode).toBe(409)
+  })
+
+  it('denies Moderators and Members with 403 and Visitors with 401', async () => {
+    const target = await createTestUser(stack.db.db)
+    const moderator = await person(['moderator'])
+    const member = await person()
+
+    expect((await put(target.id, 'admin', moderator.cookies)).statusCode).toBe(403)
+    expect((await remove(target.id, 'moderator', member.cookies)).statusCode).toBe(403)
+    expect((await put(target.id, 'admin')).statusCode).toBe(401)
+    expect(await audits('role.grant')).toHaveLength(0)
   })
 })

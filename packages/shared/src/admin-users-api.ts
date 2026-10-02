@@ -92,3 +92,21 @@ export const adminUserDetailSchema = z.object({
     .nullable(),
 })
 export type AdminUserDetail = z.infer<typeof adminUserDetailSchema>
+
+/** Roles an Admin can grant or remove. Everyone is a Member, so that role is not changeable (D-150). */
+export const ASSIGNABLE_ROLES = [ROLES.moderator, ROLES.admin] as const
+export const assignableRoleSchema = z.enum(ASSIGNABLE_ROLES)
+
+/** `PUT` and `DELETE /admin/users/:id/roles/:role`. */
+export const adminUserRoleParamsSchema = z.object({
+  id: z.uuid(),
+  role: assignableRoleSchema,
+})
+
+/** The user's roles after a grant or removal. `changed` is false when the user already was in that state. */
+export const adminUserRolesResponseSchema = z.object({
+  userId: z.uuid(),
+  roles: z.array(roleNameSchema),
+  changed: z.boolean(),
+})
+export type AdminUserRolesResponse = z.infer<typeof adminUserRolesResponseSchema>
