@@ -50,8 +50,13 @@ describe('admin layout loader', () => {
     })
   })
 
-  it('opens the area for other admin permissions but lists no queue link', async () => {
+  it('lists the Users link for users.view and no queue links', async () => {
     loadSession.mockResolvedValue(viewer(['users.view']))
+    expect(await loader(args)).toEqual({ items: [{ to: '/admin/users', label: 'Users' }] })
+  })
+
+  it('opens the area for audit.view alone but lists no links', async () => {
+    loadSession.mockResolvedValue(viewer(['audit.view']))
     expect(await loader(args)).toEqual({ items: [] })
   })
 

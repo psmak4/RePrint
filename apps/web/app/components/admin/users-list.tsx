@@ -1,0 +1,153 @@
+import { ADMIN_USER_STATUSES, type AdminUsersResponse, ASSIGNABLE_ROLES } from '@reprint/shared'
+import { Button, Input, Label } from '@reprint/ui'
+import { Form, Link } from 'react-router'
+import { copy } from '../../copy/index.js'
+
+const text = copy.admin.users
+
+const SELECT_CLASS =
+  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+
+type Filters = { q: string; role: string; status: string; joinedFrom: string; joinedTo: string }
+
+const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' })
+
+/** `/admin/users`: search and filter state lives in the URL; a plain GET form drives it (PRD §7.11). */
+export function UsersList({
+  users,
+  filters,
+  canSearchEmail,
+}: {
+  users: AdminUsersResponse
+  filters: Filters
+  canSearchEmail: boolean
+}) {
+  const active = Object.values(filters).some(Boolean)
+  const nextParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(filters)) if (value) nextParams.set(key, value)
+  if (users.meta.nextCursor) nextParams.set('cursor', users.meta.nextCursor)
+
+  return (
+    <section aria-labelledby="users-heading" className="flex flex-col gap-4">
+      <h2 id="users-heading" className="text-2xl font-semibold">
+        {text.title}
+      </h2>
+      <Form method="get" className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="users-q">
+            {canSearchEmail ? text.searchLabel : text.searchLabelLimited}
+          </Label>
+          <Input id="users-q" name="q" type="search" defaultValue={filters.q} maxLength={100} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="users-role">{text.roleLabel}</Label>
+          <select id="users-role" name="role" defaultValue={filters.role} className={SELECT_CLASS}>
+            <option value="">{text.any}</option>
+            <option value="member">{text.roles.member}</option>
+            {ASSIGNABLE_ROLES.map((role) => (
+              <option key={role} value={role}>
+                {text.roles[role]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="users-status">{text.statusLabel}</Label>
+          <select
+            id="users-status"
+            name="status"
+            defaultValue={filters.status}
+            className={SELECT_CLASS}
+          >
+            <option value="">{text.any}</option>
+            {ADMIN_USER_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {text.statuses[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="users-from">{text.joinedFromLabel}</Label>
+          <Input id="users-from" name="joinedFrom" type="date" defaultValue={filters.joinedFrom} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="users-to">{text.joinedToLabel}</Label>
+          <Input id="users-to" name="joinedTo" type="date" defaultValue={filters.joinedTo} />
+        </div>
+        <Button type="submit">{text.filter}</Button>
+        {active ? (
+          <Link to="/admin/users" className="text-sm text-link underline">
+            {text.clear}
+          </Link>
+        ) : null}
+      </Form>
+      {users.items.length === 0 ? (
+        <p className="text-muted-foreground">{text.empty}</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table aria-label={text.listLabel} className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th scope="col" className="py-2 pr-4">
+                  {text.columns.user}
+                </th>
+                {canSearchEmail ? (
+                  <th scope="col" className="py-2 pr-4">
+                    {text.columns.email}
+                  </th>
+                ) : null}
+                <th scope="col" className="py-2 pr-4">
+                  {text.columns.status}
+                </th>
+                <th scope="col" className="py-2 pr-4">
+                  {text.columns.roles}
+                </th>
+                <th scope="col" className="py-2 pr-4">
+                  {text.columns.joined}
+                </th>
+                <th scope="col" className="py-2 pr-4">
+                  {text.columns.reviews}
+                </th>
+                <th scope="col" className="py-2">
+                  {text.columns.reports}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.items.map((user) => (
+                <tr key={user.id} className="border-b border-border">
+                  <th scope="row" className="py-2 pr-4 font-medium">
+                    <Link to={`/admin/users/${user.id}`} className="underline">
+                      {user.displayName}
+                    </Link>
+                    <span className="block text-muted-foreground">@{user.username}</span>
+                  </th>
+                  {canSearchEmail ? (
+                    <td className="py-2 pr-4 break-all">{user.email ?? text.noEmail}</td>
+                  ) : null}
+                  <td className="py-2 pr-4">{text.statuses[user.status]}</td>
+                  <td className="py-2 pr-4">
+                    {user.roles.map((role) => text.roles[role]).join(', ')}
+                  </td>
+                  <td className="py-2 pr-4">
+                    <time dateTime={user.joinedAt}>
+                      {dateFormat.format(new Date(user.joinedAt))}
+                    </time>
+                  </td>
+                  <td className="py-2 pr-4">{user.reviewCount}</td>
+                  <td className="py-2">{user.reportsReceived}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {users.meta.nextCursor ? (
+        <Link to={`/admin/users?${nextParams}`} className="text-sm text-link underline">
+          {text.next}
+        </Link>
+      ) : null}
+    </section>
+  )
+}

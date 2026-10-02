@@ -26,6 +26,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   if (viewer.permissions.includes(PERMISSIONS.reportsResolve)) {
     items.push({ to: '/admin/reports', label: copy.admin.reportsNav })
   }
+  if (viewer.permissions.includes(PERMISSIONS.usersView)) {
+    items.push({ to: '/admin/users', label: copy.admin.usersNav })
+  }
   return { items }
 }
 

@@ -467,7 +467,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the report dialog offers the five reasons, requires a note for "other", and is available only to verified Members on others' Approved reviews (component tests)
   - Accept: `/admin/reports` shows each review with its reports and reasons, with Dismiss and Unpublish (reason) actions; "Suspend author" appears only for Admins (component tests)
   - Accept: the `/admin` dashboard now shows the open report count and oldest open report age (component test)
-- [ ] M7-T07 · Web: admin users list and detail with actions · deps: M7-T04, M7-T05, M4-T11 · PRD: §7.11
+- [x] M7-T07 · Web: admin users list and detail with actions · deps: M7-T04, M7-T05, M4-T11 · PRD: §7.11
   - Accept: `/admin/users` searches and filters with state in the URL (component and loader tests)
   - Accept: `/admin/users/:id` shows the detail sections and actions for roles, suspend (reason, end date), unsuspend, end all sessions, and resend verification, gated by permission (component tests)
 - [ ] M7-T08 · Audit log: `GET /v1/admin/audit`, `/v1/admin/audit.csv`, and `/admin/audit` page · deps: M4-T03, M4-T11 · PRD: §7.11, §10
