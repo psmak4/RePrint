@@ -482,3 +482,7 @@ Entry format:
 ### 2026-10-02 · M7-T06 · PR pending
 - Report dialog (`components/reviews/report-review.tsx`, resource route `routes/review-report.tsx`) on the Book page's review list; `/admin/reports` (`routes/admin-reports.tsx`, `components/admin/reports-queue.tsx`) with Dismiss, Unpublish (reason), and Suspend author (Admins); the dashboard card shows the open report count and oldest age. Component and loader/action tests alongside. D-152 records the choices.
 - Next iteration: M7-T07 (admin users list and detail). The suspend action here posts to `/v1/admin/users/:id/suspend`; the admin nav is built in `routes/admin.tsx` (add Users for `users.view`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-02 · M7-T07 · PR pending
+- `/admin/users` (`routes/admin-users.tsx`, `components/admin/users-list.tsx`) and `/admin/users/:id` (`routes/admin-user.tsx`, `components/admin/user-detail.tsx`) with role, suspend, unsuspend, end sessions, and resend actions; "Users" nav link. Loader/action and component tests alongside (incl. axe). D-153 records the choices.
+- Next iteration: M7-T08 (audit log API and `/admin/audit` page; add the nav link for `audit.view` in `routes/admin.tsx`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
