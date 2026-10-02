@@ -18,6 +18,7 @@ describe('permissions', () => {
     expect(PERMISSIONS.usersSuspend).toBe('users.suspend')
     expect(PERMISSIONS.rolesAssign).toBe('roles.assign')
     expect(PERMISSIONS.auditView).toBe('audit.view')
+    expect(PERMISSIONS.catalogManage).toBe('catalog.manage')
   })
 
   it('has unique names', () => {

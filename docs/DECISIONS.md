@@ -1042,3 +1042,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.11 says the log can be filtered and exported but does not name the filters, the CSV columns, or the injection rule.
 - Affects: M7-T17, M7-T18
 
+
+### D-155 · Admin Catalog editing (M7-T09)
+
+- Status: Implementation
+- Decision: (1) `PATCH /v1/admin/books/:id` needs the new `catalog.manage` permission (migration `0014` adds it as data and grants it to Admin only, D-045; Moderators get 403). (2) The body edits any of `title`, `description` (nullable), `genreIds`, `series` (`{ name, position }`, position decimal or null), and `contributions` (`{ authorId }` or `{ name }`, plus `role`; at least one). Only fields present are changed, and `genreIds`, `series`, and `contributions` replace the whole list. At least one field is required. (3) Every field present is stamped `admin` in `field_origins` and added to `locked_fields` under the names the ingest code already checks (`title`, `description`, `genres`, `series`, `contributions`), even when the value did not change, so an Admin can lock a field on purpose. Genre rows written are `origin = admin`. (4) A Series is matched by case-insensitive name or created; a new Contribution by `name` always creates a new Author (never matched by name, D-100). Unknown Genre or Author IDs, a repeated Series, and a repeated Author and Role are 400s. (5) The slug does not change with the title (it ends in a stable ID fragment). The search vector is rebuilt in the same transaction (D-034). (6) One `book.edit` audit row per request holds the edited fields before and after (Genres as slugs), written in the same transaction. (7) The response is the Book's editable view with `lockedFields` and `fieldOrigins`, for the M7-T13 page.
+- Why: The PRD lists what an Admin can edit but not the request shape, the permission name, or how lists are edited.
+- Affects: M7-T10, M7-T11, M7-T13

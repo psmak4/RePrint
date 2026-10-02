@@ -32,6 +32,7 @@ const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
 const ADMIN_AUDIT = 'modules/admin/audit.integration.test.ts'
+const ADMIN_BOOKS = 'modules/admin/books.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
@@ -270,6 +271,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
       'streams the filtered rows with a header row, escaped, and guards against formula injection',
     ],
     denied: [ADMIN_AUDIT, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'PATCH /v1/admin/books/{id}': {
+    allowed: [ADMIN_BOOKS, 'edits fields, locks them, and audits before and after values'],
+    denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
   'GET /v1/admin/users': {
     allowed: [ADMIN_USERS, 'lists users newest first with roles and counts for Admins'],

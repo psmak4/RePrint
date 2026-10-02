@@ -12,6 +12,7 @@ import type { SourceAdapter } from './catalog/sources/types.js'
 import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
 import { adminAuditRoutes } from './modules/admin/audit.js'
+import { adminBookRoutes } from './modules/admin/books.js'
 import { adminSuspensionRoutes } from './modules/admin/suspensions.js'
 import { adminUserRoutes } from './modules/admin/users.js'
 import { loginRoutes } from './modules/auth/login.js'
@@ -184,6 +185,12 @@ export async function buildApp(
     jobs: options.jobs,
   })
   await app.register(adminAuditRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(adminBookRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
