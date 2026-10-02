@@ -30,6 +30,7 @@ const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
 const LIBRARY = 'modules/library/library.integration.test.ts'
+const PROFILES = 'modules/profiles/profiles.integration.test.ts'
 const NOTIFICATIONS = 'modules/notifications/notifications.integration.test.ts'
 
 /**
@@ -138,6 +139,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/users/{username}/library': {
     allowed: [LIBRARY, 'lists entries newest first with counts per Shelf'],
     denied: [LIBRARY, 'hides a private library from Visitors and other Members, but not its owner'],
+  },
+  'GET /v1/users/{username}': {
+    allowed: [PROFILES, 'returns the public profile with review and helpful totals'],
+    denied: [PROFILES, 'answers 404 for unknown, suspended, and deleted users'],
+  },
+  'GET /v1/users/{username}/reviews': {
+    allowed: [PROFILES, 'lists Approved reviews newest first, paginated'],
+    denied: [PROFILES, 'answers 404 for unknown, suspended, and deleted users on reviews'],
   },
   'GET /v1/books/{slug}/helpful-votes': {
     allowed: [HELPFUL, 'lists the review IDs the Member marked helpful on a Book'],

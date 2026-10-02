@@ -27,6 +27,7 @@ import { moderationRoutes } from './modules/moderation/routes.js'
 import { notificationRoutes } from './modules/notifications/routes.js'
 import type { ReadinessCheck } from './modules/ops/readiness.js'
 import { opsRoutes } from './modules/ops/routes.js'
+import { profileRoutes } from './modules/profiles/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
 import { reviewRoutes } from './modules/reviews/routes.js'
 import { uploadRoutes } from './modules/uploads/routes.js'
@@ -151,6 +152,13 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+  })
+  await app.register(profileRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    storage,
   })
   await app.register(moderationRoutes, {
     prefix: '/v1',

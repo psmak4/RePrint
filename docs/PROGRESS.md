@@ -431,3 +431,8 @@ Entry format:
 ### 2026-10-01 · M6-T05 · PR pending
 - Web Library page: `routes/library.tsx` (loader, `noindex`), `components/library/library-page.tsx` (`LibraryPage`, `PrivateLibrary`), `lib/library-links.ts`, and `copy.library`. Tests in `routes/library.test.ts` and `library-page.test.tsx` (with axe). D-142 records the choices.
 - Next iteration: M6-T06 (Profiles API). The profile page (M6-T07) should link to `/u/:username/library` and show the Library tab only for a public Library or the owner. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M6-T06 · PR pending
+- `GET /v1/users/:username` and `/v1/users/:username/reviews` in `modules/profiles/routes.ts`; shared schemas in `packages/shared/src/profiles-api.ts`; `openapi.json` regenerated. Integration tests in `profiles.integration.test.ts`; route-coverage table extended. D-143 records the choices.
+- Next iteration: M6-T07 (web profile page). The profile carries `libraryPublic` (show the Library tab when true or when the viewer is the owner); a review item has its `book` summary and no `author`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
