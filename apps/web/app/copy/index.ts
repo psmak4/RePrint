@@ -50,7 +50,21 @@ export const copy = {
   home: {
     title: 'Discover books. Read reviews you can trust.',
     lead: 'Every review on RePrint is approved by a moderator before anyone sees it.',
-    cta: 'Browse books',
+    metaDescription:
+      'Discover books and read reviews you can trust. Every review on RePrint is approved by a moderator.',
+    empty: 'Nothing to show here yet. Search for a book to get started.',
+    loadFailed: 'Could not load recommendations right now.',
+    signInPrompt: 'Sign in to write reviews and mark the ones you find helpful.',
+    signIn: 'Sign in',
+    register: 'Create an account',
+    recentlyReviewed: 'Recently reviewed',
+    topRated: 'Top rated on RePrint',
+    mostReviewedThisMonth: 'Most reviewed this month',
+    browseByGenre: 'Browse by genre',
+    allGenres: 'All genres',
+    featuredReview: 'Featured review',
+    featuredReviewOn: 'Review of',
+    readMore: 'Read the full review',
   },
   search: {
     title: (q: string) => (q ? `Search: ${q}` : 'Search'),
