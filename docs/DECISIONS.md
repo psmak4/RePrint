@@ -1000,3 +1000,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.10 and §10 name the endpoints and actions but not the payloads, the error cases, or what each closes.
 - Affects: M7-T06, M7-T17
 
+
+### D-149 · Admin users API (M7-T03)
+- Status: Implementation
+- Decision: (1) `GET /v1/admin/users` and `GET /v1/admin/users/:id` need `users.view`. Which view the caller gets depends on `audit.view` (held only by Admins), checked in the handler as a capability, never a role name: the full view adds email, email verification time, sessions (unexpired, with IP), and audit history; the limited view (D-044) has none of those and `email` is null. A search by email is ignored for the limited view (it matches username only) so a search cannot reveal an email. (2) The list is newest first by join time, cursor-paginated with the same opaque cursor as the Moderation queues. `q` is a case-insensitive substring of username or email (`%` and `_` are matched literally); `role` is one role; `joinedFrom` and `joinedTo` are inclusive UTC dates. (3) Status is derived: `unverified` is an `active` account with no verified email, so `active` filters to verified accounts only; `suspended` and `deleted` follow `users.status`. (4) Each item carries Approved review count and reports received (any status, on the user's Reviews). Detail adds Reviews by status, reports filed and received, and the audit history: up to 50 entries that target the user or were done by them, newest first. A suspension reason is not stored yet; M7-T05 adds it with suspend.
+- Why: PRD §4 and §7.11 name the fields but not the filters' exact meaning, the limited view's mechanism, or the audit scope.
+- Affects: M7-T04, M7-T05, M7-T07

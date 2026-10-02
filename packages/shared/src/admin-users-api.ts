@@ -1,0 +1,94 @@
+import { z } from 'zod'
+import { auditActionSchema, auditTargetTypeSchema } from './audit.js'
+import { cursorPageOf, cursorQuerySchema } from './pagination.js'
+import { ROLES } from './permissions.js'
+import { reviewStatusSchema } from './reviews.js'
+
+const roleNameSchema = z.enum([ROLES.member, ROLES.moderator, ROLES.admin])
+
+/** Response shapes for the Admin users endpoints (PRD §7.11, §10, D-044, D-149). */
+
+/**
+ * What an Admin sees a user as. `unverified` is an active account whose email is not yet verified;
+ * the stored status has only active, suspended, and deleted.
+ */
+export const ADMIN_USER_STATUSES = ['active', 'unverified', 'suspended', 'deleted'] as const
+export const adminUserStatusSchema = z.enum(ADMIN_USER_STATUSES)
+export type AdminUserStatus = z.infer<typeof adminUserStatusSchema>
+
+/** `GET /admin/users?q=&role=&status=&joinedFrom=&joinedTo=&cursor=&limit=`. */
+export const adminUsersQuerySchema = cursorQuerySchema.extend({
+  /** Email or username fragment; Moderators match on username only. */
+  q: z.string().trim().min(1).max(100).optional(),
+  role: roleNameSchema.optional(),
+  status: adminUserStatusSchema.optional(),
+  /** Inclusive dates (UTC, `YYYY-MM-DD`). */
+  joinedFrom: z.iso.date().optional(),
+  joinedTo: z.iso.date().optional(),
+})
+export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>
+
+export const adminUserParamsSchema = z.object({ id: z.uuid() })
+
+export const adminUserSummarySchema = z.object({
+  id: z.uuid(),
+  username: z.string(),
+  displayName: z.string(),
+  /** Null in the limited view (D-044). */
+  email: z.string().nullable(),
+  status: adminUserStatusSchema,
+  roles: z.array(roleNameSchema),
+  joinedAt: z.iso.datetime(),
+  /** Approved Reviews. */
+  reviewCount: z.number().int().min(0),
+  /** Reports (any status) on the user's Reviews. */
+  reportsReceived: z.number().int().min(0),
+})
+export type AdminUserSummary = z.infer<typeof adminUserSummarySchema>
+
+export const adminUsersResponseSchema = cursorPageOf(adminUserSummarySchema)
+export type AdminUsersResponse = z.infer<typeof adminUsersResponseSchema>
+
+export const adminUserSessionSchema = z.object({
+  id: z.uuid(),
+  device: z.string(),
+  ip: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  lastSeenAt: z.iso.datetime(),
+})
+
+export const adminUserAuditEntrySchema = z.object({
+  id: z.uuid(),
+  action: auditActionSchema,
+  targetType: auditTargetTypeSchema,
+  targetId: z.uuid().nullable(),
+  actor: z.object({ id: z.uuid(), username: z.string() }).nullable(),
+  before: z.record(z.string(), z.unknown()).nullable(),
+  after: z.record(z.string(), z.unknown()).nullable(),
+  ip: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+})
+
+/** `GET /admin/users/:id`. `admin` is null in the limited view (D-044). */
+export const adminUserDetailSchema = z.object({
+  user: adminUserSummarySchema.extend({
+    bio: z.string().nullable(),
+    emailVerifiedAt: z.iso.datetime().nullable(),
+    suspendedUntil: z.iso.datetime().nullable(),
+    deletedAt: z.iso.datetime().nullable(),
+  }),
+  /** The user's Reviews by status. */
+  reviews: z.record(reviewStatusSchema, z.number().int().min(0)),
+  reports: z.object({
+    filed: z.number().int().min(0),
+    received: z.number().int().min(0),
+  }),
+  admin: z
+    .object({
+      sessions: z.array(adminUserSessionSchema),
+      /** Newest first; entries about the user or done by them, up to 50. */
+      audit: z.array(adminUserAuditEntrySchema),
+    })
+    .nullable(),
+})
+export type AdminUserDetail = z.infer<typeof adminUserDetailSchema>

@@ -11,6 +11,7 @@ import type { InteractiveCall } from './catalog/resolve.js'
 import type { SourceAdapter } from './catalog/sources/types.js'
 import type { Env } from './config/env.js'
 import type { JobQueue } from './jobs/queue.js'
+import { adminUserRoutes } from './modules/admin/users.js'
 import { loginRoutes } from './modules/auth/login.js'
 import { passwordResetRoutes } from './modules/auth/password-reset.js'
 import { authRoutes } from './modules/auth/register.js'
@@ -169,6 +170,12 @@ export async function buildApp(
     storage,
   })
   await app.register(moderationRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+  })
+  await app.register(adminUserRoutes, {
     prefix: '/v1',
     env,
     db: options.database,
