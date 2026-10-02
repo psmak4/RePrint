@@ -427,3 +427,7 @@ Entry format:
 ### 2026-10-01 · M6-T04 · PR pending
 - `GET /v1/users/:username/library` in `modules/library/routes.ts`; shared schemas in `packages/shared/src/library-api.ts` (`libraryQuerySchema`, `libraryResponseSchema`, `usernameParamsSchema`); `openapi.json` regenerated. Integration tests in `library.integration.test.ts` (counts, shelf filter, four sorts, paging, private library 404 for others and 200 for the owner, unknown and deleted users); route-coverage table extended. D-141 records the choices.
 - Next iteration: M6-T05 (web library page). `counts` always covers every Shelf, `meta.total` follows the `shelf` filter, and a private Library is a plain 404 to others (the web page should show its "private" state from that 404 only when the viewer cannot otherwise tell; D-141). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
+
+### 2026-10-01 · M6-T05 · PR pending
+- Web Library page: `routes/library.tsx` (loader, `noindex`), `components/library/library-page.tsx` (`LibraryPage`, `PrivateLibrary`), `lib/library-links.ts`, and `copy.library`. Tests in `routes/library.test.ts` and `library-page.test.tsx` (with axe). D-142 records the choices.
+- Next iteration: M6-T06 (Profiles API). The profile page (M6-T07) should link to `/u/:username/library` and show the Library tab only for a public Library or the owner. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -420,7 +420,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M6-T04 · Library API: `GET /v1/users/:username/library` · deps: M6-T01 · PRD: §7.7, §10
   - Accept: returns entries with `shelf=` filter, counts per shelf, `sort=added_desc|added_asc|title|author`, and pagination (integration tests)
   - Accept: a private library returns 404 to others and works for its owner (allowed and denied tests)
-- [ ] M6-T05 · Web: library page (`/u/:username/library`) · deps: M6-T04, M6-T03 · PRD: §7.7
+- [x] M6-T05 · Web: library page (`/u/:username/library`) · deps: M6-T04, M6-T03 · PRD: §7.7
   - Accept: tabs All, Reading, Want to Read, Read with counts; sort and page in the URL (component and loader tests)
   - Accept: the owner can change or remove shelves inline; a private library shows a clear private state to others
 - [ ] M6-T06 · Profiles API: `GET /v1/users/:username` and `/v1/users/:username/reviews` · deps: M6-T04, M5-T01 · PRD: §7.8, §10
