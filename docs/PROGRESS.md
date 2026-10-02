@@ -445,3 +445,7 @@ Entry format:
 - `GET /v1/me/export` (`modules/me/export.ts`, schema in `packages/shared/src/export.ts`), the web resource route `routes/settings-export.tsx`, and a "Download your data" section (`export-section.tsx`) on Settings → Security. Integration tests in `export.integration.test.ts`; route-coverage table extended. D-145 records the choices.
 - Next iteration: M6-T09 (seed libraries). M7-T01 should add reports to the export. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared` or `packages/db`, rebuild them before API tests.
 
+
+### 2026-10-01 · M6-T09 · PR pending
+- `seedLibraries` (`modules/library/seed-libraries.ts`), `pnpm --filter api seed:libraries` wired into `db:seed` and `db:reset`. Integration test in `seed-libraries.integration.test.ts`. D-146 records the choices.
+- Next iteration: M6-T10 (e2e). Seeded private Libraries belong to the first four reviewers by username; public ones to the next ten. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
