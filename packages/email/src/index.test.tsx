@@ -100,6 +100,19 @@ describe('renderEmail', () => {
     expect(email.text).toContain('30 days')
   })
 
+  it('renders the account-suspended template', async () => {
+    const timed = await renderEmail('account-suspended', {
+      username: 'ada_l',
+      reason: 'Repeated harassment.',
+      until: '2026-12-01',
+    })
+    expect(timed.subject).toBe('Your RePrint account was suspended')
+    expect(timed.text).toContain('Reason: Repeated harassment.')
+    expect(timed.text).toContain('after 2026-12-01')
+    const open = await renderEmail('account-suspended', { username: 'ada_l', reason: 'Spam.' })
+    expect(open.text).toContain('no end date')
+  })
+
   it('escapes user-controlled text in HTML', async () => {
     const email = await renderEmail('verify-email', { ...props, username: '<script>x</script>' })
     expect(email.html).not.toContain('<script>x')

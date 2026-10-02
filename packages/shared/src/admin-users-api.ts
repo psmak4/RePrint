@@ -75,6 +75,8 @@ export const adminUserDetailSchema = z.object({
     bio: z.string().nullable(),
     emailVerifiedAt: z.iso.datetime().nullable(),
     suspendedUntil: z.iso.datetime().nullable(),
+    /** Null in the limited view and for accounts that are not suspended. */
+    suspendedReason: z.string().nullable(),
     deletedAt: z.iso.datetime().nullable(),
   }),
   /** The user's Reviews by status. */
@@ -110,3 +112,34 @@ export const adminUserRolesResponseSchema = z.object({
   changed: z.boolean(),
 })
 export type AdminUserRolesResponse = z.infer<typeof adminUserRolesResponseSchema>
+
+/** `POST /admin/users/:id/suspend`. `until` is optional; without it the suspension lasts until lifted. */
+export const suspendUserRequestSchema = z.object({
+  reason: z.string().trim().min(1).max(500),
+  until: z.iso.datetime().optional(),
+})
+export type SuspendUserRequest = z.infer<typeof suspendUserRequestSchema>
+
+/** `POST /admin/users/:id/suspend` and `/unsuspend`. */
+export const adminUserSuspensionResponseSchema = z.object({
+  userId: z.uuid(),
+  status: z.enum(['active', 'suspended']),
+  suspendedUntil: z.iso.datetime().nullable(),
+})
+export type AdminUserSuspensionResponse = z.infer<typeof adminUserSuspensionResponseSchema>
+
+/** `POST /admin/users/:id/revoke-sessions`: how many sessions were ended. */
+export const adminUserRevokeSessionsResponseSchema = z.object({
+  userId: z.uuid(),
+  revoked: z.number().int().min(0),
+})
+export type AdminUserRevokeSessionsResponse = z.infer<typeof adminUserRevokeSessionsResponseSchema>
+
+/** `POST /admin/users/:id/resend-verification`. `sent` is false when the email is already verified. */
+export const adminUserResendVerificationResponseSchema = z.object({
+  userId: z.uuid(),
+  sent: z.boolean(),
+})
+export type AdminUserResendVerificationResponse = z.infer<
+  typeof adminUserResendVerificationResponseSchema
+>

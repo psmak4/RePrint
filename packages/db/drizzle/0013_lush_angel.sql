@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "suspended_reason" text;

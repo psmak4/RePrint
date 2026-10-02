@@ -44,7 +44,7 @@ function escapeLike(text: string): string {
   return text.replace(/[\\%_]/g, (char) => `\\${char}`)
 }
 
-/** Admin user search, detail, and role changes (PRD §7.11). Suspensions come in a later task. */
+/** Admin user search, detail, and role changes (PRD §7.11). Suspensions are in `suspensions.ts`. */
 export const adminUserRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, options) => {
   const { db } = options
   const view = requirePermission('users.view')
@@ -224,6 +224,7 @@ export const adminUserRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (
           bio: row.bio,
           emailVerifiedAt: full ? (row.emailVerifiedAt?.toISOString() ?? null) : null,
           suspendedUntil: row.suspendedUntil?.toISOString() ?? null,
+          suspendedReason: full ? row.suspendedReason : null,
           deletedAt: row.deletedAt?.toISOString() ?? null,
         },
         reviews: byStatus,

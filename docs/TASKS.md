@@ -458,7 +458,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T04 · Role management: `PUT/DELETE /v1/admin/users/:id/roles/:role` · deps: M7-T03 · PRD: §4, §7.11, §10
   - Accept: `roles.assign` is required (allowed and denied tests); changes are audited with before and after values
   - Accept: removing the Admin role from yourself when you are the last Admin returns 409 (integration test)
-- [ ] M7-T05 · Suspensions: suspend, unsuspend, revoke sessions, resend verification · deps: M7-T03, M2-T09 · PRD: §4, §7.11, §7.12, §10
+- [x] M7-T05 · Suspensions: suspend, unsuspend, revoke sessions, resend verification · deps: M7-T03, M2-T09 · PRD: §4, §7.11, §7.12, §10
   - Accept: suspend (reason, optional end date) sets status, ends all sessions immediately, and sends the "account suspended" email; the user cannot log in (integration tests)
   - Accept: suspensions with an end date lift automatically after it passes (integration test with a clock override); unsuspend lifts manually
   - Accept: `/revoke-sessions` and `/resend-verification` work; all four require `users.suspend` (or `users.view` for resend, per `docs/DECISIONS.md`) and are audited (allowed and denied tests)

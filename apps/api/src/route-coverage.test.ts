@@ -32,6 +32,7 @@ const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
 const MOD_REPORTS = 'modules/moderation/reports.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
+const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
 const LIBRARY = 'modules/library/library.integration.test.ts'
 const PROFILES = 'modules/profiles/profiles.integration.test.ts'
@@ -273,6 +274,22 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'DELETE /v1/admin/users/{id}/roles/{role}': {
     allowed: [ADMIN_USERS, 'removes a role and records it'],
     denied: [ADMIN_USERS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/users/{id}/suspend': {
+    allowed: [ADMIN_SUSPENSIONS, 'suspends, ends every session, emails the user, and audits it'],
+    denied: [ADMIN_SUSPENSIONS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/users/{id}/unsuspend': {
+    allowed: [ADMIN_SUSPENSIONS, 'lifts a suspension and audits it'],
+    denied: [ADMIN_SUSPENSIONS, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'POST /v1/admin/users/{id}/revoke-sessions': {
+    allowed: [ADMIN_SUSPENSIONS, 'ends every session of the user and audits it'],
+    denied: [ADMIN_SUSPENSIONS, 'returns 404 for unknown users and denies non-Admins'],
+  },
+  'POST /v1/admin/users/{id}/resend-verification': {
+    allowed: [ADMIN_SUSPENSIONS, 'sends a fresh link to an unverified account and audits it'],
+    denied: [ADMIN_SUSPENSIONS, 'denies Members with 403 and Visitors with 401'],
   },
   'POST /v1/mod/reports/{reviewId}/dismiss': {
     allowed: [MOD_REPORTS, 'closes the reports, un-hides the review, and audits it'],
