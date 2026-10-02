@@ -402,3 +402,8 @@ Entry format:
 ### 2026-10-01 · M5-T07 · PR pending
 - Discover home page: `components/books/discover-page.tsx` (`DiscoverPage`), `routes/home.tsx` loader fetching `/v1/discover` (renders with no rows if the API fails), and `copy.home` strings. Tests in `discover-page.test.tsx` (with axe) and `routes/home.test.ts`. D-136 records the choices.
 - Next iteration: M5-T08 (seed featured Genres, a featured review, helpful votes). Locally only the three Book rows show until then. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M5-T08 · PR pending
+- `seed:discover` (`modules/discover/seed-discover.ts`, `scripts/seed-discover.ts`) added to `db:seed` and `db:reset`: eight Books get six Approved reviews each (recent, so Top rated and "this month" show), Helpful votes, six featured Genres, and a featured review. `seed-reviews.ts` now exports `loadSeedAccounts`, `pick`, `reviewText`, `DAY_MS` for reuse. Integration test in `seed-discover.integration.test.ts`. D-137 records the choices.
+- Next iteration: M5-T09 (M5 verification). After `db:reset`, wait for the `discover.rebuild` job or clear the `discover:v1:*` Redis keys to see rows. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

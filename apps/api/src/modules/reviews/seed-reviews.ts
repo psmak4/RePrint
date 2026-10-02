@@ -18,7 +18,7 @@ export const REVIEWS_SEED = 20260103
 
 const BOOKS_WITH_REVIEWS = 40
 const REVIEWS_PER_BOOK = [2, 5] as const
-const DAY_MS = 24 * 60 * 60 * 1000
+export const DAY_MS = 24 * 60 * 60 * 1000
 
 type VersionPlan = { status: ReviewStatus; reason?: string }
 
@@ -66,11 +66,40 @@ const HEADLINES = [
   'Not for everyone',
 ] as const
 
-function pick<T>(random: SeedRandom, items: readonly T[]): T {
+/** Verified, active non-staff accounts who write reviews, and the Moderators who decide them. */
+export async function loadSeedAccounts(db: Pick<Database, 'select'>) {
+  // Moderators and Admins decide; every other verified, active account can write reviews.
+  const staff = db
+    .select({ id: userRoles.userId })
+    .from(userRoles)
+    .innerJoin(roles, eq(roles.id, userRoles.roleId))
+    .where(inArray(roles.name, ['moderator', 'admin']))
+  const reviewers = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(
+        eq(users.status, 'active'),
+        isNotNull(users.emailVerifiedAt),
+        notInArray(users.id, staff),
+      ),
+    )
+    .orderBy(asc(users.username))
+  const moderators = await db
+    .select({ id: users.id })
+    .from(users)
+    .innerJoin(userRoles, eq(userRoles.userId, users.id))
+    .innerJoin(roles, eq(roles.id, userRoles.roleId))
+    .where(eq(roles.name, 'moderator'))
+    .orderBy(asc(users.username))
+  return { reviewers, moderators }
+}
+
+export function pick<T>(random: SeedRandom, items: readonly T[]): T {
   return items[random.int(0, items.length - 1)] as T
 }
 
-function reviewText(random: SeedRandom) {
+export function reviewText(random: SeedRandom) {
   return {
     headline: random.int(0, 2) === 0 ? null : pick(random, HEADLINES),
     body: `${pick(random, OPENERS)} ${pick(random, MIDDLES)} ${pick(random, MIDDLES)}`,
@@ -103,30 +132,7 @@ export async function seedReviews(
       return { reviews: 0, versions: 0, skipped: true }
     }
 
-    // Moderators and Admins decide; every other verified, active account can write reviews.
-    const staff = tx
-      .select({ id: userRoles.userId })
-      .from(userRoles)
-      .innerJoin(roles, eq(roles.id, userRoles.roleId))
-      .where(inArray(roles.name, ['moderator', 'admin']))
-    const reviewers = await tx
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(
-          eq(users.status, 'active'),
-          isNotNull(users.emailVerifiedAt),
-          notInArray(users.id, staff),
-        ),
-      )
-      .orderBy(asc(users.username))
-    const moderators = await tx
-      .select({ id: users.id })
-      .from(users)
-      .innerJoin(userRoles, eq(userRoles.userId, users.id))
-      .innerJoin(roles, eq(roles.id, userRoles.roleId))
-      .where(eq(roles.name, 'moderator'))
-      .orderBy(asc(users.username))
+    const { reviewers, moderators } = await loadSeedAccounts(tx)
     const bookRows = await tx
       .select({ id: books.id })
       .from(books)
