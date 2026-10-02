@@ -961,3 +961,10 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: `/u/:username/library` reads `shelf`, `sort`, and `page` from the URL (bad values fall back to the defaults) and renders Shelf tabs (All, Reading, Want to Read, Read) with counts, a GET sort form, and numbered pagination. Cards are in a grid (1 column at base, 2 at `sm`, 3 at `lg`). The owner (the root session's username matches, case-insensitively) gets a `ShelfSelector` on each card seeded from the entry's Shelf; a change or "Remove" takes effect on the next load and the card stays in place until then. When the API answers 404 the page renders "This library is private, or it doesn't exist" with HTTP status 404, so a private Library and an unknown account look the same (D-141). The page is `noindex`.
 - Why: PRD §7.7 and `docs/DESIGN.md` leave the grid, the owner's inline control, and the private wording open.
 - Affects: M6-T07, M6-T10
+
+### D-143 · Profiles API (M6-T06)
+- Status: Implementation
+- Decision: `GET /v1/users/:username` returns `{ username, displayName, bio, avatarUrl, joinedAt, reviewCount, helpfulVotes, libraryPublic }`. `reviewCount` counts the Member's Approved Reviews, and `helpfulVotes` is the sum of `helpful_count` over those same Reviews (a Review that is later unpublished stops counting). `libraryPublic` lets the web page decide whether to show the Library tab (the owner always sees it). `GET /v1/users/:username/reviews?page=&pageSize=` lists Approved Reviews newest first (ties by ID) as the public review fields plus the Book summary, with no `author` (it is the profile's Member). Only `active` accounts have a profile: unknown, suspended, and deleted usernames return 404. Nothing depends on the viewer, so both routes use the public cache hook (`Cache-Control: public`, ETag).
+- Why: PRD §7.8 and §10 name the routes and totals; they leave the response shapes, what counts as a helpful vote received, and which accounts have a profile open.
+- Affects: M6-T07, M6-T08
+
