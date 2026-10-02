@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { reviewStatusSchema } from './reviews.js'
+import { reportStatusSchema, reviewReportReasonSchema, reviewStatusSchema } from './reviews.js'
 import { shelfSchema } from './shelves.js'
 
 /** The Member's data download (PRD §11): everything RePrint holds about them, and nobody else's. */
@@ -52,6 +52,18 @@ export const memberExportSchema = z.object({
   /** Reviews this Member marked helpful. */
   helpfulVotes: z.array(
     z.object({ reviewId: z.uuid(), book: bookRefSchema, createdAt: z.iso.datetime() }),
+  ),
+  /** Reports this Member filed on other Members' reviews (PRD §7.9). */
+  reports: z.array(
+    z.object({
+      id: z.uuid(),
+      reviewId: z.uuid(),
+      book: bookRefSchema,
+      reason: reviewReportReasonSchema,
+      note: z.string().nullable(),
+      status: reportStatusSchema,
+      createdAt: z.iso.datetime(),
+    }),
   ),
   library: z.array(
     z.object({

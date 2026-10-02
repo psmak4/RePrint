@@ -26,6 +26,7 @@ const DISCOVER = 'modules/discover/discover.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
+const REPORTS = 'modules/reviews/reports.integration.test.ts'
 const BOOK_REVIEWS = 'modules/reviews/book-reviews.integration.test.ts'
 const MOD_QUEUE = 'modules/moderation/queue.integration.test.ts'
 const MOD_DECISIONS = 'modules/moderation/decisions.integration.test.ts'
@@ -148,6 +149,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/users/{username}/reviews': {
     allowed: [PROFILES, 'lists Approved reviews newest first, paginated'],
     denied: [PROFILES, 'answers 404 for unknown, suspended, and deleted users on reviews'],
+  },
+  'POST /v1/reviews/{id}/reports': {
+    allowed: [REPORTS, 'records a report from a verified Member on someone else’s Approved review'],
+    denied: [REPORTS, 'denies Visitors, unverified Members, the author, and a second report'],
   },
   'GET /v1/books/{slug}/helpful-votes': {
     allowed: [HELPFUL, 'lists the review IDs the Member marked helpful on a Book'],

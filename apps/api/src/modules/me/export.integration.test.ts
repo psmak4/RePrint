@@ -3,6 +3,7 @@ import {
   helpfulVotes,
   newId,
   notifications,
+  reviewReports,
   reviews,
   reviewVersions,
   shelfEntries,
@@ -92,6 +93,10 @@ describe('GET /v1/me/export', () => {
       { reviewId: otherReview, userId: me.user.id },
       { reviewId: myReview, userId: other.id },
     ])
+    await stack.db.db.insert(reviewReports).values([
+      { reviewId: otherReview, reporterId: me.user.id, reason: 'spam' },
+      { reviewId: myReview, reporterId: other.id, reason: 'offensive' },
+    ])
     await stack.db.db.insert(notifications).values([
       { userId: me.user.id, type: 'review_approved', data: { bookTitle: 'Read By Me' } },
       { userId: other.id, type: 'password_changed' },
@@ -109,6 +114,8 @@ describe('GET /v1/me/export', () => {
     expect(data.reviews[0]).toMatchObject({ id: myReview, status: 'approved' })
     expect(data.reviews[0]?.versions).toHaveLength(1)
     expect(data.helpfulVotes.map((vote) => vote.reviewId)).toEqual([otherReview])
+    expect(data.reports).toHaveLength(1)
+    expect(data.reports[0]).toMatchObject({ reviewId: otherReview, reason: 'spam', status: 'open' })
     expect(data.library).toHaveLength(1)
     expect(data.library[0]).toMatchObject({ shelf: 'read', book: { title: 'Read By Me' } })
     expect(data.notifications.map((n) => n.type)).toEqual(['review_approved'])
@@ -137,6 +144,7 @@ describe('GET /v1/me/export', () => {
     expect(data.reviews).toEqual([])
     expect(data.library).toEqual([])
     expect(data.helpfulVotes).toEqual([])
+    expect(data.reports).toEqual([])
   })
 
   it('returns 401 Problem Details for a Visitor', async () => {

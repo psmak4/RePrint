@@ -1,4 +1,12 @@
-import { books, editions, helpfulVotes, reviews, reviewVersions, users } from '@reprint/db'
+import {
+  books,
+  editions,
+  helpfulVotes,
+  reviewReports,
+  reviews,
+  reviewVersions,
+  users,
+} from '@reprint/db'
 import {
   type BookReviewsQuery,
   type BookReviewsResponse,
@@ -13,12 +21,16 @@ import {
   myHelpfulVotesResponseSchema,
   myReviewSchema,
   nextReviewStatus,
+  REPORT_AUTO_HIDE_THRESHOLD,
+  type ReviewReportResponse,
   type ReviewStatus,
   reviewIdParamsSchema,
   reviewInputSchema,
+  reviewReportInputSchema,
+  reviewReportResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
-import { and, asc, count, desc, eq, ne, type SQL, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, isNull, ne, type SQL, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
 import { requireAuth, requireVerified } from '../auth/guards.js'
@@ -82,6 +94,7 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
         const where = and(
           eq(reviews.bookId, bookId),
           eq(reviews.status, 'approved'),
+          isNull(reviews.hiddenAt),
           ne(users.status, 'deleted'),
           rating === undefined ? undefined : eq(reviews.rating, rating),
         )
@@ -296,6 +309,50 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
     },
   )
 
+  // Reports (PRD §7.9): verified Members, someone else's Approved review, once each.
+  app.post(
+    '/reviews/:id/reports',
+    {
+      preHandler: [requireVerified, rateLimit('report')],
+      schema: {
+        params: reviewIdParamsSchema,
+        body: reviewReportInputSchema,
+        response: { 200: reviewReportResponseSchema },
+      },
+    },
+    async (request): Promise<ReviewReportResponse> => {
+      if (!db || !request.auth) throw new Error('review routes need a database')
+      const reporterId = request.auth.user.id
+      const { reason, note } = request.body
+      await db.transaction(async (tx) => {
+        const review = await lockVotableReview(tx, request.params.id)
+        if (review.userId === reporterId) {
+          throw new HttpProblem(403, 'You cannot report your own review.')
+        }
+        const inserted = await tx
+          .insert(reviewReports)
+          .values({ reviewId: review.id, reporterId, reason, note: note || null })
+          .onConflictDoNothing()
+          .returning({ id: reviewReports.id })
+        if (inserted.length === 0) {
+          throw new HttpProblem(409, 'You have already reported this review.')
+        }
+        // The review row is locked, so concurrent reports count one after another.
+        const [open] = await tx
+          .select({ total: count() })
+          .from(reviewReports)
+          .where(and(eq(reviewReports.reviewId, review.id), eq(reviewReports.status, 'open')))
+        if ((open?.total ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
+          await tx
+            .update(reviews)
+            .set({ hiddenAt: sql`coalesce(${reviews.hiddenAt}, now())` })
+            .where(eq(reviews.id, review.id))
+        }
+      })
+      return { status: 'report_received' }
+    },
+  )
+
   // Private to the Member, so it stays out of the public cached review list.
   app.get(
     '/books/:slug/helpful-votes',
@@ -346,7 +403,7 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
 
 type Tx = Parameters<Parameters<NonNullable<AuthRoutesOptions['db']>['transaction']>[0]>[0]
 
-/** Locks an Approved review (of a Member who has not deleted their account) for a vote change. */
+/** Locks an Approved review (of a Member who has not deleted their account) for a vote or report. */
 async function lockVotableReview(tx: Tx, id: string) {
   const [review] = await tx
     .select({

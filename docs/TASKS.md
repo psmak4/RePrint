@@ -444,7 +444,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M7 · Trust and admin
 
-- [ ] M7-T01 · Reports: schema and `POST /v1/reviews/:id/reports` with auto-hide at 3 open reports · deps: M4-T05, M6-T08 · PRD: §5.3, §7.9, §9, §10, §11
+- [x] M7-T01 · Reports: schema and `POST /v1/reviews/:id/reports` with auto-hide at 3 open reports · deps: M4-T05, M6-T08 · PRD: §5.3, §7.9, §9, §10, §11
   - Accept: verified Members can report someone else's Approved review once, with a reason enum and a note (≤ 500 chars) required for "other" (integration tests, incl. denied: own review, duplicate, unverified)
   - Accept: the 3rd open report hides the review from public lists until a moderator decides (integration test)
   - Accept: 21 reports in a day return 429; the export and `accounts.erase` include reports

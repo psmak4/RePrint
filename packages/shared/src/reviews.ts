@@ -86,6 +86,42 @@ export type HelpfulVoteResponse = z.infer<typeof helpfulVoteResponseSchema>
 export const myHelpfulVotesResponseSchema = z.object({ reviewIds: z.array(z.uuid()) })
 export type MyHelpfulVotesResponse = z.infer<typeof myHelpfulVotesResponseSchema>
 
+/** Why a Member reports a Review (PRD §7.9). */
+export const REVIEW_REPORT_REASONS = [
+  'unmarked_spoiler',
+  'offensive',
+  'spam',
+  'off_topic',
+  'other',
+] as const
+export const reviewReportReasonSchema = z.enum(REVIEW_REPORT_REASONS)
+export type ReviewReportReason = z.infer<typeof reviewReportReasonSchema>
+
+/** A report is open until a Moderator dismisses it or acts on the Review (PRD §7.10). */
+export const REPORT_STATUSES = ['open', 'dismissed', 'actioned'] as const
+export const reportStatusSchema = z.enum(REPORT_STATUSES)
+export type ReportStatus = z.infer<typeof reportStatusSchema>
+
+export const REPORT_NOTE_MAX = 500
+/** Open reports that hide a Review until a Moderator decides (PRD §7.9). */
+export const REPORT_AUTO_HIDE_THRESHOLD = 3
+
+/** `POST /reviews/:id/reports`: a reason, with a note (up to 500 characters) required for "other". */
+export const reviewReportInputSchema = z
+  .object({
+    reason: reviewReportReasonSchema,
+    note: z.string().trim().max(REPORT_NOTE_MAX).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.reason === 'other' && !value.note) {
+      ctx.addIssue({ code: 'custom', path: ['note'], message: 'Tell us what is wrong.' })
+    }
+  })
+export type ReviewReportInput = z.infer<typeof reviewReportInputSchema>
+
+export const reviewReportResponseSchema = z.object({ status: z.literal('report_received') })
+export type ReviewReportResponse = z.infer<typeof reviewReportResponseSchema>
+
 /** Reviews on a Book page: 10 per page (PRD §7.4). */
 export const BOOK_REVIEWS_PAGE_SIZE = 10
 export const REVIEW_SORTS = ['most_helpful', 'newest', 'highest', 'lowest'] as const

@@ -8,7 +8,7 @@ import {
   profileSchema,
   usernameParamsSchema,
 } from '@reprint/shared'
-import { and, count, desc, eq, sql } from 'drizzle-orm'
+import { and, count, desc, eq, isNull, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { HttpProblem } from '../../errors.js'
 import type { ImageStorage } from '../../storage/index.js'
@@ -47,7 +47,7 @@ export const profileRoutes: FastifyPluginAsyncZod<ProfileRoutesOptions> = async 
   }
 
   const approvedBy = (userId: string) =>
-    and(eq(reviews.userId, userId), eq(reviews.status, 'approved'))
+    and(eq(reviews.userId, userId), eq(reviews.status, 'approved'), isNull(reviews.hiddenAt))
 
   app.get(
     '/users/:username',
