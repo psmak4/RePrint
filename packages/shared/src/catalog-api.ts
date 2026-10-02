@@ -8,6 +8,7 @@ import {
   editionSchema,
   slugSchema,
 } from './catalog.js'
+import { shelfSchema } from './shelves.js'
 
 /** Request and response shapes for the public catalog endpoints (PRD §7.4, §7.5, §10). */
 
@@ -22,11 +23,18 @@ export const ratingSummarySchema = z.object({
 })
 export type RatingSummary = z.infer<typeof ratingSummarySchema>
 
+/**
+ * The signed-in viewer's Shelf for a Book (PRD §7.7): `null` when it is on none. Left out for
+ * Visitors, so a response that has it is never shared-cached (D-139).
+ */
+export const viewerShelfSchema = shelfSchema.nullable().optional()
+
 /** `GET /books/:slug`: the Book with its Primary Edition and rating summary. */
 export const bookDetailSchema = bookSchema.omit({ reviewCount: true }).extend({
   primaryEdition: editionSchema.nullable(),
   editionCount: z.number().int().min(0),
   rating: ratingSummarySchema,
+  viewerShelf: viewerShelfSchema,
 })
 export type BookDetail = z.infer<typeof bookDetailSchema>
 
@@ -46,6 +54,7 @@ export const bookSummarySchema = z.object({
   firstPublishedYear: bookSchema.shape.firstPublishedYear,
   contributions: z.array(contributionSchema),
   rating: ratingSummarySchema,
+  viewerShelf: viewerShelfSchema,
 })
 export type BookSummary = z.infer<typeof bookSummarySchema>
 

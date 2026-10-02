@@ -410,7 +410,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `shelf_entries` enforces one entry per Member per Book; PUT sets or replaces the shelf (`want_to_read|reading|read`), and DELETE removes it (integration tests)
   - Accept: unverified Members can shelve; Visitors get 401 (allowed and denied tests)
   - Accept: shelving never creates or changes a review, and reviewing never shelves (integration test)
-- [ ] M6-T02 · Viewer shelf status in Book, search, Series, and Discover responses · deps: M6-T01, M5-T06, M5-T04, M3-T14 · PRD: §7.5, §7.7
+- [x] M6-T02 · Viewer shelf status in Book, search, Series, and Discover responses · deps: M6-T01, M5-T06, M5-T04, M3-T14 · PRD: §7.5, §7.7
   - Accept: signed-in responses include `viewerShelf` on each Book; Visitor responses do not (integration tests)
   - Accept: responses that include viewer data are not publicly cached (`Cache-Control: private` or `Vary: Cookie`) (integration test)
 - [ ] M6-T03 · Web: shelf selector on the book page, search results, Discover cards, and Series page · deps: M6-T02, M5-T07, M5-T05, M3-T17 · PRD: §7.7, §12
