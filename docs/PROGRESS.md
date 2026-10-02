@@ -453,3 +453,7 @@ Entry format:
 ### 2026-10-01 · M6-T10 · PR pending
 - `e2e/specs/library.spec.ts` (specs live in `e2e/specs/`): shelves Dune from the Book page and from search results, changes the Shelf from the library, checks tab counts, profile → Library link, and that a private Library is hidden from another signed-in Member (and its profile has no Library tab) but still open to its owner. axe on each page; passes in chromium, webkit, and mobile.
 - Next iteration: M6-T11 (M6 verification). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-01 · M6-T11 · PR pending
+- M6 verification: `pnpm check` and `pnpm test:e2e` (39 passed across chromium, webkit, mobile) pass on `main`. Each acceptance criterion in `docs/milestones/M6-libraries-and-profiles.md` is mapped to its proving test in the PR body. No gaps found; no code changed.
+- Next iteration: M7-T01 (reports; also add reports to the data export). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
