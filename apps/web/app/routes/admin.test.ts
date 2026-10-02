@@ -43,6 +43,13 @@ describe('admin layout loader', () => {
     })
   })
 
+  it('lists the reports queue for a holder of reports.resolve', async () => {
+    loadSession.mockResolvedValue(viewer(['reports.resolve']))
+    expect(await loader(args)).toEqual({
+      items: [{ to: '/admin/reports', label: 'Reports queue' }],
+    })
+  })
+
   it('opens the area for other admin permissions but lists no queue link', async () => {
     loadSession.mockResolvedValue(viewer(['users.view']))
     expect(await loader(args)).toEqual({ items: [] })

@@ -8,6 +8,7 @@ import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
 import { HelpfulVote } from './helpful-vote.js'
+import { ReportReview } from './report-review.js'
 import { SpoilerToggle } from './spoiler-toggle.js'
 
 const text = copy.reviews.list
@@ -42,6 +43,8 @@ function ReviewItem({
   voted: boolean
 }) {
   const body = <ReviewBody body={review.body} />
+  // Voting and reporting are for verified Members on other people's reviews (PRD §7.6, §7.9).
+  const canInteract = viewer?.verified === true && viewer.username !== review.author.username
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -59,12 +62,15 @@ function ReviewItem({
         <time dateTime={review.submittedAt}>{dateFormat.format(new Date(review.submittedAt))}</time>
       </p>
       {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
-      <HelpfulVote
-        reviewId={review.id}
-        count={review.helpfulCount}
-        voted={voted}
-        canVote={viewer?.verified === true && viewer.username !== review.author.username}
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <HelpfulVote
+          reviewId={review.id}
+          count={review.helpfulCount}
+          voted={voted}
+          canVote={canInteract}
+        />
+        {canInteract ? <ReportReview reviewId={review.id} /> : null}
+      </div>
     </li>
   )
 }
