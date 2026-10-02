@@ -478,7 +478,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Admins can edit title, description, Genres, Series (with position), and contributions; edited fields get `field_origins` = admin and are added to `locked_fields` (integration tests)
   - Accept: a later refresh leaves locked fields untouched (integration test); the permission is per `docs/DECISIONS.md`, and non-admins get 403
   - Accept: each edit writes an audit row with before and after values
-- [ ] M7-T10 · Admin cover upload, Primary Edition choice, and `POST /v1/admin/books/:id/refresh` · deps: M7-T09, M2-T16 · PRD: §5.1, §6, §7.11, §10
+- [x] M7-T10 · Admin cover upload, Primary Edition choice, and `POST /v1/admin/books/:id/refresh` · deps: M7-T09, M2-T16 · PRD: §5.1, §6, §7.11, §10
   - Accept: an uploaded cover follows the M2 upload rules, is stored in R2/local storage as a Cover with origin `upload`, and is locked (integration test)
   - Accept: Admins can set the Primary Edition (locked); refresh enqueues an interactive-priority re-fetch that respects locks (integration tests)
 - [ ] M7-T11 · Merge queue and `POST /v1/admin/books/merge` · deps: M7-T09, M6-T01, M5-T01 · PRD: §5.4, §7.11, §10
