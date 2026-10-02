@@ -394,7 +394,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: rows are built for Recently reviewed (one card per Book), Top rated (weighted, ≥ 5 approved reviews), Most reviewed this month (last 30 days), Browse by genre (12 featured Genres), and Featured review (integration tests)
   - Accept: a `discover.rebuild` repeatable job runs every 10 minutes and caches rows in Redis; `GET /discover` serves from that cache (integration test)
   - Accept: rows with fewer than 6 Books are omitted (integration test)
-- [ ] M5-T07 · Web: Discover home page · deps: M5-T06, M3-T15 · PRD: §7.2
+- [x] M5-T07 · Web: Discover home page · deps: M5-T06, M3-T15 · PRD: §7.2
   - Accept: `/` renders each row returned by `/v1/discover` with BookCards, a genre grid with a link to all Genres, and the featured review with its Book (component tests)
   - Accept: Visitors see sign-in prompts, and Members do not; empty or hidden rows leave no gaps (component tests)
 - [ ] M5-T08 · Seed: featured Genres, a featured review, helpful votes · deps: M5-T06, M5-T01, M4-T14 · PRD: §13

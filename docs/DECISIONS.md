@@ -917,3 +917,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: PRD §7.2 and §9 name the rows, the 6-Book rule, and the 10-minute rebuild; they leave the key layout, row size, miss behavior, and response shape open.
 - Affects: M5-T07, M5-T08, M7-T15
 
+
+### D-136 · Discover home page (M5-T07)
+- Status: Implementation
+- Decision: `/` renders the rows from `GET /v1/discover` in the order Recently reviewed, Top rated, Most reviewed this month, Browse by genre (Genre links plus "All genres"), Featured review. A `null` row renders nothing, and when every row is `null` the page shows a short "Nothing to show here yet" line. If the API call fails, the loader logs it and the page renders as if every row were hidden instead of returning an error page. Visitors get a "Sign in / Create an account" prompt under the intro; signed-in Members do not. The featured review shows its text, spoiler toggle, author, and a link to the Book's reviews, without a helpful button (the Book page carries voting).
+- Why: PRD §7.2 names the rows and says Visitors differ only by sign-in prompts; it leaves the order, failure behavior, and the featured card's controls open.
+- Affects: M5-T09, M6-T03

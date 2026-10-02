@@ -398,3 +398,7 @@ Entry format:
 - `featured_items` table (migration 0010), `GET /v1/discover` (`modules/discover/`: `rows.ts` builders, `cache.ts` Redis rows, `routes.ts`), and the `discover.rebuild` job (every 10 minutes). `JobContext` and `startWorker` now take a `redis` client. Schema in `packages/shared/src/discover-api.ts`. Integration tests in `discover.integration.test.ts`; route-coverage table extended. D-135 records the choices.
 - Next iteration: M5-T07 (web Discover home page). A hidden row is `null` in the response; the featured review comes with its Book. Nothing seeds `featured_items` yet (M5-T08), so locally only the three Book rows appear. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`); after changing `packages/shared`, run `pnpm --filter @reprint/shared build` before API tests.
 
+
+### 2026-10-01 · M5-T07 · PR pending
+- Discover home page: `components/books/discover-page.tsx` (`DiscoverPage`), `routes/home.tsx` loader fetching `/v1/discover` (renders with no rows if the API fails), and `copy.home` strings. Tests in `discover-page.test.tsx` (with axe) and `routes/home.test.ts`. D-136 records the choices.
+- Next iteration: M5-T08 (seed featured Genres, a featured review, helpful votes). Locally only the three Book rows show until then. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
