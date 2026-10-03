@@ -520,7 +520,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T03 · Sitemaps: chunked, rebuilt nightly, `robots.txt` · deps: M8-T01 · PRD: §11
   - Accept: a nightly `sitemaps.build` job writes a sitemap index plus chunks (≤ 50,000 URLs each) for Books, Authors, Genres, Series, and public profiles (integration test)
   - Accept: `/sitemap.xml` and `/robots.txt` are served by the web app, and `robots.txt` disallows admin and settings paths
-- [ ] M8-T04 · Legal and static pages: Terms, Privacy, Community Guidelines, About, Contact (draft copy) · deps: M1-T12 · PRD: §7.13, §11
+- [x] M8-T04 · Legal and static pages: Terms, Privacy, Community Guidelines, About, Contact (draft copy) · deps: M1-T12 · PRD: §7.13, §11
   - Accept: the five pages exist with draft copy clearly marked `DRAFT – owner review` and are linked from the footer (component test)
   - Accept: the Privacy draft covers GDPR and CCPA rights, 90-day IP retention, JSON export, and cookieless analytics; the Community Guidelines list rejection reasons
 - [ ] M8-T05 · Cookieless analytics and success-metric events · deps: M1-T14 · PRD: §2, §11
