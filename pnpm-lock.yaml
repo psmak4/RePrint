@@ -396,6 +396,9 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+      web-vitals:
+        specifier: ^6.2.2
+        version: 6.2.2
 
   packages/config:
     devDependencies:

@@ -560,3 +560,7 @@ Entry format:
 ### 2026-10-03 · M8-T07 · PR pending
 - `GET /v1/admin/system` (`modules/admin/system.ts`, `catalog.manage`) returns Source requests per second, search cache hit rate, breaker state, and queue depth; schema in `packages/shared/src/admin-system-api.ts`; `buildApp` gained a `queue` option (`server.ts` passes it); `openapi.json` regenerated. Web: `/admin/system` (`routes/admin-system.tsx`, `components/admin/system-dashboard.tsx`) revalidates every 30 s; "System" nav link; axe in `e2e/specs/admin.spec.ts`. Integration, loader, and component tests. D-169 records the choices.
 - Next iteration: M8-T08 (k6 load tooling). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-02 · M8-T08 · PR pending
+- `load/k6/mixed-read-heavy.js` (200 rps for 10 min by default; thresholds for errors and the three p95 targets), `pnpm load:smoke` (`scripts/load-smoke.sh`: `k6` binary or `grafana/k6` Docker image; 30 s at 3 rps; passes locally), and `e2e/specs/web-vitals.spec.ts` (LCP, CLS, INP on The Hobbit's Book page, throttled Pixel 7; runs in the `mobile` project only). `docs/performance.md` documents both and has a table for the owner's staging results. D-170 records the choices. A 429 counts as an error, and the PRD's per-IP read limit blocks a full run from one IP: M8-T15 needs `SPREAD_IPS=true` on staging or several generators (see `docs/performance.md`).
+- Next iteration: M8-T09 (axe on every page type). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
