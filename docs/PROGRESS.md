@@ -564,3 +564,7 @@ Entry format:
 ### 2026-10-02 · M8-T08 · PR pending
 - `load/k6/mixed-read-heavy.js` (200 rps for 10 min by default; thresholds for errors and the three p95 targets), `pnpm load:smoke` (`scripts/load-smoke.sh`: `k6` binary or `grafana/k6` Docker image; 30 s at 3 rps; passes locally), and `e2e/specs/web-vitals.spec.ts` (LCP, CLS, INP on The Hobbit's Book page, throttled Pixel 7; runs in the `mobile` project only). `docs/performance.md` documents both and has a table for the owner's staging results. D-170 records the choices. A 429 counts as an error, and the PRD's per-IP read limit blocks a full run from one IP: M8-T15 needs `SPREAD_IPS=true` on staging or several generators (see `docs/performance.md`).
 - Next iteration: M8-T09 (axe on every page type). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T09 · PR pending
+- `e2e/specs/a11y-pages.spec.ts` fills the axe gaps: the five legal pages, Author, Book, settings (profile, security), and the admin Book edit page. With the existing specs every page type now has a check (table in `docs/a11y.md`); axe found nothing new to fix. `docs/a11y.md` also holds the VoiceOver and NVDA script and a results table for the owner (M8-T15).
+- Next iteration: M8-T10 (ASVS L2 preparation). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`). `pnpm test:e2e -- <name>` ignores the filter and runs every spec.
