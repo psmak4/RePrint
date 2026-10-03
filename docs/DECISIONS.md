@@ -1142,3 +1142,7 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: the k6 scenario (`load/k6/mixed-read-heavy.js`) is a constant-arrival-rate run with a fixed mix (25% search, 5% shelf writes, 70% reads). Writes need signed-in Members, so they come from `LOAD_MEMBERS` (none means no writes). `SPREAD_IPS=true` sends random `X-Forwarded-For` values so one generator can pass the per-IP read limit on a target that trusts the header. `pnpm load:smoke` uses the `k6` binary or falls back to the `grafana/k6` Docker image, at 3 requests per second for 30 seconds with the seeded `member1` and `member2`. The web vitals check is a Playwright spec that runs in the `mobile` project only (CDP throttling is Chromium-only), with the `web-vitals` package (already allowed by D-022's list) added to `e2e` as a dev dependency.
 - Why: the PRD gives the targets but not the mix or how to get past its own rate limits; the shelf write is the only cheap authenticated write that needs no email or review state. The smoke rate stays under 300 reads per minute so it works from one machine.
 - Affects: M8-T08, M8-T15
+
+### D-171 · ASVS L2 preparation (M8-T10)
+- `docs/security/asvs-l2.md` maps the authentication, session, and access-control requirements to code and tests. `apps/api/src/security-docs.test.ts` fails when a test named in the map no longer exists, so the map can't rot silently.
+- Gaps found are filed as tasks (M8-T17), not fixed here: they change session behavior, and this task is preparation. The pre-launch sign-off (M8-T15) is the owner's.

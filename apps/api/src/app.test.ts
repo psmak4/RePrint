@@ -186,3 +186,25 @@ describe('request IDs and logging', () => {
     expect(response.headers['x-request-id']).toBe('r-1')
   })
 })
+
+describe('security headers (PRD §11)', () => {
+  it('sets HSTS with preload, nosniff, the referrer policy, and a CSP that allows nothing', async () => {
+    const response = await app.inject({ method: 'GET', url: '/v1/health' })
+    expect(response.headers['strict-transport-security']).toBe(
+      'max-age=63072000; includeSubDomains; preload',
+    )
+    expect(response.headers['x-content-type-options']).toBe('nosniff')
+    expect(response.headers['referrer-policy']).toBe('strict-origin-when-cross-origin')
+    const csp = String(response.headers['content-security-policy'])
+    expect(csp).toContain("default-src 'none'")
+    expect(csp).toContain("frame-ancestors 'none'")
+    expect(csp).not.toContain('unsafe-inline')
+  })
+
+  it('sets the same headers on error responses', async () => {
+    const response = await app.inject({ method: 'GET', url: '/v1/nope' })
+    expect(response.statusCode).toBe(404)
+    expect(response.headers['strict-transport-security']).toContain('preload')
+    expect(response.headers['x-content-type-options']).toBe('nosniff')
+  })
+})
