@@ -5,25 +5,20 @@ import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/author'
 
 const META_DESCRIPTION_LIMIT = 160
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) return [{ title: APP_NAME }]
-  const { author, canonicalUrl, metaDescription } = loaderData
-  const image = coverUrl(author.photo, 'large')
-  return [
-    { title: `${author.name} | ${APP_NAME}` },
-    { name: 'description', content: metaDescription },
-    { tagName: 'link', rel: 'canonical', href: canonicalUrl },
-    { property: 'og:type', content: 'profile' },
-    { property: 'og:site_name', content: APP_NAME },
-    { property: 'og:title', content: author.name },
-    { property: 'og:description', content: metaDescription },
-    { property: 'og:url', content: canonicalUrl },
-    ...(image ? [{ property: 'og:image', content: image }] : []),
-  ]
+export function meta(args: Route.MetaArgs) {
+  if (!args.loaderData) return [{ title: APP_NAME }]
+  const { author, canonicalUrl, metaDescription } = args.loaderData
+  return pageMeta(args, {
+    title: `${author.name} | ${APP_NAME}`,
+    description: metaDescription,
+    canonicalUrl,
+    openGraph: { type: 'profile', title: author.name, image: coverUrl(author.photo, 'large') },
+  })
 }
 
 /** The Author and their Books grouped by Role, loaded on the server (PRD §7.5). */

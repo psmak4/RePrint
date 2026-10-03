@@ -11,16 +11,14 @@ import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-users'
 
 const PAGE_SIZE = 25
 const FILTERS = ['q', 'role', 'status', 'joinedFrom', 'joinedTo'] as const
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.users.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.users.title}`, noindex: true })
 }
 
 /** Users, newest first, searched and filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */

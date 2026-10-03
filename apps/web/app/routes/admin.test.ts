@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const loadSession = vi.fn()
 vi.mock('../lib/auth.server.js', () => ({ loadSession: (r: Request) => loadSession(r) }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader, meta } from './admin.js'
 
 const args = { request: new Request('https://reprint.test/admin/reviews') } as never
@@ -63,7 +64,7 @@ describe('admin layout loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 
   it('lists the Catalog sections for a holder of catalog.manage', async () => {

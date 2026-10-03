@@ -4,13 +4,14 @@ import { GenresIndexPage } from '../components/books/genre-pages.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/genres'
 
-export function meta() {
-  return [
-    { title: `${copy.genres.indexTitle} | ${APP_NAME}` },
-    { name: 'description', content: copy.genres.indexMetaDescription },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, {
+    title: `${copy.genres.indexTitle} | ${APP_NAME}`,
+    description: copy.genres.indexMetaDescription,
+  })
 }
 
 /** The Genre tree, loaded on the server (PRD §7.5). */

@@ -10,14 +10,15 @@ import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
 import { isSearchable, parseSearchParams, resolveHref, searchHref } from '../lib/search-links.js'
+import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/search'
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  return [
-    { title: `${APP_NAME}: ${copy.search.title(loaderData?.query.q ?? '')}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, {
+    title: `${APP_NAME}: ${copy.search.title(args.loaderData?.query.q ?? '')}`,
+    noindex: true,
+  })
 }
 
 /** The Genre select is optional: if the list can't load the filter still works from the URL. */

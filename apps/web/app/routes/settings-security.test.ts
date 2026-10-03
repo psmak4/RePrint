@@ -12,6 +12,7 @@ vi.mock('../lib/auth.server.js', () => ({
 vi.mock('../lib/api.server.js', () => ({ apiClientFor: () => ({ get }) }))
 vi.mock('../lib/me.server.js', () => ({ loadMe: () => ({ id: 'me' }) }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { action, loader, meta } from './settings-security.js'
 
 const post = (body: unknown) =>
@@ -51,7 +52,7 @@ describe('settings/security loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })
 

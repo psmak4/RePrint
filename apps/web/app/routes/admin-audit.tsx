@@ -12,6 +12,7 @@ import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-audit'
 
 const PAGE_SIZE = 25
@@ -19,11 +20,8 @@ const FILTERS = Object.keys(
   adminAuditFiltersSchema.shape,
 ) as (keyof typeof adminAuditFiltersSchema.shape)[]
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.audit.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.audit.title}`, noindex: true })
 }
 
 /** The audit log, newest first, filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */

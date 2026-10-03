@@ -510,7 +510,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M8 · Launch readiness
 
-- [ ] M8-T01 · SEO meta on every page: canonical, description, Open Graph, `noindex` rules · deps: M7-T18 · PRD: §7.4, §11
+- [x] M8-T01 · SEO meta on every page: canonical, description, Open Graph, `noindex` rules · deps: M7-T18 · PRD: §7.4, §11
   - Accept: every web route renders a canonical URL and meta description (a test walks the route manifest)
   - Accept: admin, settings, auth pages, and profiles of unverified Members are `noindex` (loader tests)
   - Accept: Book, Author, Genre, Series, and profile pages have Open Graph tags

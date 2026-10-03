@@ -14,15 +14,13 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog-merge'
 
 const QUEUE_PAGE_SIZE = 20
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.merge.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.merge.title}`, noindex: true })
 }
 
 /** Open merge candidates, oldest first (PRD §7.11). */

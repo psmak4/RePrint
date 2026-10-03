@@ -6,6 +6,7 @@ vi.mock('../lib/auth.server.js', async (importOriginal) => ({
   loadSession: (r: Request) => loadSession(r),
 }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { action, loader, meta } from './admin-reviews.js'
 
 const id = (n: number) => `0192a3b4-0000-7000-8000-00000000000${n}`
@@ -125,7 +126,7 @@ describe('admin reviews loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })
 

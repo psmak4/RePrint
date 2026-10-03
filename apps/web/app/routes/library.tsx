@@ -4,16 +4,17 @@ import { LibraryPage, PrivateLibrary } from '../components/library/library-page.
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/library'
 
-export function meta({ params }: Route.MetaArgs) {
-  const username = params.username ?? ''
-  return [
-    { title: `${copy.library.title(username)} | ${APP_NAME}` },
-    { name: 'description', content: copy.library.metaDescription(username) },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  const username = args.params.username ?? ''
+  return pageMeta(args, {
+    title: `${copy.library.title(username)} | ${APP_NAME}`,
+    description: copy.library.metaDescription(username),
+    noindex: true,
+  })
 }
 
 /** A Member's Library, loaded on the server; sort, Shelf, and page come from the URL (PRD §7.7). */

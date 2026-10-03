@@ -6,6 +6,7 @@ vi.mock('../lib/auth.server.js', async (importOriginal) => ({
   loadSession: (r: Request) => loadSession(r),
 }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader, meta } from './admin-audit.js'
 import { loader as csvLoader } from './admin-audit-csv.js'
 
@@ -80,7 +81,7 @@ describe('admin audit loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })
 

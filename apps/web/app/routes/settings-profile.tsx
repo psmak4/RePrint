@@ -4,13 +4,11 @@ import { ProfileSettingsPage } from '../components/settings/profile-settings-pag
 import { copy } from '../copy/index.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { loadMe } from '../lib/me.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/settings-profile'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.settings.profile.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.settings.profile.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

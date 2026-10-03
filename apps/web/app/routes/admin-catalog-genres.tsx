@@ -18,13 +18,11 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog-genres'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.genres.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.genres.title}`, noindex: true })
 }
 
 /** Every Genre (archived too) and every Subject rule (PRD §5.4, §7.11). */

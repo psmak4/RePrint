@@ -16,13 +16,11 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-book'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.book.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.book.title}`, noindex: true })
 }
 
 /** One Book as an Admin edits it, with the Genres to choose from (PRD §7.11). */

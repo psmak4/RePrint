@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader as genreLoader, meta as genreMeta } from './genre.js'
 import { loader as genresLoader } from './genres.js'
 import { loader as seriesLoader } from './series.js'
@@ -61,7 +62,9 @@ describe('genre loader', () => {
     const result = await load('?sort=most_reviewed&page=3')
     expect(seen[0]).toContain('/v1/genres/science-fiction?sort=most_reviewed&page=3')
     expect(result.sort).toBe('most_reviewed')
-    expect(genreMeta({ loaderData: result } as never)).toContainEqual({
+    expect(
+      genreMeta(metaArgs('/genres/science-fiction', { loaderData: result }) as never),
+    ).toContainEqual({
       title: 'Science Fiction | RePrint',
     })
   })

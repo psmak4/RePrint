@@ -6,6 +6,7 @@ vi.mock('../lib/auth.server.js', async (importOriginal) => ({
   loadSession: (r: Request) => loadSession(r),
 }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader, meta } from './admin-index.js'
 
 const args = { request: new Request('https://reprint.test/admin') } as never
@@ -68,6 +69,6 @@ describe('admin dashboard loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })

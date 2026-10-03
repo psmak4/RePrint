@@ -12,6 +12,7 @@ const profile = {
   reviewCount: 0,
   helpfulVotes: 0,
   libraryPublic: true,
+  verified: true,
 }
 const reviews = { items: [], meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 } }
 

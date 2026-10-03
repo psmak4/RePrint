@@ -47,6 +47,10 @@ export const copy = {
       { label: 'Contact', href: '/contact' },
     ],
   },
+  seo: {
+    defaultDescription:
+      'RePrint is a place to discover books and read reviews you can trust. Every review is approved by a moderator.',
+  },
   home: {
     title: 'Discover books. Read reviews you can trust.',
     lead: 'Every review on RePrint is approved by a moderator before anyone sees it.',

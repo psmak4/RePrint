@@ -10,13 +10,11 @@ import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.admin.catalog.title}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.catalog.title}`, noindex: true })
 }
 
 /** Catalog size and monthly growth from `GET /v1/admin/catalog/stats` (PRD §6, §7.11). */

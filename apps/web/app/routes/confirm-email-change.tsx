@@ -2,13 +2,14 @@ import { APP_NAME, confirmEmailChangeRequestSchema } from '@reprint/shared'
 import { ConfirmEmailChangePage } from '../components/settings/confirm-email-change-page.js'
 import { copy } from '../copy/index.js'
 import { loadSession, postToApi } from '../lib/auth.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/confirm-email-change'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.settings.confirmEmail.successTitle}` },
-    { name: 'robots', content: 'noindex' },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, {
+    title: `${APP_NAME}: ${copy.settings.confirmEmail.successTitle}`,
+    noindex: true,
+  })
 }
 
 /** The emailed link is a GET, so the loader spends the token, as verify-email does (D-082). */

@@ -4,14 +4,16 @@ import { DiscoverPage } from '../components/books/discover-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/home'
 
-export function meta() {
-  return [
-    { title: `${APP_NAME}: ${copy.home.title}` },
-    { name: 'description', content: copy.home.metaDescription },
-  ]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, {
+    title: `${APP_NAME}: ${copy.home.title}`,
+    description: copy.home.metaDescription,
+    openGraph: { type: 'website' },
+  })
 }
 
 const NO_ROWS: DiscoverResponse = {

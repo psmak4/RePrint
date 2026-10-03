@@ -21,25 +21,24 @@ import { groupContributors } from '../lib/contributors.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/book'
 
 const MORE_BY_AUTHOR_LIMIT = 6
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) return [{ title: APP_NAME }]
-  const { book, canonicalUrl, metaDescription } = loaderData
-  const image = coverUrl(book.cover ?? book.primaryEdition?.cover ?? null, 'large')
-  return [
-    { title: `${book.title} | ${APP_NAME}` },
-    { name: 'description', content: metaDescription },
-    { tagName: 'link', rel: 'canonical', href: canonicalUrl },
-    { property: 'og:type', content: 'book' },
-    { property: 'og:site_name', content: APP_NAME },
-    { property: 'og:title', content: book.title },
-    { property: 'og:description', content: metaDescription },
-    { property: 'og:url', content: canonicalUrl },
-    ...(image ? [{ property: 'og:image', content: image }] : []),
-  ]
+export function meta(args: Route.MetaArgs) {
+  if (!args.loaderData) return [{ title: APP_NAME }]
+  const { book, canonicalUrl, metaDescription } = args.loaderData
+  return pageMeta(args, {
+    title: `${book.title} | ${APP_NAME}`,
+    description: metaDescription,
+    canonicalUrl,
+    openGraph: {
+      type: 'book',
+      title: book.title,
+      image: coverUrl(book.cover ?? book.primaryEdition?.cover ?? null, 'large'),
+    },
+  })
 }
 
 /** The Book, its Editions, and up to 6 more Books by its first Author, all loaded on the server (PRD §7.4). */
