@@ -556,3 +556,7 @@ Entry format:
 ### 2026-10-03 · M8-T06 · PR pending
 - `system.monitor` job (every minute; `modules/ops/monitor.ts`) raises `queue_stuck`, `review_queue_stale`, `source_breaker_open`, and `source_usage_high` through `captureAlert` (`observability/sentry.ts`, tag `alert:<signal>`). The gateway now publishes breaker-open to Redis and `SourceMetrics` gained `requestsBetween` and the breaker marks; `JobContext` gained `queue`, `sourceRps`, `alert` (and `startWorker` takes `sourceRps`, `onAlert`). Integration tests in `monitor.integration.test.ts`; `docs/runbooks/alerts.md` maps every PRD §11 alert. D-168 records the choices.
 - Next iteration: M8-T07 (admin system dashboard); reuse `SourceMetrics` (`requestsAt`, `cacheCounts`, `breakerOpen`) and the queue counts. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T07 · PR pending
+- `GET /v1/admin/system` (`modules/admin/system.ts`, `catalog.manage`) returns Source requests per second, search cache hit rate, breaker state, and queue depth; schema in `packages/shared/src/admin-system-api.ts`; `buildApp` gained a `queue` option (`server.ts` passes it); `openapi.json` regenerated. Web: `/admin/system` (`routes/admin-system.tsx`, `components/admin/system-dashboard.tsx`) revalidates every 30 s; "System" nav link; axe in `e2e/specs/admin.spec.ts`. Integration, loader, and component tests. D-169 records the choices.
+- Next iteration: M8-T08 (k6 load tooling). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

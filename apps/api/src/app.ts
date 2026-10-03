@@ -3,6 +3,7 @@ import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import type { Database } from '@reprint/db'
+import type { Queue } from 'bullmq'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { Redis } from 'ioredis'
@@ -17,6 +18,7 @@ import { adminFeaturedRoutes } from './modules/admin/featured.js'
 import { adminGenreRoutes } from './modules/admin/genres.js'
 import { adminMergeRoutes } from './modules/admin/merge.js'
 import { adminSuspensionRoutes } from './modules/admin/suspensions.js'
+import { adminSystemRoutes } from './modules/admin/system.js'
 import { adminUserRoutes } from './modules/admin/users.js'
 import { loginRoutes } from './modules/auth/login.js'
 import { passwordResetRoutes } from './modules/auth/password-reset.js'
@@ -67,6 +69,8 @@ export async function buildApp(
     redis?: Redis
     /** Enqueues background jobs (emails); needed to serve the auth routes. */
     jobs?: Pick<JobQueue, 'enqueue'>
+    /** The job queue itself, read by the Admin system dashboard. */
+    queue?: Queue
     /** The Source behind the gateway; enables opening Books that are not yet on RePrint. */
     catalog?: {
       source: SourceAdapter
@@ -221,6 +225,14 @@ export async function buildApp(
     env,
     db: options.database,
     jobs: options.jobs,
+  })
+  await app.register(adminSystemRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    redis: options.redis,
+    queue: options.queue,
   })
   await app.register(adminSuspensionRoutes, {
     prefix: '/v1',

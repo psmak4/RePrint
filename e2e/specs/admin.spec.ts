@@ -13,6 +13,7 @@ const adminPages = [
   '/admin/catalog/merge',
   '/admin/catalog/genres',
   '/admin/featured',
+  '/admin/system',
 ]
 
 test('an Admin grants Moderator to one Member and suspends another, who cannot log in', async ({

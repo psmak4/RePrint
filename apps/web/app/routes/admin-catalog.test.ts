@@ -9,6 +9,7 @@ vi.mock('../lib/auth.server.js', async (importOriginal) => ({
 import { loader as statsLoader } from './admin-catalog.js'
 import { action as genresAction, loader as genresLoader } from './admin-catalog-genres.js'
 import { action as mergeAction, loader as mergeLoader } from './admin-catalog-merge.js'
+import { loader as systemLoader } from './admin-system.js'
 
 const id = (n: number) => `0192a3b4-0000-7000-8000-00000000000${n}`
 const viewerWith = (permissions: string[]) => ({
@@ -91,6 +92,30 @@ describe('admin catalog dashboard loader', () => {
   it('answers 502 when the API fails', async () => {
     stubApi({ 'GET /v1/admin/catalog/stats': { status: 500 } })
     const error = (await thrown(() => statsLoader(getArgs()))) as { init?: { status: number } }
+    expect(error.init?.status).toBe(502)
+  })
+})
+
+describe('admin system loader', () => {
+  const system = {
+    generatedAt: '2026-10-03T12:00:00.000Z',
+    source: { requestsPerSecond: 0, limitPerSecond: 2, breakerOpen: false },
+    searchCache: { hits: 0, misses: 0, hitRate: null },
+    queue: { waiting: 0, active: 0, delayed: 0, failed: 0, oldestWaitingSeconds: null },
+  }
+  it('loads the numbers', async () => {
+    stubApi({ 'GET /v1/admin/system': { body: system } })
+    expect((await systemLoader(getArgs('/admin/system'))).system.source.limitPerSecond).toBe(2)
+  })
+  it('is denied without catalog.manage', async () => {
+    stubApi({})
+    await denied(() => systemLoader(getArgs('/admin/system')))
+  })
+  it('answers 502 when the API fails', async () => {
+    stubApi({ 'GET /v1/admin/system': { status: 500 } })
+    const error = (await thrown(() => systemLoader(getArgs('/admin/system')))) as {
+      init?: { status: number }
+    }
     expect(error.init?.status).toBe(502)
   })
 })

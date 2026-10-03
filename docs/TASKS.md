@@ -529,7 +529,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T06 · Alert signals and a monitor job for the PRD §11 alerts · deps: M3-T07, M7-T02 · PRD: §6, §11
   - Accept: a `system.monitor` repeatable job checks queue depth (> 1,000 waiting or oldest > 15 min), oldest pending review > 48 h, circuit breaker open, and Source usage > 70% of the limit for an hour, and reports each to Sentry with a stable tag (integration tests)
   - Accept: `docs/runbooks/alerts.md` maps every PRD §11 alert (incl. error rate > 2% and p95 over target) to its signal and the Sentry, Slack, or uptime rule the owner must configure
-- [ ] M8-T07 · Admin system dashboard: Source requests per second, cache hit rate, queue health · deps: M8-T06, M7-T14 · PRD: §6
+- [x] M8-T07 · Admin system dashboard: Source requests per second, cache hit rate, queue health · deps: M8-T06, M7-T14 · PRD: §6
   - Accept: `/admin/system` (Admin only) shows Source requests per second, search cache hit rate, breaker state, and queue depth from the M3-T07 counters (component and integration tests)
   - Accept: the page is linked from the admin nav, refreshes every 30 seconds, and is covered by axe in e2e
 - [ ] M8-T08 · Load and performance tooling: k6 scenario and web vitals checks · deps: M7-T18 · PRD: §11, §12

@@ -36,6 +36,7 @@ const ADMIN_BOOKS = 'modules/admin/books.integration.test.ts'
 const ADMIN_FEATURED = 'modules/admin/featured.integration.test.ts'
 const ADMIN_GENRES = 'modules/admin/genres.integration.test.ts'
 const ADMIN_MERGE = 'modules/admin/merge.integration.test.ts'
+const ADMIN_SYSTEM = 'modules/admin/system.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
 const SITEMAPS = 'modules/sitemaps/sitemaps.integration.test.ts'
@@ -333,6 +334,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/admin/catalog/stats': {
     allowed: [ADMIN_GENRES, 'returns Catalog size and twelve months of growth'],
     denied: [ADMIN_GENRES, 'denies Moderators and Members with 403 and Visitors with 401'],
+  },
+  'GET /v1/admin/system': {
+    allowed: [ADMIN_SYSTEM, 'reports Source rate, cache hit rate, breaker state, and queue depth'],
+    denied: [ADMIN_SYSTEM, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
   'GET /v1/admin/books/merge-candidates': {
     allowed: [ADMIN_MERGE, 'lists open merge candidates oldest first with both Books'],
