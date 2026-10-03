@@ -552,6 +552,7 @@ export const copy = {
     title: 'Administration',
     navLabel: 'Administration sections',
     navToggle: 'Admin menu',
+    scrollableTable: (name: string) => `${name}, scrollable table`,
     reviewsNav: 'Review queue',
     dashboardNav: 'Dashboard',
     reportsNav: 'Reports queue',

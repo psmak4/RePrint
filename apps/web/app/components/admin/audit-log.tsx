@@ -2,6 +2,7 @@ import { type AdminAuditResponse, AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from '@rep
 import { Button, Input, Label } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.audit
 
@@ -128,7 +129,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
       {entries.items.length === 0 ? (
         <p className="text-muted-foreground">{text.empty}</p>
       ) : (
-        <div className="overflow-x-auto">
+        <ScrollRegion label={text.listLabel}>
           <table aria-label={text.listLabel} className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border">
@@ -166,7 +167,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       )}
       {entries.meta.nextCursor ? (
         <Link to={`/admin/audit?${nextParams}`} className="text-sm text-link underline">

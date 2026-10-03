@@ -500,7 +500,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T16 · IP retention: clear session and audit IPs after 90 days · deps: M4-T03, M2-T15 · PRD: §11
   - Accept: a daily job nulls `ip` on sessions and `audit_log` rows older than 90 days (integration test with a clock override)
   - Accept: the audit trigger allows only this IP-clearing update and still rejects every other UPDATE or DELETE (integration test)
-- [ ] M7-T17 · E2E: report and unpublish; admin assigns a role and suspends a user · deps: M7-T06, M7-T07 · PRD: §12
+- [x] M7-T17 · E2E: report and unpublish; admin assigns a role and suspends a user · deps: M7-T06, M7-T07 · PRD: §12
   - Accept: `e2e/reports.spec.ts` has a Member report a review and a Moderator unpublish it; the author sees the notification
   - Accept: `e2e/admin.spec.ts` has an Admin grant Moderator to a Member and suspend another user, who then cannot log in; axe checks run on each admin page
 - [ ] M7-T18 · M7 verification: run the Trust and admin acceptance criteria end to end, fix gaps, update docs · deps: M7-T08, M7-T14, M7-T15, M7-T16, M7-T17 · PRD: §3, §4, §7.9, §7.10, §7.11

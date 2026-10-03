@@ -2,6 +2,7 @@ import { ADMIN_USER_STATUSES, type AdminUsersResponse, ASSIGNABLE_ROLES } from '
 import { Button, Input, Label } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.users
 
@@ -85,7 +86,7 @@ export function UsersList({
       {users.items.length === 0 ? (
         <p className="text-muted-foreground">{text.empty}</p>
       ) : (
-        <div className="overflow-x-auto">
+        <ScrollRegion label={text.listLabel}>
           <table aria-label={text.listLabel} className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border">
@@ -141,7 +142,7 @@ export function UsersList({
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       )}
       {users.meta.nextCursor ? (
         <Link to={`/admin/users?${nextParams}`} className="text-sm text-link underline">
