@@ -1,8 +1,10 @@
 import { APP_NAME, seriesDetailResponseSchema, slugSchema } from '@reprint/shared'
 import { data, useRouteLoaderData } from 'react-router'
 import { SeriesPage } from '../components/books/series-page.js'
+import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
+import { seriesBreadcrumbs } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
@@ -35,10 +37,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     logger.error({ status: response.status }, 'series request failed')
     throw data(copy.series.loadFailed, { status: 502 })
   }
-  return seriesDetailResponseSchema.parse(await response.json())
+  const detail = seriesDetailResponseSchema.parse(await response.json())
+  return { ...detail, jsonLd: seriesBreadcrumbs(new URL(request.url).origin, detail) }
 }
 
 export default function Series({ loaderData }: Route.ComponentProps) {
   const session = useRouteLoaderData<typeof rootLoader>('root')
-  return <SeriesPage detail={loaderData} viewer={session?.viewer ?? null} />
+  return (
+    <>
+      <JsonLd data={loaderData.jsonLd} />
+      <SeriesPage detail={loaderData} viewer={session?.viewer ?? null} />
+    </>
+  )
 }

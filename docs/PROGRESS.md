@@ -536,3 +536,7 @@ Entry format:
 ### 2026-10-03 · M8-T01 · PR pending
 - `pageMeta` (`apps/web/app/lib/seo.ts`) now builds every page route's `meta`: description (site default fallback), canonical link, `noindex` where needed, Open Graph for Book, Author, Genre, Series, profile, and home. The root loader returns `origin`, which the canonical URL uses. `GET /v1/users/:username` gained `verified`, so unverified Members' profiles are `noindex`; `openapi.json` regenerated. `routes/seo.test.ts` walks `routes.ts` and checks each page route. D-163 records the choices.
 - Next iteration: M8-T02 (JSON-LD). Reuse `pageMeta`; add a safe `<JsonLd>` component (no `dangerouslySetInnerHTML`). Tests that call `meta` use `metaArgs` from `lib/seo.testing.ts`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`). `ready.integration.test.ts` flaked once again; it passes on rerun.
+
+### 2026-10-03 · M8-T02 · PR pending
+- JSON-LD: `lib/json-ld.ts` (builders) and `components/seo/json-ld.tsx` (`<JsonLd>`, escapes `<` and the line separators, no `dangerouslySetInnerHTML`). Book emits `Book` + `AggregateRating` (when reviewed) + `Review`s + `BreadcrumbList`; Author emits `Person` + `BreadcrumbList`; Genre and Series emit `BreadcrumbList`. Loaders return `jsonLd`. Unit tests for builders and the component; loader tests for Book and Author. D-164 records the choices.
+- Next iteration: M8-T03 (sitemaps and `robots.txt`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

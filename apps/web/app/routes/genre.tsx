@@ -6,8 +6,10 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { GenrePage } from '../components/books/genre-pages.js'
+import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
+import { genreBreadcrumbs } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/genre'
@@ -51,13 +53,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     logger.error({ status: response.status }, 'genre request failed')
     throw data(copy.genres.loadFailed, { status: 502 })
   }
+  const detail = genreDetailResponseSchema.parse(await response.json())
   return {
-    detail: genreDetailResponseSchema.parse(await response.json()),
+    detail,
     sort: query.sort,
     page: query.page,
+    jsonLd: genreBreadcrumbs(url.origin, detail),
   }
 }
 
 export default function Genre({ loaderData }: Route.ComponentProps) {
-  return <GenrePage detail={loaderData.detail} sort={loaderData.sort} />
+  return (
+    <>
+      <JsonLd data={loaderData.jsonLd} />
+      <GenrePage detail={loaderData.detail} sort={loaderData.sort} />
+    </>
+  )
 }

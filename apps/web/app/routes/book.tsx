@@ -14,11 +14,13 @@ import {
 import { data, redirect } from 'react-router'
 import { z } from 'zod'
 import { BookPage, type MoreByAuthor } from '../components/books/book-page.js'
+import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, loadSession, sendToApi } from '../lib/auth.server.js'
 import { groupContributors } from '../lib/contributors.js'
 import { coverUrl } from '../lib/cover-url.js'
+import { bookBreadcrumbs, bookJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
 import { pageMeta } from '../lib/seo.js'
@@ -98,6 +100,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       : description
     : copy.books.page.metaDescription(book.title, authors ?? '')
   const canonicalUrl = new URL(`/books/${book.slug}`, request.url).toString()
+  const { origin } = new URL(request.url)
+  const jsonLd = [bookJsonLd(origin, book, reviews?.items ?? []), bookBreadcrumbs(origin, book)]
 
   return {
     book,
@@ -110,6 +114,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     reviewQuery,
     canonicalUrl,
     metaDescription,
+    jsonLd,
   }
 }
 
@@ -214,15 +219,18 @@ async function loadMoreByAuthor(
 
 export default function Book({ loaderData }: Route.ComponentProps) {
   return (
-    <BookPage
-      book={loaderData.book}
-      editions={loaderData.editions}
-      moreByAuthor={loaderData.moreByAuthor}
-      viewer={loaderData.viewer}
-      myReview={loaderData.myReview}
-      reviews={loaderData.reviews}
-      reviewQuery={loaderData.reviewQuery}
-      votedReviewIds={loaderData.votedReviewIds}
-    />
+    <>
+      <JsonLd data={loaderData.jsonLd} />
+      <BookPage
+        book={loaderData.book}
+        editions={loaderData.editions}
+        moreByAuthor={loaderData.moreByAuthor}
+        viewer={loaderData.viewer}
+        myReview={loaderData.myReview}
+        reviews={loaderData.reviews}
+        reviewQuery={loaderData.reviewQuery}
+        votedReviewIds={loaderData.votedReviewIds}
+      />
+    </>
   )
 }

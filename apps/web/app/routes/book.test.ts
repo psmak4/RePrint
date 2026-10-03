@@ -113,6 +113,14 @@ describe('book loader', () => {
     expect(response.headers.get('Location')).toBe('/books/dune-abc123')
   })
 
+  it('returns Book and BreadcrumbList JSON-LD with absolute URLs', async () => {
+    const result = await load(respond)
+    expect(result.jsonLd).toMatchObject([
+      { '@type': 'Book', url: 'https://reprint.test/books/dune-abc123', name: 'Dune' },
+      { '@type': 'BreadcrumbList' },
+    ])
+  })
+
   it('gives the canonical URL and meta description', async () => {
     const result = await load(respond)
     expect(result.canonicalUrl).toBe('https://reprint.test/books/dune-abc123')
