@@ -47,6 +47,18 @@ describe('author loader', () => {
     expect(tags).toContainEqual({ property: 'og:title', content: 'Frank Herbert' })
   })
 
+  it('returns Person and BreadcrumbList JSON-LD', async () => {
+    const result = await load(respond)
+    expect(result.jsonLd).toMatchObject([
+      {
+        '@type': 'Person',
+        name: 'Frank Herbert',
+        url: 'https://reprint.test/authors/frank-herbert',
+      },
+      { '@type': 'BreadcrumbList' },
+    ])
+  })
+
   it('builds a description when there is no bio and trims a long one', async () => {
     const none = await load(() => Response.json({ ...author, bio: null }))
     expect(none.metaDescription).toBe(

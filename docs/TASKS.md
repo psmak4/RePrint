@@ -514,7 +514,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every web route renders a canonical URL and meta description (a test walks the route manifest)
   - Accept: admin, settings, auth pages, and profiles of unverified Members are `noindex` (loader tests)
   - Accept: Book, Author, Genre, Series, and profile pages have Open Graph tags
-- [ ] M8-T02 · Structured data: schema.org Book, AggregateRating, Review, Person, BreadcrumbList · deps: M8-T01 · PRD: §7.4, §11
+- [x] M8-T02 · Structured data: schema.org Book, AggregateRating, Review, Person, BreadcrumbList · deps: M8-T01 · PRD: §7.4, §11
   - Accept: the book page emits JSON-LD `Book` with `AggregateRating` (when reviewed) and `Review` entries; Author pages emit `Person`; content pages emit `BreadcrumbList` (unit tests validate shapes)
   - Accept: JSON-LD is rendered without `dangerouslySetInnerHTML` (serialized via a safe script component that escapes `<`), and the lint rule stays on
 - [ ] M8-T03 · Sitemaps: chunked, rebuilt nightly, `robots.txt` · deps: M8-T01 · PRD: §11

@@ -1,9 +1,11 @@
 import { APP_NAME, authorDetailSchema, slugSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { AuthorPage } from '../components/books/author-page.js'
+import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { coverUrl } from '../lib/cover-url.js'
+import { authorBreadcrumbs, authorJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/author'
@@ -48,9 +50,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     : copy.author.metaDescription(author.name)
   const canonicalUrl = new URL(`/authors/${author.slug}`, request.url).toString()
 
-  return { author, canonicalUrl, metaDescription }
+  const { origin } = new URL(request.url)
+  const jsonLd = [authorJsonLd(origin, author), authorBreadcrumbs(origin, author)]
+
+  return { author, canonicalUrl, metaDescription, jsonLd }
 }
 
 export default function Author({ loaderData }: Route.ComponentProps) {
-  return <AuthorPage author={loaderData.author} />
+  return (
+    <>
+      <JsonLd data={loaderData.jsonLd} />
+      <AuthorPage author={loaderData.author} />
+    </>
+  )
 }
