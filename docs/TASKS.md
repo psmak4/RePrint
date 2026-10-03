@@ -503,7 +503,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M7-T17 · E2E: report and unpublish; admin assigns a role and suspends a user · deps: M7-T06, M7-T07 · PRD: §12
   - Accept: `e2e/reports.spec.ts` has a Member report a review and a Moderator unpublish it; the author sees the notification
   - Accept: `e2e/admin.spec.ts` has an Admin grant Moderator to a Member and suspend another user, who then cannot log in; axe checks run on each admin page
-- [ ] M7-T18 · M7 verification: run the Trust and admin acceptance criteria end to end, fix gaps, update docs · deps: M7-T08, M7-T14, M7-T15, M7-T16, M7-T17 · PRD: §3, §4, §7.9, §7.10, §7.11
+- [x] M7-T18 · M7 verification: run the Trust and admin acceptance criteria end to end, fix gaps, update docs · deps: M7-T08, M7-T14, M7-T15, M7-T16, M7-T17 · PRD: §3, §4, §7.9, §7.10, §7.11
   - Accept: `pnpm check` and `pnpm test:e2e` pass
   - Accept: every acceptance criterion in `docs/milestones/M7-trust-and-admin.md` is checked off in the PR body with the command that proved it
   - Accept: a test enumerates every `/mod/*` and `/admin/*` route and asserts each has a permission preHandler and an allowed and denied test
