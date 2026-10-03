@@ -101,6 +101,9 @@ async function rebuild() {
       mailer: undefined as never,
       storage: undefined as never,
       catalog: undefined as never,
+      queue: undefined as never,
+      sourceRps: 2,
+      alert: () => {},
     },
   )
 }

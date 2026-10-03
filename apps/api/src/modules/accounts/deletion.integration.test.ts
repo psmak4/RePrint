@@ -199,6 +199,9 @@ describe('accounts.erase job', () => {
         storage,
         mailer: undefined as never,
         catalog: undefined as never,
+        queue: undefined as never,
+        sourceRps: 2,
+        alert: () => {},
       },
     )
 

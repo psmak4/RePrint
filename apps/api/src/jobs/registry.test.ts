@@ -1,4 +1,5 @@
 import type { Database } from '@reprint/db'
+import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
 import { pino } from 'pino'
 import { describe, expect, it } from 'vitest'
@@ -12,6 +13,9 @@ const unusedServices = {
   redis: {} as Redis,
   storage: {} as ImageStorage,
   catalog: {} as JobContext['catalog'],
+  queue: {} as Queue,
+  sourceRps: 2,
+  alert: () => {},
 }
 
 describe('job registry', () => {

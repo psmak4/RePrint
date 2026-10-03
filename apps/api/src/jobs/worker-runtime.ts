@@ -3,6 +3,7 @@ import { type ConnectionOptions, type Job, Worker } from 'bullmq'
 import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import type { Mailer } from '../email/mailer.js'
+import type { Alert } from '../observability/sentry.js'
 import type { ImageStorage } from '../storage/index.js'
 import { createJobQueue, QUEUE_NAME, workerConnection } from './queue.js'
 import { isJobName, type JobContext, jobs } from './registry.js'
@@ -41,14 +42,33 @@ export async function startWorker(options: {
   catalog: JobContext['catalog']
   /** Called for every failed job (the entry point wires this to Sentry). */
   onJobError?: (error: unknown) => void
+  /** `SOURCE_RATE_LIMIT_RPS`, for the monitor job. */
+  sourceRps: number
+  /** Called for every alert the monitor job raises (the entry point wires this to Sentry). */
+  onAlert?: (alert: Alert) => void
 }): Promise<RunningWorker> {
-  const { redisUrl, log, mailer, db, redis, storage, catalog, onJobError } = options
+  const { redisUrl, log, mailer, db, redis, storage, catalog, onJobError, sourceRps, onAlert } =
+    options
   const jobQueue = createJobQueue(redisUrl)
   const connection = workerConnection(redisUrl)
   connection.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
   const worker = new Worker(
     QUEUE_NAME,
-    (job) => processJob(job, { mailer, db, redis, storage, catalog }, log),
+    (job) =>
+      processJob(
+        job,
+        {
+          mailer,
+          db,
+          redis,
+          storage,
+          catalog,
+          queue: jobQueue.queue,
+          sourceRps,
+          alert: onAlert ?? (() => {}),
+        },
+        log,
+      ),
     {
       connection: connection as ConnectionOptions,
       concurrency: 5,

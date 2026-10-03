@@ -84,6 +84,7 @@ describe('worker (dist/worker.js)', () => {
       'ratings.recompute',
       'sitemaps.build',
       'system.heartbeat',
+      'system.monitor',
       'users.lift_suspensions',
     ])
   })

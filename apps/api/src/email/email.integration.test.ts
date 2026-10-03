@@ -65,6 +65,7 @@ beforeAll(async () => {
     storage: new LocalImageStorage(tmpdir(), 'http://localhost/uploads'),
     // The email job never touches the Source.
     catalog: undefined as never,
+    sourceRps: 2,
   })
   stopWorker = worker.stop
 })

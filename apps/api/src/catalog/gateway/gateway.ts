@@ -33,10 +33,22 @@ export interface CallContext {
 export function createSourceGateway(options: SourceGatewayOptions) {
   const limiter = createSourceRateLimiter({ redis: options.redis, rps: options.rps })
   const metrics = createSourceMetrics(options.redis)
+  const cooldownMs = options.cooldownMs ?? 30_000
   const breaker = createCircuitBreaker({
     failureThreshold: options.failureThreshold ?? 5,
-    cooldownMs: options.cooldownMs ?? 30_000,
+    cooldownMs,
   })
+  let publishedOpen = false
+  /** Shares the breaker's state through Redis, because the monitor runs in another process. */
+  const publishBreaker = () => {
+    if (breaker.state === 'open') {
+      publishedOpen = true
+      void metrics.recordBreakerOpen(cooldownMs * 2).catch(() => {})
+    } else if (publishedOpen && breaker.state === 'closed') {
+      publishedOpen = false
+      void metrics.recordBreakerClosed().catch(() => {})
+    }
+  }
   const context = new AsyncLocalStorage<CallContext>()
   const transport = options.fetch ?? fetch
   const userAgent = `RePrint/${options.version} (${options.contactEmail})`
@@ -64,9 +76,11 @@ export function createSourceGateway(options: SourceGatewayOptions) {
       // A 5xx or 429 means the Source is struggling; a 404 or other 4xx is a normal answer.
       if (response.status >= 500 || response.status === 429) breaker.recordFailure()
       else breaker.recordSuccess()
+      publishBreaker()
       return response
     } catch (error) {
       breaker.recordFailure()
+      publishBreaker()
       throw error
     }
   }
