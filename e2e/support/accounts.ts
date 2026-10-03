@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { createDb, reviews, roles, userRoles, users } from '@reprint/db'
+import { createDb, reviewReports, reviews, roles, userRoles, users } from '@reprint/db'
 import { eq } from 'drizzle-orm'
 import { newIdentity, testPassword, useOwnClientIp } from './identity.js'
 import { linkInEmail, waitForEmail } from './mailpit.js'
@@ -32,13 +32,46 @@ export async function registerVerifiedMember(page: Page, prefix: string) {
   return identity
 }
 
-/** The Moderator role comes from the seed or an Admin in real life; a fresh e2e database has neither. */
-export async function grantModerator(email: string) {
+/** Roles come from the seed or an Admin in real life; a fresh e2e database has neither. */
+async function grantRole(email: string, roleName: 'moderator' | 'admin') {
   await withDb(async (db) => {
     const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
-    const [role] = await db.select({ id: roles.id }).from(roles).where(eq(roles.name, 'moderator'))
-    if (!user || !role) throw new Error(`Cannot grant Moderator to ${email}`)
+    const [role] = await db.select({ id: roles.id }).from(roles).where(eq(roles.name, roleName))
+    if (!user || !role) throw new Error(`Cannot grant ${roleName} to ${email}`)
     await db.insert(userRoles).values({ userId: user.id, roleId: role.id }).onConflictDoNothing()
+  })
+}
+
+export const grantModerator = (email: string) => grantRole(email, 'moderator')
+export const grantAdmin = (email: string) => grantRole(email, 'admin')
+
+/** Undoes `moveReviewToQueueFront`, so an Approved review is among the newest on its Book page. */
+export async function restoreReviewSubmittedAt(email: string) {
+  await withDb(async (db) => {
+    const [row] = await db
+      .select({ id: reviews.id })
+      .from(reviews)
+      .innerJoin(users, eq(users.id, reviews.userId))
+      .where(eq(users.email, email))
+    if (!row) throw new Error(`${email} has no review`)
+    await db.update(reviews).set({ submittedAt: new Date() }).where(eq(reviews.id, row.id))
+  })
+}
+
+/** Moves a Member's open reports to the front of the oldest-first reports queue. */
+export async function moveReportsToQueueFront(authorEmail: string) {
+  await withDb(async (db) => {
+    const [row] = await db
+      .select({ id: reviews.id })
+      .from(reviews)
+      .innerJoin(users, eq(users.id, reviews.userId))
+      .where(eq(users.email, authorEmail))
+    if (!row) throw new Error(`${authorEmail} has no review`)
+    const longAgo = new Date(Date.UTC(2000, 0, 1) + Math.floor(Math.random() * 86_400_000))
+    await db
+      .update(reviewReports)
+      .set({ createdAt: longAgo })
+      .where(eq(reviewReports.reviewId, row.id))
   })
 }
 

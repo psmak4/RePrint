@@ -1,6 +1,7 @@
 import type { AdminCatalogStats } from '@reprint/shared'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.catalog
 
@@ -44,7 +45,7 @@ export function CatalogDashboard({ stats }: { stats: AdminCatalogStats }) {
           {text.growthHeading}
         </h3>
         {grew ? (
-          <div className="overflow-x-auto">
+          <ScrollRegion label={text.growthHeading}>
             <table className="w-full text-left text-sm">
               <caption className="pb-2 text-left text-muted-foreground">
                 {text.growthCaption}
@@ -78,7 +79,7 @@ export function CatalogDashboard({ stats }: { stats: AdminCatalogStats }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollRegion>
         ) : (
           <p className="text-muted-foreground">{text.noGrowth}</p>
         )}
