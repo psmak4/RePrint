@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 
 const text = copy.shelves
 
@@ -64,7 +65,10 @@ export function ShelfSelector({
       setSlug(bookSlug)
       return sendShelf(bookSlug, next)
     },
-    onSuccess: (result) => setShelf(result.shelf),
+    onSuccess: (result) => {
+      setShelf(result.shelf)
+      if (result.shelf) trackEvent(ANALYTICS_EVENTS.shelfAdded, { shelf: result.shelf })
+    },
   })
 
   if (!signedIn) {

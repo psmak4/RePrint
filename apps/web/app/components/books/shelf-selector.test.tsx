@@ -8,6 +8,7 @@ import { ShelfSelector } from './shelf-selector.js'
 
 afterEach(() => {
   cleanup()
+  window.plausible = undefined
   vi.unstubAllGlobals()
 })
 
@@ -60,6 +61,24 @@ describe('ShelfSelector', () => {
     expect(url).toBe('/books/dune/shelf')
     expect(init?.method).toBe('PUT')
     expect(JSON.parse(String(init?.body))).toEqual({ shelf: 'read' })
+  })
+
+  it('tracks adding a Book to a shelf, but not removing it', async () => {
+    const tracker = vi.fn()
+    window.plausible = tracker
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) =>
+      Response.json({ shelf: init?.method === 'DELETE' ? null : 'read' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    renderSelector()
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'read' } })
+    await waitFor(() =>
+      expect(tracker).toHaveBeenCalledWith('Shelf Added', { props: { shelf: 'read' } }),
+    )
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'remove' } })
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(optionLabels()[0]).toBe('Add to shelf'))
+    expect(tracker).toHaveBeenCalledTimes(1)
   })
 
   it('removes the Book from its shelf', async () => {

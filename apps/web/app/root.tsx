@@ -11,12 +11,14 @@ import {
   useRouteLoaderData,
 } from 'react-router'
 import type { Route } from './+types/root'
+import { Analytics } from './components/analytics.js'
 import { VerificationBanner } from './components/auth/verification-banner.js'
 import { ErrorPage } from './components/error-page.js'
 import { AccountMenu } from './components/shell/account-menu.js'
 import { AppShell } from './components/shell/app-shell.js'
 import { NotificationBell } from './components/shell/notification-bell.js'
 import { SearchBox } from './components/shell/search-box.js'
+import { analyticsConfig } from './lib/analytics.js'
 import { loadSession } from './lib/auth.server.js'
 import { logger } from './lib/logger.server.js'
 import { loadNotifications } from './lib/notifications.server.js'
@@ -29,7 +31,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   const session = await loadSession(request)
   const notifications = session.viewer ? await loadNotifications(request) : null
   // The public origin, for canonical URLs (see `pageMeta`).
-  return { ...session, notifications, origin: new URL(request.url).origin }
+  return {
+    ...session,
+    notifications,
+    origin: new URL(request.url).origin,
+    // Null (no script, no cookies) unless VITE_ANALYTICS_DOMAIN is set (D-049).
+    analytics: analyticsConfig(),
+  }
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -61,6 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         >
           {children}
         </AppShell>
+        <Analytics config={session?.analytics ?? null} />
         <ScrollRestoration />
         <Scripts />
       </body>

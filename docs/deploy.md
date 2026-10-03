@@ -36,7 +36,7 @@ Render deploys are triggered only by the workflow (`autoDeployTrigger: "off"`), 
 
 ## Netlify
 
-Link the site with base directory `apps/web`. Set `API_INTERNAL_URL`, `API_ORIGIN`, `VITE_API_ORIGIN`, `APP_ENV`, and `VITE_SENTRY_DSN` in the site's environment (see `.env.example`). Static assets under `/assets/*` are cached immutably.
+Link the site with base directory `apps/web`. Set `API_INTERNAL_URL`, `API_ORIGIN`, `VITE_API_ORIGIN`, `APP_ENV`, `VITE_SENTRY_DSN`, and (to turn analytics on) `VITE_ANALYTICS_DOMAIN` and `VITE_ANALYTICS_SCRIPT_URL` in the site's environment (see `.env.example`). Static assets under `/assets/*` are cached immutably.
 
 ## Rollback
 

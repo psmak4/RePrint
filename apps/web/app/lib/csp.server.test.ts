@@ -25,6 +25,13 @@ describe('buildCsp', () => {
     )
   })
 
+  it('permits the analytics origin for scripts and events only when given', () => {
+    expect(buildCsp('n')).not.toContain('plausible')
+    const csp = buildCsp('n', { analyticsOrigin: 'https://plausible.io' })
+    expect(csp).toContain("script-src 'nonce-n' 'strict-dynamic' https://plausible.io")
+    expect(csp).toContain("connect-src 'self' https://plausible.io")
+  })
+
   it('generates a fresh nonce each time', () => {
     expect(generateNonce()).not.toBe(generateNonce())
   })

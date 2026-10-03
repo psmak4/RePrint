@@ -548,3 +548,7 @@ Entry format:
 ### 2026-10-03 · M8-T04 · PR pending
 - Five pages (`routes/about|terms|privacy|community-guidelines|contact.tsx`) over `components/legal/static-page.tsx`, copy in `copy.legal`, each marked `DRAFT – owner review`; the footer already linked them. Privacy covers GDPR and CCPA, 90-day IP retention, JSON export, and cookieless analytics; Community Guidelines list the rejection reasons. Component tests (incl. axe) in `routes/static-pages.test.tsx`. D-166 records the choices.
 - Next iteration: M8-T05 (cookieless analytics). The Contact page shows a placeholder address: M8-T14 (HUMAN) must replace it. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T05 · PR pending
+- Cookieless analytics: the root loader returns `analytics` from `VITE_ANALYTICS_DOMAIN` / `VITE_ANALYTICS_SCRIPT_URL` (null = off); `<Analytics>` adds the script after hydration; the script origin joins the CSP. `trackEvent` fires `Search Result Click`, `Review Submitted`, and `Shelf Added` (`lib/analytics.ts`). Unit and component tests with a mocked `window.plausible`; `e2e/specs/analytics.spec.ts` checks the script loads under the CSP and no cookies are set (the e2e web server now sets the analytics env). D-167 records the choices.
+- Next iteration: M8-T06 (alert signals and monitor job). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`). `moderation.spec.ts` flaked once on webkit in a full e2e run and passed on rerun.

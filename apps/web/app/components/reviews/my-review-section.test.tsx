@@ -2,10 +2,13 @@
 import type { Edition, MyReview, Viewer } from '@reprint/shared'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MyReviewSection } from './my-review-section.js'
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.plausible = undefined
+})
 
 const id = '0192a3b4-0000-7000-8000-000000000001'
 const viewer: Viewer = { id, username: 'ada', displayName: 'Ada', verified: true, permissions: [] }
@@ -108,6 +111,24 @@ describe('write a review', () => {
       hasSpoilers: true,
       editionId: id,
     })
+  })
+
+  it('tracks a submitted review, and nothing when the server rejects it', async () => {
+    const tracker = vi.fn()
+    window.plausible = tracker
+    renderSection({ viewer }, () => ({ formError: 'Too many reviews today.' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Write a review' }))
+    await fillValidForm()
+    fireEvent.click(screen.getByRole('button', { name: 'Submit for approval' }))
+    await screen.findByText('Too many reviews today.')
+    expect(tracker).not.toHaveBeenCalled()
+    cleanup()
+    const calls = renderSection({ viewer })
+    fireEvent.click(screen.getByRole('button', { name: 'Write a review' }))
+    await fillValidForm()
+    fireEvent.click(screen.getByRole('button', { name: 'Submit for approval' }))
+    await waitFor(() => expect(calls).toHaveLength(1))
+    await waitFor(() => expect(tracker).toHaveBeenCalledWith('Review Submitted', undefined))
   })
 
   it('shows server errors on the field and for the whole form', async () => {

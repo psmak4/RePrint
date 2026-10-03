@@ -20,11 +20,14 @@ export function BookCard({
   book,
   href,
   shelf,
+  onNavigate,
 }: {
   book: BookCardData
   href: string
   /** The shelf control, when the page offers one. */
   shelf?: ReactNode
+  /** Called when the title link is followed. */
+  onNavigate?: () => void
 }) {
   const authors = book.authorNames.join(', ')
   return (
@@ -32,7 +35,7 @@ export function BookCard({
       <Cover cover={book.cover} title={book.title} authorName={book.authorNames[0]} size="medium" />
       <div className="flex min-w-0 flex-col gap-1">
         <h3 className="text-base font-semibold">
-          <Link to={href} className="text-link underline">
+          <Link to={href} onClick={onNavigate} className="text-link underline">
             {book.title}
           </Link>
         </h3>

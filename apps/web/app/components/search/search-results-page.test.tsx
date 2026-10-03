@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 import type { SearchQuery, SearchResponse } from '@reprint/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { copy } from '../../copy/index.js'
 import { SearchResultsPage } from './search-results-page.js'
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.plausible = undefined
+})
 
 const query: SearchQuery = { q: 'dune', type: 'books', sort: 'relevance', page: 1 }
 const ID = '0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b'
@@ -101,6 +104,15 @@ describe('SearchResultsPage', () => {
       '/resolve?ref=ref-1-abcdefghijklmnopqrstu',
     )
     expect(screen.getByText(copy.books.noReviews)).toBeTruthy()
+  })
+
+  it('tracks a click on a result, stored or not', () => {
+    const tracker = vi.fn()
+    window.plausible = tracker
+    renderPage()
+    expect(tracker).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('link', { name: 'Dune' }))
+    expect(tracker).toHaveBeenCalledWith('Search Result Click', undefined)
   })
 
   it('notes when the Source was unavailable', () => {
