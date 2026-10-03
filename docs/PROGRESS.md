@@ -544,3 +544,7 @@ Entry format:
 ### 2026-10-03 · M8-T03 · PR pending
 - `sitemaps.build` daily job (`jobs/registry.ts`, `modules/sitemaps/build.ts`) stores a chunk list and chunks (≤ 50,000 URLs) in Redis; `GET /v1/sitemaps` and `GET /v1/sitemaps/:number` serve them; the web app renders `/sitemap.xml`, `/sitemaps/N.xml` (`routes/sitemap.ts`) and `/robots.txt` (`routes/robots.ts`, disallows admin and settings). Shared schemas in `packages/shared/src/sitemap-api.ts`; `openapi.json` regenerated. Integration and web tests. D-165 records the choices.
 - Next iteration: M8-T04 (legal and static pages). The sitemap is empty until the job first runs (the worker schedules it on start; the route 404s before that). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T04 · PR pending
+- Five pages (`routes/about|terms|privacy|community-guidelines|contact.tsx`) over `components/legal/static-page.tsx`, copy in `copy.legal`, each marked `DRAFT – owner review`; the footer already linked them. Privacy covers GDPR and CCPA, 90-day IP retention, JSON export, and cookieless analytics; Community Guidelines list the rejection reasons. Component tests (incl. axe) in `routes/static-pages.test.tsx`. D-166 records the choices.
+- Next iteration: M8-T05 (cookieless analytics). The Contact page shows a placeholder address: M8-T14 (HUMAN) must replace it. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
