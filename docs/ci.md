@@ -16,13 +16,14 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) | `pnpm build && pnpm openapi:check` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
+| `restore-drill` | Backs up the migrated and seeded database with `scripts/backup.sh`, restores it into a scratch database with `scripts/restore.sh`, and fails unless every table has the same row count (`scripts/restore-drill.sh`) | `pnpm backup:drill` |
 | `e2e` | Playwright + axe in Chromium, WebKit, and a mobile viewport against the built apps and the Docker services (`docker compose up -d --wait`, `SOURCE_MODE=stub`, database migrated after the build). Uploads the Playwright report as an artifact | `pnpm build && pnpm db:migrate && pnpm test:e2e` |
 
 Later tasks add jobs here as their commands appear. Each one must also be added to this table (and to `pnpm check`, except `e2e`, which needs the Docker services and browsers and runs on its own).
 
 ## Deploy workflow
 
-`.github/workflows/deploy-staging.yml` deploys `main` to staging after merge. It is not a required PR check and is not in the table above. See `docs/deploy.md`.
+`.github/workflows/deploy-staging.yml` deploys `main` to staging after merge. It is not a required PR check and is not in the table above. See `docs/deploy.md`. `.github/workflows/backup.yml` (nightly production dump to R2) is likewise not a PR check; see `docs/runbooks/restore.md`.
 
 ## Where CI runs
 

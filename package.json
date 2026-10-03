@@ -17,7 +17,7 @@
     "vocabulary:check": "bash scripts/check-vocabulary.sh",
     "secrets:scan": "bash scripts/gitleaks.sh",
     "audit:deps": "pnpm audit --audit-level high",
-    "check": "pnpm lint && pnpm vocabulary:check && pnpm typecheck && pnpm db:check && pnpm test:unit && pnpm test:integration && pnpm build && pnpm openapi:check && pnpm secrets:scan && pnpm audit:deps",
+    "check": "pnpm lint && pnpm vocabulary:check && pnpm typecheck && pnpm db:check && pnpm test:unit && pnpm test:integration && pnpm build && pnpm openapi:check && pnpm secrets:scan && pnpm audit:deps && pnpm backup:drill",
     "test:integration": "turbo run test:integration",
     "db:generate": "pnpm --filter @reprint/db db:generate",
     "db:migrate": "pnpm --filter @reprint/db db:migrate",
@@ -25,6 +25,7 @@
     "openapi:check": "turbo run openapi:check",
     "test:e2e": "pnpm --filter e2e test:e2e",
     "load:smoke": "bash scripts/load-smoke.sh",
+    "backup:drill": "bash scripts/restore-drill.sh",
     "db:seed": "pnpm --filter @reprint/db db:seed && pnpm --filter api seed:catalog && pnpm --filter api seed:reviews && pnpm --filter api seed:discover && pnpm --filter api seed:libraries",
     "db:reset": "pnpm --filter @reprint/db db:reset && pnpm --filter api seed:catalog && pnpm --filter api seed:reviews && pnpm --filter api seed:discover && pnpm --filter api seed:libraries"
   },

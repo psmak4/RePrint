@@ -572,3 +572,8 @@ Entry format:
 ### 2026-10-03 · M8-T10 · PR pending
 - `docs/security/asvs-l2.md` maps authentication, session, access-control, header, and supply-chain requirements to code and tests; `apps/api/src/security-docs.test.ts` fails if a cited test disappears. New test: API security headers (`app.test.ts`). The rest (cookie flags, Origin check, CSP, HSTS) already had tests; `pnpm audit:deps` and `pnpm secrets:scan` run in `pnpm check`. Gap filed as M8-T17 (no absolute session lifetime); a second gap (old session kept on sign-in) is accepted. D-171 records the choices.
 - Next iteration: M8-T11 (backups). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T11 · PR pending
+- `scripts/backup.sh`, `scripts/restore.sh` (scratch-only target), and `scripts/restore-drill.sh` (`pnpm backup:drill`, in `pnpm check` and the new required CI job `restore-drill`, added to `docs/ci.md`). `.github/workflows/backup.yml` dumps production nightly to R2 `daily/` and exits with a notice when secrets are absent. `docs/runbooks/restore.md` has setup, restore steps, the drill log table, and `backup-lifecycle.json` (30 days). Secrets are in `docs/deploy.md`. D-172 records the choices.
+- Next iteration: M8-T12 (release workflow). M8-T13 (HUMAN) must apply the lifecycle rule and set the backup secrets. Local `pnpm backup:drill` falls back to the Compose container since Homebrew `pg_dump` is older than 18. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+

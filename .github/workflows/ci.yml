@@ -145,3 +145,33 @@ jobs:
       - name: Remove the CI stack
         if: ${{ always() }}
         run: $COMPOSE down -v --remove-orphans
+
+  restore-drill:
+    name: restore-drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Backs up the migrated and seeded database with scripts/backup.sh and restores it into a scratch
+    # database with scripts/restore.sh (M8-T11). Same isolated Compose project as e2e.
+    env:
+      COMPOSE: docker compose -p reprint-ci-drill -f docker-compose.yml -f docker-compose.ci.yml
+      DATABASE_URL: postgres://reprint:reprint@localhost:15432/reprint
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Install the Postgres 18 client tools
+        # pg_dump must be at least as new as the server. macOS (self-hosted fallback) falls back to the container.
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+            sudo apt-get install -y postgresql-client-18
+          fi
+      - name: Start Postgres (fresh CI stack)
+        run: |
+          $COMPOSE down -v --remove-orphans
+          $COMPOSE up -d --wait postgres
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: bash scripts/restore-drill.sh
+      - name: Remove the CI stack
+        if: ${{ always() }}
+        run: $COMPOSE down -v --remove-orphans

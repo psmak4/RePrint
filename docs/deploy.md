@@ -25,8 +25,14 @@ Staging deploys automatically on every merge to `main` (PRD §12 step 6). Stagin
 | `NETLIFY_SITE_ID` | variable or secret | Netlify site to deploy |
 | `STAGING_WEB_URL` | variable | Smoke test target, for example `https://staging.reprint.com` |
 | `STAGING_API_URL` | variable | Smoke test target, for example `https://api.staging.reprint.com` |
+| `PRODUCTION_DATABASE_URL_DIRECT` | secret | Neon direct (non-pooled) production URL for the nightly backup (`backup.yml`) |
+| `R2_ACCOUNT_ID` | variable or secret | Cloudflare account ID for the R2 endpoint (backup) |
+| `R2_BUCKET_BACKUPS` | variable or secret | R2 bucket that holds the dumps (backup) |
+| `R2_BACKUPS_ACCESS_KEY_ID`, `R2_BACKUPS_SECRET_ACCESS_KEY` | secret | R2 API token with read and write on the backups bucket only (backup) |
 | `TURBO_TOKEN` | secret | Optional Turborepo remote cache |
 | `TURBO_TEAM` | variable or secret | Optional Turborepo remote cache |
+
+`.github/workflows/backup.yml` runs nightly (03:17 UTC) and on demand. See `docs/runbooks/restore.md`. If any backup value is missing it logs `Backup skipped` as a notice and succeeds.
 
 ## Render (Blueprint) values
 
