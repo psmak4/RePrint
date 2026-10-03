@@ -536,7 +536,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `load/k6/mixed-read-heavy.js` models 200 rps for 10 minutes with thresholds for < 1% errors and p95 of 200 ms (reads), 400 ms (writes), and 300 ms (search)
   - Accept: `pnpm load:smoke` runs a 30-second low-rate version against the local stack and passes
   - Accept: a Playwright check records LCP, CLS, and INP for the book page on a throttled mobile profile and fails above the PRD targets (documented in `docs/performance.md`)
-- [ ] M8-T09 · Accessibility audit: axe on every page type, fixes, manual screen-reader checklist · deps: M7-T18 · PRD: §11, §12
+- [x] M8-T09 · Accessibility audit: axe on every page type, fixes, manual screen-reader checklist · deps: M7-T18 · PRD: §11, §12
   - Accept: e2e specs visit every page type (Discover, search, book, author, genre, series, profile, library, settings, auth, legal, every admin page) with zero serious or critical axe issues
   - Accept: `docs/a11y.md` holds the VoiceOver and NVDA manual test script for the owner
 - [ ] M8-T10 · Security review preparation against OWASP ASVS 5.0 Level 2 · deps: M7-T18 · PRD: §11
