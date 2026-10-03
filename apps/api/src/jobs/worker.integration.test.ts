@@ -82,6 +82,7 @@ describe('worker (dist/worker.js)', () => {
       'discover.rebuild',
       'privacy.clearOldIps',
       'ratings.recompute',
+      'sitemaps.build',
       'system.heartbeat',
       'users.lift_suspensions',
     ])

@@ -39,6 +39,7 @@ import { opsRoutes } from './modules/ops/routes.js'
 import { profileRoutes } from './modules/profiles/routes.js'
 import { registerRateLimits } from './modules/rate-limit/plugin.js'
 import { reviewRoutes } from './modules/reviews/routes.js'
+import { sitemapRoutes } from './modules/sitemaps/routes.js'
 import { uploadRoutes } from './modules/uploads/routes.js'
 import { baseLoggerOptions } from './observability/logging.js'
 import { registerErrorHandling } from './plugins/error-handler.js'
@@ -259,6 +260,13 @@ export async function buildApp(
         : undefined,
   })
   await app.register(discoverRoutes, {
+    prefix: '/v1',
+    env,
+    db: options.database,
+    jobs: options.jobs,
+    redis: options.redis,
+  })
+  await app.register(sitemapRoutes, {
     prefix: '/v1',
     env,
     db: options.database,

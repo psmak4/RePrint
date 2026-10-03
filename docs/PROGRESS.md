@@ -540,3 +540,7 @@ Entry format:
 ### 2026-10-03 · M8-T02 · PR pending
 - JSON-LD: `lib/json-ld.ts` (builders) and `components/seo/json-ld.tsx` (`<JsonLd>`, escapes `<` and the line separators, no `dangerouslySetInnerHTML`). Book emits `Book` + `AggregateRating` (when reviewed) + `Review`s + `BreadcrumbList`; Author emits `Person` + `BreadcrumbList`; Genre and Series emit `BreadcrumbList`. Loaders return `jsonLd`. Unit tests for builders and the component; loader tests for Book and Author. D-164 records the choices.
 - Next iteration: M8-T03 (sitemaps and `robots.txt`). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-03 · M8-T03 · PR pending
+- `sitemaps.build` daily job (`jobs/registry.ts`, `modules/sitemaps/build.ts`) stores a chunk list and chunks (≤ 50,000 URLs) in Redis; `GET /v1/sitemaps` and `GET /v1/sitemaps/:number` serve them; the web app renders `/sitemap.xml`, `/sitemaps/N.xml` (`routes/sitemap.ts`) and `/robots.txt` (`routes/robots.ts`, disallows admin and settings). Shared schemas in `packages/shared/src/sitemap-api.ts`; `openapi.json` regenerated. Integration and web tests. D-165 records the choices.
+- Next iteration: M8-T04 (legal and static pages). The sitemap is empty until the job first runs (the worker schedules it on start; the route 404s before that). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

@@ -38,6 +38,7 @@ const ADMIN_GENRES = 'modules/admin/genres.integration.test.ts'
 const ADMIN_MERGE = 'modules/admin/merge.integration.test.ts'
 const ADMIN_USERS = 'modules/admin/users.integration.test.ts'
 const ADMIN_SUSPENSIONS = 'modules/admin/suspensions.integration.test.ts'
+const SITEMAPS = 'modules/sitemaps/sitemaps.integration.test.ts'
 const SHELF = 'modules/library/shelf.integration.test.ts'
 const LIBRARY = 'modules/library/library.integration.test.ts'
 const PROFILES = 'modules/profiles/profiles.integration.test.ts'
@@ -217,6 +218,14 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/discover': {
     allowed: [DISCOVER, 'builds every Book row from approved reviews'],
     denied: [DISCOVER, 'hides every row with fewer than 6 Books'],
+  },
+  'GET /v1/sitemaps': {
+    allowed: [SITEMAPS, 'serves the index and chunks with public cache headers'],
+    denied: [SITEMAPS, 'returns 404 Problem Details before the first build'],
+  },
+  'GET /v1/sitemaps/{number}': {
+    allowed: [SITEMAPS, 'returns the chunk'],
+    denied: [SITEMAPS, 'returns 404 Problem Details for a chunk that does not exist'],
   },
   'GET /v1/series/{slug}': {
     allowed: [SERIES, 'lists Books in reading order with decimal positions'],
