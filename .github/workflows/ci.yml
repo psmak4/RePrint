@@ -169,6 +169,7 @@ jobs:
         run: |
           $COMPOSE down -v --remove-orphans
           $COMPOSE up -d --wait postgres
+      - run: pnpm build
       - run: pnpm db:migrate
       - run: pnpm db:seed
       - run: bash scripts/restore-drill.sh
