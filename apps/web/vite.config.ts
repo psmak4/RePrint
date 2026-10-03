@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
     'APP_ENV',
     'LOG_LEVEL',
     'VITE_SENTRY_DSN',
+    'VITE_ANALYTICS_DOMAIN',
+    'VITE_ANALYTICS_SCRIPT_URL',
   ]) {
     if (env[key] && process.env[key] === undefined) process.env[key] = env[key]
   }

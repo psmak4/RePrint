@@ -10,6 +10,7 @@ import {
 import { Button, Input, Label } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
 import { BookCard, type BookCardData } from '../books/book-card.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
@@ -245,6 +246,8 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
   )
 }
 
+const trackResultClick = () => trackEvent(ANALYTICS_EVENTS.searchResultClick)
+
 function Results({ results, signedIn }: { results: SearchResponse; signedIn: boolean }) {
   return (
     <ul className="flex flex-col gap-3">
@@ -255,6 +258,7 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
               <BookCard
                 book={fromSummary(item.book)}
                 href={`/books/${item.book.slug}`}
+                onNavigate={trackResultClick}
                 shelf={<BookShelfSelector book={item.book} signedIn={signedIn} />}
               />
             </li>
@@ -266,6 +270,7 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
               <BookCard
                 book={fromCandidate(item.candidate)}
                 href={resolveHref(item.candidate.ref)}
+                onNavigate={trackResultClick}
                 shelf={
                   <ShelfSelector
                     target={{ kind: 'candidate', ref: item.candidate.ref }}

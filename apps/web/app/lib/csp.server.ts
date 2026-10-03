@@ -6,19 +6,31 @@ export function generateNonce(): string {
 
 /**
  * Strict Content-Security-Policy for server-rendered pages (PRD §11). Scripts run only with the
- * per-request nonce. `apiOrigin` is allowed for client-side fetches after load, and `sentryOrigin` for error reports.
+ * per-request nonce. `apiOrigin` is allowed for client-side fetches after load, `sentryOrigin` for error reports, and
+ * `analyticsOrigin` for the analytics script and its events.
  */
 export function buildCsp(
   nonce: string,
-  options: { apiOrigin?: string; sentryOrigin?: string; dev?: boolean } = {},
+  options: {
+    apiOrigin?: string
+    sentryOrigin?: string
+    analyticsOrigin?: string
+    dev?: boolean
+  } = {},
 ): string {
   const connect = ["'self'", ...(options.apiOrigin ? [options.apiOrigin] : [])]
   if (options.sentryOrigin) connect.push(options.sentryOrigin)
+  if (options.analyticsOrigin) connect.push(options.analyticsOrigin)
   // The Vite dev server needs a websocket for HMR and inline styles for injected CSS.
   if (options.dev) connect.push('ws:', 'http:')
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
-    'script-src': [`'nonce-${nonce}'`, "'strict-dynamic'"],
+    // `strict-dynamic` lets the nonced entry script add the analytics script; the host is for old browsers.
+    'script-src': [
+      `'nonce-${nonce}'`,
+      "'strict-dynamic'",
+      ...(options.analyticsOrigin ? [options.analyticsOrigin] : []),
+    ],
     'style-src': options.dev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
     // blob: is the avatar preview; the local uploads driver serves over http in dev.
     'img-src': ["'self'", 'data:', 'blob:', 'https:', ...(options.dev ? ['http:'] : [])],

@@ -6,6 +6,7 @@ import type { RenderToPipeableStreamOptions } from 'react-dom/server'
 import { renderToPipeableStream } from 'react-dom/server'
 import type { EntryContext, HandleErrorFunction } from 'react-router'
 import { ServerRouter } from 'react-router'
+import { analyticsConfig, analyticsOrigin } from './lib/analytics.js'
 import { BASELINE_SECURITY_HEADERS, buildCsp, generateNonce } from './lib/csp.server.js'
 import { logger } from './lib/logger.server.js'
 import { REQUEST_ID_HEADER } from './lib/request-id.server.js'
@@ -43,6 +44,7 @@ export default function handleRequest(
   responseHeaders.set(
     'Content-Security-Policy',
     buildCsp(nonce, {
+      analyticsOrigin: analyticsOrigin(analyticsConfig()),
       apiOrigin: process.env.API_ORIGIN,
       sentryOrigin: sentryOrigin(sentryDsn),
       dev: process.env.NODE_ENV === 'development',

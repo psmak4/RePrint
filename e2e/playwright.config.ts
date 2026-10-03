@@ -27,6 +27,9 @@ const stackEnv = {
   SMTP_HOST: 'localhost',
   SMTP_PORT: process.env.SMTP_PORT ?? '1025',
   API_INTERNAL_URL: `http://localhost:${apiPort}`,
+  // Analytics on, with the script served by the analytics spec (D-167); other specs get a harmless 404.
+  VITE_ANALYTICS_DOMAIN: 'reprint.test',
+  VITE_ANALYTICS_SCRIPT_URL: `${webOrigin}/analytics-test.js`,
 }
 
 export default defineConfig({

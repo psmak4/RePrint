@@ -13,6 +13,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
 import type { z } from 'zod'
 import { copy } from '../../copy/index.js'
+import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 import { StarRatingInput } from './star-rating-input.js'
 
 type FormInput = z.input<typeof reviewInputSchema>
@@ -70,6 +71,9 @@ export function ReviewForm({
   }, [serverFields, setError])
 
   const saved = fetcher.data?.saved === true && fetcher.state === 'idle'
+  useEffect(() => {
+    if (saved) trackEvent(ANALYTICS_EVENTS.reviewSubmitted)
+  }, [saved])
   useEffect(() => {
     if (saved) onSaved()
   }, [saved, onSaved])

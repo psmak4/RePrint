@@ -523,7 +523,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T04 · Legal and static pages: Terms, Privacy, Community Guidelines, About, Contact (draft copy) · deps: M1-T12 · PRD: §7.13, §11
   - Accept: the five pages exist with draft copy clearly marked `DRAFT – owner review` and are linked from the footer (component test)
   - Accept: the Privacy draft covers GDPR and CCPA rights, 90-day IP retention, JSON export, and cookieless analytics; the Community Guidelines list rejection reasons
-- [ ] M8-T05 · Cookieless analytics and success-metric events · deps: M1-T14 · PRD: §2, §11
+- [x] M8-T05 · Cookieless analytics and success-metric events · deps: M1-T14 · PRD: §2, §11
   - Accept: the analytics script (provider per `docs/DECISIONS.md`) loads only when `ANALYTICS_DOMAIN` is set, sets no cookies (e2e check of `document.cookie` and response headers), and is allowed by the CSP
   - Accept: custom events fire for search → book page click, review submitted, and shelf added (component tests with a mocked tracker)
 - [ ] M8-T06 · Alert signals and a monitor job for the PRD §11 alerts · deps: M3-T07, M7-T02 · PRD: §6, §11
