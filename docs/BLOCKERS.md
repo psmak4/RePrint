@@ -49,3 +49,15 @@ Entry format:
   3. Re-run `scripts/ralph/ralph.sh`; the next iteration finishes PR #66 (step 2 of the loop prompt) and merges it.
 - Resolved: 2026-09-30. The owner chose a free self-hosted runner over paying or making the repo public. CI now runs on the owner's Mac (D-113, PR #67, `docs/ci-runner.md`); #66 was updated from `main`, passed all nine checks, and merged.
 
+
+### 2026-10-03 · M8-T14 · HUMAN
+- Task: M8-T14 Provide or approve final legal and static page copy. The loop can't write binding legal text or choose a monitored inbox.
+- State: the About, Terms, Privacy, Community Guidelines, and Contact pages exist as draft copy (M8-T04, D-166). Each is marked `DRAFT – owner review`, and the Contact page shows the placeholder `copy.legal.contactPlaceholder` in `apps/web/app/copy/index.ts`.
+- Owner must:
+  1. Read the five pages (`/about`, `/terms`, `/privacy`, `/community-guidelines`, `/contact`) and have counsel review Terms and Privacy as needed.
+  2. Edit the copy under `copy.legal` in `apps/web/app/copy/index.ts`, or approve it as is.
+  3. Replace `contactPlaceholder` with a real, monitored inbox.
+  4. Remove the `DRAFT – owner review` markers, update the component tests in `apps/web/app/routes/static-pages.test.tsx` to match, and run `pnpm check`.
+  5. Merge that change through a PR and mark M8-T14 `[x]` in `docs/TASKS.md`.
+- Also waiting on the owner: M1-T19 (staging infrastructure) blocks M1-T20, M1-T22, and M8-T12; M8-T13 and M8-T15 follow. Until then no non-HUMAN task is eligible.
+- Resolved:
