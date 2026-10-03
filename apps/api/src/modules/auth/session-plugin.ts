@@ -41,13 +41,14 @@ declare module 'fastify' {
 
 /**
  * Reads `rp_session` on every request, looks up its hashed token, and sets `request.auth`.
- * Expired sessions and sessions of suspended or deleted users are treated as signed out.
+ * Expired sessions, sessions older than `SESSION_MAX_DAYS`, and sessions of suspended or deleted users are treated as signed out.
  */
 export function registerSessions(app: FastifyInstance, env: Env, db: Database | undefined): void {
   app.decorateRequest('auth', null)
   if (!db) return
   const cookieOptions = sessionCookieOptions(env)
   const ttlMs = env.SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
+  const maxAgeMs = Math.max(env.SESSION_MAX_DAYS, env.SESSION_TTL_DAYS) * 24 * 60 * 60 * 1000
 
   app.decorate('sessions', {
     async start(request, reply, userId) {
@@ -84,7 +85,13 @@ export function registerSessions(app: FastifyInstance, env: Env, db: Database | 
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
-      .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, now)))
+      .where(
+        and(
+          eq(sessions.tokenHash, hashToken(token)),
+          gt(sessions.expiresAt, now),
+          gt(sessions.createdAt, new Date(now.getTime() - maxAgeMs)),
+        ),
+      )
       .limit(1)
     const row = found?.status === 'active' ? found : undefined
     if (!row) {

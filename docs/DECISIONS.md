@@ -1152,3 +1152,8 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: the PRD names the layers (Neon PITR, nightly dump to R2 for 30 days, a drill) but not the tooling. Custom format restores selectively and compresses; refusing non-scratch targets prevents restoring over production by mistake. The CI drill is the only automated proof that dumps restore.
 - Affects: M8-T13, M8-T15
 
+
+### D-173 · Absolute session lifetime (M8-T17)
+- Decision: `SESSION_MAX_DAYS` (default 90, 1 to 730) is the longest a session lives from `sessions.created_at`. The session lookup in `session-plugin.ts` refuses an older session whatever its sliding `expires_at` says, and clears the cookie; no migration is needed. A value below `SESSION_TTL_DAYS` is raised to it.
+- Why: the PRD asks for sessions to end but gives no number. 90 days is three sliding windows, so a regular reader signs in about quarterly and a stolen cookie cannot live forever.
+- Affects: `docs/security/asvs-l2.md`, `.env.example`

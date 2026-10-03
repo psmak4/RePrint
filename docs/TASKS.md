@@ -565,6 +565,6 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `pnpm check` and `pnpm test:e2e` pass, and the latest staging deploy is green
   - Accept: every acceptance criterion in `docs/milestones/M8-launch-readiness.md` is checked off in the PR body with the command or record that proved it
   - Accept: `docs/PROGRESS.md` lists anything remaining before tagging `v1.0.0`
-- [ ] M8-T17 · Absolute session lifetime · deps: M8-T10 · PRD: §11
+- [x] M8-T17 · Absolute session lifetime · deps: M8-T10 · PRD: §11
   - Accept: a session cannot be renewed past an absolute maximum age (set in `SESSION_MAX_DAYS`, documented in `.env.example`; the value is an implementation detail, recorded in `docs/DECISIONS.md`); the Member signs in again after it
   - Accept: an integration test shows a session older than the maximum is refused even when it was used yesterday, and `docs/security/asvs-l2.md` marks the gap closed

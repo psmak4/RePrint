@@ -173,6 +173,41 @@ describe('session lookup', () => {
     expect(response.statusCode).toBe(401)
   })
 
+  it('rejects a session older than SESSION_MAX_DAYS even when used yesterday', async () => {
+    const user = await createTestUser(stack.db.db)
+    const { token } = await signIn(user.id)
+    await stack.db.db
+      .update(sessions)
+      .set({
+        createdAt: new Date(Date.now() - 91 * DAY_MS),
+        lastSeenAt: new Date(Date.now() - DAY_MS / 2),
+        expiresAt: new Date(Date.now() + 20 * DAY_MS),
+      })
+      .where(eq(sessions.userId, user.id))
+    const response = await app.inject({
+      method: 'GET',
+      url: '/test/auth',
+      headers: withCookie(token),
+    })
+    expect(response.statusCode).toBe(401)
+    expect(response.headers['set-cookie']).toContain(`${SESSION_COOKIE}=;`)
+  })
+
+  it('keeps a session younger than SESSION_MAX_DAYS', async () => {
+    const user = await createTestUser(stack.db.db)
+    const { token } = await signIn(user.id)
+    await stack.db.db
+      .update(sessions)
+      .set({ createdAt: new Date(Date.now() - 89 * DAY_MS) })
+      .where(eq(sessions.userId, user.id))
+    const response = await app.inject({
+      method: 'GET',
+      url: '/test/auth',
+      headers: withCookie(token),
+    })
+    expect(response.statusCode).toBe(200)
+  })
+
   it.each(['suspended', 'deleted'] as const)('rejects a session of a %s user', async (status) => {
     const user = await createTestUser(stack.db.db)
     const { token } = await signIn(user.id)

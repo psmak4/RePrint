@@ -46,6 +46,7 @@ describe('loadEnv', () => {
     const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
     const env = loadEnv(source)
     expect(env.SESSION_TTL_DAYS).toBe(30)
+    expect(env.SESSION_MAX_DAYS).toBe(90)
     expect(env.COOKIE_DOMAIN).toBeUndefined()
     expect(env.COOKIE_SECURE).toBeUndefined()
     const custom = loadEnv({
@@ -60,6 +61,7 @@ describe('loadEnv', () => {
       COOKIE_SECURE: true,
     })
     expect(() => loadEnv({ ...source, SESSION_TTL_DAYS: '0' })).toThrow(/SESSION_TTL_DAYS/)
+    expect(() => loadEnv({ ...source, SESSION_MAX_DAYS: '0' })).toThrow(/SESSION_MAX_DAYS/)
   })
 
   it('names a missing required variable', () => {
