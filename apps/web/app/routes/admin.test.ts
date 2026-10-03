@@ -74,6 +74,7 @@ describe('admin layout loader', () => {
         { to: '/admin/catalog', label: 'Catalog' },
         { to: '/admin/catalog/merge', label: 'Merge queue' },
         { to: '/admin/catalog/genres', label: 'Genres and rules' },
+        { to: '/admin/system', label: 'System' },
       ],
     })
   })

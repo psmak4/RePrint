@@ -39,6 +39,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     items.push({ to: '/admin/catalog', label: copy.admin.catalogNav })
     items.push({ to: '/admin/catalog/merge', label: copy.admin.mergeNav })
     items.push({ to: '/admin/catalog/genres', label: copy.admin.genresNav })
+    items.push({ to: '/admin/system', label: copy.admin.systemNav })
   }
   if (viewer.permissions.includes(PERMISSIONS.featuredManage)) {
     items.push({ to: '/admin/featured', label: copy.admin.featuredNav })

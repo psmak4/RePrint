@@ -25,6 +25,7 @@ async function main(): Promise<void> {
     database: database.db,
     redis,
     jobs: jobQueue,
+    queue: jobQueue.queue,
     readinessChecks: [postgresCheck(database), redisCheck(redis), queueCheck(jobQueue)],
   })
   // Connection errors are reported through /v1/ready; log them without crashing or spamming stderr.
