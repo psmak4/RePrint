@@ -568,3 +568,7 @@ Entry format:
 ### 2026-10-03 · M8-T09 · PR pending
 - `e2e/specs/a11y-pages.spec.ts` fills the axe gaps: the five legal pages, Author, Book, settings (profile, security), and the admin Book edit page. With the existing specs every page type now has a check (table in `docs/a11y.md`); axe found nothing new to fix. `docs/a11y.md` also holds the VoiceOver and NVDA script and a results table for the owner (M8-T15).
 - Next iteration: M8-T10 (ASVS L2 preparation). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`). `pnpm test:e2e -- <name>` ignores the filter and runs every spec.
+
+### 2026-10-03 · M8-T10 · PR pending
+- `docs/security/asvs-l2.md` maps authentication, session, access-control, header, and supply-chain requirements to code and tests; `apps/api/src/security-docs.test.ts` fails if a cited test disappears. New test: API security headers (`app.test.ts`). The rest (cookie flags, Origin check, CSP, HSTS) already had tests; `pnpm audit:deps` and `pnpm secrets:scan` run in `pnpm check`. Gap filed as M8-T17 (no absolute session lifetime); a second gap (old session kept on sign-in) is accepted. D-171 records the choices.
+- Next iteration: M8-T11 (backups). Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
