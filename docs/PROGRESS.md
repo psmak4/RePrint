@@ -577,3 +577,7 @@ Entry format:
 - `scripts/backup.sh`, `scripts/restore.sh` (scratch-only target), and `scripts/restore-drill.sh` (`pnpm backup:drill`, in `pnpm check` and the new required CI job `restore-drill`, added to `docs/ci.md`). `.github/workflows/backup.yml` dumps production nightly to R2 `daily/` and exits with a notice when secrets are absent. `docs/runbooks/restore.md` has setup, restore steps, the drill log table, and `backup-lifecycle.json` (30 days). Secrets are in `docs/deploy.md`. D-172 records the choices.
 - Next iteration: M8-T12 (release workflow). M8-T13 (HUMAN) must apply the lifecycle rule and set the backup secrets. Local `pnpm backup:drill` falls back to the Compose container since Homebrew `pg_dump` is older than 18. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
 
+
+### 2026-10-03 · M8-T17 · PR pending
+- `SESSION_MAX_DAYS` (default 90) caps a session's age from `created_at`: `session-plugin.ts` refuses an older session even if it was used yesterday and clears the cookie. Integration tests (older refused, younger kept) and an env test; `docs/security/asvs-l2.md` gap closed; `.env.example` updated. D-173 records the choice.
+- Next iteration: M1-T20 and M8-T12 wait on M1-T19 (skipped, `[~]`), so nothing in `docs/TASKS.md` is eligible except HUMAN tasks (M8-T13 needs M8-T12). Expect `BLOCKED`.

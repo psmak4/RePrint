@@ -26,6 +26,8 @@ const baseEnvSchema = z.object({
   TRUST_PROXY: booleanFlag.default(false),
   /** Session lifetime; it renews while the session is in use (PRD §7.1, D-027). */
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+  /** Absolute session age: it is never renewed past this, so the Member signs in again (ASVS L2, D-173). */
+  SESSION_MAX_DAYS: z.coerce.number().int().min(1).max(730).default(90),
   /** Domain of the `rp_session` cookie so `www` and `api` both get it. Unset means host-only. */
   COOKIE_DOMAIN: z.string().min(1).optional(),
   /** Defaults to on everywhere except `APP_ENV=local` (plain http). */

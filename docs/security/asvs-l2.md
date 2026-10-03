@@ -69,7 +69,7 @@ Prepared for the pre-launch security review (PRD §11, M8-T15). Each row names t
 
 | Gap | Status |
 | --- | --- |
-| Sessions have no absolute lifetime: a session that is used at least every 30 days never expires (ASVS asks for an absolute maximum at L2) | Filed as M8-T17 |
+| Sessions had no absolute lifetime (ASVS asks for an absolute maximum at L2) | Closed by M8-T17: `SESSION_MAX_DAYS` (default 90) refuses a session older than that; test `rejects a session older than SESSION_MAX_DAYS even when used yesterday` in `session.integration.test.ts` |
 | Signing in while holding another session's cookie leaves the old session until it expires (no fixation risk, because tokens are server-generated; the old session stays listed under Sessions and the Member can end it) | Accepted for v1 |
 
 ## Sign-off
