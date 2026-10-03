@@ -6,7 +6,7 @@ import { EnvError, loadWorkerEnv } from './config/env.js'
 import { createMailer } from './email/mailer.js'
 import { startWorker } from './jobs/worker-runtime.js'
 import { baseLoggerOptions } from './observability/logging.js'
-import { captureError, initSentry } from './observability/sentry.js'
+import { captureAlert, captureError, initSentry } from './observability/sentry.js'
 import { createImageStorage } from './storage/index.js'
 
 async function main(): Promise<void> {
@@ -27,6 +27,8 @@ async function main(): Promise<void> {
     storage: createImageStorage(env),
     catalog,
     onJobError: captureError,
+    sourceRps: env.SOURCE_RATE_LIMIT_RPS,
+    onAlert: captureAlert,
   })
   log.info('worker ready')
 

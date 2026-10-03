@@ -13,6 +13,7 @@ import {
   verifyEmailProps,
 } from '@reprint/email'
 import { SITEMAP_MAX_URLS } from '@reprint/shared'
+import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
@@ -23,8 +24,10 @@ import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
 import { liftExpiredSuspensions } from '../modules/admin/suspensions.js'
 import { clearOldIps } from '../modules/audit/retention.js'
 import { rebuildDiscover } from '../modules/discover/cache.js'
+import { runMonitor } from '../modules/ops/monitor.js'
 import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import { buildSitemaps } from '../modules/sitemaps/build.js'
+import type { Alert } from '../observability/sentry.js'
 import type { ImageStorage } from '../storage/index.js'
 
 /** What a job handler can use besides its payload. Later tasks add services here. */
@@ -34,6 +37,12 @@ export interface JobContext {
   db: Database
   redis: Redis
   storage: ImageStorage
+  /** The job queue itself, for the monitor. */
+  queue: Queue
+  /** `SOURCE_RATE_LIMIT_RPS`, the Source limit the monitor compares usage with. */
+  sourceRps: number
+  /** Reports an operational alert (the entry point wires this to Sentry). */
+  alert: (alert: Alert) => void
   /** The Catalog's Source; `background` runs its calls behind interactive requests (PRD §6). */
   catalog: {
     source: SourceAdapter
@@ -184,6 +193,18 @@ export const jobs = {
     },
     schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'system.monitor': defineJob({
+    payload: z.object({}),
+    handler: async (_payload, { db, redis, queue, sourceRps, alert, log }) => {
+      const alerts = await runMonitor({ db, redis, queue, sourceRps })
+      for (const item of alerts) {
+        log.warn({ signal: item.signal, ...item.detail }, item.message)
+        alert(item)
+      }
+      return { alerts: alerts.map((item) => item.signal) }
+    },
+    schedule: { everyMs: 60_000, payload: {} },
   }),
   'catalog.refresh': defineJob({
     // `interactive` marks an Admin's refresh, which goes ahead of background refreshes (PRD §6).

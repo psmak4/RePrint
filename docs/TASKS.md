@@ -526,7 +526,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T05 · Cookieless analytics and success-metric events · deps: M1-T14 · PRD: §2, §11
   - Accept: the analytics script (provider per `docs/DECISIONS.md`) loads only when `ANALYTICS_DOMAIN` is set, sets no cookies (e2e check of `document.cookie` and response headers), and is allowed by the CSP
   - Accept: custom events fire for search → book page click, review submitted, and shelf added (component tests with a mocked tracker)
-- [ ] M8-T06 · Alert signals and a monitor job for the PRD §11 alerts · deps: M3-T07, M7-T02 · PRD: §6, §11
+- [x] M8-T06 · Alert signals and a monitor job for the PRD §11 alerts · deps: M3-T07, M7-T02 · PRD: §6, §11
   - Accept: a `system.monitor` repeatable job checks queue depth (> 1,000 waiting or oldest > 15 min), oldest pending review > 48 h, circuit breaker open, and Source usage > 70% of the limit for an hour, and reports each to Sentry with a stable tag (integration tests)
   - Accept: `docs/runbooks/alerts.md` maps every PRD §11 alert (incl. error rate > 2% and p95 over target) to its signal and the Sentry, Slack, or uptime rule the owner must configure
 - [ ] M8-T07 · Admin system dashboard: Source requests per second, cache hit rate, queue health · deps: M8-T06, M7-T14 · PRD: §6

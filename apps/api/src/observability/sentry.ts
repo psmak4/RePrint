@@ -21,3 +21,28 @@ export function initSentry(env: SentryEnv, service: 'api' | 'worker'): boolean {
 export function captureError(error: unknown, requestId?: string): void {
   Sentry.captureException(error, requestId ? { tags: { request_id: requestId } } : undefined)
 }
+
+/** Alert signals the monitor job reports (PRD §11). Each is a stable Sentry tag value for alert rules. */
+export const ALERT_SIGNALS = [
+  'queue_stuck',
+  'review_queue_stale',
+  'source_breaker_open',
+  'source_usage_high',
+] as const
+export type AlertSignal = (typeof ALERT_SIGNALS)[number]
+
+export interface Alert {
+  signal: AlertSignal
+  message: string
+  detail?: Record<string, unknown>
+}
+
+/** Reports an operational alert. The tag and fingerprint are the signal, so repeats group into one issue. */
+export function captureAlert({ signal, message, detail }: Alert): void {
+  Sentry.captureMessage(message, {
+    level: 'error',
+    tags: { alert: signal },
+    fingerprint: [`alert:${signal}`],
+    extra: detail,
+  })
+}
