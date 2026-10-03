@@ -12,6 +12,7 @@ import {
   reviewDecisionProps,
   verifyEmailProps,
 } from '@reprint/email'
+import { SITEMAP_MAX_URLS } from '@reprint/shared'
 import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
@@ -23,6 +24,7 @@ import { liftExpiredSuspensions } from '../modules/admin/suspensions.js'
 import { clearOldIps } from '../modules/audit/retention.js'
 import { rebuildDiscover } from '../modules/discover/cache.js'
 import { recomputeRatings } from '../modules/reviews/aggregates.js'
+import { buildSitemaps } from '../modules/sitemaps/build.js'
 import type { ImageStorage } from '../storage/index.js'
 
 /** What a job handler can use besides its payload. Later tasks add services here. */
@@ -170,6 +172,18 @@ export const jobs = {
     },
     schedule: { everyMs: 10 * 60 * 1000, payload: {} },
     retry: { attempts: 3, backoffMs: 30_000 },
+  }),
+  'sitemaps.build': defineJob({
+    // `chunkSize` lets tests split a small Catalog into several chunks.
+    payload: z.object({ chunkSize: z.number().int().min(1).max(SITEMAP_MAX_URLS).optional() }),
+    handler: async ({ chunkSize }, { db, redis, log }) => {
+      const index = await buildSitemaps(db, redis, { chunkSize })
+      const urls = index.chunks.reduce((total, chunk) => total + chunk.urlCount, 0)
+      log.info({ chunks: index.chunks.length, urls }, 'sitemaps built')
+      return { chunks: index.chunks.length, urls }
+    },
+    schedule: { everyMs: 24 * 60 * 60 * 1000, payload: {} },
+    retry: { attempts: 3, backoffMs: 60_000 },
   }),
   'catalog.refresh': defineJob({
     // `interactive` marks an Admin's refresh, which goes ahead of background refreshes (PRD §6).
