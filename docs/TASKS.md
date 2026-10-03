@@ -532,7 +532,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T07 · Admin system dashboard: Source requests per second, cache hit rate, queue health · deps: M8-T06, M7-T14 · PRD: §6
   - Accept: `/admin/system` (Admin only) shows Source requests per second, search cache hit rate, breaker state, and queue depth from the M3-T07 counters (component and integration tests)
   - Accept: the page is linked from the admin nav, refreshes every 30 seconds, and is covered by axe in e2e
-- [ ] M8-T08 · Load and performance tooling: k6 scenario and web vitals checks · deps: M7-T18 · PRD: §11, §12
+- [x] M8-T08 · Load and performance tooling: k6 scenario and web vitals checks · deps: M7-T18 · PRD: §11, §12
   - Accept: `load/k6/mixed-read-heavy.js` models 200 rps for 10 minutes with thresholds for < 1% errors and p95 of 200 ms (reads), 400 ms (writes), and 300 ms (search)
   - Accept: `pnpm load:smoke` runs a 30-second low-rate version against the local stack and passes
   - Accept: a Playwright check records LCP, CLS, and INP for the book page on a throttled mobile profile and fails above the PRD targets (documented in `docs/performance.md`)
