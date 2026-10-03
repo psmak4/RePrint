@@ -1,0 +1,10 @@
+{
+  "Rules": [
+    {
+      "ID": "expire-daily-dumps-after-30-days",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "daily/" },
+      "Expiration": { "Days": 30 }
+    }
+  ]
+}

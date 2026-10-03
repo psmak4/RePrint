@@ -542,7 +542,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T10 · Security review preparation against OWASP ASVS 5.0 Level 2 · deps: M7-T18 · PRD: §11
   - Accept: `docs/security/asvs-l2.md` maps each authentication, session, and access-control requirement to code and tests, with gaps fixed or filed as tasks
   - Accept: `pnpm audit --audit-level high` and Gitleaks are clean, and CSP, HSTS, cookie flags, and Origin checks are verified by tests
-- [ ] M8-T11 · Backups: nightly logical dump to R2 and a restore runbook · deps: M1-T18 · PRD: §11
+- [x] M8-T11 · Backups: nightly logical dump to R2 and a restore runbook · deps: M1-T18 · PRD: §11
   - Accept: `.github/workflows/backup.yml` runs nightly `pg_dump` of production into the R2 backups bucket (30-day lifecycle) and exits with a notice when secrets are absent
   - Accept: `scripts/restore.sh` and `docs/runbooks/restore.md` restore a dump into a scratch database; the script is exercised locally against the compose database in CI
 - [ ] M8-T12 · Release workflow: tag → production deploy with Sentry releases · deps: M1-T20 · PRD: §12, §13, §11

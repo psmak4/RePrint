@@ -1,0 +1,83 @@
+# Nightly logical backup of the production database to the R2 backups bucket (PRD §11, D-052).
+# Without the production secrets it exits with a notice. Not a required PR check; see docs/runbooks/restore.md.
+name: Backup
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # 03:17 UTC every day
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check backup configuration
+        id: gate
+        env:
+          PRODUCTION_DATABASE_URL_DIRECT: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_BACKUPS: ${{ vars.R2_BUCKET_BACKUPS || secrets.R2_BUCKET_BACKUPS }}
+          R2_BACKUPS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUPS_ACCESS_KEY_ID }}
+          R2_BACKUPS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUPS_SECRET_ACCESS_KEY }}
+        run: |
+          missing=()
+          for name in PRODUCTION_DATABASE_URL_DIRECT R2_ACCOUNT_ID R2_BUCKET_BACKUPS R2_BACKUPS_ACCESS_KEY_ID R2_BACKUPS_SECRET_ACCESS_KEY; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Backup skipped::Production backups are not set up (missing: ${missing[*]}). See docs/runbooks/restore.md."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.gate.outputs.configured == 'true'
+
+      - name: Install the Postgres 18 client tools
+        if: steps.gate.outputs.configured == 'true'
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+          pg_dump --version
+
+      - name: Dump the production database
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          PRODUCTION_DATABASE_URL_DIRECT: ${{ secrets.PRODUCTION_DATABASE_URL_DIRECT }}
+        run: |
+          echo "::add-mask::$PRODUCTION_DATABASE_URL_DIRECT"
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          echo "BACKUP_FILE=$RUNNER_TEMP/reprint-$stamp.dump" >> "$GITHUB_ENV"
+          bash scripts/backup.sh "$PRODUCTION_DATABASE_URL_DIRECT" "$RUNNER_TEMP/reprint-$stamp.dump"
+
+      - name: Upload to R2
+        if: steps.gate.outputs.configured == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUPS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUPS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID || secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_BACKUPS: ${{ vars.R2_BUCKET_BACKUPS || secrets.R2_BUCKET_BACKUPS }}
+        run: |
+          endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          key="daily/$(basename "$BACKUP_FILE")"
+          aws s3 cp "$BACKUP_FILE" "s3://${R2_BUCKET_BACKUPS}/${key}" --endpoint-url "$endpoint" --no-progress
+          # Fail the run unless the stored object has the size we sent.
+          stored="$(aws s3api head-object --bucket "$R2_BUCKET_BACKUPS" --key "$key" --endpoint-url "$endpoint" --query ContentLength --output text)"
+          local_size="$(wc -c < "$BACKUP_FILE" | tr -d ' ')"
+          [ "$stored" = "$local_size" ] || { echo "::error::Stored size $stored differs from local size $local_size"; exit 1; }
+          echo "Uploaded $key ($stored bytes)"
+
+      - name: Remove the local dump
+        if: ${{ always() && steps.gate.outputs.configured == 'true' }}
+        run: rm -f "$BACKUP_FILE" "$BACKUP_FILE.partial"

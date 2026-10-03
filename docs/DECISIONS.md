@@ -1146,3 +1146,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 ### D-171 · ASVS L2 preparation (M8-T10)
 - `docs/security/asvs-l2.md` maps the authentication, session, and access-control requirements to code and tests. `apps/api/src/security-docs.test.ts` fails when a test named in the map no longer exists, so the map can't rot silently.
 - Gaps found are filed as tasks (M8-T17), not fixed here: they change session behavior, and this task is preparation. The pre-launch sign-off (M8-T15) is the owner's.
+
+### D-172 · Backups and restore drill (M8-T11)
+- Decision: `scripts/backup.sh` writes a `pg_dump --format=custom --no-owner --no-privileges` archive and checks it with `pg_restore --list`; `scripts/restore.sh` restores one into an empty database whose name starts with `scratch` or `restore` and prints exact row counts per table. `PG_RUN` lets either script run the Postgres tools elsewhere (the drill uses the Compose container when no Postgres 18 client is installed). `backup.yml` installs `postgresql-client-18` from the PGDG repository, uploads to `daily/` in the backups bucket with the AWS CLI against R2's S3 endpoint, and compares stored and local sizes. The 30-day lifecycle rule is a JSON file applied once by the owner (M8-T13), not by the workflow, so the backup token needs no bucket-admin rights. The drill is a new required CI job, `restore-drill`, also run by `pnpm check` (`pnpm backup:drill`). The secret is `PRODUCTION_DATABASE_URL_DIRECT` (renamed from the `.env.example` placeholder `PRODUCTION_DATABASE_URL`, to match the staging name and because `pg_dump` needs a direct URL).
+- Why: the PRD names the layers (Neon PITR, nightly dump to R2 for 30 days, a drill) but not the tooling. Custom format restores selectively and compresses; refusing non-scratch targets prevents restoring over production by mistake. The CI drill is the only automated proof that dumps restore.
+- Affects: M8-T13, M8-T15
+
