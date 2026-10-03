@@ -7,6 +7,7 @@ vi.mock('../lib/auth.server.js', () => ({
   postToApi: (...args: unknown[]) => postToApi(...args),
 }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader, meta } from './confirm-email-change.js'
 
 const args = (query: string) => ({ request: new Request(`http://x/confirm${query}`) }) as never
@@ -34,6 +35,6 @@ describe('confirm-email-change loader', () => {
   })
 
   it('is noindex', () => {
-    expect(meta()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(meta(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })

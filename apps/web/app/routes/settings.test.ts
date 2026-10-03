@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const loadSession = vi.fn()
 vi.mock('../lib/auth.server.js', () => ({ loadSession: (r: Request) => loadSession(r) }))
 
+import { metaArgs } from '../lib/seo.testing.js'
 import { loader, meta } from './settings.js'
 import { meta as profileMeta } from './settings-profile.js'
 
@@ -27,6 +28,6 @@ describe('settings loader', () => {
 
 describe('settings meta', () => {
   it.each([meta, profileMeta])('marks the page noindex', (fn) => {
-    expect(fn()).toContainEqual({ name: 'robots', content: 'noindex' })
+    expect(fn(metaArgs() as never)).toContainEqual({ name: 'robots', content: 'noindex' })
   })
 })

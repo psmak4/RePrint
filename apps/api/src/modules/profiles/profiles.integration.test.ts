@@ -88,6 +88,7 @@ describe('GET /v1/users/:username', () => {
       libraryPublic: true,
     })
     expect(profile.joinedAt).toBe(user.createdAt.toISOString())
+    expect(profile.verified).toBe(true)
     expect(response.headers['cache-control']).toContain('public')
     expect(JSON.stringify(response.json())).not.toContain(user.email)
   })
@@ -95,7 +96,7 @@ describe('GET /v1/users/:username', () => {
   it('shows zero totals for a Member with no reviews', async () => {
     const user = await createTestUser(stack.db.db, { verified: false })
     const response = await app.inject({ method: 'GET', url: `/v1/users/${user.username}` })
-    expect(response.json()).toMatchObject({ reviewCount: 0, helpfulVotes: 0 })
+    expect(response.json()).toMatchObject({ reviewCount: 0, helpfulVotes: 0, verified: false })
   })
 
   it('answers 404 for unknown, suspended, and deleted users', async () => {

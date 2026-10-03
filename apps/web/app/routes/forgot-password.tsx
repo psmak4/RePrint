@@ -3,10 +3,11 @@ import { redirect } from 'react-router'
 import { ForgotPasswordPage } from '../components/auth/forgot-password-page.js'
 import { copy } from '../copy/index.js'
 import { failed, loadSession, postToApi } from '../lib/auth.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/forgot-password'
 
-export function meta() {
-  return [{ title: `${APP_NAME}: ${copy.auth.forgot.title}` }]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.forgot.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

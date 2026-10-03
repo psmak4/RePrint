@@ -3,10 +3,11 @@ import { redirect } from 'react-router'
 import { SettingsLayout } from '../components/settings/settings-layout.js'
 import { copy } from '../copy/index.js'
 import { loadSession } from '../lib/auth.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/settings'
 
-export function meta() {
-  return [{ title: `${APP_NAME}: ${copy.settings.title}` }, { name: 'robots', content: 'noindex' }]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.settings.title}`, noindex: true })
 }
 
 /** Every settings page needs a signed-in Member. */

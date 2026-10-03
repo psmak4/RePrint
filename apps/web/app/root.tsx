@@ -28,7 +28,8 @@ export const middleware = [createRequestLogMiddleware(logger)]
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await loadSession(request)
   const notifications = session.viewer ? await loadNotifications(request) : null
-  return { ...session, notifications }
+  // The public origin, for canonical URLs (see `pageMeta`).
+  return { ...session, notifications, origin: new URL(request.url).origin }
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

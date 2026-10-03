@@ -9,15 +9,19 @@ import { GenrePage } from '../components/books/genre-pages.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/genre'
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) return [{ title: APP_NAME }]
-  const { name } = loaderData.detail.genre
-  return [
-    { title: `${name} | ${APP_NAME}` },
-    { name: 'description', content: copy.genres.metaDescription(name) },
-  ]
+export function meta(args: Route.MetaArgs) {
+  if (!args.loaderData) return [{ title: APP_NAME }]
+  const { detail, page } = args.loaderData
+  const { name } = detail.genre
+  return pageMeta(args, {
+    title: `${name} | ${APP_NAME}`,
+    description: copy.genres.metaDescription(name),
+    keepParams: { page: page > 1 ? String(page) : undefined },
+    openGraph: { type: 'website', title: name },
+  })
 }
 
 /** One page of Books in a Genre, sorted as the URL says (PRD §7.5). */
@@ -47,7 +51,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     logger.error({ status: response.status }, 'genre request failed')
     throw data(copy.genres.loadFailed, { status: 502 })
   }
-  return { detail: genreDetailResponseSchema.parse(await response.json()), sort: query.sort }
+  return {
+    detail: genreDetailResponseSchema.parse(await response.json()),
+    sort: query.sort,
+    page: query.page,
+  }
 }
 
 export default function Genre({ loaderData }: Route.ComponentProps) {

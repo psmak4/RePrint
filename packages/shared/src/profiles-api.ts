@@ -19,6 +19,8 @@ export const profileSchema = z.object({
   helpfulVotes: z.number().int().min(0),
   /** Whether the Library tab is shown to everyone (the owner always sees it). */
   libraryPublic: z.boolean(),
+  /** Whether the Member has verified their email; search engines are told to skip unverified profiles. */
+  verified: z.boolean(),
 })
 export type Profile = z.infer<typeof profileSchema>
 

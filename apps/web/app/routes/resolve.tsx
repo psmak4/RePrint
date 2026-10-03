@@ -9,10 +9,11 @@ import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/resolve'
 
-export function meta() {
-  return [{ title: copy.resolve.title }, { name: 'robots', content: 'noindex' }]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: copy.resolve.title, noindex: true })
 }
 
 /** Stores a search result the Catalog doesn't have yet, then sends the reader to its page (PRD §6). */

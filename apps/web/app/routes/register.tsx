@@ -3,10 +3,11 @@ import { redirect } from 'react-router'
 import { RegisterPage } from '../components/auth/register-page.js'
 import { copy } from '../copy/index.js'
 import { failed, forwardCookies, loadSession, postToApi } from '../lib/auth.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/register'
 
-export function meta() {
-  return [{ title: `${APP_NAME}: ${copy.auth.register.title}` }]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.register.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

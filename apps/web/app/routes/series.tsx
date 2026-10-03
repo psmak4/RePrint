@@ -4,16 +4,18 @@ import { SeriesPage } from '../components/books/series-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/series'
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) return [{ title: APP_NAME }]
-  const { name } = loaderData.series
-  return [
-    { title: `${name} | ${APP_NAME}` },
-    { name: 'description', content: copy.series.metaDescription(name) },
-  ]
+export function meta(args: Route.MetaArgs) {
+  if (!args.loaderData) return [{ title: APP_NAME }]
+  const { name } = args.loaderData.series
+  return pageMeta(args, {
+    title: `${name} | ${APP_NAME}`,
+    description: copy.series.metaDescription(name),
+    openGraph: { type: 'website', title: name },
+  })
 }
 
 /** A Series and its Books in reading order, loaded on the server (PRD §7.5). */

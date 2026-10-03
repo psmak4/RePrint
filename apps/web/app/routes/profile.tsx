@@ -9,23 +9,21 @@ import { ProfilePage } from '../components/profile/profile-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/profile'
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (!loaderData) return [{ title: APP_NAME }]
-  const { profile, canonicalUrl } = loaderData
-  const description = copy.profile.metaDescription(profile.displayName, profile.reviewCount)
-  return [
-    { title: `${copy.profile.title(profile.displayName)} | ${APP_NAME}` },
-    { name: 'description', content: description },
-    { tagName: 'link', rel: 'canonical', href: canonicalUrl },
-    { property: 'og:type', content: 'profile' },
-    { property: 'og:site_name', content: APP_NAME },
-    { property: 'og:title', content: profile.displayName },
-    { property: 'og:description', content: description },
-    { property: 'og:url', content: canonicalUrl },
-  ]
+export function meta(args: Route.MetaArgs) {
+  if (!args.loaderData) return [{ title: APP_NAME }]
+  const { profile, canonicalUrl } = args.loaderData
+  return pageMeta(args, {
+    title: `${copy.profile.title(profile.displayName)} | ${APP_NAME}`,
+    description: copy.profile.metaDescription(profile.displayName, profile.reviewCount),
+    canonicalUrl,
+    // Only verified Members are indexed (PRD §11).
+    noindex: !profile.verified,
+    openGraph: { type: 'profile', title: profile.displayName },
+  })
 }
 
 /** A Member's profile and their Approved Reviews, loaded on the server (PRD §7.8). */

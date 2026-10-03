@@ -36,6 +36,7 @@ export const profileRoutes: FastifyPluginAsyncZod<ProfileRoutesOptions> = async 
         displayName: users.displayName,
         bio: users.bio,
         libraryPublic: users.libraryPublic,
+        emailVerifiedAt: users.emailVerifiedAt,
         createdAt: users.createdAt,
         avatarKey: covers.r2Key,
       })
@@ -71,6 +72,7 @@ export const profileRoutes: FastifyPluginAsyncZod<ProfileRoutesOptions> = async 
         reviewCount: totals?.reviewCount ?? 0,
         helpfulVotes: totals?.helpfulVotes ?? 0,
         libraryPublic: member.libraryPublic,
+        verified: member.emailVerifiedAt !== null,
       }
     },
   )

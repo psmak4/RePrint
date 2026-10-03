@@ -18,6 +18,7 @@ const profile: Profile = {
   reviewCount: 1,
   helpfulVotes: 7,
   libraryPublic: true,
+  verified: true,
 }
 const review: ProfileReview = {
   id: '0192a3b4-0000-7000-8000-000000000001',

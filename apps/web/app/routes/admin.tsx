@@ -2,6 +2,7 @@ import { APP_NAME, PERMISSIONS } from '@reprint/shared'
 import { AdminLayout, type AdminNavItem } from '../components/admin/admin-layout.js'
 import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
+import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin'
 
 /** Holding any of these opens the admin area; each page then checks its own permission. */
@@ -14,8 +15,8 @@ const ADMIN_AREA_PERMISSIONS = [
   PERMISSIONS.featuredManage,
 ]
 
-export function meta() {
-  return [{ title: `${APP_NAME}: ${copy.admin.title}` }, { name: 'robots', content: 'noindex' }]
+export function meta(args: Route.MetaArgs) {
+  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
