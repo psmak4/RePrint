@@ -554,14 +554,17 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Cloudflare DNS serves `www`, `api`, and `img.reprint.com` (R2 + CDN); Resend verifies `mail.reprint.com` with SPF, DKIM, and DMARC
   - Accept: R2 buckets for uploads and backups (30-day lifecycle) exist; GitHub production secrets are set; Sentry alert rules route to email and Slack; the uptime monitor watches `/v1/ready` and `/`
   - Accept: `pnpm --filter api seed:admin` has created the first production Admin
-- [ ] M8-T14 · HUMAN · Provide or approve final legal and static page copy · deps: M8-T04 · PRD: §7.13, §11
+- [x] M8-T14 · HUMAN · Provide or approve final legal and static page copy · deps: M8-T04 · PRD: §7.13, §11
   - Accept: the owner (and counsel as needed) replaces the draft copy or approves it, and the `DRAFT` markers are removed in a PR
   - Accept: the Contact page's address is a real monitored inbox
+- [ ] M8-T17 · HUMAN · Set the Contact page email to a monitored inbox · deps: M8-T14 · PRD: §7.13
+  - Accept: `copy.legal.contactPlaceholder` in `apps/web/app/copy/index.ts` is replaced with a real address the owner monitors (and renamed to `contactEmail`)
+  - Accept: `/contact` shows the address, and `pnpm check` passes
 - [ ] M8-T15 · HUMAN · Pre-launch checks: load test on staging, screen-reader pass, security sign-off, restore drill · deps: M8-T13, M8-T08, M8-T09, M8-T10 · PRD: §11, §12
   - Accept: the k6 scenario passes against staging, with results recorded in `docs/performance.md`
   - Accept: the VoiceOver and NVDA pass from `docs/a11y.md` is done and issues are filed as tasks
   - Accept: the ASVS L2 review is signed off in `docs/security/asvs-l2.md`, and a restore drill from a real backup is recorded in `docs/runbooks/restore.md`
-- [ ] M8-T16 · M8 verification: launch readiness end to end, fix gaps, update docs · deps: M8-T02, M8-T03, M8-T14, M8-T05, M8-T07, M8-T15 · PRD: §3, §11, §12, §13
+- [ ] M8-T16 · M8 verification: launch readiness end to end, fix gaps, update docs · deps: M8-T02, M8-T03, M8-T14, M8-T17, M8-T05, M8-T07, M8-T15 · PRD: §3, §11, §12, §13
   - Accept: `pnpm check` and `pnpm test:e2e` pass, and the latest staging deploy is green
   - Accept: every acceptance criterion in `docs/milestones/M8-launch-readiness.md` is checked off in the PR body with the command or record that proved it
   - Accept: `docs/PROGRESS.md` lists anything remaining before tagging `v1.0.0`

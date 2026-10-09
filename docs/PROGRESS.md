@@ -581,3 +581,7 @@ Entry format:
 ### 2026-10-03 · M8-T17 · PR pending
 - `SESSION_MAX_DAYS` (default 90) caps a session's age from `created_at`: `session-plugin.ts` refuses an older session even if it was used yesterday and clears the cookie. Integration tests (older refused, younger kept) and an env test; `docs/security/asvs-l2.md` gap closed; `.env.example` updated. D-173 records the choice.
 - Next iteration: M1-T20 and M8-T12 wait on M1-T19 (skipped, `[~]`), so nothing in `docs/TASKS.md` is eligible except HUMAN tasks (M8-T13 needs M8-T12). Expect `BLOCKED`.
+
+### 2026-10-09 · M8-T14 (owner) · owner/m8-t14-approve-legal-copy
+- Owner approved the legal and static page copy as written. Removed the `DRAFT – owner review` banner from `StaticPage` and its copy keys; `static-pages.test.tsx` now asserts no draft marker. Added M8-T17 (HUMAN) for the Contact email, still a placeholder.
+- Next iteration: no loop-buildable task is eligible. M8-T17 needs the owner's inbox; M1-T19 (staging) blocks M1-T20, M1-T22, M8-T12, M8-T13, M8-T15, and M8-T16.

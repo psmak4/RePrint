@@ -1036,8 +1036,7 @@ export const copy = {
     home: 'Back to home',
   },
   legal: {
-    draftNotice: 'DRAFT – owner review',
-    draftExplanation: 'This page is draft copy and has not been reviewed by the owner or a lawyer.',
+    // Owner to supply a monitored inbox before launch (M8-T17).
     contactPlaceholder: '[contact address: owner to supply]',
     terms: {
       title: 'Terms of Service',
