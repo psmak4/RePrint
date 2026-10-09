@@ -58,6 +58,13 @@ describe('legal and static pages', () => {
     }
   })
 
+  it('Contact shows the owner email as a mailto link', () => {
+    render(<Contact />)
+    const link = screen.getByRole('link', { name: copy.legal.contactEmail })
+    expect(link.getAttribute('href')).toBe(`mailto:${copy.legal.contactEmail}`)
+    expect(document.body.textContent).not.toContain('owner to supply')
+  })
+
   it('sets a title, description, and canonical URL', () => {
     expect(aboutMeta(metaArgs('/about') as never)).toContainEqual({
       tagName: 'link',
