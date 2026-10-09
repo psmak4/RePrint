@@ -558,7 +558,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T14 · HUMAN · Provide or approve final legal and static page copy · deps: M8-T04 · PRD: §7.13, §11
   - Accept: the owner (and counsel as needed) replaces the draft copy or approves it, and the `DRAFT` markers are removed in a PR
   - Accept: the Contact page's address is a real monitored inbox
-- [ ] M8-T17 · HUMAN · Set the Contact page email to a monitored inbox · deps: M8-T14 · PRD: §7.13
+- [x] M8-T17 · HUMAN · Set the Contact page email to a monitored inbox · deps: M8-T14 · PRD: §7.13
   - Accept: `copy.legal.contactPlaceholder` in `apps/web/app/copy/index.ts` is replaced with a real address the owner monitors (and renamed to `contactEmail`)
   - Accept: `/contact` shows the address, and `pnpm check` passes
 - [ ] M8-T15 · HUMAN · Pre-launch checks: load test on staging, screen-reader pass, security sign-off, restore drill · deps: M8-T13, M8-T08, M8-T09, M8-T10 · PRD: §11, §12

@@ -590,6 +590,10 @@ Entry format:
 - Owner approved the legal and static page copy as written. Removed the `DRAFT – owner review` banner from `StaticPage` and its copy keys; `static-pages.test.tsx` now asserts no draft marker. Added M8-T17 (HUMAN) for the Contact email, still a placeholder.
 - Next iteration: no loop-buildable task is eligible. M8-T17 needs the owner's inbox; M1-T19 (staging) blocks M1-T20, M1-T22, M8-T12, M8-T13, M8-T15, and M8-T16.
 
+### 2026-10-09 · M8-T17 (owner) · owner/m8-t17-contact-email
+- The Contact page shows the owner's inbox (`copy.legal.contactEmail`) as a `mailto:` link; the placeholder key is gone and a component test covers the link.
+- Next iteration: nothing changes for the loop; staging (M1-T19) is next, set up by the owner.
+
 ### 2026-10-09 · Free-tier staging prep (owner) · owner/free-tier-staging
 - Added `render.staging.yaml` (free Render Blueprint), `keep-staging-warm.yml`, and a step-by-step "Free-tier staging setup" in `docs/deploy.md` (D-175). M1-T19 is back to `[ ]` for the owner; M1-T22 is skipped (no free previews).
 - Next iteration: M1-T19 is HUMAN; once the owner marks it `[x]`, M1-T20 verifies the staging deploy and M8-T12 can follow.

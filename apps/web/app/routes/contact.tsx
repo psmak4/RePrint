@@ -15,7 +15,10 @@ export default function Contact() {
   return (
     <StaticPage content={copy.legal.contact}>
       <p className="mt-6">
-        <strong>{copy.legal.contact.emailLabel}:</strong> {copy.legal.contactPlaceholder}
+        <strong>{copy.legal.contact.emailLabel}:</strong>{' '}
+        <a className="underline" href={`mailto:${copy.legal.contactEmail}`}>
+          {copy.legal.contactEmail}
+        </a>
       </p>
     </StaticPage>
   )
