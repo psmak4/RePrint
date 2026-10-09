@@ -1036,8 +1036,8 @@ export const copy = {
     home: 'Back to home',
   },
   legal: {
-    // Owner to supply a monitored inbox before launch (M8-T17).
-    contactPlaceholder: '[contact address: owner to supply]',
+    // The owner's monitored inbox (M8-T17).
+    contactEmail: 'psmak4@gmail.com',
     terms: {
       title: 'Terms of Service',
       description: 'The rules for using RePrint: accounts, reviews, and acceptable use.',
