@@ -60,4 +60,4 @@ Entry format:
   4. Remove the `DRAFT – owner review` markers, update the component tests in `apps/web/app/routes/static-pages.test.tsx` to match, and run `pnpm check`.
   5. Merge that change through a PR and mark M8-T14 `[x]` in `docs/TASKS.md`.
 - Also waiting on the owner: M1-T19 (staging infrastructure) blocks M1-T20, M1-T22, and M8-T12; M8-T13 and M8-T15 follow. Until then no non-HUMAN task is eligible.
-- Resolved:
+- Resolved: 2026-10-09. The owner approved the copy as written (changes can come later). The DRAFT banner is removed and the test now checks it's gone. The Contact email is still the placeholder; it's tracked as M8-T17 (HUMAN), due before launch.

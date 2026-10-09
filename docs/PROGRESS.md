@@ -585,3 +585,7 @@ Entry format:
 ### 2026-10-09 · Security fix (owner) · owner/fix-source-map-js-advisory
 - A new high advisory (GHSA-68fv-2mgg-jv7q) in `source-map-js` <1.2.2 failed the `audit` job on every PR. Added a targeted override in `pnpm-workspace.yaml` (D-174); only `source-map-js` changed in the lockfile.
 - Next iteration: for future audit failures on transitive dependencies, follow D-174 (narrow override, advisory ID in a comment), not `pnpm audit --fix update`.
+
+### 2026-10-09 · M8-T14 (owner) · owner/m8-t14-approve-legal-copy
+- Owner approved the legal and static page copy as written. Removed the `DRAFT – owner review` banner from `StaticPage` and its copy keys; `static-pages.test.tsx` now asserts no draft marker. Added M8-T17 (HUMAN) for the Contact email, still a placeholder.
+- Next iteration: no loop-buildable task is eligible. M8-T17 needs the owner's inbox; M1-T19 (staging) blocks M1-T20, M1-T22, M8-T12, M8-T13, M8-T15, and M8-T16.

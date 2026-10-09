@@ -21,10 +21,10 @@ const pages = [
 ] as const
 
 describe('legal and static pages', () => {
-  it.each(pages)('%s has a title and the DRAFT marker', (_name, Page) => {
+  it.each(pages)('%s has a title and no draft marker (owner-approved copy)', (_name, Page) => {
     render(<Page />)
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy()
-    expect(screen.getByRole('note').textContent).toContain('DRAFT – owner review')
+    expect(document.body.textContent).not.toContain('DRAFT')
   })
 
   it.each(pages)('%s has no axe violations', async (_name, Page) => {
