@@ -1,0 +1,23 @@
+# Free Render web services sleep after ~15 minutes without traffic, and waking takes up to a minute,
+# longer than the Netlify SSR function waits. This pings staging so it stays awake (D-175).
+# Does nothing until the STAGING_API_URL repository variable is set. Not a required PR check.
+name: Keep staging warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    name: ping
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: ${{ vars.STAGING_API_URL != '' }}
+    steps:
+      - name: Ping the staging API
+        env:
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+        run: curl --silent --show-error --max-time 90 --output /dev/null --write-out "%{http_code}\n" "${STAGING_API_URL%/}/v1/health" || true

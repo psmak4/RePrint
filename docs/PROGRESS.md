@@ -593,3 +593,7 @@ Entry format:
 ### 2026-10-09 · M8-T17 (owner) · owner/m8-t17-contact-email
 - The Contact page shows the owner's inbox (`copy.legal.contactEmail`) as a `mailto:` link; the placeholder key is gone and a component test covers the link.
 - Next iteration: nothing changes for the loop; staging (M1-T19) is next, set up by the owner.
+
+### 2026-10-09 · Free-tier staging prep (owner) · owner/free-tier-staging
+- Added `render.staging.yaml` (free Render Blueprint), `keep-staging-warm.yml`, and a step-by-step "Free-tier staging setup" in `docs/deploy.md` (D-175). M1-T19 is back to `[ ]` for the owner; M1-T22 is skipped (no free previews).
+- Next iteration: M1-T19 is HUMAN; once the owner marks it `[x]`, M1-T20 verifies the staging deploy and M8-T12 can follow.
