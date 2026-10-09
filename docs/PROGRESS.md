@@ -581,3 +581,7 @@ Entry format:
 ### 2026-10-03 · M8-T17 · PR pending
 - `SESSION_MAX_DAYS` (default 90) caps a session's age from `created_at`: `session-plugin.ts` refuses an older session even if it was used yesterday and clears the cookie. Integration tests (older refused, younger kept) and an env test; `docs/security/asvs-l2.md` gap closed; `.env.example` updated. D-173 records the choice.
 - Next iteration: M1-T20 and M8-T12 wait on M1-T19 (skipped, `[~]`), so nothing in `docs/TASKS.md` is eligible except HUMAN tasks (M8-T13 needs M8-T12). Expect `BLOCKED`.
+
+### 2026-10-09 · Security fix (owner) · owner/fix-source-map-js-advisory
+- A new high advisory (GHSA-68fv-2mgg-jv7q) in `source-map-js` <1.2.2 failed the `audit` job on every PR. Added a targeted override in `pnpm-workspace.yaml` (D-174); only `source-map-js` changed in the lockfile.
+- Next iteration: for future audit failures on transitive dependencies, follow D-174 (narrow override, advisory ID in a comment), not `pnpm audit --fix update`.
