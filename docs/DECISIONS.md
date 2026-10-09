@@ -1157,3 +1157,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: `SESSION_MAX_DAYS` (default 90, 1 to 730) is the longest a session lives from `sessions.created_at`. The session lookup in `session-plugin.ts` refuses an older session whatever its sliding `expires_at` says, and clears the cookie; no migration is needed. A value below `SESSION_TTL_DAYS` is raised to it.
 - Why: the PRD asks for sessions to end but gives no number. 90 days is three sliding windows, so a regular reader signs in about quarterly and a stolen cookie cannot live forever.
 - Affects: `docs/security/asvs-l2.md`, `.env.example`
+
+### D-174 · Security overrides for transitive dependencies
+- Status: Implementation
+- Decision: When `pnpm audit --audit-level high` fails on a transitive dependency whose parents haven't released a patched range, add a narrow entry under `overrides:` in `pnpm-workspace.yaml` (`<pkg>@<vulnerable-range>: ^<patched>`) with the advisory ID in a comment, instead of `pnpm audit --fix update` (which re-resolves the whole lockfile and rewrites manifest ranges). Remove the entry once every parent requires a patched version. First entry: `source-map-js@<1.2.2` → `^1.2.2` for GHSA-68fv-2mgg-jv7q (high), reached only through build and test tooling (vite > postcss, vitest coverage).
+- Why: Keeps a security fix to one package (17 lockfile lines) so it's easy to review and revert, and unblocks the `audit` CI job for every PR.
+- Affects: `pnpm-workspace.yaml`, `pnpm-lock.yaml`, the `audit` CI job

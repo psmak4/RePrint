@@ -10,3 +10,8 @@ allowBuilds:
   msgpackr-extract: false
   protobufjs: false
   ssh2: false
+# Security overrides: force patched versions of vulnerable transitive dependencies. Remove an entry
+# once every package that pulls it in requires a patched version on its own (see docs/DECISIONS.md).
+overrides:
+  # GHSA-68fv-2mgg-jv7q (high): reached only through build and test tooling (vite > postcss, vitest coverage).
+  source-map-js@<1.2.2: ^1.2.2
