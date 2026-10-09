@@ -96,12 +96,12 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `apps/web/netlify.toml` builds with `@netlify/vite-plugin-react-router`, uses Node 24, and caches hashed assets immutably
   - Accept: `.github/workflows/deploy-staging.yml` runs on push to `main`: migrate staging, deploy the API and worker, deploy the web app, smoke-test `/v1/ready` and `/`; it exits with a notice (not a failure) when the staging secrets are absent
   - Accept: `docs/deploy.md` lists every secret and variable the workflows read
-- [~] M1-T19 · HUMAN · Create staging infrastructure (Neon, Render, Netlify, Resend, Sentry) and add deploy secrets · deps: M1-T18 · PRD: §13, §8, §11
+- [ ] M1-T19 · HUMAN · Create staging infrastructure (Neon, Render, Netlify, Resend, Sentry) and add deploy secrets · deps: M1-T18 · PRD: §13, §8, §11
   - Accept: Neon staging project in US East on Postgres 18 (or 17 if 18 is unsupported, recorded in `docs/DECISIONS.md`), with `pg_trgm`, `unaccent`, and `citext` available
   - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
   - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
   - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
-  - Accept: Skipped (2026-09-29): deferred by the owner to avoid paid services while the app is built locally. Un-skip (`[ ]`) when ready; D-070 describes a free-tier staging setup. M1-T20 and M1-T22 stay unbuilt until then.
+  - Accept: Free-tier variant (2026-10-09, D-175): follow `docs/deploy.md` → "Free-tier staging setup"; the Render Blueprint uses `render.staging.yaml`, platform URLs instead of custom DNS, and no Sentry. Mark `[x]` once the "Deploy staging" workflow's smoke test passes.
 - [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
   - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
   - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
@@ -111,10 +111,11 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: each Render preview uses its own Neon branch created from staging (Neon GitHub integration or Render preview env hook)
   - Accept: preview env vars point the preview web at the preview API, email in Resend test mode, and `SOURCE_MODE=stub`
   - Accept: Skipped (2026-09-29): deferred with M1-T19 (D-070). Render API previews aren't free; CI keeps running e2e against the local stack (D-024).
-- [ ] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
+- [~] M1-T22 · Run Playwright + axe against the PR preview environment · deps: M1-T21, M1-T13 · PRD: §12
   - Accept: the CI `e2e-preview` job waits for both preview URLs, then runs `pnpm test:e2e` against them
   - Accept: the job is green on this task's PR, and `docs/ci.md` is updated
   - Accept: the local-stack `e2e` job remains as a fallback for PRs where previews fail to build, and is documented
+  - Accept: Skipped (2026-10-09): per-PR API previews aren't free on Render (M1-T21 skipped, D-175); CI keeps running e2e against the local stack (D-024).
 - [~] M1-T23 · HUMAN · Install the Renovate GitHub app on the repository · deps: M1-T17 · PRD: §8, §11
   - Accept: Renovate opens its onboarding or dependency dashboard issue on the repo
   - Accept: the dashboard issue shows `renovate.json` from M1-T17 was read without config errors

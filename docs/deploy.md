@@ -38,11 +38,39 @@ Staging deploys automatically on every merge to `main` (PRD §12 step 6). Stagin
 
 Created from `render.yaml`; `sync: false` values are entered in the Render dashboard, never committed: `DATABASE_URL` (Neon pooled), `DATABASE_URL_DIRECT` (Neon direct, used by the pre-deploy migration), `WEB_ORIGINS` (the staging web origin), `SENTRY_DSN`. Add the remaining variables from `.env.example` for the features that exist by then (`COOKIE_DOMAIN`, storage, Source). The worker needs the same `STORAGE_DRIVER`, `IMAGE_BASE_URL`, and `R2_*` values as the API, because `accounts.erase` deletes avatar files. For email set `EMAIL_TRANSPORT=resend`, `RESEND_API_KEY`, and `EMAIL_FROM` on both the API and the worker (the API needs them when `WORKER_IN_PROCESS=true`); startup fails if the transport is `resend` and the key is missing. `REDIS_URL` comes from the Key Value instance. Set `APP_ENV=staging` (the Blueprint default) or `production` on the production Blueprint.
 
-Render deploys are triggered only by the workflow (`autoDeployTrigger: "off"`), so migrations always run first. The pre-deploy command needs a paid Render plan. Free-tier staging (D-070) has no pre-deploy command or worker; run migrations from the workflow only, remove `preDeployCommand`, and set `WORKER_IN_PROCESS=true` on the API.
+Render deploys are triggered only by the workflow (`autoDeployTrigger: "off"`), so migrations always run first. The pre-deploy command needs a paid Render plan. Free-tier staging uses `render.staging.yaml` instead (D-175): no pre-deploy command or worker, migrations run from the workflow only, and `WORKER_IN_PROCESS=true` on the API. Steps are in **Free-tier staging setup** below.
 
 ## Netlify
 
 Link the site with base directory `apps/web`. Set `API_INTERNAL_URL`, `API_ORIGIN`, `VITE_API_ORIGIN`, `APP_ENV`, `VITE_SENTRY_DSN`, and (to turn analytics on) `VITE_ANALYTICS_DOMAIN` and `VITE_ANALYTICS_SCRIPT_URL` in the site's environment (see `.env.example`). Static assets under `/assets/*` are cached immutably.
+
+## Free-tier staging setup (owner, step by step)
+
+Staging runs entirely on free plans (D-070, D-175) at the platforms' own URLs; no custom domain is needed. The browser only ever talks to the Netlify site: the web server calls the API and passes its session cookie through, so leave `COOKIE_DOMAIN` unset and the cookie belongs to the Netlify host.
+
+Write down these values as you go (the names below are used in later steps):
+`NEON_POOLED`, `NEON_DIRECT`, `API_URL` (e.g. `https://reprint-api-staging.onrender.com`), `WEB_URL` (e.g. `https://reprint-staging.netlify.app`), `RENDER_HOOK`, `NETLIFY_SITE_ID`, `NETLIFY_TOKEN`, `RESEND_KEY`, `INVITE_CODES`.
+
+1. **Neon (database).** Sign up at neon.tech, then create a project named `reprint-staging` in an AWS US East region, Postgres 18 (17 if 18 isn't offered; note it in `docs/DECISIONS.md`). From **Connect**, copy the pooled connection string (`NEON_POOLED`) and, with "Connection pooling" off, the direct one (`NEON_DIRECT`).
+2. **Resend (email).** Sign up at resend.com and create an API key with "Sending access" (`RESEND_KEY`). Until you verify a domain, Resend only delivers to your own sign-up address, so test registrations should use that address.
+3. **Render (API and Redis).** Sign up at render.com with GitHub and allow access to `psmak4/RePrint`. Choose **New → Blueprint**, pick the repo, and set **Blueprint path** to `render.staging.yaml`. When it asks for the `sync: false` values, enter:
+   - `DATABASE_URL` = `NEON_POOLED`, `DATABASE_URL_DIRECT` = `NEON_DIRECT`
+   - `WEB_ORIGINS` and `WEB_URL` = `WEB_URL` (pick your Netlify site name now, e.g. `reprint-staging`, so you know the URL; update both later if it differs)
+   - `IMAGE_BASE_URL` = `API_URL` + `/v1/uploads` (Render shows the service URL after creation; edit it then if needed)
+   - `SIGNUP_INVITE_CODES` = a few codes of your choice (`INVITE_CODES`), `RESEND_API_KEY` = `RESEND_KEY`
+
+   After it's created, open the `reprint-api-staging` service → **Settings → Deploy Hook**, and copy the URL (`RENDER_HOOK`).
+4. **Netlify (web app).** Sign up at netlify.com with GitHub. **Add new site → Import an existing project**, pick the repo, set **Base directory** to `apps/web` (the build command and publish folder come from `netlify.toml`), and name the site to match `WEB_URL`. Then:
+   - **Site configuration → Environment variables:** `API_INTERNAL_URL` = `API_URL`, `API_ORIGIN` = `API_URL`, `APP_ENV` = `staging`.
+   - **Site configuration → Build & deploy → Continuous deployment:** set builds to **Stopped**. The GitHub workflow deploys after migrations; Netlify's own builds would race it.
+   - Copy the **Site ID** from Site configuration → General (`NETLIFY_SITE_ID`), and create a personal access token under User settings → Applications (`NETLIFY_TOKEN`).
+5. **GitHub (deploy settings).** In the repo: **Settings → Secrets and variables → Actions**.
+   - Secrets: `STAGING_DATABASE_URL_DIRECT` = `NEON_DIRECT`, `RENDER_DEPLOY_HOOK_API_STAGING` = `RENDER_HOOK`, `NETLIFY_AUTH_TOKEN` = `NETLIFY_TOKEN`.
+   - Variables: `NETLIFY_SITE_ID`, `STAGING_API_URL` = `API_URL`, `STAGING_WEB_URL` = `WEB_URL`. Setting `STAGING_API_URL` also turns on `keep-staging-warm.yml`.
+6. **First deploy.** Repo → **Actions → Deploy staging → Run workflow** on `main`. It migrates Neon, deploys Render and Netlify, and smoke-tests both URLs (allow up to 10 minutes on the first run). Then open `WEB_URL`.
+7. **First Admin (optional).** On your machine, with `DATABASE_URL` set to `NEON_DIRECT` for that one command only: `pnpm --filter api seed:admin -- --email … --username …` (it reads the password from stdin).
+
+Free-tier limits to expect: the API sleeps after ~15 minutes idle (the keep-warm workflow pings it every 10), uploads such as avatars disappear on each redeploy, the Redis instance is small and not persisted, email only reaches your own address, and there are no per-PR preview environments (M1-T21 and M1-T22 stay skipped).
 
 ## Rollback
 

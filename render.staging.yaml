@@ -1,0 +1,68 @@
+# Free-tier staging Blueprint (D-070, D-175). Point a Render Blueprint at this file
+# (Blueprint path: render.staging.yaml). Production keeps render.yaml (paid, ≥ 2 instances, worker).
+# Differences from render.yaml: free plans, one instance, no pre-deploy command (migrations run in
+# .github/workflows/deploy-staging.yml), no worker (jobs run inside the API, WORKER_IN_PROCESS=true).
+# Free web services sleep after ~15 minutes idle; keep-staging-warm.yml pings it to avoid cold starts.
+# Secrets are `sync: false`: Render asks for them when the Blueprint is created; they never live in git.
+services:
+  - type: web
+    name: reprint-api-staging
+    runtime: node
+    region: virginia
+    plan: free
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build --filter=api
+    startCommand: pnpm --filter api start
+    healthCheckPath: /v1/ready
+    autoDeployTrigger: "off" # deploys come from deploy-staging.yml, after migrations
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: APP_ENV
+        value: staging
+      - key: TRUST_PROXY
+        value: true
+      - key: WORKER_IN_PROCESS
+        value: true # no free background workers on Render
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: reprint-redis-staging
+          property: connectionString
+      - key: SOURCE_MODE
+        value: live
+      - key: SOURCE_RATE_LIMIT_RPS
+        value: 1 # PRD §13: staging calls Open Library at 1 request per second
+      - key: HIBP_MODE
+        value: live
+      - key: PUBLIC_SIGNUPS
+        value: false # private beta (D-014); invite codes below
+      - key: EMAIL_TRANSPORT
+        value: resend
+      - key: EMAIL_FROM
+        value: RePrint <onboarding@resend.dev> # Resend's shared sender until a domain is verified
+      - key: STORAGE_DRIVER
+        value: local # free services have no persistent disk: uploads vanish on redeploy (fine for staging)
+      - key: DATABASE_URL
+        sync: false # Neon pooled connection string
+      - key: DATABASE_URL_DIRECT
+        sync: false # Neon direct connection string
+      - key: WEB_ORIGINS
+        sync: false # the Netlify site URL, e.g. https://reprint-staging.netlify.app
+      - key: WEB_URL
+        sync: false # same Netlify URL; used for links in emails
+      - key: IMAGE_BASE_URL
+        sync: false # this service's URL + /v1/uploads, e.g. https://reprint-api-staging.onrender.com/v1/uploads
+      - key: SIGNUP_INVITE_CODES
+        sync: false # comma-separated invite codes for testers
+      - key: RESEND_API_KEY
+        sync: false
+
+keyValues:
+  - name: reprint-redis-staging
+    region: virginia
+    plan: free
+    maxmemoryPolicy: noeviction # BullMQ needs a store that never evicts queue keys
+    ipAllowList: [] # internal connections only
