@@ -581,7 +581,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `@fontsource-variable/newsreader` and `@fontsource-variable/instrument-sans` (D-180) provide `--font-serif` and `--font-sans`, Latin subset only, with the above-the-fold WOFF2 files preloaded from the root route
   - Accept: a built page requests no Google domain (Playwright network check), and `buildCsp` is unchanged (`font-src 'self'`, `style-src 'self'`)
   - Accept: every existing page still passes axe in the light theme (pages not redesigned in M9 just take the new tokens), and the M8-T08 web vitals check passes on the Book page (LCP ≤ 2.5 s, CLS ≤ 0.1, mobile profile)
-- [ ] M9-T02 · Web: generated cover, star rating, and the shared redesign components · deps: M9-T01 · PRD: §6, §7.4, §11
+- [x] M9-T02 · Web: generated cover, star rating, and the shared redesign components · deps: M9-T01 · PRD: §6, §7.4, §11
   - Accept: `Cover`'s fallback is the generated cover from `docs/DESIGN.md`, its colour picked from the slug (a unit test shows the same slug always gets the same colour), with space reserved at 2:3
   - Accept: `StarRating` shows partial fill for averages and exposes "Rated X out of 5" as its accessible name
   - Accept: `BookRail`, `GenreTile`, `ReviewExcerpt`, `SectionNav`, `FactsRow`, `DetailsList`, `RatingBreakdown`, `SeriesCard`, `AuthorCard`, `EditionsCard`, `AuthorMatchCard`, and `TrustBadge` exist with component tests for every interactive one (bars toggle a filter, format filter, section nav current item)

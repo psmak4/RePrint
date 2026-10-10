@@ -2,6 +2,7 @@ import type { Cover as CoverData } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { copy } from '../../copy/index.js'
+import { generatedCoverColor } from '../../lib/cover-color.js'
 import { type CoverSize, coverUrl } from '../../lib/cover-url.js'
 
 const WIDTHS: Record<CoverSize, string> = {
@@ -18,12 +19,18 @@ export function Cover({
   cover,
   title,
   authorName,
+  slug,
+  dashed = false,
   size = 'medium',
   className,
 }: {
   cover: CoverData | null
   title: string
   authorName?: string | null
+  /** Picks the generated cover's colour; falls back to the title when a page has no slug. */
+  slug?: string | null
+  /** A dashed frame for a Book that is not on RePrint yet (search candidates). */
+  dashed?: boolean
   size?: CoverSize
   className?: string
 }) {
@@ -45,19 +52,13 @@ export function Cover({
 
   if (!url || failed) {
     return (
-      <div role="img" aria-label={copy.books.coverAlt(title)} className={frame}>
-        <div
-          aria-hidden="true"
-          className="flex h-full flex-col justify-between gap-2 bg-surface-raised p-2 text-center"
-        >
-          <span className="line-clamp-4 text-sm font-semibold break-words">{title}</span>
-          {authorName ? (
-            <span className="line-clamp-2 text-xs break-words text-muted-foreground">
-              {authorName}
-            </span>
-          ) : null}
-        </div>
-      </div>
+      <GeneratedCover
+        title={title}
+        authorName={authorName}
+        slug={slug ?? title}
+        dashed={dashed}
+        className={cn(WIDTHS[size], className)}
+      />
     )
   }
 
@@ -72,6 +73,64 @@ export function Cover({
         className="h-full w-full object-cover"
         onError={() => setFailed(true)}
       />
+    </div>
+  )
+}
+
+/**
+ * The designed cover for a Book with no image: a solid colour from the slug, an inset frame, the
+ * author at the top, the title in the serif, and a short rule. Type scales with the cover's own
+ * width (container query units), so one component serves a 44 px thumbnail and a 300 px header.
+ */
+export function GeneratedCover({
+  title,
+  authorName,
+  slug,
+  dashed = false,
+  className,
+}: {
+  title: string
+  authorName?: string | null | undefined
+  slug: string
+  dashed?: boolean
+  className?: string
+}) {
+  return (
+    <div
+      role="img"
+      aria-label={copy.books.coverAlt(title)}
+      data-generated-cover=""
+      className={cn(
+        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-md shadow-sm',
+        className,
+      )}
+      style={{ backgroundColor: generatedCoverColor(slug), color: '#fdfaf3' }}
+    >
+      <div
+        aria-hidden="true"
+        className={cn(
+          'absolute inset-[3%] flex flex-col items-center justify-between border text-center',
+          dashed ? 'border-dashed' : '',
+        )}
+        style={{ borderColor: 'rgba(253, 250, 243, 0.32)', padding: '8cqw' }}
+      >
+        <span
+          className="line-clamp-2 w-full font-semibold tracking-widest break-words uppercase"
+          style={{ fontSize: '6cqw', lineHeight: 1.3, opacity: 0.88 }}
+        >
+          {authorName ?? ''}
+        </span>
+        <span
+          className="line-clamp-5 w-full font-serif font-medium break-words"
+          style={{ fontSize: '12cqw', lineHeight: 1.1 }}
+        >
+          {title}
+        </span>
+        <span
+          className="block"
+          style={{ width: '16cqw', borderTop: '1px solid rgba(253, 250, 243, 0.6)' }}
+        />
+      </div>
     </div>
   )
 }

@@ -168,6 +168,56 @@ export const copy = {
       loadFailed: "We couldn't load this book right now. Please try again in a moment.",
     },
   },
+  redesign: {
+    starRating: (average: string) => `Rated ${average} out of 5`,
+    trustBadge: 'Read by a moderator',
+    bookRail: {
+      scrollLabel: (label: string) => `${label}, scrolls sideways`,
+    },
+    genreTile: {
+      books: (count: number) => `${count} ${count === 1 ? 'book' : 'books'}`,
+    },
+    reviewExcerpt: {
+      by: (name: string) => `by ${name}`,
+      readFull: (title: string) => `Read the full review of ${title}`,
+      rating: (rating: number) => `${rating} out of 5 stars`,
+    },
+    sectionNav: {
+      label: 'On this page',
+    },
+    ratingBreakdown: {
+      heading: 'Rating breakdown',
+      average: (average: string) => `${average} out of 5`,
+      count: (count: number) => `${count} ${count === 1 ? 'rating' : 'ratings'}`,
+      barLabel: (stars: number, count: number) =>
+        `${stars} ${stars === 1 ? 'star' : 'stars'}: ${count} ${count === 1 ? 'review' : 'reviews'}`,
+      clearFilter: 'Show all ratings',
+    },
+    series: {
+      heading: 'In this series',
+      position: (position: string, total: number | null) =>
+        total ? `Book ${position} of ${total}` : `Book ${position}`,
+      youAreHere: "You're here",
+      upNext: (title: string) => `Up next: ${title}`,
+      viewSeries: 'View the series',
+    },
+    author: {
+      heading: 'About the author',
+      lifeSpan: (born: string | null, died: string | null) =>
+        born && died ? `${born} to ${died}` : born ? `Born ${born}` : (died ?? ''),
+      bookCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on RePrint`,
+      viewAuthor: (name: string) => `More about ${name}`,
+      match: 'Author',
+    },
+    editions: {
+      heading: (count: number) => `Editions (${count})`,
+      filterLabel: 'Filter by format',
+      allFormats: 'All formats',
+      empty: 'No editions in this format.',
+      seeAll: 'See all editions',
+      published: (year: number) => `Published ${year}`,
+    },
+  },
   reviews: {
     starRating: {
       groupLabel: 'Your rating',
