@@ -56,6 +56,11 @@ describe('StarRating', () => {
     expect(fill.hasAttribute('style')).toBe(false)
   })
 
+  it('sizes to its stars so the fill stays a share of five stars inside a stretched flex column', () => {
+    render(<StarRating average={3} />)
+    expect(screen.getByRole('img', { name: 'Rated 3.0 out of 5' }).className).toContain('w-max')
+  })
+
   it('clamps out-of-range averages', () => {
     render(<StarRating average={7} />)
     expect(screen.getByRole('img', { name: 'Rated 5.0 out of 5' })).toBeTruthy()

@@ -6,7 +6,9 @@ const STARS = '★★★★★'
 
 /**
  * Five stars with partial fill for an average (4.3 fills the fifth star by 30%). The stars are one
- * image named "Rated X out of 5"; callers show the number and review count beside it.
+ * image named "Rated X out of 5"; callers show the number and review count beside it. `w-max`
+ * keeps the box as wide as the five stars even as a stretched flex item, because the fill is a
+ * percentage of this box (D-186).
  */
 export function StarRating({
   average,
@@ -21,7 +23,7 @@ export function StarRating({
     <span
       role="img"
       aria-label={copy.redesign.starRating(clamped.toFixed(1))}
-      className={cn('relative inline-block text-base leading-none tracking-wider', className)}
+      className={cn('relative inline-block w-max text-base leading-none tracking-wider', className)}
     >
       <span aria-hidden="true" className="text-[#d6d3d1]">
         {STARS}

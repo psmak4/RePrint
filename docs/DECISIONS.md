@@ -1228,3 +1228,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: Components never set `style={…}`. Generated cover colours use 12 whole-string Tailwind classes (`generatedCoverClass`), and star fills and rating bars use a 5%-step width lookup (`widthClass`). A unit test fails if any `.tsx` component sets a `style` prop.
 - Why: The CSP is `style-src 'self'` (PRD §11), which blocks style attributes. The M9 components used them, which produced about 150 violations per page on a seeded database; CI's e2e database is empty, so it never saw them. Stars now move in quarter-star steps.
 - Affects: `apps/web/app/lib/width-class.ts`, `apps/web/app/lib/cover-color.ts`, `Cover`, `StarRating`, `RatingBreakdown`, `RatingSummary`
+
+### D-186 · `StarRating` sizes to its five stars (M9-T09)
+- Status: Decided (loop)
+- Decision: The `StarRating` root has `w-max`, so its box is exactly as wide as the five stars even as a stretched flex item.
+- Why: The fill is a percentage of the root's width. In the rating breakdown's flex column at phone width the root stretched to the full column, so a 3.0 average filled the whole (wider) box and showed five filled stars.
+- Affects: `apps/web/app/components/books/star-rating.tsx`, `e2e/specs/star-rating.spec.ts`
