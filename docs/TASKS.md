@@ -602,7 +602,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M9-T07 · Web: search results redesign · deps: M9-T02, M9-T03 · PRD: §7.3
   - Accept: `/search` matches the Search results template in `docs/DESIGN.md`, including the `AuthorMatchCard` when an Author result matches the query and the `topReview` quote on Catalog Books
   - Accept: Source candidates show the dashed generated cover and "Not on RePrint yet", and filters still collapse into a disclosure below `lg`
-- [ ] M9-T08 · M9 verification: run the Redesign acceptance criteria end to end, fix gaps, update docs · deps: M9-T01, M9-T05, M9-T06, M9-T07 · PRD: §3, §11, §12
+- [x] M9-T08 · M9 verification: run the Redesign acceptance criteria end to end, fix gaps, update docs · deps: M9-T01, M9-T05, M9-T06, M9-T07 · PRD: §3, §11, §12
   - Accept: every acceptance criterion in `docs/milestones/M9-redesign.md` is checked off in the PR body with the command that proved it
   - Accept: axe passes on Discover, Book, and search at phone and desktop widths; `pnpm check` and `pnpm test:e2e` pass; screenshots of the three pages are attached to the PR
   - Accept: `docs/DESIGN.md` matches what shipped, and `docs/PROGRESS.md` is updated

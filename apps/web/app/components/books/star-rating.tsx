@@ -1,5 +1,6 @@
 import { cn } from '@reprint/ui'
 import { copy } from '../../copy/index.js'
+import { widthClass } from '../../lib/width-class.js'
 
 const STARS = '★★★★★'
 
@@ -28,8 +29,10 @@ export function StarRating({
       <span
         aria-hidden="true"
         data-testid="star-fill"
-        className="absolute top-0 left-0 overflow-hidden whitespace-nowrap text-star"
-        style={{ width: `${(clamped / 5) * 100}%` }}
+        className={cn(
+          'absolute top-0 left-0 overflow-hidden whitespace-nowrap text-star',
+          widthClass(clamped / 5),
+        )}
       >
         {STARS}
       </span>

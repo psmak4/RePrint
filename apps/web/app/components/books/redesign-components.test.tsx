@@ -31,10 +31,12 @@ describe('generated cover', () => {
       <Cover cover={null} title="Dune" slug="dune" authorName="Frank Herbert" />,
     )
     const cover = container.querySelector('[data-generated-cover]') as HTMLElement
-    expect(cover.style.backgroundColor).not.toBe('')
+    expect(cover.className).toMatch(/bg-\[#[0-9a-f]{6}\]/)
     const again = render(<Cover cover={null} title="Other title" slug="dune" />)
     const second = again.container.querySelector('[data-generated-cover]') as HTMLElement
-    expect(second.style.backgroundColor).toBe(cover.style.backgroundColor)
+    expect(second.className).toBe(cover.className)
+    // The CSP (`style-src 'self'`) blocks style attributes, so a cover carries none.
+    expect(container.querySelectorAll('[style]')).toHaveLength(0)
     expect(generatedCoverColor('dune')).toBeTruthy()
     expect(cover.className).toContain('aspect-[2/3]')
   })
@@ -49,7 +51,9 @@ describe('StarRating', () => {
   it('is named "Rated X out of 5" and fills partially', () => {
     render(<StarRating average={4.3} />)
     expect(screen.getByRole('img', { name: 'Rated 4.3 out of 5' })).toBeTruthy()
-    expect(screen.getByTestId('star-fill').style.width).toBe('86%')
+    const fill = screen.getByTestId('star-fill')
+    expect(fill.className).toContain('w-[85%]')
+    expect(fill.hasAttribute('style')).toBe(false)
   })
 
   it('clamps out-of-range averages', () => {
