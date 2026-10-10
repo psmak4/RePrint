@@ -358,7 +358,9 @@ function BookHeader({
           authorName={groups[0]?.people[0]?.name}
           slug={book.slug}
           size="large"
-          className="w-44 shadow-[inset_5px_0_0_rgba(0,0,0,0.25),0_30px_50px_-22px_rgba(15,23,42,0.6)] md:w-full"
+          raised
+          priority
+          className="w-44 md:w-full"
         />
         <div className="flex w-full min-w-0 flex-col items-center gap-[18px] md:items-start md:gap-[22px] md:pt-2">
           {membership ? (

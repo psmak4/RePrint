@@ -3,7 +3,7 @@ import { cn } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { copy } from '../../copy/index.js'
 import { generatedCoverClass } from '../../lib/cover-color.js'
-import { type CoverSize, coverUrl } from '../../lib/cover-url.js'
+import { type CoverSize, coverSrcSet, coverUrl } from '../../lib/cover-url.js'
 
 /** A bound book's spine edge and soft drop shadow (docs/DESIGN.md, Generated covers). */
 export const COVER_SHADOW =
@@ -15,9 +15,19 @@ const WIDTHS: Record<CoverSize, string> = {
   large: 'w-40 md:w-56',
 }
 
+/** Wider than 2:3, so the image fills the width of its space rather than the height. */
+const isWide = (img: HTMLImageElement) =>
+  img.naturalWidth > 0 && img.naturalWidth / img.naturalHeight > 2 / 3
+
+/** A bigger, softer shadow for the one large cover in a page header. */
+export const COVER_SHADOW_RAISED =
+  'shadow-[inset_5px_0_0_rgba(0,0,0,0.25),0_30px_50px_-22px_rgba(15,23,42,0.6)]'
+
 /**
- * A Book's Cover at 2:3, with space reserved so nothing shifts. When the image is missing or
- * fails to load, a generated cover shows the title and author instead (PRD §6).
+ * A Book's Cover in a 2:3 space reserved up front so nothing shifts. The image is never cropped:
+ * it is scaled to fit and sits at the bottom of the space, and the spine shadow and corners go on
+ * the image itself, so a cover that is a little narrower or wider than 2:3 still looks bound. When
+ * the image is missing or fails to load, a generated cover shows the title and author (PRD §6).
  */
 export function Cover({
   cover,
@@ -26,6 +36,8 @@ export function Cover({
   slug,
   dashed = false,
   size = 'medium',
+  raised = false,
+  priority = false,
   className,
 }: {
   cover: CoverData | null
@@ -36,24 +48,25 @@ export function Cover({
   /** A dashed frame for a Book that is not on RePrint yet (search candidates). */
   dashed?: boolean
   size?: CoverSize
+  /** The large header cover: a deeper shadow. */
+  raised?: boolean
+  /** The page's main image (the Book header): load it at once instead of lazily. */
+  priority?: boolean
   className?: string
 }) {
   const url = coverUrl(cover, size)
   const [failed, setFailed] = useState(false)
+  // Narrower than 2:3 (most covers) fills the height; wider fills the width. Decided on load.
+  const [wide, setWide] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
-  // An image that failed before hydration never fires `onError` in React, so check it once mounted.
+  // An image that loaded or failed before hydration never fires its events in React, so check it.
   useEffect(() => {
     const img = imgRef.current
-    if (img?.complete && img.naturalWidth === 0) setFailed(true)
+    if (!img?.complete) return
+    if (img.naturalWidth === 0) setFailed(true)
+    else setWide(isWide(img))
   }, [])
-
-  const frame = cn(
-    'relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] bg-surface-raised',
-    COVER_SHADOW,
-    WIDTHS[size],
-    className,
-  )
 
   if (!url || failed) {
     return (
@@ -62,20 +75,34 @@ export function Cover({
         authorName={authorName}
         slug={slug ?? title}
         dashed={dashed}
+        raised={raised}
         className={cn(WIDTHS[size], className)}
       />
     )
   }
 
   return (
-    <div className={frame}>
+    <div
+      className={cn(
+        'relative flex aspect-[2/3] shrink-0 items-end justify-center',
+        WIDTHS[size],
+        className,
+      )}
+    >
       <img
         ref={imgRef}
         src={url}
+        srcSet={coverSrcSet(cover, size)}
         alt={copy.books.coverAlt(title)}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : undefined}
         decoding="async"
-        className="h-full w-full object-cover"
+        className={cn(
+          'block rounded-[3px_6px_6px_3px] bg-surface-raised object-contain',
+          wide ? 'h-auto max-h-full w-full' : 'h-full max-w-full w-auto',
+          raised ? COVER_SHADOW_RAISED : COVER_SHADOW,
+        )}
+        onLoad={(event) => setWide(isWide(event.currentTarget))}
         onError={() => setFailed(true)}
       />
     </div>
@@ -92,12 +119,14 @@ export function GeneratedCover({
   authorName,
   slug,
   dashed = false,
+  raised = false,
   className,
 }: {
   title: string
   authorName?: string | null | undefined
   slug: string
   dashed?: boolean
+  raised?: boolean
   className?: string
 }) {
   return (
@@ -109,7 +138,7 @@ export function GeneratedCover({
         '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] text-[#fdfaf3]',
         dashed
           ? 'border border-dashed border-[#a8a29e] bg-surface-raised text-[#334155]'
-          : [generatedCoverClass(slug), COVER_SHADOW],
+          : [generatedCoverClass(slug), raised ? COVER_SHADOW_RAISED : COVER_SHADOW],
         className,
       )}
     >

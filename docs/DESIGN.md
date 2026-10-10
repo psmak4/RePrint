@@ -97,6 +97,10 @@ Every pair is checked on all four grounds: background / surface / surface-raised
 
 Amber (`star`) only ever means a rating or a featured label; it is never an action colour. Body copy that needs more weight than `muted-foreground` uses `#334155` (9.9:1 on background).
 
+### Image covers
+
+A real cover is never cropped. Its 2:3 space is reserved up front (no layout shift), the image is scaled to fit and sits at the bottom of that space, and the spine shadow and corners go on the image itself, so covers a little narrower or wider than 2:3 keep their whole artwork. Rows and grids add a `srcset` with the next Open Library size for high-density screens. The Book header loads the largest size eagerly with high fetch priority, since it is the page's largest image.
+
 ### Generated covers
 
 A Book with no Cover image gets a generated cover: a solid colour chosen by hashing the slug into this list, `#1e3a8a #312e81 #155e75 #134e4a #14532d #3f6212 #713f12 #7c2d12 #9a3412 #831843 #4c1d95 #57534e`, with a 1 px inset frame at 32% opacity, the author in small uppercase at the top, the title in the serif in the middle, and a short rule below. Text is `#fdfaf3` (at least 6.5:1 on every colour; the author line at 88% opacity stays above 4.5:1). Sizes scale with the cover through container query units, so one component serves 44 px thumbnails and the 300 px Book header.
