@@ -638,3 +638,7 @@ Entry format:
 ### 2026-10-10 · M9 review follow-ups (owner) · owner/m9-followups
 - The owner's review of the M9 screenshots found two issues, queued as M9-T09 (rating summary shows five filled stars at phone width) and M9-T10 (local `pnpm test:e2e` writes test Books, users, and reviews into the developer's `reprint` database; the stub Source's "Dune" with cover ID 1 and year 1937 came from that).
 - Next iteration: M9-T09.
+
+### 2026-10-10 · M9-T09 · PR pending
+- Cause: the `StarRating` fill is a percentage of its root, and in the rating breakdown's flex column at phone width the root stretched to the full column, so 3.0 filled the whole box. Fix: `w-max` on the root (D-186). `e2e/specs/star-rating.spec.ts` measures the fill at 390 px for 3.0 and 3.5 (fails without `w-max`, confirmed); a unit test pins the class.
+- Next iteration: M9-T10 (isolated local e2e). Stray `pnpm dev` servers were already on ports 5173 and 3000 (not started by the loop), so the new spec ran against them. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
