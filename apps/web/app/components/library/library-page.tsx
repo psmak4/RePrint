@@ -2,8 +2,10 @@ import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@r
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type LibraryView, libraryHref } from '../../lib/library-links.js'
-import { BookCard } from '../books/book-card.js'
+import { InitialsAvatar } from '../books/avatar.js'
+import { BookGrid } from '../books/book-tile.js'
 import { summaryCard } from '../books/genre-pages.js'
+import { PageHero, PagerLinks } from '../books/page-hero.js'
 import { BookShelfSelector } from '../books/shelf-selector.js'
 
 const text = copy.library
@@ -25,7 +27,10 @@ function Tabs({
   counts: LibraryResponse['counts']
 }) {
   return (
-    <nav aria-label={text.tabsLabel} className="flex flex-wrap gap-2 border-b border-border">
+    <nav
+      aria-label={text.tabsLabel}
+      className="flex gap-6 overflow-x-auto border-b border-border [scrollbar-width:none] md:gap-7"
+    >
       {TABS.map((tab) => {
         const current = view.shelf === tab.shelf
         return (
@@ -33,13 +38,17 @@ function Tabs({
             key={tab.key}
             to={libraryHref(username, view, { shelf: tab.shelf, page: 1 })}
             aria-current={current ? 'page' : undefined}
-            className={
+            aria-label={text.tabLabel(text.tabs[tab.key], counts[tab.key])}
+            className={`-mb-px inline-flex h-[52px] shrink-0 items-center gap-2 border-b-2 text-base font-medium whitespace-nowrap ${
               current
-                ? 'border-b-2 border-primary px-3 py-2 font-semibold'
-                : 'px-3 py-2 text-muted-foreground hover:text-foreground'
-            }
+                ? 'border-accent text-foreground'
+                : 'border-transparent text-[#334155] hover:text-foreground'
+            }`}
           >
-            {text.tabLabel(text.tabs[tab.key], counts[tab.key])}
+            {text.tabs[tab.key]}
+            <span className="rounded-full bg-[#ece8e0] px-2 py-0.5 text-xs font-semibold text-[#334155]">
+              {counts[tab.key]}
+            </span>
           </Link>
         )
       })}
@@ -50,14 +59,14 @@ function Tabs({
 function SortForm({ username, view }: { username: string; view: LibraryView }) {
   // A plain GET form, so sorting works without JavaScript; the Shelf tab is kept and the page resets.
   return (
-    <Form method="get" action={`/u/${username}/library`} className="flex flex-wrap items-end gap-3">
+    <Form method="get" action={`/u/${username}/library`} className="flex items-center gap-2.5">
       {view.shelf ? <input type="hidden" name="shelf" value={view.shelf} /> : null}
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex items-center gap-2.5 text-sm text-muted-foreground">
         {text.sortLabel}
         <select
           name="sort"
           defaultValue={view.sort}
-          className="rounded-md border border-input-border bg-background px-2 py-1.5"
+          className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
         >
           {LIBRARY_SORTS.map((sort) => (
             <option key={sort} value={sort}>
@@ -68,7 +77,7 @@ function SortForm({ username, view }: { username: string; view: LibraryView }) {
       </label>
       <button
         type="submit"
-        className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface"
+        className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
       >
         {text.apply}
       </button>
@@ -87,42 +96,26 @@ function Pagination({
 }) {
   if (totalPages <= 1) return null
   return (
-    <nav aria-label={text.pagesLabel} className="flex items-center justify-between">
-      {view.page > 1 ? (
-        <Link
-          rel="prev"
-          to={libraryHref(username, view, { page: view.page - 1 })}
-          className="text-link underline"
-        >
-          {text.previous}
-        </Link>
-      ) : (
-        <span />
-      )}
-      <span className="text-sm text-muted-foreground">{text.pageOf(view.page, totalPages)}</span>
-      {view.page < totalPages ? (
-        <Link
-          rel="next"
-          to={libraryHref(username, view, { page: view.page + 1 })}
-          className="text-link underline"
-        >
-          {text.next}
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
+    <PagerLinks
+      label={text.pagesLabel}
+      previous={
+        view.page > 1
+          ? { href: libraryHref(username, view, { page: view.page - 1 }), text: text.previous }
+          : null
+      }
+      next={
+        view.page < totalPages
+          ? { href: libraryHref(username, view, { page: view.page + 1 }), text: text.next }
+          : null
+      }
+      status={text.pageOf(view.page, totalPages)}
+    />
   )
 }
 
 /** Shown to everyone but the owner when the Library is private (or the account does not exist; D-141). */
 export function PrivateLibrary() {
-  return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-3xl font-semibold">{text.privateHeading}</h1>
-      <p className="text-muted-foreground">{text.privateBody}</p>
-    </div>
-  )
+  return <PageHero title={text.privateHeading} lead={text.privateBody} />
 }
 
 /** `/u/:username/library`: Shelf tabs with counts, sort, and pages in the URL (PRD §7.7). */
@@ -138,38 +131,54 @@ export function LibraryPage({
   viewer?: Viewer | null
 }) {
   const isOwner = viewer !== null && viewer.username.toLowerCase() === username.toLowerCase()
+  const total = library.counts.all
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-semibold">
-        {isOwner ? text.ownHeading : text.heading(username)}
-      </h1>
-      <Tabs username={username} view={view} counts={library.counts} />
-      <SortForm username={username} view={view} />
-      {library.items.length === 0 ? (
-        <p className="text-muted-foreground">
-          {text.empty}{' '}
-          <Link to="/" className="text-link underline">
-            {text.discoverPrompt}
-          </Link>
-        </p>
-      ) : (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {library.items.map(({ shelf, book }) => (
-            <li key={book.id}>
-              <BookCard
-                book={summaryCard(book)}
-                href={`/books/${book.slug}`}
-                shelf={
-                  isOwner ? (
-                    <BookShelfSelector book={{ ...book, viewerShelf: shelf }} signedIn />
-                  ) : undefined
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-      <Pagination username={username} view={view} totalPages={library.meta.totalPages} />
+    <div className="flex flex-col gap-8 md:gap-10">
+      <PageHero
+        eyebrow={
+          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:text-[13px]">
+            {text.eyebrow}
+          </p>
+        }
+        leading={
+          <InitialsAvatar
+            name={username}
+            size="xl"
+            className="size-16 text-2xl md:size-[88px] md:text-[32px]"
+          />
+        }
+        title={isOwner ? text.ownHeading : text.heading(username)}
+        lead={isOwner ? text.ownShelfCount(total) : text.shelfCount(total)}
+      />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+          <Tabs username={username} view={view} counts={library.counts} />
+          <SortForm username={username} view={view} />
+        </div>
+        {library.items.length === 0 ? (
+          <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-[#a8a29e] px-6 py-5">
+            <p className="text-muted-foreground">{text.empty}</p>
+            <Link
+              to="/"
+              className="inline-flex h-11 items-center rounded-full bg-accent px-5 text-[15px] font-semibold text-accent-foreground hover:bg-accent-hover"
+            >
+              {text.discoverPrompt}
+            </Link>
+          </div>
+        ) : (
+          <BookGrid
+            items={library.items.map(({ shelf, book }) => ({
+              slug: book.slug,
+              book: summaryCard(book),
+              eyebrow: view.shelf ? undefined : text.tabs[shelf],
+              shelf: isOwner ? (
+                <BookShelfSelector book={{ ...book, viewerShelf: shelf }} signedIn variant="icon" />
+              ) : undefined,
+            }))}
+          />
+        )}
+        <Pagination username={username} view={view} totalPages={library.meta.totalPages} />
+      </div>
     </div>
   )
 }

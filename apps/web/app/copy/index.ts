@@ -499,7 +499,10 @@ export const copy = {
   },
   genres: {
     indexTitle: 'Genres',
-    indexIntro: 'Browse books by genre.',
+    indexIntro: 'Every shelf in the catalog. Pick one to see its top-rated books.',
+    includes: 'Includes',
+    breadcrumbLabel: 'Breadcrumb',
+    discover: 'Discover',
     indexEmpty: 'No genres yet',
     indexMetaDescription: 'Browse books by genre, with ratings and reviews on RePrint.',
     parentLabel: 'Parent genre',
@@ -556,6 +559,9 @@ export const copy = {
     tabsLabel: 'Shelves',
     tabs: { all: 'All', reading: 'Reading', want_to_read: 'Want to Read', read: 'Read' },
     tabLabel: (name: string, count: number) => `${name} (${count})`,
+    eyebrow: 'Library',
+    shelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on their shelves`,
+    ownShelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on your shelves`,
     sortLabel: 'Sort by',
     sorts: {
       added_desc: 'Newest added',

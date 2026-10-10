@@ -1,18 +1,7 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
-import type { BookCardData } from './book-card.js'
-import { Cover } from './cover.js'
-import { StarRating } from './star-rating.js'
+import { BookTile, type BookTileItem } from './book-tile.js'
 
-export type BookRailItem = {
-  slug: string
-  book: BookCardData
-  /** Extra line under the stars, such as "46 new reviews". */
-  note?: string
-  /** The shelf control; it sits on the cover's top-right corner (use the `icon` variant). */
-  shelf?: ReactNode
-}
+export type BookRailItem = BookTileItem
 
 /**
  * A row of cover-first Books: a grid from `lg`, a horizontal scroller below. The scroller is a
@@ -42,41 +31,14 @@ export function BookRail({
       <ul
         className={`flex gap-4 pb-2 lg:grid lg:grid-cols-6 lg:gap-6 lg:pb-0 ${columns === 7 ? 'xl:grid-cols-7' : ''}`}
       >
-        {items.map(({ slug, book, note, shelf }) => {
-          const average = book.rating?.average ?? null
-          const count = book.rating?.count ?? 0
-          return (
-            <li key={slug} className="relative flex w-[140px] shrink-0 flex-col gap-1.5 lg:w-auto">
-              <Link to={hrefFor(slug)} className="mb-1.5 block" tabIndex={-1} aria-hidden="true">
-                <Cover
-                  cover={book.cover}
-                  title={book.title}
-                  authorName={book.authorNames[0]}
-                  slug={slug}
-                  size="medium"
-                  className="w-full"
-                />
-              </Link>
-              {shelf ? <div className="absolute top-2 right-2">{shelf}</div> : null}
-              <h3 className="font-serif text-base leading-5 font-medium md:text-lg md:leading-[22px]">
-                <Link to={hrefFor(slug)} className="hover:underline">
-                  {book.title}
-                </Link>
-              </h3>
-              {book.authorNames.length > 0 ? (
-                <p className="text-sm text-muted-foreground">{book.authorNames.join(', ')}</p>
-              ) : null}
-              {average !== null && count > 0 ? (
-                <p className="flex items-center gap-2 text-sm">
-                  <StarRating average={average} className="text-sm" />
-                  <span className="font-semibold">{average.toFixed(1)}</span>
-                  <span className="text-muted-foreground">({count})</span>
-                </p>
-              ) : null}
-              {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
-            </li>
-          )
-        })}
+        {items.map((item) => (
+          <BookTile
+            key={item.slug}
+            item={item}
+            href={hrefFor(item.slug)}
+            className="w-[140px] shrink-0 lg:w-auto"
+          />
+        ))}
       </ul>
     </section>
   )

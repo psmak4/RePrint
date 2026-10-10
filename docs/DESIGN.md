@@ -166,9 +166,13 @@ Single 40 rem column. Fields in order: star rating (radio group), headline with 
 
 Admin layout (below). Two panes from `lg`: a queue list on the left (oldest first, age and rating per row) and the selected review on the right (Book, reviewer history, rating, full text, spoiler flag, and a diff for edits). The action bar (Approve, Reject with reason picker) is sticky at the bottom of the right pane. Keyboard shortcuts are listed in a help dialog.
 
-### Library (`/me/library`, `/users/:username/library`)
+### Genres (`/genres`) and Genre (`/genres/:slug`)
 
-Tabs for the three Shelves with counts, then a grid of `BookCard`s (2 columns at base, 3 at `md`, 4 at `lg`) with sort options. Owner view adds a shelf selector on each card. Empty shelf: one sentence and a link to Discover.
+Both open with the `PageHero` band (`ground-deep`): breadcrumb, serif `h1` (38 px, 56 px from `md`), and a lead. The index is a grid of `GenreTile`s (2 across at base, 3 at `md`, 6 at `lg`); a child Genre is a small chip under its parent's tile. A Genre page adds its child Genres as pill links in the band, then sort as pill links (Top rated, Most reviewed, Newest review), the Books as a `BookGrid` (2, 3, 4, then 6 across), and Previous / Next pills.
+
+### Library (`/u/:username/library`)
+
+`PageHero` with a "Library" eyebrow, an initials avatar, "<username>'s library" (or "Your library" for the owner), and the shelved count. Below: Shelf tabs (All, Reading, Want to Read, Read) as underlined tabs with count badges, and sort (its own GET form with Apply) on the right from `md`. The Books are a `BookGrid`; in the All tab each tile is labelled with its Shelf, and the owner gets the bookmark shelf control on each cover. An empty Shelf is a dashed box with one sentence and a "Find something to read" pill. A private (or missing) Library is the band alone with the private message.
 
 ### Public profile (`/users/:username`)
 
