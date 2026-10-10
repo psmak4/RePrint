@@ -96,12 +96,13 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `apps/web/netlify.toml` builds with `@netlify/vite-plugin-react-router`, uses Node 24, and caches hashed assets immutably
   - Accept: `.github/workflows/deploy-staging.yml` runs on push to `main`: migrate staging, deploy the API and worker, deploy the web app, smoke-test `/v1/ready` and `/`; it exits with a notice (not a failure) when the staging secrets are absent
   - Accept: `docs/deploy.md` lists every secret and variable the workflows read
-- [ ] M1-T19 · HUMAN · Create staging infrastructure (Neon, Render, Netlify, Resend, Sentry) and add deploy secrets · deps: M1-T18 · PRD: §13, §8, §11
+- [~] M1-T19 · HUMAN · Create staging infrastructure (Neon, Render, Netlify, Resend, Sentry) and add deploy secrets · deps: M1-T18 · PRD: §13, §8, §11
   - Accept: Neon staging project in US East on Postgres 18 (or 17 if 18 is unsupported, recorded in `docs/DECISIONS.md`), with `pg_trgm`, `unaccent`, and `citext` available
   - Accept: Render Blueprint from `render.yaml` is created, with staging env vars from `.env.example` filled in (never in git)
   - Accept: Netlify site linked to `apps/web`; Resend account with a sandbox domain; Sentry projects for web and api
   - Accept: every secret listed in `docs/deploy.md` is set in GitHub Actions; `staging.reprint.com` and `api.staging.reprint.com` DNS exist (or platform URLs are recorded in `docs/deploy.md`)
   - Accept: Free-tier variant (2026-10-09, D-175): follow `docs/deploy.md` → "Free-tier staging setup"; the Render Blueprint uses `render.staging.yaml`, platform URLs instead of custom DNS, and no Sentry. Mark `[x]` once the "Deploy staging" workflow's smoke test passes.
+  - Accept: On hold (2026-10-10): the owner is setting up free-tier staging (`docs/deploy.md`) and chose to run M9 first. Change back to `[x]` once the "Deploy staging" smoke test passes, so M1-T20 and M8-T12 become eligible.
 - [ ] M1-T20 · Turn on staging auto-deploy and smoke tests · deps: M1-T19 · PRD: §12, §13
   - Accept: after this PR merges, `gh run list --workflow deploy-staging.yml --limit 1` shows a successful run
   - Accept: the workflow's smoke step gets 200 from staging `/v1/ready` and `/`
