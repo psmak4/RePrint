@@ -2,7 +2,7 @@ import type { Cover as CoverData } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { copy } from '../../copy/index.js'
-import { generatedCoverColor } from '../../lib/cover-color.js'
+import { generatedCoverClass } from '../../lib/cover-color.js'
 import { type CoverSize, coverUrl } from '../../lib/cover-url.js'
 
 const WIDTHS: Record<CoverSize, string> = {
@@ -101,35 +101,25 @@ export function GeneratedCover({
       aria-label={copy.books.coverAlt(title)}
       data-generated-cover=""
       className={cn(
-        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-md shadow-sm',
+        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-md text-[#fdfaf3] shadow-sm',
+        generatedCoverClass(slug),
         className,
       )}
-      style={{ backgroundColor: generatedCoverColor(slug), color: '#fdfaf3' }}
     >
       <div
         aria-hidden="true"
         className={cn(
-          'absolute inset-[3%] flex flex-col items-center justify-between border text-center',
+          'absolute inset-[3%] flex flex-col items-center justify-between border border-[rgba(253,250,243,0.32)] p-[8cqw] text-center',
           dashed ? 'border-dashed' : '',
         )}
-        style={{ borderColor: 'rgba(253, 250, 243, 0.32)', padding: '8cqw' }}
       >
-        <span
-          className="line-clamp-2 w-full font-semibold tracking-widest break-words uppercase"
-          style={{ fontSize: '6cqw', lineHeight: 1.3, opacity: 0.88 }}
-        >
+        <span className="line-clamp-2 w-full text-[6cqw] leading-[1.3] font-semibold tracking-widest break-words uppercase opacity-[0.88]">
           {authorName ?? ''}
         </span>
-        <span
-          className="line-clamp-5 w-full font-serif font-medium break-words"
-          style={{ fontSize: '12cqw', lineHeight: 1.1 }}
-        >
+        <span className="line-clamp-5 w-full font-serif text-[12cqw] leading-[1.1] font-medium break-words">
           {title}
         </span>
-        <span
-          className="block"
-          style={{ width: '16cqw', borderTop: '1px solid rgba(253, 250, 243, 0.6)' }}
-        />
+        <span className="block w-[16cqw] border-t border-[rgba(253,250,243,0.6)]" />
       </div>
     </div>
   )

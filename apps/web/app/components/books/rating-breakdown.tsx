@@ -1,4 +1,5 @@
 import { copy } from '../../copy/index.js'
+import { widthClass } from '../../lib/width-class.js'
 import { StarRating } from './star-rating.js'
 
 const text = copy.redesign.ratingBreakdown
@@ -48,8 +49,7 @@ export function RatingBreakdown({
                 </span>
                 <span aria-hidden="true" className="h-2.5 flex-1 rounded-full bg-[#ece8e0]">
                   <span
-                    className={`block h-2.5 rounded-full ${active ? 'bg-accent' : 'bg-star'}`}
-                    style={{ width: `${(n / max) * 100}%` }}
+                    className={`block h-2.5 rounded-full ${active ? 'bg-accent' : 'bg-star'} ${widthClass(n / max)}`}
                   />
                 </span>
                 <span aria-hidden="true" className="w-8 shrink-0 text-right text-muted-foreground">

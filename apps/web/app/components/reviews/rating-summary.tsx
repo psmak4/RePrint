@@ -2,6 +2,7 @@ import type { RatingSummary as Summary } from '@reprint/shared'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
+import { widthClass } from '../../lib/width-class.js'
 
 const text = copy.reviews.list
 
@@ -53,8 +54,7 @@ export function RatingSummary({
                 </span>
                 <span aria-hidden="true" className="h-3 flex-1 rounded bg-input-border/40">
                   <span
-                    className={`block h-3 rounded ${active ? 'bg-link' : 'bg-warning'}`}
-                    style={{ width: `${(count / max) * 100}%` }}
+                    className={`block h-3 rounded ${active ? 'bg-link' : 'bg-warning'} ${widthClass(count / max)}`}
                   />
                 </span>
                 <span aria-hidden="true" className="w-8 shrink-0 text-right text-muted-foreground">
