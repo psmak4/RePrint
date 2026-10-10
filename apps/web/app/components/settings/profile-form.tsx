@@ -44,11 +44,14 @@ export function ProfileForm({ me }: { me: Me }) {
   const bioError = errors.bio?.message
 
   return (
-    <section aria-labelledby="profile-heading">
-      <h2 id="profile-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="profile-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="profile-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.lead}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>
       <form
         noValidate
         className="mt-4 flex flex-col gap-5"
@@ -57,7 +60,10 @@ export function ProfileForm({ me }: { me: Me }) {
         )}
       >
         {fetcher.data?.formError ? (
-          <p role="alert" className="rounded-md border border-danger px-3 py-2 text-sm text-danger">
+          <p
+            role="alert"
+            className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+          >
             {fetcher.data.formError}
           </p>
         ) : null}

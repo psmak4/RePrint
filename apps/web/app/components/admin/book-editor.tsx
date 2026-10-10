@@ -14,7 +14,7 @@ import { Cover } from '../books/cover.js'
 
 const text = copy.admin.book
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type SaveResult =
   | { done: 'edit' | 'cover'; book: AdminBook }
@@ -41,7 +41,7 @@ function Locked({ field, book }: { field: string; book: AdminBookDetail }) {
   const origin = book.fieldOrigins[field]
   return (
     <span className="text-xs text-muted-foreground">
-      <span className="rounded border border-border px-1.5 py-0.5 font-medium">
+      <span className="rounded-full bg-[#ece8e0] px-2 py-0.5 font-medium text-[#334155]">
         {text.lockedBadge}
       </span>
       {origin ? ` ${text.originLine(origin.source, date.format(new Date(origin.at)))}` : null}
@@ -145,7 +145,7 @@ function EditForm({ book, genres }: { book: AdminBookDetail; genres: AdminGenre[
       }}
       className="flex flex-col gap-5"
     >
-      <h2 className="text-xl font-semibold">{text.fieldsHeading}</h2>
+      <h2 className="font-serif text-2xl leading-tight font-medium">{text.fieldsHeading}</h2>
       <div className="flex flex-col gap-1">
         <Label htmlFor={`${ids}-title`}>{text.titleLabel}</Label>
         <Input
@@ -372,7 +372,7 @@ function CoverPanel({ book }: { book: AdminBookDetail }) {
   const result = fetcher.data
   return (
     <section aria-label={text.coverHeading} className="flex flex-col gap-3">
-      <h2 className="text-xl font-semibold">{text.coverHeading}</h2>
+      <h2 className="font-serif text-2xl leading-tight font-medium">{text.coverHeading}</h2>
       <Cover cover={book.cover} title={book.title} size="medium" />
       <Locked field="cover" book={book} />
       <form
@@ -416,7 +416,7 @@ function RefreshPanel() {
   const result = fetcher.data
   return (
     <section aria-label={text.refreshHeading} className="flex flex-col gap-2">
-      <h2 className="text-xl font-semibold">{text.refreshHeading}</h2>
+      <h2 className="font-serif text-2xl leading-tight font-medium">{text.refreshHeading}</h2>
       <p className="text-sm text-muted-foreground">{text.refreshHint}</p>
       <div>
         <Button
@@ -441,7 +441,7 @@ function RefreshPanel() {
 function LockedSummary({ book }: { book: AdminBookDetail }) {
   return (
     <section aria-label={text.lockedHeading} className="flex flex-col gap-2">
-      <h2 className="text-xl font-semibold">{text.lockedHeading}</h2>
+      <h2 className="font-serif text-2xl leading-tight font-medium">{text.lockedHeading}</h2>
       <p className="text-sm text-muted-foreground">{text.lockedHint}</p>
       {book.lockedFields.length === 0 ? (
         <p className="text-sm">{text.noLocks}</p>
@@ -469,7 +469,9 @@ export function BookEditor({ book, genres }: { book: AdminBookDetail; genres: Ad
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">{text.title}</h1>
+        <h1 className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]">
+          {text.title}
+        </h1>
         <p className="text-muted-foreground">{book.title}</p>
         <Link to={`/books/${book.slug}`} className="text-sm underline">
           {text.back}

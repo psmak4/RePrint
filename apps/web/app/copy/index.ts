@@ -477,6 +477,7 @@ export const copy = {
     },
   },
   author: {
+    eyebrow: 'Author',
     photoAlt: (name: string) => `Photo of ${name}`,
     born: (year: string) => `Born ${year}`,
     lifeSpan: (birth: string, death: string) => `${birth} to ${death}`,
@@ -523,6 +524,8 @@ export const copy = {
     loadFailed: "We couldn't load genres right now. Please try again in a moment.",
   },
   series: {
+    eyebrow: 'Series',
+    bookCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} in reading order`,
     booksHeading: 'Books in reading order',
     position: (position: number) => `Book ${position}`,
     noPosition: 'Not numbered',

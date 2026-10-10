@@ -31,7 +31,7 @@ export function BookCard({
 }) {
   const authors = book.authorNames.join(', ')
   return (
-    <article className="flex gap-4 rounded-lg border border-border bg-surface p-4">
+    <article className="flex gap-4 rounded-2xl border border-border bg-surface p-5 md:p-6">
       <Cover cover={book.cover} title={book.title} authorName={book.authorNames[0]} size="medium" />
       <div className="flex min-w-0 flex-col gap-1">
         <h3 className="text-base font-semibold">

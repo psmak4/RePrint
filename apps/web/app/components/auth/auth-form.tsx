@@ -60,13 +60,16 @@ export function AuthForm<T extends FieldValues>({
   return (
     <form
       noValidate
-      className="mt-6 flex flex-col gap-5"
+      className="mt-7 flex flex-col gap-5"
       onSubmit={handleSubmit((values) =>
         fetcher.submit(values as never, { method: 'post', encType: 'application/json' }),
       )}
     >
       {failure.formError ? (
-        <p role="alert" className="rounded-md border border-danger px-3 py-2 text-sm text-danger">
+        <p
+          role="alert"
+          className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+        >
           {failure.formError}
         </p>
       ) : null}
@@ -101,7 +104,7 @@ export function AuthForm<T extends FieldValues>({
           </div>
         )
       })}
-      <Button type="submit" disabled={busy}>
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={busy}>
         {busy ? copy.auth.submitting : submitLabel}
       </Button>
     </form>

@@ -1,6 +1,7 @@
 import { type ForgotPasswordRequest, forgotPasswordRequestSchema } from '@reprint/shared'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AuthCard } from './auth-card.js'
 import { type AuthField, AuthForm } from './auth-form.js'
 
 const fields: AuthField<ForgotPasswordRequest>[] = [
@@ -12,18 +13,21 @@ export function ForgotPasswordPage() {
   const c = copy.auth.forgot
 
   if (fetcher.data?.status === 'check_your_email') {
-    return (
-      <section className="mx-auto max-w-md py-8" aria-live="polite">
-        <h1 className="text-3xl font-semibold">{c.checkEmailTitle}</h1>
-        <p className="mt-4 text-muted-foreground">{c.checkEmailBody}</p>
-      </section>
-    )
+    return <AuthCard live title={c.checkEmailTitle} lead={c.checkEmailBody} />
   }
 
   return (
-    <section className="mx-auto max-w-md py-8">
-      <h1 className="text-3xl font-semibold">{c.title}</h1>
-      <p className="mt-4 text-muted-foreground">{c.lead}</p>
+    <AuthCard
+      title={c.title}
+      lead={c.lead}
+      footer={
+        <p>
+          <a className="text-link underline" href="/login">
+            {c.backToLogin}
+          </a>
+        </p>
+      }
+    >
       <AuthForm
         schema={forgotPasswordRequestSchema}
         fields={fields}
@@ -31,11 +35,6 @@ export function ForgotPasswordPage() {
         submitLabel={c.submit}
         fetcher={fetcher}
       />
-      <p className="mt-6 text-sm">
-        <a className="text-link underline" href="/login">
-          {c.backToLogin}
-        </a>
-      </p>
-    </section>
+    </AuthCard>
   )
 }

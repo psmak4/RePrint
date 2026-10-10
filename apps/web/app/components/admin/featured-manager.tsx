@@ -12,7 +12,7 @@ import { copy } from '../../copy/index.js'
 const text = copy.admin.featured
 
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type ActionResult =
   | { done: 'genresSaved' | 'reviewSaved' | 'reviewCleared' }
@@ -85,7 +85,7 @@ function GenrePicker({
 
   return (
     <section aria-labelledby="featured-genres-heading" className="flex flex-col gap-3">
-      <h3 id="featured-genres-heading" className="text-xl font-semibold">
+      <h3 id="featured-genres-heading" className="font-serif text-2xl leading-tight font-medium">
         {text.genresHeading}
       </h3>
       <p className="text-sm text-muted-foreground">
@@ -202,12 +202,12 @@ function ReviewPicker({
   const action = useAction()
   return (
     <section aria-labelledby="featured-review-heading" className="flex flex-col gap-3">
-      <h3 id="featured-review-heading" className="text-xl font-semibold">
+      <h3 id="featured-review-heading" className="font-serif text-2xl leading-tight font-medium">
         {text.reviewHeading}
       </h3>
       <p className="text-sm text-muted-foreground">{text.reviewHint}</p>
       {current ? (
-        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-3">
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4">
           <ReviewCard item={current} />
           <div>
             <Button
@@ -232,7 +232,7 @@ function ReviewPicker({
           {candidates.map((item) => (
             <li
               key={item.review.id}
-              className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-3"
+              className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4"
             >
               <ReviewCard item={item} />
               <div>
@@ -268,7 +268,10 @@ export function FeaturedManager({
 }) {
   return (
     <section aria-labelledby="featured-heading" className="flex flex-col gap-8">
-      <h2 id="featured-heading" className="text-2xl font-semibold">
+      <h2
+        id="featured-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       <GenrePicker

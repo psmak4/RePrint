@@ -64,6 +64,8 @@ export function BookTile({
             <span className="text-muted-foreground">({count})</span>
           </span>
         </p>
+      ) : book.rating ? (
+        <p className="text-sm text-muted-foreground">{copy.books.noReviews}</p>
       ) : null}
       {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
     </li>
@@ -74,13 +76,18 @@ export function BookTile({
 export function BookGrid({
   items,
   hrefFor = (slug) => `/books/${slug}`,
+  narrow = false,
 }: {
   items: BookTileItem[]
   hrefFor?: (slug: string) => string
+  /** In a column beside a sidebar: at most four across. */
+  narrow?: boolean
 }) {
   if (items.length === 0) return null
   return (
-    <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 md:gap-x-6 md:gap-y-10 lg:grid-cols-6">
+    <ul
+      className={`grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 md:gap-x-6 md:gap-y-10 ${narrow ? '' : 'lg:grid-cols-6'}`}
+    >
       {items.map((item) => (
         <BookTile key={item.slug} item={item} href={hrefFor(item.slug)} />
       ))}

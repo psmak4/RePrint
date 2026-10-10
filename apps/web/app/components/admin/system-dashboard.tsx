@@ -25,9 +25,9 @@ function age(seconds: number | null): string {
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="rounded-md border border-border p-4">
+    <div className="rounded-2xl border border-border bg-surface p-5">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-3xl font-semibold">{value}</dd>
+      <dd className="mt-2 font-serif text-[40px] leading-none font-medium">{value}</dd>
       {note ? <dd className="mt-1 text-sm text-muted-foreground">{note}</dd> : null}
     </div>
   )
@@ -46,7 +46,10 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
   return (
     <section aria-labelledby="system-heading" className="flex flex-col gap-6">
       <div>
-        <h2 id="system-heading" className="text-2xl font-semibold">
+        <h2
+          id="system-heading"
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
           {text.title}
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -54,7 +57,7 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
         </p>
       </div>
       <section aria-labelledby="source-heading" className="flex flex-col gap-3">
-        <h3 id="source-heading" className="text-xl font-semibold">
+        <h3 id="source-heading" className="font-serif text-2xl leading-tight font-medium">
           {text.sourceHeading}
         </h3>
         <dl className="grid gap-4 sm:grid-cols-2">
@@ -70,7 +73,7 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
         </dl>
       </section>
       <section aria-labelledby="cache-heading" className="flex flex-col gap-3">
-        <h3 id="cache-heading" className="text-xl font-semibold">
+        <h3 id="cache-heading" className="font-serif text-2xl leading-tight font-medium">
           {text.cacheHeading}
         </h3>
         <dl className="grid gap-4 sm:grid-cols-2">
@@ -86,7 +89,7 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
         </dl>
       </section>
       <section aria-labelledby="queue-heading" className="flex flex-col gap-3">
-        <h3 id="queue-heading" className="text-xl font-semibold">
+        <h3 id="queue-heading" className="font-serif text-2xl leading-tight font-medium">
           {text.queueHeading}
         </h3>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

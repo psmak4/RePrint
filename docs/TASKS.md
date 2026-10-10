@@ -616,4 +616,5 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: at 1440 px and 375 px, the header, footer, Discover, Book page, and search results match the canvas boards (layout, type sizes, pill buttons, cover styling, cards), with the gaps listed in D-188 for data the API does not send
   - Accept: no inline `style` attributes (the D-185 test passes), shell copy stays in `app/copy` (the copy guard passes), and the shelf control remains a native select in every variant
   - Accept: the Genres index, Genre pages, and Library use the same design (hero band, Genre tiles, cover-first Book grid, pill tabs and sort), at desktop and phone widths
+  - Accept: every other page (Author, Series, profile, settings, account and recovery pages, static pages, error and resolve pages, and admin) uses the same type, controls, cards, and hero band
   - Accept: `pnpm check` and `pnpm test:e2e` (with axe) pass

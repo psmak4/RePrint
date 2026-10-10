@@ -77,7 +77,7 @@ export function ReportReview({ reviewId }: { reviewId: string }) {
           }}
           className="flex flex-col gap-4"
         >
-          <h2 id={titleId} className="text-lg font-semibold">
+          <h2 id={titleId} className="font-serif text-xl leading-tight font-medium">
             {text.title}
           </h2>
           {received ? (

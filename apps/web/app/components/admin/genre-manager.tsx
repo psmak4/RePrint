@@ -7,7 +7,7 @@ import { copy } from '../../copy/index.js'
 const text = copy.admin.genres
 
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type ActionResult =
   | {
@@ -117,7 +117,7 @@ function GenreForm({
         event.preventDefault()
         submit()
       }}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
@@ -204,7 +204,7 @@ function GenreRow({ genre, genres }: { genre: AdminGenre; genres: AdminGenre[] }
             {parent ? `${parent.name} › ` : ''}
             {genre.name}
             {genre.archived ? (
-              <span className="ml-2 rounded-md border border-border px-2 py-0.5 text-xs font-normal">
+              <span className="ml-2 rounded-full bg-[#ece8e0] px-2.5 py-0.5 text-xs font-medium text-[#334155]">
                 {text.archivedBadge}
               </span>
             ) : null}
@@ -260,7 +260,7 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
   const chosen = genreId || live[0]?.id || ''
   return (
     <section aria-labelledby="rules-heading" className="flex flex-col gap-3">
-      <h3 id="rules-heading" className="text-xl font-semibold">
+      <h3 id="rules-heading" className="font-serif text-2xl leading-tight font-medium">
         {text.rulesHeading}
       </h3>
       <p className="text-sm text-muted-foreground">{text.rulesHint}</p>
@@ -271,7 +271,7 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
           {rules.map((rule) => (
             <li
               key={rule.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border p-2 text-sm"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3 text-sm"
             >
               <span>
                 <span className="font-medium">{rule.pattern}</span> → {rule.genre.name} ·{' '}
@@ -303,7 +303,7 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
           })
           setPattern('')
         }}
-        className="grid gap-3 rounded-lg border border-border bg-surface p-3 sm:grid-cols-3"
+        className="grid gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-3"
       >
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${ids}-pattern`}>{text.patternLabel}</Label>
@@ -371,11 +371,14 @@ export function GenreManager({
 }) {
   return (
     <section aria-labelledby="genres-heading" className="flex flex-col gap-6">
-      <h2 id="genres-heading" className="text-2xl font-semibold">
+      <h2
+        id="genres-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       <section aria-labelledby="genre-list-heading" className="flex flex-col gap-3">
-        <h3 id="genre-list-heading" className="text-xl font-semibold">
+        <h3 id="genre-list-heading" className="font-serif text-2xl leading-tight font-medium">
           {text.genresHeading}
         </h3>
         {genres.length === 0 ? (
@@ -389,7 +392,7 @@ export function GenreManager({
         )}
       </section>
       <section aria-labelledby="genre-add-heading" className="flex flex-col gap-3">
-        <h3 id="genre-add-heading" className="text-xl font-semibold">
+        <h3 id="genre-add-heading" className="font-serif text-2xl leading-tight font-medium">
           {text.addHeading}
         </h3>
         <GenreForm parents={genres} submitLabel={text.add} busyLabel={text.adding} />

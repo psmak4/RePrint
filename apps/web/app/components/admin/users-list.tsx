@@ -7,7 +7,7 @@ import { ScrollRegion } from './scroll-region.js'
 const text = copy.admin.users
 
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type Filters = { q: string; role: string; status: string; joinedFrom: string; joinedTo: string }
 
@@ -30,7 +30,10 @@ export function UsersList({
 
   return (
     <section aria-labelledby="users-heading" className="flex flex-col gap-4">
-      <h2 id="users-heading" className="text-2xl font-semibold">
+      <h2
+        id="users-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       <Form method="get" className="flex flex-wrap items-end gap-3">
@@ -90,24 +93,24 @@ export function UsersList({
           <table aria-label={text.listLabel} className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th scope="col" className="py-2 pr-4">
+                <th scope="col" className="py-3 pr-4">
                   {text.columns.user}
                 </th>
                 {canSearchEmail ? (
-                  <th scope="col" className="py-2 pr-4">
+                  <th scope="col" className="py-3 pr-4">
                     {text.columns.email}
                   </th>
                 ) : null}
-                <th scope="col" className="py-2 pr-4">
+                <th scope="col" className="py-3 pr-4">
                   {text.columns.status}
                 </th>
-                <th scope="col" className="py-2 pr-4">
+                <th scope="col" className="py-3 pr-4">
                   {text.columns.roles}
                 </th>
-                <th scope="col" className="py-2 pr-4">
+                <th scope="col" className="py-3 pr-4">
                   {text.columns.joined}
                 </th>
-                <th scope="col" className="py-2 pr-4">
+                <th scope="col" className="py-3 pr-4">
                   {text.columns.reviews}
                 </th>
                 <th scope="col" className="py-2">
@@ -118,25 +121,25 @@ export function UsersList({
             <tbody>
               {users.items.map((user) => (
                 <tr key={user.id} className="border-b border-border">
-                  <th scope="row" className="py-2 pr-4 font-medium">
+                  <th scope="row" className="py-3 pr-4 font-medium">
                     <Link to={`/admin/users/${user.id}`} className="underline">
                       {user.displayName}
                     </Link>
                     <span className="block text-muted-foreground">@{user.username}</span>
                   </th>
                   {canSearchEmail ? (
-                    <td className="py-2 pr-4 break-all">{user.email ?? text.noEmail}</td>
+                    <td className="py-3 pr-4 break-all">{user.email ?? text.noEmail}</td>
                   ) : null}
-                  <td className="py-2 pr-4">{text.statuses[user.status]}</td>
-                  <td className="py-2 pr-4">
+                  <td className="py-3 pr-4">{text.statuses[user.status]}</td>
+                  <td className="py-3 pr-4">
                     {user.roles.map((role) => text.roles[role]).join(', ')}
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-3 pr-4">
                     <time dateTime={user.joinedAt}>
                       {dateFormat.format(new Date(user.joinedAt))}
                     </time>
                   </td>
-                  <td className="py-2 pr-4">{user.reviewCount}</td>
+                  <td className="py-3 pr-4">{user.reviewCount}</td>
                   <td className="py-2">{user.reportsReceived}</td>
                 </tr>
               ))}

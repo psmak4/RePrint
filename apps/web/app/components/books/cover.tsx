@@ -123,7 +123,7 @@ export function GeneratedCover({
         <span className="line-clamp-2 w-full text-[6.4cqw] leading-[1.3] tracking-[0.14em] break-words uppercase opacity-[0.88]">
           {authorName ?? ''}
         </span>
-        <span className="line-clamp-5 w-full font-serif text-[13cqw] leading-[1.05] font-medium tracking-[-0.01em] break-words">
+        <span className="line-clamp-5 w-full font-serif text-[13cqw] leading-[1.05] font-medium tracking-[-0.01em] break-words hyphens-auto">
           {title}
         </span>
         <span className="block w-[20cqw] border-t border-current opacity-55" />

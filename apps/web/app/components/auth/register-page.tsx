@@ -2,6 +2,7 @@ import { type RegisterRequest, registerRequestSchema } from '@reprint/shared'
 import { useFetcher } from 'react-router'
 import { z } from 'zod'
 import { copy } from '../../copy/index.js'
+import { AuthCard } from './auth-card.js'
 import { type AuthField, AuthForm } from './auth-form.js'
 
 // While signups are closed the invite code is required, so the form asks for it up front.
@@ -40,17 +41,21 @@ export function RegisterPage({ signupsOpen }: { signupsOpen: boolean }) {
   const c = copy.auth.register
 
   if (fetcher.data?.status === 'check_your_email') {
-    return (
-      <section className="mx-auto max-w-md py-8" aria-live="polite">
-        <h1 className="text-3xl font-semibold">{c.checkEmailTitle}</h1>
-        <p className="mt-4 text-muted-foreground">{c.checkEmailBody}</p>
-      </section>
-    )
+    return <AuthCard live title={c.checkEmailTitle} lead={c.checkEmailBody} />
   }
 
   return (
-    <section className="mx-auto max-w-md py-8">
-      <h1 className="text-3xl font-semibold">{c.title}</h1>
+    <AuthCard
+      title={c.title}
+      footer={
+        <p>
+          {c.haveAccount}{' '}
+          <a className="font-semibold text-link underline" href="/login">
+            {c.loginLink}
+          </a>
+        </p>
+      }
+    >
       <AuthForm
         schema={signupsOpen ? registerRequestSchema : inviteRequiredSchema}
         fields={signupsOpen ? baseFields : [...baseFields, inviteField]}
@@ -62,12 +67,6 @@ export function RegisterPage({ signupsOpen }: { signupsOpen: boolean }) {
         submitLabel={c.submit}
         fetcher={fetcher}
       />
-      <p className="mt-6 text-sm text-muted-foreground">
-        {c.haveAccount}{' '}
-        <a className="text-link underline" href="/login">
-          {c.loginLink}
-        </a>
-      </p>
-    </section>
+    </AuthCard>
   )
 }

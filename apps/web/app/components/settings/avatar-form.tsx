@@ -39,8 +39,11 @@ export function AvatarForm({
   const error = missing ? c.chooseFile : fetcher.data?.formError
 
   return (
-    <section aria-labelledby="avatar-heading">
-      <h2 id="avatar-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="avatar-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="avatar-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.title}
       </h2>
       <form
@@ -66,12 +69,12 @@ export function AvatarForm({
               alt={preview ? c.previewAlt : c.currentAlt}
               width={96}
               height={96}
-              className="size-24 rounded-full object-cover"
+              className="size-24 shrink-0 rounded-full object-cover"
             />
           ) : (
             <span
               aria-hidden="true"
-              className="flex size-24 items-center justify-center rounded-full bg-surface text-3xl font-semibold"
+              className="flex size-24 shrink-0 items-center justify-center rounded-full bg-[#bfdbfe] font-serif text-3xl font-medium"
             >
               {displayName.charAt(0).toUpperCase()}
             </span>

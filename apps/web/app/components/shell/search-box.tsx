@@ -20,7 +20,7 @@ function renderOption(option: Option, id: string, selected: boolean, choose: () 
       // Keep focus in the input while the pointer picks an option.
       onMouseDown={(event) => event.preventDefault()}
       onClick={choose}
-      className="flex cursor-pointer items-baseline justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-surface-raised hover:bg-surface-raised"
+      className="flex cursor-pointer items-baseline justify-between gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-surface-raised hover:bg-surface-raised"
     >
       <span>
         <span className="font-medium">{option.label}</span>

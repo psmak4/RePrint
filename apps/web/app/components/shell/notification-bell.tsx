@@ -59,7 +59,7 @@ export function NotificationBell({
         ) : (
           <ul aria-label={c.label}>
             {notifications.items.map((item) => (
-              <li key={item.id} className="rounded-md p-3 text-sm">
+              <li key={item.id} className="rounded-lg p-3 text-sm">
                 <p>
                   {fresh.has(item.id) ? <strong className="sr-only">{c.unreadMark} </strong> : null}
                   {c.messages[item.type]}

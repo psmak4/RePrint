@@ -172,7 +172,7 @@ function OwnReview({
       </p>
       <p className="mt-1 text-sm text-muted-foreground">{c.statusNotes[review.status]}</p>
       {review.status === 'rejected' && review.rejectionReason ? (
-        <p className="mt-2 rounded-md border border-danger px-3 py-2 text-sm">
+        <p className="mt-2 rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm">
           {c.rejectionReason(review.rejectionReason)}
         </p>
       ) : null}

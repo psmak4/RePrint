@@ -158,6 +158,13 @@ Below `lg` the side column follows the reviews; on phones the actions become a t
 
 `h1` "Results for “…”" with Books and Authors tabs (counts). From `lg`, filters sit in a 260 px left panel (Genre checkboxes with counts, minimum rating, first-published decade chips, language, and the note that Genre, rating, and language filters only show Books already on RePrint); below `lg` they collapse into a disclosure. Above the list: an `AuthorMatchCard` when the query matches an Author well, then the result count split by Catalog and Source with Sort (its own GET form) on the right. The query lives in the header search box, so the page has no second search field. Each result: cover (112 px), Series line, serif title, Author and first published year, stars with average and review count, the `topReview` excerpt as a quote (D-177), Genre chips, and the shelf control. A Source candidate shows a dashed generated cover, "Not on RePrint yet", and "No RePrint reviews yet. Open it to be the first." 20 per page, numbered pagination.
 
+### Shared page frames
+
+- **`PageHero`** opens every browse and account-area page (Genres, Genre, Library, Author, Series, profile, settings, admin, static pages): the `ground-deep` band with an optional breadcrumb or eyebrow, an optional avatar, the serif `h1`, a lead, and anything the page adds (tabs, chips, totals).
+- **`AuthCard`** is the centered white card (460 px, 24 px corners) for log in, register, password recovery, email verification and change, the error page, and the resolve page: serif title, lead, body, a full-width pill for the one next step, and links under the card.
+- **`BookGrid` / `BookTile`** show Books cover-first everywhere outside rails (2, 3, 4, then 6 across; `narrow` stops at 4 beside a sidebar). A tile reads its rating as one phrase for screen readers and says "No RePrint reviews yet" when it has none.
+- Form controls are 44 px tall with 10 px corners and 15 px text; labels are 15 px semibold. Settings sections and admin tables sit in `surface` cards with 16 to 24 px corners.
+
 ### Review form
 
 Single 40 rem column. Fields in order: star rating (radio group), headline with counter (120), body with counter (50 to 10,000), spoiler checkbox, optional Edition select. Errors show inline under the field (`aria-describedby`) and in a summary `Alert` that takes focus on submit. Primary "Submit for review" button; a note explains that reviews are moderated.

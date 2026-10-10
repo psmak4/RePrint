@@ -44,7 +44,10 @@ function useSecurityForm<T extends FieldValues>(schema: z.ZodType<T, T>, intent:
 function FormError({ message }: { message?: string }) {
   if (!message) return null
   return (
-    <p role="alert" className="rounded-md border border-danger px-3 py-2 text-sm text-danger">
+    <p
+      role="alert"
+      className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+    >
       {message}
     </p>
   )
@@ -57,13 +60,19 @@ export function ChangeEmailForm({ me }: { me: Me }) {
   const { register, formState } = form
   const pending = fetcher.data?.pendingEmail
   return (
-    <section aria-labelledby="email-heading">
-      <h2 id="email-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="email-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="email-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.email.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.email.lead(me.email)}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.email.lead(me.email)}</p>
       {pending ? (
-        <div role="status" className="mt-4 rounded-md border border-border px-3 py-2">
+        <div
+          role="status"
+          className="mt-4 rounded-xl border border-[#fde68a] bg-[#fffbeb] px-4 py-3"
+        >
           <p className="font-semibold">{c.email.pendingTitle}</p>
           <p className="text-sm">{c.email.pendingBody(pending)}</p>
         </div>
@@ -104,11 +113,14 @@ export function ChangePasswordForm() {
   )
   const { register, formState } = form
   return (
-    <section aria-labelledby="password-heading">
-      <h2 id="password-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="password-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="password-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.password.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.password.lead}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.password.lead}</p>
       <form noValidate className="mt-4 flex flex-col gap-5" onSubmit={submit}>
         <FormError message={fetcher.data?.formError} />
         <TextField
@@ -152,11 +164,14 @@ export function DeleteAccountForm() {
   )
   const { register, formState } = form
   return (
-    <section aria-labelledby="delete-heading">
-      <h2 id="delete-heading" className="text-xl font-semibold text-danger">
+    <section
+      aria-labelledby="delete-heading"
+      className="rounded-2xl border border-[#fecaca] bg-surface p-6 md:p-8"
+    >
+      <h2 id="delete-heading" className="font-serif text-2xl leading-tight font-medium text-danger">
         {c.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.lead}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>
       <p className="mt-2">{c.erase}</p>
       <form noValidate className="mt-4 flex flex-col gap-5" onSubmit={submit}>
         <FormError message={fetcher.data?.formError} />
