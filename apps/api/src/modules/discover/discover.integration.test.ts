@@ -155,13 +155,19 @@ describe('GET /v1/discover', () => {
   it('hides every row with fewer than 6 Books', async () => {
     for (let i = 0; i < 5; i++) await makeBook(`t${i}`, Array<number>(5).fill(4))
     const { body } = await discover()
-    expect(body).toEqual({
+    expect(body).toMatchObject({
       recentlyReviewed: null,
       topRated: null,
       mostReviewedThisMonth: null,
       featuredGenres: null,
       featuredReview: null,
     })
+    expect(body.justApproved).toHaveLength(5)
+
+    await stack.reset()
+    await stack.redis.flushall()
+    for (let i = 0; i < 2; i++) await makeBook(`u${i}`, [4])
+    expect((await discover()).body.justApproved).toBeNull()
   })
 
   it('shows picked Genres in order and the featured review with its Book', async () => {
@@ -207,13 +213,14 @@ describe('GET /v1/discover', () => {
     await rebuild()
     expect((await discover()).body.recentlyReviewed?.map((book) => book.slug)).toContain('late')
     // One key per row, plus the cached site mean.
-    expect((await stack.redis.keys('discover:v1:*')).sort()).toEqual([
-      'discover:v1:row:featuredGenres',
-      'discover:v1:row:featuredReview',
-      'discover:v1:row:mostReviewedThisMonth',
-      'discover:v1:row:recentlyReviewed',
-      'discover:v1:row:topRated',
-      'discover:v1:site-mean',
+    expect((await stack.redis.keys('discover:v2:*')).sort()).toEqual([
+      'discover:v2:row:featuredGenres',
+      'discover:v2:row:featuredReview',
+      'discover:v2:row:justApproved',
+      'discover:v2:row:mostReviewedThisMonth',
+      'discover:v2:row:recentlyReviewed',
+      'discover:v2:row:topRated',
+      'discover:v2:site-mean',
     ])
   })
 

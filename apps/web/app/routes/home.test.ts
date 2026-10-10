@@ -10,6 +10,7 @@ const rows = {
   mostReviewedThisMonth: null,
   featuredGenres: [{ slug: 'fantasy', name: 'Fantasy' }],
   featuredReview: null,
+  justApproved: null,
 }
 
 describe('home loader', () => {

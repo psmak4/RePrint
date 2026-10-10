@@ -1205,3 +1205,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: The primary button's hover colour is a solid `accent-hover` (`#1d4ed8`, 6.7:1 with white text) instead of `accent` at 90% opacity, which over the light ground fell below 4.5:1 (axe `color-contrast`). The web fonts are declared in `apps/web/app/fonts.css` with Latin-only `@font-face` rules pointing at the Fontsource WOFF2 files, plus `Newsreader Fallback` and `Instrument Sans Fallback` faces with metric overrides; `packages/ui/src/theme.css` only names the families in `--font-sans` and `--font-serif`.
 - Why: Fontsource's own CSS also declares the Cyrillic, Greek, and Vietnamese subsets, which D-180 excludes. Keeping `@font-face` in the web app keeps the UI package free of file paths.
 - Affects: `packages/ui/src/theme.css`, `packages/ui/src/components/button.tsx`, `apps/web/app/fonts.css`, `docs/DESIGN.md`
+
+### D-182 · Excerpt fields: the headline stays separate from the excerpt (M9-T03)
+- Status: Decided (loop)
+- Decision: `reviewExcerptSchema` carries `headline` (the Review's own, or `null`) and `excerpt` (the body as one line of plain text, whitespace collapsed, cut at the last word boundary that fits 200 characters including a trailing `…`, trailing punctuation dropped). D-177's "the headline if there is one, otherwise the body" is read as "the web shows the headline as the title and the excerpt below it". `approvedAt` is `decided_at`, falling back to `submitted_at`. The excerpt rules live in `excerptOf` and `EXCERPTABLE_REVIEW` (`apps/api/src/modules/reviews/excerpts.ts`); reviews by deleted accounts are also left out (D-043). The Discover cache key is now `discover:v2` because a row was added.
+- Why: The D-177 field list names both `headline` and `excerpt`, so they have to be separate fields; the web can still lead with the headline.
+- Affects: `packages/shared/src/reviews.ts`, `discover-api.ts`, `search-api.ts`, M9-T05, M9-T07

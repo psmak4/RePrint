@@ -10365,11 +10365,74 @@
                                   "rating"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "topReview": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                      },
+                                      "rating": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 5
+                                      },
+                                      "headline": {
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
+                                      },
+                                      "excerpt": {
+                                        "type": "string",
+                                        "maxLength": 200
+                                      },
+                                      "author": {
+                                        "type": "object",
+                                        "properties": {
+                                          "username": {
+                                            "type": "string"
+                                          },
+                                          "displayName": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "username",
+                                          "displayName"
+                                        ],
+                                        "additionalProperties": false
+                                      },
+                                      "approvedAt": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "rating",
+                                      "headline",
+                                      "excerpt",
+                                      "author",
+                                      "approvedAt"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
                               "kind",
-                              "book"
+                              "book",
+                              "topReview"
                             ],
                             "additionalProperties": false
                           },
@@ -13680,6 +13743,319 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "justApproved": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "review": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "rating": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 5
+                                  },
+                                  "headline": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "excerpt": {
+                                    "type": "string",
+                                    "maxLength": 200
+                                  },
+                                  "author": {
+                                    "type": "object",
+                                    "properties": {
+                                      "username": {
+                                        "type": "string"
+                                      },
+                                      "displayName": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "username",
+                                      "displayName"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "approvedAt": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "rating",
+                                  "headline",
+                                  "excerpt",
+                                  "author",
+                                  "approvedAt"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "book": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                                  },
+                                  "slug": {
+                                    "type": "string",
+                                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                  },
+                                  "title": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "subtitle": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "cover": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "origin": {
+                                            "type": "string",
+                                            "enum": [
+                                              "open_library",
+                                              "upload"
+                                            ]
+                                          },
+                                          "originRef": {
+                                            "anyOf": [
+                                              {
+                                                "type": "string",
+                                                "minLength": 1
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "width": {
+                                            "anyOf": [
+                                              {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0,
+                                                "maximum": 9007199254740991
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "height": {
+                                            "anyOf": [
+                                              {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0,
+                                                "maximum": 9007199254740991
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "url": {
+                                            "anyOf": [
+                                              {
+                                                "type": "string",
+                                                "format": "uri"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "origin",
+                                          "originRef",
+                                          "width",
+                                          "height",
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "firstPublishedYear": {
+                                    "anyOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 9999
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "contributions": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "author": {
+                                          "type": "object",
+                                          "properties": {
+                                            "id": {
+                                              "type": "string",
+                                              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                                            },
+                                            "slug": {
+                                              "type": "string",
+                                              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                            },
+                                            "name": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            }
+                                          },
+                                          "required": [
+                                            "id",
+                                            "slug",
+                                            "name"
+                                          ],
+                                          "additionalProperties": false
+                                        },
+                                        "role": {
+                                          "type": "string",
+                                          "enum": [
+                                            "author",
+                                            "co_author",
+                                            "translator",
+                                            "illustrator",
+                                            "editor",
+                                            "narrator",
+                                            "other"
+                                          ]
+                                        },
+                                        "position": {
+                                          "anyOf": [
+                                            {
+                                              "type": "integer",
+                                              "minimum": 0,
+                                              "maximum": 9007199254740991
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "author",
+                                        "role",
+                                        "position"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "rating": {
+                                    "type": "object",
+                                    "properties": {
+                                      "average": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 1,
+                                            "maximum": 5
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      },
+                                      "count": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "distribution": {
+                                        "minItems": 5,
+                                        "maxItems": 5,
+                                        "type": "array",
+                                        "items": {
+                                          "type": "integer",
+                                          "minimum": 0,
+                                          "maximum": 9007199254740991
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "average",
+                                      "count",
+                                      "distribution"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "viewerShelf": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "want_to_read",
+                                          "reading",
+                                          "read"
+                                        ]
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "slug",
+                                  "title",
+                                  "subtitle",
+                                  "cover",
+                                  "firstPublishedYear",
+                                  "contributions",
+                                  "rating"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "review",
+                              "book"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -13687,7 +14063,8 @@
                     "topRated",
                     "mostReviewedThisMonth",
                     "featuredGenres",
-                    "featuredReview"
+                    "featuredReview",
+                    "justApproved"
                   ],
                   "additionalProperties": false
                 }

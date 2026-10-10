@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   bookReviewsQuerySchema,
   canTransitionReview,
+  excerptOf,
   myReviewSchema,
   nextReviewStatus,
   REVIEW_ACTIONS,
+  REVIEW_EXCERPT_MAX,
   REVIEW_STATUSES,
   type ReviewStatus,
   reviewInputSchema,
@@ -148,5 +150,36 @@ describe('bookReviewsQuerySchema', () => {
     expect(bookReviewsQuerySchema.safeParse({ rating: '0' }).success).toBe(false)
     expect(bookReviewsQuerySchema.safeParse({ rating: '6' }).success).toBe(false)
     expect(bookReviewsQuerySchema.safeParse({ pageSize: '51' }).success).toBe(false)
+  })
+})
+
+describe('excerptOf', () => {
+  it('returns a short body unchanged, with whitespace collapsed to one line', () => {
+    expect(excerptOf('  A short\n\nreview   body.  ')).toBe('A short review body.')
+  })
+
+  it('keeps a body of exactly the maximum length', () => {
+    const body = 'a'.repeat(REVIEW_EXCERPT_MAX)
+    expect(excerptOf(body)).toBe(body)
+  })
+
+  it('cuts a long body at a word boundary, within the maximum, with an ellipsis', () => {
+    const body = Array.from({ length: 60 }, (_, i) => `word${i}`).join(' ')
+    const excerpt = excerptOf(body)
+    expect(excerpt.length).toBeLessThanOrEqual(REVIEW_EXCERPT_MAX)
+    expect(excerpt.endsWith('…')).toBe(true)
+    const lastWord = excerpt.slice(0, -1).split(' ').pop() ?? ''
+    expect(body.split(' ')).toContain(lastWord)
+  })
+
+  it('drops trailing punctuation before the ellipsis', () => {
+    expect(excerptOf('one two, three four five six', 15)).toBe('one two, three…')
+    expect(excerptOf('one two, three four five six', 10)).toBe('one two…')
+  })
+
+  it('cuts a single very long word hard', () => {
+    const excerpt = excerptOf('x'.repeat(500))
+    expect(excerpt).toHaveLength(REVIEW_EXCERPT_MAX)
+    expect(excerpt.endsWith('…')).toBe(true)
   })
 })
