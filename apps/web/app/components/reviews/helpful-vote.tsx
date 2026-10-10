@@ -54,15 +54,28 @@ export function HelpfulVote({
   })
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-4">
       {canVote ? (
         <button
           type="button"
           aria-pressed={state.helpful}
           disabled={mutation.isPending}
           onClick={() => mutation.mutate(!state.helpful)}
-          className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface aria-pressed:border-link aria-pressed:text-link"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised aria-pressed:border-accent aria-pressed:bg-[#eff6ff] aria-pressed:text-[#1e40af]"
         >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M7 10v12" />
+            <path d="M15 5.9 14 10h5.8a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.4 22H7V10l4-8a3 3 0 0 1 4 3.9z" />
+          </svg>
           {state.helpful ? text.markedHelpful : text.markHelpful}
         </button>
       ) : null}

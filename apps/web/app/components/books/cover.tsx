@@ -5,6 +5,10 @@ import { copy } from '../../copy/index.js'
 import { generatedCoverClass } from '../../lib/cover-color.js'
 import { type CoverSize, coverUrl } from '../../lib/cover-url.js'
 
+/** A bound book's spine edge and soft drop shadow (docs/DESIGN.md, Generated covers). */
+export const COVER_SHADOW =
+  'shadow-[inset_4px_0_0_rgba(0,0,0,0.22),0_12px_24px_-10px_rgba(15,23,42,0.45)]'
+
 const WIDTHS: Record<CoverSize, string> = {
   small: 'w-16',
   medium: 'w-28',
@@ -45,7 +49,8 @@ export function Cover({
   }, [])
 
   const frame = cn(
-    'relative aspect-[2/3] shrink-0 overflow-hidden rounded-md border border-border bg-surface',
+    'relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] bg-surface-raised',
+    COVER_SHADOW,
     WIDTHS[size],
     className,
   )
@@ -101,25 +106,27 @@ export function GeneratedCover({
       aria-label={copy.books.coverAlt(title)}
       data-generated-cover=""
       className={cn(
-        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-md text-[#fdfaf3] shadow-sm',
-        generatedCoverClass(slug),
+        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] text-[#fdfaf3]',
+        dashed
+          ? 'border border-dashed border-[#a8a29e] bg-surface-raised text-[#334155]'
+          : [generatedCoverClass(slug), COVER_SHADOW],
         className,
       )}
     >
       <div
         aria-hidden="true"
         className={cn(
-          'absolute inset-[3%] flex flex-col items-center justify-between border border-[rgba(253,250,243,0.32)] p-[8cqw] text-center',
-          dashed ? 'border-dashed' : '',
+          'absolute inset-[6cqw] flex flex-col items-center justify-between border px-[7cqw] pt-[10cqw] pb-[9cqw] text-center',
+          dashed ? 'border-[#a8a29e]' : 'border-[rgba(253,250,243,0.32)]',
         )}
       >
-        <span className="line-clamp-2 w-full text-[6cqw] leading-[1.3] font-semibold tracking-widest break-words uppercase opacity-[0.88]">
+        <span className="line-clamp-2 w-full text-[6.4cqw] leading-[1.3] tracking-[0.14em] break-words uppercase opacity-[0.88]">
           {authorName ?? ''}
         </span>
-        <span className="line-clamp-5 w-full font-serif text-[12cqw] leading-[1.1] font-medium break-words">
+        <span className="line-clamp-5 w-full font-serif text-[13cqw] leading-[1.05] font-medium tracking-[-0.01em] break-words">
           {title}
         </span>
-        <span className="block w-[16cqw] border-t border-[rgba(253,250,243,0.6)]" />
+        <span className="block w-[20cqw] border-t border-current opacity-55" />
       </div>
     </div>
   )

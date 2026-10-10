@@ -45,12 +45,15 @@ function Shell({ heading, children }: { heading: string; children: React.ReactNo
   return (
     <section
       aria-labelledby="my-review-heading"
-      className="rounded-lg border border-border bg-surface p-4"
+      className="flex h-full flex-col gap-3 rounded-[14px] border border-border bg-background p-5"
     >
-      <h2 id="my-review-heading" className="text-xl font-semibold">
+      <h2
+        id="my-review-heading"
+        className="text-xs font-semibold tracking-[0.12em] text-link uppercase"
+      >
         {heading}
       </h2>
-      <div className="mt-2">{children}</div>
+      <div className="flex flex-col gap-3 text-[15px] leading-normal">{children}</div>
     </section>
   )
 }

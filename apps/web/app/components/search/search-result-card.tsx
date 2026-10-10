@@ -13,7 +13,10 @@ export type SearchResultData = BookCardData & {
   topReview?: ReviewExcerpt | null
 }
 
-/** One search result: cover, title, Author and year, rating, the top review as a quote, shelf control. */
+/**
+ * One search result row: cover, serif title, Author and year, rating, the top review as a quote,
+ * and the shelf control on the right.
+ */
 export function SearchResultCard({
   book,
   href,
@@ -28,67 +31,75 @@ export function SearchResultCard({
   const authors = book.authorNames.join(', ')
   const rated = book.rating && book.rating.average !== null && book.rating.count > 0
   return (
-    <article className="flex gap-4 rounded-lg border border-border bg-surface p-4">
-      <Cover
-        cover={book.cover}
-        title={book.title}
-        authorName={book.authorNames[0]}
-        slug={book.slug}
-        dashed={book.candidate}
-        size="medium"
-      />
-      <div className="flex min-w-0 flex-col gap-1">
-        {book.candidate ? (
-          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            {copy.search.notOnReprint}
-          </p>
-        ) : null}
-        <h3 className="font-serif text-xl leading-6 font-medium">
-          <Link to={href} onClick={onNavigate} className="text-link underline">
+    <article className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 border-b border-border py-6 md:grid-cols-[88px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[112px_minmax(0,1fr)_auto] lg:gap-7 lg:py-7">
+      <Link to={href} onClick={onNavigate} tabIndex={-1} aria-hidden="true" className="self-start">
+        <Cover
+          cover={book.cover}
+          title={book.title}
+          authorName={book.authorNames[0]}
+          slug={book.slug ?? book.title}
+          dashed={book.candidate}
+          size="medium"
+          className="w-full"
+        />
+      </Link>
+      <div className="flex min-w-0 flex-col gap-2.5">
+        <h3 className="font-serif text-[22px] leading-[1.15] font-medium md:text-[26px]">
+          <Link to={href} onClick={onNavigate} className="text-foreground hover:underline">
             {book.title}
           </Link>
         </h3>
         {book.subtitle ? <p className="text-sm text-muted-foreground">{book.subtitle}</p> : null}
         {authors || book.firstPublishedYear ? (
-          <p className="text-sm">
-            {[authors ? copy.books.byAuthors(authors) : '', book.firstPublishedYear ?? '']
-              .filter(Boolean)
-              .join(' · ')}
+          <p className="text-[15px] text-muted-foreground">
+            {authors ? <span className="text-[#1e293b]">{authors}</span> : null}
+            {authors && book.firstPublishedYear ? ' · ' : null}
+            {book.firstPublishedYear ? copy.search.firstPublished(book.firstPublishedYear) : null}
           </p>
         ) : null}
-        {rated && book.rating?.average != null ? (
-          <p className="flex items-center gap-2 text-sm">
-            <StarRating average={book.rating.average} />
+        {book.candidate ? (
+          <p className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex h-[26px] items-center rounded-full bg-[#ece8e0] px-2.5 text-[13px] font-medium text-[#334155]">
+              {copy.search.notOnReprint}
+            </span>
+            <span className="text-[15px] text-muted-foreground">{copy.search.beNotFirst}</span>
+          </p>
+        ) : rated && book.rating?.average != null ? (
+          <p className="flex flex-wrap items-center gap-2.5 text-[15px]">
+            <StarRating average={book.rating.average} className="text-[17px]" />
             <span className="sr-only">
               {copy.books.ratingLabel(book.rating.average.toFixed(1), book.rating.count)}
             </span>
-            <span aria-hidden="true">
-              <span className="font-semibold">{book.rating.average.toFixed(1)}</span>{' '}
-              <span className="text-muted-foreground">
-                {copy.books.reviewCount(book.rating.count)}
+            <span aria-hidden="true" className="flex items-center gap-2.5">
+              <span className="font-semibold">{book.rating.average.toFixed(1)}</span>
+              <span className="text-link">
+                {copy.redesign.bookPage.reviewsLink(book.rating.count)}
               </span>
             </span>
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            {book.candidate ? copy.search.beNotFirst : copy.books.noReviews}
-          </p>
+          <p className="text-sm text-muted-foreground">{copy.books.noReviews}</p>
         )}
         {book.topReview ? (
-          <figure className="mt-1 border-l-2 border-border pl-3">
-            <blockquote className="text-sm leading-5 break-words">
-              {book.topReview.headline ? (
-                <span className="font-semibold">{book.topReview.headline}. </span>
-              ) : null}
-              {book.topReview.excerpt}
+          <figure className="border-l-2 border-[#d9d4ca] pl-4">
+            <blockquote className="font-serif text-[17px] leading-normal break-words text-[#334155] italic">
+              {copy.redesign.reviewExcerpt.quoted(
+                book.topReview.headline
+                  ? `${book.topReview.headline}. ${book.topReview.excerpt}`
+                  : book.topReview.excerpt,
+              )}
             </blockquote>
-            <figcaption className="text-xs text-muted-foreground">
+            <figcaption className="mt-1 text-sm text-muted-foreground">
               {copy.redesign.reviewExcerpt.by(book.topReview.author.displayName)}
             </figcaption>
           </figure>
         ) : null}
-        {shelf ? <div className="mt-1">{shelf}</div> : null}
       </div>
+      {shelf ? (
+        <div className="col-start-2 lg:col-start-3 lg:min-w-[170px] lg:justify-self-end">
+          {shelf}
+        </div>
+      ) : null}
     </article>
   )
 }

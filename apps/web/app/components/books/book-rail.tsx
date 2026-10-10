@@ -10,7 +10,7 @@ export type BookRailItem = {
   book: BookCardData
   /** Extra line under the stars, such as "46 new reviews". */
   note?: string
-  /** The shelf button that sits under the cover. */
+  /** The shelf control; it sits on the cover's top-right corner (use the `icon` variant). */
   shelf?: ReactNode
 }
 
@@ -22,7 +22,10 @@ export function BookRail({
   label,
   items,
   hrefFor = (slug) => `/books/${slug}`,
+  columns = 7,
 }: {
+  /** How many Books fit across from `xl`: 7 on Discover, 6 on the Book page. */
+  columns?: 6 | 7
   /** Accessible name for the row, normally the section heading's text. */
   label: string
   items: BookRailItem[]
@@ -36,22 +39,25 @@ export function BookRail({
       tabIndex={0}
       className="overflow-x-auto lg:overflow-visible"
     >
-      <ul className="flex gap-4 lg:grid lg:grid-cols-6 xl:grid-cols-7">
+      <ul
+        className={`flex gap-4 pb-2 lg:grid lg:grid-cols-6 lg:gap-6 lg:pb-0 ${columns === 7 ? 'xl:grid-cols-7' : ''}`}
+      >
         {items.map(({ slug, book, note, shelf }) => {
           const average = book.rating?.average ?? null
+          const count = book.rating?.count ?? 0
           return (
-            <li key={slug} className="flex w-32 shrink-0 flex-col gap-2 lg:w-auto">
-              <Link to={hrefFor(slug)} className="block" tabIndex={-1} aria-hidden="true">
+            <li key={slug} className="relative flex w-[140px] shrink-0 flex-col gap-1.5 lg:w-auto">
+              <Link to={hrefFor(slug)} className="mb-1.5 block" tabIndex={-1} aria-hidden="true">
                 <Cover
                   cover={book.cover}
                   title={book.title}
                   authorName={book.authorNames[0]}
                   slug={slug}
                   size="medium"
-                  className="w-full shadow-sm"
+                  className="w-full"
                 />
               </Link>
-              {shelf}
+              {shelf ? <div className="absolute top-2 right-2">{shelf}</div> : null}
               <h3 className="font-serif text-base leading-5 font-medium md:text-lg md:leading-[22px]">
                 <Link to={hrefFor(slug)} className="hover:underline">
                   {book.title}
@@ -60,10 +66,11 @@ export function BookRail({
               {book.authorNames.length > 0 ? (
                 <p className="text-sm text-muted-foreground">{book.authorNames.join(', ')}</p>
               ) : null}
-              {average !== null && (book.rating?.count ?? 0) > 0 ? (
+              {average !== null && count > 0 ? (
                 <p className="flex items-center gap-2 text-sm">
                   <StarRating average={average} className="text-sm" />
-                  <span className="font-medium">{average.toFixed(1)}</span>
+                  <span className="font-semibold">{average.toFixed(1)}</span>
+                  <span className="text-muted-foreground">({count})</span>
                 </p>
               ) : null}
               {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}

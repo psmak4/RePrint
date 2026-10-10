@@ -646,3 +646,8 @@ Entry format:
 ### 2026-10-10 · M9-T10 · PR pending
 - `pnpm test:e2e` now goes through `e2e/run.mjs`, which starts the isolated `reprint-e2e` Compose project (own ports) and migrates it; CI and `E2E_STACK=external` use the environment as set (D-187). Checked: dev DB row counts (books, users, reviews) are identical before and after a run of `discover` and `reviews` specs, with dev servers still on 5173/3000. Account-registration specs now pass locally (the invite-code failures came from the dev database's settings).
 - Next iteration: nothing eligible except HUMAN-held M1-T19 (on hold); expect `BLOCKED`. The isolated stack stays up after a run; `docs/local-dev.md` says how to remove it.
+
+### 2026-10-10 · M9-T11 · owner request · fix/m9-match-canvas
+- The owner found the M9 build did not match the design canvas. Compared each board with the running app at 1440 px and 375 px and rebuilt the differences: pill buttons and the header (wordmark, nav, pill search with the current query), the footer, every Discover section, the Book page header, sticky section nav, Details, rating card with the review panel, review list, side cards and rows, and the search page (open result rows, author card, sort above results). Choices and the remaining data gaps are in D-188.
+- `pnpm check` passes. Component tests were updated where markup or copy changed on purpose (headings, "Welcome back" strip, 5 monthly rows, excerpt card).
+- `pnpm test:e2e`: 70 passed, 2 skipped. The first full run timed out twice in `moderation.spec.ts` waiting for the queue's Approve button (Chromium and WebKit); the spec passed alone (4.9 s) and in a second full run, so it looks like a load-related flake, not this change.

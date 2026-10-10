@@ -162,7 +162,7 @@ describe('side lists', () => {
       format: 'ebook',
     }
     renderPage({}, [edition, ebook])
-    const card = screen.getByRole('heading', { name: 'Editions (2)' }).closest('section')
+    const card = screen.getByRole('heading', { name: 'Editions' }).closest('section')
     expect(card).not.toBeNull()
     const inCard = within(card as HTMLElement)
     expect(inCard.getAllByRole('listitem')).toHaveLength(2)
@@ -227,7 +227,7 @@ describe('side lists', () => {
         bookCount: 4,
       },
     })
-    expect(screen.getByText("You're here")).toBeTruthy()
+    expect(screen.getByText(/You're here/)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' })).toBeTruthy()
     expect(screen.getByText('Wrote Dune.')).toBeTruthy()
   })

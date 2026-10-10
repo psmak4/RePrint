@@ -25,11 +25,16 @@ export function RatingBreakdown({
 }) {
   const max = Math.max(...distribution, 1)
   return (
-    <section aria-label={text.heading} className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-      <div className="flex flex-col gap-1">
-        <p className="font-serif text-5xl leading-none font-medium">{average.toFixed(1)}</p>
-        <StarRating average={average} />
-        <p className="text-sm text-muted-foreground">{text.count(count)}</p>
+    <section
+      aria-label={text.heading}
+      className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-4 md:grid-cols-[140px_minmax(0,1fr)] md:gap-6"
+    >
+      <div className="flex flex-col items-center gap-1.5 md:items-start md:gap-2">
+        <p className="font-serif text-[52px] leading-[0.9] font-medium md:text-[72px]">
+          {average.toFixed(1)}
+        </p>
+        <StarRating average={average} className="text-[13px] md:text-xl" />
+        <p className="text-xs text-muted-foreground md:text-sm">{text.count(count)}</p>
       </div>
       <ul className="flex flex-1 flex-col gap-1">
         {[5, 4, 3, 2, 1].map((stars) => {
@@ -42,17 +47,18 @@ export function RatingBreakdown({
                 aria-pressed={active}
                 aria-label={text.barLabel(stars, n)}
                 onClick={() => onSelect(active ? null : stars)}
-                className="flex min-h-6 w-full items-center gap-2 rounded px-1 text-sm hover:bg-surface-raised"
+                className={`grid min-h-8 w-full grid-cols-[36px_minmax(0,1fr)_32px] items-center gap-2.5 rounded-lg border px-1.5 text-sm font-medium md:grid-cols-[40px_minmax(0,1fr)_32px] md:px-2 ${active ? 'border-accent bg-[#eff6ff]' : 'border-transparent hover:bg-surface-raised'}`}
               >
-                <span aria-hidden="true" className="w-8 shrink-0 text-left">
+                <span aria-hidden="true" className="text-left">
                   {stars} ★
                 </span>
-                <span aria-hidden="true" className="h-2.5 flex-1 rounded-full bg-[#ece8e0]">
-                  <span
-                    className={`block h-2.5 rounded-full ${active ? 'bg-accent' : 'bg-star'} ${widthClass(n / max)}`}
-                  />
+                <span
+                  aria-hidden="true"
+                  className="h-2 overflow-hidden rounded-full bg-[#ece8e0] md:h-2.5"
+                >
+                  <span className={`block h-full rounded-full bg-star ${widthClass(n / max)}`} />
                 </span>
-                <span aria-hidden="true" className="w-8 shrink-0 text-right text-muted-foreground">
+                <span aria-hidden="true" className="text-right text-muted-foreground">
                   {n}
                 </span>
               </button>

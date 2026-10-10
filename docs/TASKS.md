@@ -612,3 +612,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M9-T10 · Local e2e runs on an isolated stack so they never write to the developer's database · deps: M9-T08 · PRD: §12, §13
   - Accept: `pnpm test:e2e` (local, no `CI`) starts or reuses an isolated Compose project (`reprint-e2e` on its own ports, like the CI e2e job, D-113) and points the API at it, so the `reprint` database used by `pnpm dev` gets no test Books, users, or reviews (check row counts before and after a run)
   - Accept: `docs/local-dev.md` explains it, and how to clean up test data left in a local database by earlier runs (`pnpm db:reset`)
+- [x] M9-T11 · Match the redesign canvas: shell, Discover, Book page, and search results · deps: M9-T08 · PRD: §7.2, §7.3, §7.4, §11
+  - Accept: at 1440 px and 375 px, the header, footer, Discover, Book page, and search results match the canvas boards (layout, type sizes, pill buttons, cover styling, cards), with the gaps listed in D-188 for data the API does not send
+  - Accept: no inline `style` attributes (the D-185 test passes), shell copy stays in `app/copy` (the copy guard passes), and the shelf control remains a native select in every variant
+  - Accept: `pnpm check` and `pnpm test:e2e` (with axe) pass

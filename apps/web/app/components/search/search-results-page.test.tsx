@@ -140,7 +140,7 @@ describe('SearchResultsPage', () => {
 
   it('keeps the filters behind a disclosure toggle', () => {
     renderPage()
-    expect(screen.getByText(copy.search.filtersToggle).closest('summary')).toBeTruthy()
+    expect(screen.getByText(copy.search.filtersToggle, { selector: 'summary' })).toBeTruthy()
   })
 
   it('tracks a click on a result, stored or not', () => {

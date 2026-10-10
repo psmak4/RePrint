@@ -121,7 +121,7 @@ describe('DiscoverPage', () => {
     expect(screen.getByText(/Nothing to show here yet/)).toBeTruthy()
     // Only the fixed sections remain: the Visitor pitch and "How a review gets here".
     expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
-      'Keep track of what you read',
+      'Keep track of everything you read',
       'How a review gets here',
     ])
   })
@@ -135,7 +135,7 @@ describe('DiscoverPage', () => {
     cleanup()
     renderPage(full, viewer)
     expect(screen.queryByRole('link', { name: 'Create a free account' })).toBeNull()
-    expect(screen.queryByRole('heading', { name: 'Keep track of what you read' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Keep track of everything you read' })).toBeNull()
   })
 
   it('shows Your reading only to a Member with a Reading or Want to Read entry', () => {
@@ -148,7 +148,7 @@ describe('DiscoverPage', () => {
       reading: [entry('reading', 70)],
       wantToRead: [entry('want_to_read', 71)],
     })
-    const strip = screen.getByRole('region', { name: 'Your reading' })
+    const strip = screen.getByRole('region', { name: /^Welcome back/ })
     expect(within(strip).getByRole('link', { name: 'Shelved70' })).toBeTruthy()
     expect(within(strip).getByRole('link', { name: 'Shelved71' })).toBeTruthy()
     expect(within(strip).getByRole('link', { name: 'Write a review' }).getAttribute('href')).toBe(
@@ -156,10 +156,10 @@ describe('DiscoverPage', () => {
     )
     cleanup()
     renderPage(full, viewer, { reading: [], wantToRead: [] })
-    expect(screen.queryByRole('heading', { name: 'Your reading' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: /^Welcome back/ })).toBeNull()
     cleanup()
     renderPage(full, null, { reading: [entry('reading', 70)], wantToRead: [] })
-    expect(screen.queryByRole('heading', { name: 'Your reading' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: /^Welcome back/ })).toBeNull()
   })
 
   it('shows monthly review counts and Just approved excerpts', () => {
@@ -176,7 +176,8 @@ describe('DiscoverPage', () => {
         book: summary(n, `Approved${n}`),
       })) as unknown as DiscoverResponse['justApproved'],
     })
-    expect(screen.getAllByText('4 new reviews').length).toBe(6)
+    // The canvas shows the top 5 of the month.
+    expect(screen.getAllByText('4 new reviews').length).toBe(5)
     expect(screen.getByRole('heading', { level: 2, name: 'Just approved' })).toBeTruthy()
     expect(screen.getByText('Excerpt number 2')).toBeTruthy()
   })

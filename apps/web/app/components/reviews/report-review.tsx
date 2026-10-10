@@ -60,14 +60,14 @@ export function ReportReview({ reviewId }: { reviewId: string }) {
       <button
         type="button"
         onClick={open}
-        className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface"
+        className="inline-flex min-h-10 items-center text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
       >
         {copy.reviews.list.report}
       </button>
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="m-auto w-full max-w-md rounded-lg border border-border bg-background p-4 text-foreground backdrop:bg-foreground/60"
+        className="m-auto w-full max-w-md rounded-2xl border border-border bg-surface p-6 text-foreground shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)] backdrop:bg-foreground/50"
       >
         <form
           method="post"
