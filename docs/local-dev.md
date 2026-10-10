@@ -43,6 +43,14 @@ Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`
 
 `pnpm test:integration` also runs `apps/api/src/**/*.integration.test.ts`. Each file calls `startTestStack()` (`apps/api/src/testing/stack.ts`), which starts its own Postgres 18 and Redis 7 containers and runs the migrations. Call `stack.reset()` in `beforeEach` to empty every table and flush Redis; `stack.stopRedis()` simulates a Redis outage. `GET /v1/ready` checks Postgres and Redis and returns 503 Problem Details when either is unreachable.
 
+## End-to-end tests (`pnpm test:e2e`)
+
+Run `pnpm build` first. Locally, `pnpm test:e2e` (`e2e/run.mjs`) starts or reuses an isolated Compose project, `reprint-e2e` (`docker-compose.e2e.yml`), migrates it, and runs Playwright against it: Postgres 25432, Redis 26379, Mailpit 21025/28025, web 25173, API 23000. The `reprint` database that `pnpm dev` uses never gets test Books, Members, or reviews, and a running `pnpm dev` does not clash with the specs.
+
+- In CI, or with `E2E_STACK=external`, the script runs Playwright against the environment variables already set (`DATABASE_URL`, `E2E_WEB_ORIGIN`, and so on), as the CI `e2e` job does.
+- The isolated stack stays up between runs. Reset it with `docker compose -p reprint-e2e -f docker-compose.yml -f docker-compose.e2e.yml down -v`.
+- Test data written into your dev database by runs before M9-T10 (stub Books such as "Dune", `e2e-` accounts, their reviews): run `pnpm db:reset` to drop it and re-seed.
+
 
 ## Seeded users and the first Admin
 
