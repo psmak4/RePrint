@@ -634,3 +634,7 @@ Entry format:
 ### 2026-10-10 · M9-T08 · PR pending
 - Verification found one real gap: the M9 components set inline `style` attributes (cover colour, star fill, rating bars), which `style-src 'self'` blocks, giving about 150 CSP violations per page once the database has Books. CI's e2e database is empty, so only a seeded local run showed it (`smoke` and `analytics` specs). Fixed with class lookups (D-185) plus a unit test that bans `style={` in components. Added `copy-guard.test.ts` (criterion 9: no price, cart, or buy language), which was missing.
 - `pnpm check` and `pnpm test:e2e` (64 passed, 2 skipped) pass locally against a seeded database. `api#test:integration` has a flaky Redis-stopped test that passes on rerun. Run e2e with no `pnpm dev` running, since Playwright starts its own production stack. M9 is complete; the next eligible work is M1-T19 (HUMAN, on hold).
+
+### 2026-10-10 · M9 review follow-ups (owner) · owner/m9-followups
+- The owner's review of the M9 screenshots found two issues, queued as M9-T09 (rating summary shows five filled stars at phone width) and M9-T10 (local `pnpm test:e2e` writes test Books, users, and reviews into the developer's `reprint` database; the stub Source's "Dune" with cover ID 1 and year 1937 came from that).
+- Next iteration: M9-T09.

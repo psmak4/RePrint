@@ -606,3 +606,9 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every acceptance criterion in `docs/milestones/M9-redesign.md` is checked off in the PR body with the command that proved it
   - Accept: axe passes on Discover, Book, and search at phone and desktop widths; `pnpm check` and `pnpm test:e2e` pass; screenshots of the three pages are attached to the PR
   - Accept: `docs/DESIGN.md` matches what shipped, and `docs/PROGRESS.md` is updated
+- [ ] M9-T09 · Fix: the rating summary shows five filled stars at phone width · deps: M9-T08 · PRD: §7.4, §11
+  - Accept: on `/books/:slug` at 390 px wide, the rating breakdown's `StarRating` fills to the average (a 3.0 average shows three filled stars), matching desktop; found in the owner's M9 review screenshots
+  - Accept: a component or Playwright test renders `StarRating` in the rating breakdown at a phone viewport and asserts the filled width for 3.0 and 3.5, so the regression is caught
+- [ ] M9-T10 · Local e2e runs on an isolated stack so they never write to the developer's database · deps: M9-T08 · PRD: §12, §13
+  - Accept: `pnpm test:e2e` (local, no `CI`) starts or reuses an isolated Compose project (`reprint-e2e` on its own ports, like the CI e2e job, D-113) and points the API at it, so the `reprint` database used by `pnpm dev` gets no test Books, users, or reviews (check row counts before and after a run)
+  - Accept: `docs/local-dev.md` explains it, and how to clean up test data left in a local database by earlier runs (`pnpm db:reset`)
