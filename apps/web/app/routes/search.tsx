@@ -1,5 +1,6 @@
 import {
   APP_NAME,
+  type AuthorSuggestion,
   type GenreNode,
   genreTreeResponseSchema,
   searchResponseSchema,
@@ -8,6 +9,7 @@ import { data, redirect, useRouteLoaderData } from 'react-router'
 import { SearchResultsPage } from '../components/search/search-results-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
+import { matchAuthor } from '../lib/author-match.js'
 import { logger } from '../lib/logger.server.js'
 import { isSearchable, parseSearchParams, resolveHref, searchHref } from '../lib/search-links.js'
 import { pageMeta } from '../lib/seo.js'
@@ -33,30 +35,60 @@ async function loadGenres(request: Request): Promise<GenreNode[]> {
   }
 }
 
+/** The Books tab shows an Author card when the query names an Author; any failure just skips it. */
+async function loadAuthorMatch(request: Request, q: string): Promise<AuthorSuggestion | null> {
+  try {
+    const params = new URLSearchParams({ q, type: 'authors' })
+    const response = await apiClientFor(request).get(`/v1/search?${params}`)
+    if (!response.ok) return null
+    const { items } = searchResponseSchema.parse(await response.json())
+    return matchAuthor(
+      q,
+      items.flatMap((item) => (item.kind === 'author' ? [item.author] : [])),
+    )
+  } catch (error) {
+    logger.warn({ err: error }, 'could not look up an Author match for search')
+    return null
+  }
+}
+
 /** Results come from the API on first load (PRD §7.3); an ISBN with an exact match goes straight to the Book. */
 export async function loader({ request }: Route.LoaderArgs) {
   const query = parseSearchParams(new URL(request.url).searchParams)
   const genres = query.type === 'books' ? loadGenres(request) : Promise.resolve([])
-  if (!isSearchable(query)) return { query, results: null, failed: false, genres: await genres }
+  const authorMatch =
+    query.type === 'books' && query.page === 1 && isSearchable(query)
+      ? loadAuthorMatch(request, query.q)
+      : Promise.resolve(null)
+  if (!isSearchable(query)) {
+    return { query, results: null, failed: false, genres: await genres, authorMatch: null }
+  }
   try {
-    const [response, genreList] = await Promise.all([
+    const [response, genreList, author] = await Promise.all([
       apiClientFor(request).get(
         `/v1/search?${new URL(searchHref(query), 'http://x').searchParams}`,
       ),
       genres,
+      authorMatch,
     ])
     if (!response.ok) {
       logger.error({ status: response.status }, 'search failed')
-      return data({ query, results: null, failed: true, genres: genreList }, { status: 502 })
+      return data(
+        { query, results: null, failed: true, genres: genreList, authorMatch: null },
+        { status: 502 },
+      )
     }
     const results = searchResponseSchema.parse(await response.json())
     if (results.isbnMatch?.kind === 'book') throw redirect(`/books/${results.isbnMatch.slug}`)
     if (results.isbnMatch?.kind === 'candidate') throw redirect(resolveHref(results.isbnMatch.ref))
-    return { query, results, failed: false, genres: genreList }
+    return { query, results, failed: false, genres: genreList, authorMatch: author }
   } catch (error) {
     if (error instanceof Response) throw error
     logger.error({ err: error }, 'could not load search results')
-    return data({ query, results: null, failed: true, genres: await genres }, { status: 502 })
+    return data(
+      { query, results: null, failed: true, genres: await genres, authorMatch: null },
+      { status: 502 },
+    )
   }
 }
 

@@ -157,6 +157,14 @@ export const copy = {
     previous: 'Previous',
     next: 'Next',
     pageOf: (page: number) => `Page ${page}`,
+    headingFor: (q: string) => `Results for “${q}”`,
+    filtersToggle: 'Filters',
+    resultSplit: (catalog: number, source: number) =>
+      source === 0
+        ? `${catalog} ${catalog === 1 ? 'result' : 'results'} on this page, all on RePrint`
+        : `${catalog} on RePrint · ${source} more from outside sources`,
+    notOnReprint: 'Not on RePrint yet',
+    beNotFirst: 'No RePrint reviews yet. Open it to be the first.',
   },
   resolve: {
     title: 'Opening book',

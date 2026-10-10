@@ -1216,3 +1216,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Status: Decided (loop)
 - Decision: `mostReviewedThisMonth` items use `mostReviewedItemSchema` (`bookSummarySchema` plus `recentReviewCount`, D-179). The row builder takes the count from the same query that ranks the row. The Discover cache key is now `discover:v3`, so rows cached with the old shape are never served against the new response schema.
 - Affects: `packages/shared/src/discover-api.ts`, `apps/api/src/modules/discover/`
+
+### D-184 · Search redesign without new API facets (M9-T07)
+- Status: Decided (loop)
+- Decision: The `/search` filters stay the existing GET form (Genre, language, first-published decade, minimum rating, sort) in a 260 px panel from `lg` and a disclosure below it; the one form is opened on wide screens, so there is no second copy of the fields. DESIGN's Genre checkbox counts and decade chips need facet counts the search API does not return, and numbered pagination needs a total; both are left out, so pagination stays Previous / Next with the page number. The `AuthorMatchCard` comes from a second `GET /v1/search?type=authors` call in the loader (Books tab, page 1, only when the query is searchable); `matchAuthor` accepts an Author whose name contains every word of the query (a single word under 4 letters never matches), and any failure skips the card. The card shows the name only, since `authorSuggestionSchema` has no dates or Book count. Series line and Genre chips on results are also left out: `bookSummarySchema` carries neither.
+- Why: Adding facets, totals, or Series and Genre fields to the search response is an API change the task did not scope; it can be a later task if the owner wants it.
+- Affects: `apps/web/app/routes/search.tsx`, `apps/web/app/lib/author-match.ts`, `apps/web/app/components/search/`

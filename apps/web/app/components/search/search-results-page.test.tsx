@@ -104,7 +104,43 @@ describe('SearchResultsPage', () => {
     expect(screen.getByRole('link', { name: 'Dune Messiah' }).getAttribute('href')).toBe(
       '/resolve?ref=ref-1-abcdefghijklmnopqrstu',
     )
-    expect(screen.getByText(copy.books.noReviews)).toBeTruthy()
+    expect(screen.getByText(copy.search.notOnReprint)).toBeTruthy()
+    expect(screen.getByText(copy.search.beNotFirst)).toBeTruthy()
+  })
+
+  it('quotes the top review on a Book and shows the Author match card', () => {
+    const [book, candidate] = base.items
+    renderPage({
+      results: {
+        ...base,
+        items: [
+          {
+            ...book,
+            topReview: {
+              id: ID,
+              rating: 5,
+              headline: 'Spice and power',
+              excerpt: 'A sprawling, patient epic.',
+              author: { username: 'ann', displayName: 'Ann' },
+              approvedAt: '2026-01-01T00:00:00.000Z',
+            },
+          },
+          candidate,
+        ],
+      } as never,
+      authorMatch: { id: ID, slug: 'frank-herbert', name: 'Frank Herbert' },
+    })
+    expect(screen.getByText(/A sprawling, patient epic\./)).toBeTruthy()
+    expect(screen.getByText(/Spice and power/)).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Frank Herbert/ }).getAttribute('href')).toBe(
+      '/authors/frank-herbert',
+    )
+    expect(screen.getByText(copy.search.resultSplit(1, 1))).toBeTruthy()
+  })
+
+  it('keeps the filters behind a disclosure toggle', () => {
+    renderPage()
+    expect(screen.getByText(copy.search.filtersToggle).closest('summary')).toBeTruthy()
   })
 
   it('tracks a click on a result, stored or not', () => {
