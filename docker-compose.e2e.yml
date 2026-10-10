@@ -1,0 +1,16 @@
+# Local e2e override (M9-T10). Used as:
+#   docker compose -p reprint-e2e -f docker-compose.yml -f docker-compose.e2e.yml up -d --wait
+# `pnpm test:e2e` (e2e/run.mjs) starts this for you. Its own project name gives the specs their own
+# containers and volumes, and ports distinct from the dev stack (5432, 6379, 1025/8025) and the CI
+# stack (docker-compose.ci.yml), so a run never writes to the database `pnpm dev` uses.
+services:
+  postgres:
+    ports: !override
+      - "25432:5432"
+  redis:
+    ports: !override
+      - "26379:6379"
+  mailpit:
+    ports: !override
+      - "21025:1025" # SMTP
+      - "28025:8025" # web UI and API

@@ -1234,3 +1234,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: The `StarRating` root has `w-max`, so its box is exactly as wide as the five stars even as a stretched flex item.
 - Why: The fill is a percentage of the root's width. In the rating breakdown's flex column at phone width the root stretched to the full column, so a 3.0 average filled the whole (wider) box and showed five filled stars.
 - Affects: `apps/web/app/components/books/star-rating.tsx`, `e2e/specs/star-rating.spec.ts`
+
+### D-187 · Local e2e on an isolated `reprint-e2e` stack (M9-T10)
+- Status: Decided (loop)
+- Decision: `pnpm test:e2e` runs `e2e/run.mjs`. Without `CI` or `E2E_STACK=external` it starts or reuses Compose project `reprint-e2e` (`docker-compose.e2e.yml`: Postgres 25432, Redis 26379, Mailpit 21025/28025), migrates it, and runs Playwright with the apps on 25173/23000. `DATABASE_URL_DIRECT` is set too, so a `.env` value cannot redirect the migration to the dev database. CI is unchanged.
+- Why: local runs wrote test Books, Members, and reviews into the `reprint` database used by `pnpm dev`. Separate ports also stop specs from reusing a running dev server.
+- Affects: `e2e/run.mjs`, `e2e/package.json`, `docker-compose.e2e.yml`, `docs/local-dev.md`

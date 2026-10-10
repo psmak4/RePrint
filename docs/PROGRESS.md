@@ -642,3 +642,7 @@ Entry format:
 ### 2026-10-10 · M9-T09 · PR pending
 - Cause: the `StarRating` fill is a percentage of its root, and in the rating breakdown's flex column at phone width the root stretched to the full column, so 3.0 filled the whole box. Fix: `w-max` on the root (D-186). `e2e/specs/star-rating.spec.ts` measures the fill at 390 px for 3.0 and 3.5 (fails without `w-max`, confirmed); a unit test pins the class.
 - Next iteration: M9-T10 (isolated local e2e). Stray `pnpm dev` servers were already on ports 5173 and 3000 (not started by the loop), so the new spec ran against them. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-10 · M9-T10 · PR pending
+- `pnpm test:e2e` now goes through `e2e/run.mjs`, which starts the isolated `reprint-e2e` Compose project (own ports) and migrates it; CI and `E2E_STACK=external` use the environment as set (D-187). Checked: dev DB row counts (books, users, reviews) are identical before and after a run of `discover` and `reviews` specs, with dev servers still on 5173/3000. Account-registration specs now pass locally (the invite-code failures came from the dev database's settings).
+- Next iteration: nothing eligible except HUMAN-held M1-T19 (on hold); expect `BLOCKED`. The isolated stack stays up after a run; `docs/local-dev.md` says how to remove it.
