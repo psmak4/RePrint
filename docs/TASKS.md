@@ -591,7 +591,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the excerpt is plain text, at most 200 characters, cut at a word boundary (unit tests), and the row is hidden under 3 items
 - [x] M9-T04 · API: `recentReviewCount` on "Most reviewed this month" items · deps: M8-T09 · PRD: §7.2
   - Accept: each item in `mostReviewedThisMonth` has `recentReviewCount`, the number of Approved reviews in the last `DISCOVER_RECENT_DAYS`, matching the row's ranking (integration test), and the OpenAPI spec is regenerated (D-179)
-- [ ] M9-T05 · Web: shell and Discover redesign · deps: M9-T02, M9-T03, M9-T04 · PRD: §7.2, §7.7, §11
+- [x] M9-T05 · Web: shell and Discover redesign · deps: M9-T02, M9-T03, M9-T04 · PRD: §7.2, §7.7, §11
   - Accept: header, footer, and `/` match the Discover template in `docs/DESIGN.md` at 360, 768, and 1280 px, with new strings in `apps/web/app/copy/`
   - Accept: the "Your reading" strip appears only for signed-in Members with a Reading or Want to Read Shelf entry, and the sign-up pitch only for Visitors
   - Accept: hidden rows leave no heading or gap, and component tests cover both viewer states
