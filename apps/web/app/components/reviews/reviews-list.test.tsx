@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { BookReviewsResponse, PublicReview } from '@reprint/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -131,7 +131,16 @@ describe('ReviewsList', () => {
       />,
     )
     expect((screen.getByLabelText('Sort by') as HTMLSelectElement).value).toBe('newest')
-    expect((screen.getByLabelText('Show') as HTMLSelectElement).value).toBe('4')
+    const chips = within(screen.getByRole('navigation', { name: 'Filter by rating' }))
+    expect(chips.getByRole('link', { name: '4 stars only' }).getAttribute('aria-current')).toBe(
+      'true',
+    )
+    expect(chips.getByRole('link', { name: '5 stars only' }).getAttribute('href')).toBe(
+      '/books/dune?sort=newest&rating=5#reviews',
+    )
+    expect(chips.getByRole('link', { name: 'All ratings' }).getAttribute('href')).toBe(
+      '/books/dune?sort=newest#reviews',
+    )
     expect(screen.getByRole('link', { name: 'Previous' }).getAttribute('href')).toBe(
       '/books/dune?sort=newest&rating=4#reviews',
     )
