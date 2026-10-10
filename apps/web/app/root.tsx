@@ -1,3 +1,5 @@
+import instrumentSansUrl from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url'
+import newsreaderUrl from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
@@ -24,6 +26,16 @@ import { logger } from './lib/logger.server.js'
 import { loadNotifications } from './lib/notifications.server.js'
 import { createRequestLogMiddleware } from './lib/request-log.server.js'
 import './app.css'
+
+// Preload the two above-the-fold font files (D-180); the browser needs `crossOrigin` for font fetches.
+export const links: Route.LinksFunction = () =>
+  [newsreaderUrl, instrumentSansUrl].map((href) => ({
+    rel: 'preload',
+    href,
+    as: 'font',
+    type: 'font/woff2',
+    crossOrigin: 'anonymous',
+  }))
 
 export const middleware = [createRequestLogMiddleware(logger)]
 

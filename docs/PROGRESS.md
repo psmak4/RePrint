@@ -601,3 +601,7 @@ Entry format:
 ### 2026-10-10 · M1-T19 on hold (owner) · owner/hold-m1-t19
 - M1-T19 (free-tier staging, owner) is `[~]` while the owner sets it up, so the loop runs M9 (redesign, D-176 to D-180) first. M1-T20 and M8-T12 stay ineligible until it's `[x]`.
 - Next iteration: start M9-T01.
+
+### 2026-10-10 · M9-T01 · PR pending
+- `theme.css` is the light palette (D-176) with `ground-deep`, `star`, and `accent-hover`, `color-scheme: light`, and the two font stacks. `theme.test.ts` checks the palette, that no dark values remain, and every text/UI pair on all four grounds. Newsreader and Instrument Sans are self-hosted (`apps/web/app/fonts.css`, Latin only, metric-adjusted fallbacks, both preloaded from `root.tsx`); new `e2e/specs/fonts.spec.ts` checks no Google request, same-origin fonts, CSP, and the preloads. Axe found the primary button's translucent hover failing contrast in the light theme; fixed with `accent-hover` (D-181). Web vitals check passes.
+- Next iteration: M9-T03 or M9-T04 can run next (API only); M9-T02 follows M9-T01. A local e2e run needs `docker compose exec redis redis-cli flushall` if stale Redis state makes `/resolve` hang. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).

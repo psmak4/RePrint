@@ -576,7 +576,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M9 · Redesign
 
-- [ ] M9-T01 · Light theme tokens and fonts: self-hosted Newsreader and Instrument Sans · deps: M8-T09 · PRD: §8, §11
+- [x] M9-T01 · Light theme tokens and fonts: self-hosted Newsreader and Instrument Sans · deps: M8-T09 · PRD: §8, §11
   - Accept: `packages/ui/src/theme.css` holds the light palette from `docs/DESIGN.md` (D-176) with `ground-deep` and `star`, sets `color-scheme: light`, and no dark values remain; `packages/ui/src/theme.test.ts` asserts the new palette and checks every pair in the DESIGN.md contrast table on all four grounds
   - Accept: `@fontsource-variable/newsreader` and `@fontsource-variable/instrument-sans` (D-180) provide `--font-serif` and `--font-sans`, Latin subset only, with the above-the-fold WOFF2 files preloaded from the root route
   - Accept: a built page requests no Google domain (Playwright network check), and `buildCsp` is unchanged (`font-src 'self'`, `style-src 'self'`)

@@ -1,25 +1,33 @@
 /*
- * RePrint theme tokens (Tailwind v4). Dark only for v1.
+ * RePrint theme tokens (Tailwind v4). Light only (D-176): one theme, no switcher.
  * Contrast ratios are documented in docs/DESIGN.md and checked by src/theme.test.ts.
  */
 @theme {
-  --color-background: #0f172a;
-  --color-foreground: #f8fafc;
-  --color-surface: #1e293b;
-  --color-surface-raised: #273449;
-  --color-muted-foreground: #94a3b8;
-  --color-border: #334155;
-  --color-input-border: #64748b;
-  --color-accent: #3b82f6;
-  --color-accent-foreground: #020617;
-  --color-link: #60a5fa;
-  --color-ring: #3b82f6;
-  --color-danger: #f87171;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
+  --color-background: #fbfaf7;
+  --color-ground-deep: #f3efe8;
+  --color-foreground: #0f172a;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f3f1ec;
+  --color-muted-foreground: #475569;
+  --color-border: #e4e0d8;
+  --color-input-border: #7a7f88;
+  --color-accent: #2563eb;
+  --color-accent-foreground: #ffffff;
+  --color-accent-hover: #1d4ed8;
+  --color-link: #1d4ed8;
+  --color-ring: #2563eb;
+  --color-danger: #b91c1c;
+  --color-success: #166534;
+  --color-warning: #a8500a;
+  --color-star: #a8500a;
 
+  /* The web app's fonts.css defines the web fonts and the metric-adjusted "Fallback" faces (D-180). */
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    "Instrument Sans Variable", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif:
+    "Newsreader Variable", "Newsreader Fallback", ui-serif, Georgia, Cambria, "Times New Roman",
+    Times, serif;
 
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
@@ -30,7 +38,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
