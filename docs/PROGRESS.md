@@ -597,3 +597,7 @@ Entry format:
 ### 2026-10-09 · Free-tier staging prep (owner) · owner/free-tier-staging
 - Added `render.staging.yaml` (free Render Blueprint), `keep-staging-warm.yml`, and a step-by-step "Free-tier staging setup" in `docs/deploy.md` (D-175). M1-T19 is back to `[ ]` for the owner; M1-T22 is skipped (no free previews).
 - Next iteration: M1-T19 is HUMAN; once the owner marks it `[x]`, M1-T20 verifies the staging deploy and M8-T12 can follow.
+
+### 2026-10-10 · M1-T19 on hold (owner) · owner/hold-m1-t19
+- M1-T19 (free-tier staging, owner) is `[~]` while the owner sets it up, so the loop runs M9 (redesign, D-176 to D-180) first. M1-T20 and M8-T12 stay ineligible until it's `[x]`.
+- Next iteration: start M9-T01.
