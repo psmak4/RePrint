@@ -125,7 +125,7 @@ Rules: use the shadcn component before writing your own; new dependencies need a
 
 ## App shell
 
-Skip link (first focusable) → header → `main#main` (`tabIndex=-1`, `max-w-page`) → footer. Header: logo left, search slot (own row below the logo at base, inline from `md`), account slot right. Footer: Open Library credit (PRD §6) and links to About, Terms, Privacy, Community Guidelines, and Contact (pages arrive in M8). Pages render content only; the shell owns `main`.
+Skip link (first focusable) → header → `main#main` (`tabIndex=-1`, `max-w-page`) → footer. Header (`surface`, 76 px from `md`): the wordmark (serif "Re" with "Print" in the accent italic), main links (Discover, Genres, My library) inline from `md` and behind a menu button on phones, a pill search box that shows the current query on `/search` (own row on phones), and the account slot (Log in ghost and Create account pill; Create account hidden on phones). Footer (`ground-deep`): wordmark, the "Not a store" line, the Open Library credit, and the legal links. Buttons are pills everywhere (D-188). Footer: Open Library credit (PRD §6) and links to About, Terms, Privacy, Community Guidelines, and Contact (pages arrive in M8). Pages render content only; the shell owns `main`.
 
 ## Page templates
 
@@ -133,12 +133,12 @@ Every template starts with one `h1`, is server-rendered by its loader, and has l
 
 ### Discover (`/`)
 
-1. **Hero band** (`ground-deep`): `TrustBadge`, the hero `h1`, a lead, a large search field (60 px tall) with a Search button, and "Try" chips. From `lg` the featured review sits on the right as a card with its cover, stars, headline, excerpt, reviewer, and "Read the full review".
+1. **Hero band** (`ground-deep`): `TrustBadge` (green pill), the hero `h1` with its last word in the amber italic, a lead, a large pill search field (60 px tall) with a Search button, and "Try" chips. On phones the search field and chips are hidden, since the header search sits right above. From `lg` the featured review sits on the right as a card with its cover, stars, headline, excerpt, reviewer, and "Read the full review".
 2. **Your reading** (signed in only): Books on the viewer's Reading Shelf (and up to one Want to Read), plus a "Finished something? Write a review" prompt.
 3. **Browse by genre:** 12 `GenreTile`s (6 across from `lg`, 3 at `md`, 2 at base) and "All genres".
 4. **Top rated on RePrint:** a `BookRail` of 7 (with a note that the average is weighted), shelf button on each cover.
-5. **This month** (5/7 split from `lg`): "Most reviewed this month" as a numbered list with `recentReviewCount` (D-179), beside "Just approved" `ReviewExcerpt` cards (D-177).
-6. **Sign-up pitch** (visitors only): the three Shelves, writing reviews, helpful votes; "Create a free account" and "Log in".
+5. **This month** (5/7 split from `lg`): the top 5 of "Most reviewed this month" as an open numbered list with `recentReviewCount` on the right (D-179), beside 3 "Just approved" `ReviewExcerpt` cards (D-177). "Recently reviewed" (PRD §7.2) follows as a second `BookRail`.
+6. **Sign-up pitch** (visitors only): heading, lead, the three Shelves, writing reviews, and helpful votes with tinted icons; "Create a free account" and "Log in" pills; from `lg` a drawn shelf of spines beside it.
 7. **How a review gets here:** three steps ending in a link to the Community Guidelines.
 
 Hidden rows (PRD §7.2) leave no heading or gap.
@@ -148,13 +148,22 @@ Hidden rows (PRD §7.2) leave no heading or gap.
 1. **Header band** (`ground-deep`): breadcrumb (Discover › first Genre › title); Cover (300 px from `lg`, 200 px at `md`, 176 px centred at base) beside: Series pill ("Series · Book N of M"), `h1`, byline with roles ("by …, translated by …"), rating row (stars, average, and review count linking to `#reviews`), `FactsRow` (first published, pages, publisher, original language, Edition count), actions (shelf selector as the primary button, "Write a review", copy link), and Genre chips.
 2. **`SectionNav`** (sticky): Overview, Reviews (count), Series (count), Editions (count), Author, Similar books. Items for empty sections are left out.
 3. **8/4 grid from `lg`.** Main column: About this book (serif, collapsed after 6 lines), Details (`DetailsList` from the Primary Edition: format, published date, publisher, pages, language, original language, ISBN-13, translators), Reviews (rating breakdown card with the viewer's controls on the right, star filter chips and sort, review list, pagination). Side column: `SeriesCard` (reading order, "You're here", up-next shortcut), `AuthorCard` (photo, life dates, two-line bio, counts, link), `EditionsCard` (format filter, 5 Editions, "See all").
-4. **Rows below** (full width): "More by <Author>" and "More in <first Genre>", 6 Books each.
+4. **Rows below** (full width): "More by <Author>" (with "All N books") and "More in <first Genre>" (with "Browse <Genre>"), 6 Books each.
+
+The Reviews section opens with its heading and the inline moderation line, then one card holding the `RatingBreakdown` (72 px average, filtering bars) and the viewer's review panel on the right from `xl`; when the review form is open the panel takes the card's full width. Reviews are an open list: initials avatar, name, date, stars, serif headline, body, then the Helpful pill and Report.
 
 Below `lg` the side column follows the reviews; on phones the actions become a two-button row and the facts a 2 × 2 grid.
 
 ### Search results (`/search`)
 
-`h1` "Results for “…”" with Books and Authors tabs (counts). From `lg`, filters sit in a 260 px left panel (Genre checkboxes with counts, minimum rating, first-published decade chips, language, and the note that Genre, rating, and language filters only show Books already on RePrint); below `lg` they collapse into a disclosure. Above the list: an `AuthorMatchCard` when the query matches an Author well, the result count split by Catalog and Source, and Sort. Each result: cover (112 px), Series line, serif title, Author and first published year, stars with average and review count, the `topReview` excerpt as a quote (D-177), Genre chips, and the shelf control. A Source candidate shows a dashed generated cover, "Not on RePrint yet", and "No RePrint reviews yet. Open it to be the first." 20 per page, numbered pagination.
+`h1` "Results for “…”" with Books and Authors tabs (counts). From `lg`, filters sit in a 260 px left panel (Genre checkboxes with counts, minimum rating, first-published decade chips, language, and the note that Genre, rating, and language filters only show Books already on RePrint); below `lg` they collapse into a disclosure. Above the list: an `AuthorMatchCard` when the query matches an Author well, then the result count split by Catalog and Source with Sort (its own GET form) on the right. The query lives in the header search box, so the page has no second search field. Each result: cover (112 px), Series line, serif title, Author and first published year, stars with average and review count, the `topReview` excerpt as a quote (D-177), Genre chips, and the shelf control. A Source candidate shows a dashed generated cover, "Not on RePrint yet", and "No RePrint reviews yet. Open it to be the first." 20 per page, numbered pagination.
+
+### Shared page frames
+
+- **`PageHero`** opens every browse and account-area page (Genres, Genre, Library, Author, Series, profile, settings, admin, static pages): the `ground-deep` band with an optional breadcrumb or eyebrow, an optional avatar, the serif `h1`, a lead, and anything the page adds (tabs, chips, totals).
+- **`AuthCard`** is the centered white card (460 px, 24 px corners) for log in, register, password recovery, email verification and change, the error page, and the resolve page: serif title, lead, body, a full-width pill for the one next step, and links under the card.
+- **`BookGrid` / `BookTile`** show Books cover-first everywhere outside rails (2, 3, 4, then 6 across; `narrow` stops at 4 beside a sidebar). A tile reads its rating as one phrase for screen readers and says "No RePrint reviews yet" when it has none.
+- Form controls are 44 px tall with 10 px corners and 15 px text; labels are 15 px semibold. Settings sections and admin tables sit in `surface` cards with 16 to 24 px corners.
 
 ### Review form
 
@@ -164,9 +173,13 @@ Single 40 rem column. Fields in order: star rating (radio group), headline with 
 
 Admin layout (below). Two panes from `lg`: a queue list on the left (oldest first, age and rating per row) and the selected review on the right (Book, reviewer history, rating, full text, spoiler flag, and a diff for edits). The action bar (Approve, Reject with reason picker) is sticky at the bottom of the right pane. Keyboard shortcuts are listed in a help dialog.
 
-### Library (`/me/library`, `/users/:username/library`)
+### Genres (`/genres`) and Genre (`/genres/:slug`)
 
-Tabs for the three Shelves with counts, then a grid of `BookCard`s (2 columns at base, 3 at `md`, 4 at `lg`) with sort options. Owner view adds a shelf selector on each card. Empty shelf: one sentence and a link to Discover.
+Both open with the `PageHero` band (`ground-deep`): breadcrumb, serif `h1` (38 px, 56 px from `md`), and a lead. The index is a grid of `GenreTile`s (2 across at base, 3 at `md`, 6 at `lg`); a child Genre is a small chip under its parent's tile. A Genre page adds its child Genres as pill links in the band, then sort as pill links (Top rated, Most reviewed, Newest review), the Books as a `BookGrid` (2, 3, 4, then 6 across), and Previous / Next pills.
+
+### Library (`/u/:username/library`)
+
+`PageHero` with a "Library" eyebrow, an initials avatar, "<username>'s library" (or "Your library" for the owner), and the shelved count. Below: Shelf tabs (All, Reading, Want to Read, Read) as underlined tabs with count badges, and sort (its own GET form with Apply) on the right from `md`. The Books are a `BookGrid`; in the All tab each tile is labelled with its Shelf, and the owner gets the bookmark shelf control on each cover. An empty Shelf is a dashed box with one sentence and a "Find something to read" pill. A private (or missing) Library is the band alone with the private message.
 
 ### Public profile (`/users/:username`)
 

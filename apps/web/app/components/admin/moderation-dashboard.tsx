@@ -9,13 +9,18 @@ const text = copy.admin.dashboard
 export function ModerationDashboard({ stats, now }: { stats: ModStats; now: string }) {
   return (
     <section aria-labelledby="dashboard-heading" className="flex flex-col gap-4">
-      <h2 id="dashboard-heading" className="text-2xl font-semibold">
+      <h2
+        id="dashboard-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       <dl className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-md border border-border p-4">
+        <div className="rounded-2xl border border-border bg-surface p-5">
           <dt className="text-sm text-muted-foreground">{text.pendingLabel}</dt>
-          <dd className="mt-1 text-3xl font-semibold">{stats.pendingCount}</dd>
+          <dd className="mt-2 font-serif text-[40px] leading-none font-medium">
+            {stats.pendingCount}
+          </dd>
           <dd className="mt-1 text-sm text-muted-foreground">
             {stats.oldestPendingAt
               ? text.oldest(ageText(stats.oldestPendingAt, now))
@@ -27,9 +32,11 @@ export function ModerationDashboard({ stats, now }: { stats: ModStats; now: stri
             </Link>
           </dd>
         </div>
-        <div className="rounded-md border border-border p-4">
+        <div className="rounded-2xl border border-border bg-surface p-5">
           <dt className="text-sm text-muted-foreground">{text.reportsLabel}</dt>
-          <dd className="mt-1 text-3xl font-semibold">{stats.openReportCount}</dd>
+          <dd className="mt-2 font-serif text-[40px] leading-none font-medium">
+            {stats.openReportCount}
+          </dd>
           <dd className="mt-1 text-sm text-muted-foreground">
             {stats.oldestOpenReportAt
               ? text.oldest(ageText(stats.oldestOpenReportAt, now))

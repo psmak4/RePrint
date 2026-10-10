@@ -1,6 +1,7 @@
 import { type ResetPasswordRequest, resetPasswordRequestSchema } from '@reprint/shared'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AuthCard, AuthNextLink } from './auth-card.js'
 import { type AuthField, AuthForm } from './auth-form.js'
 
 const fields: AuthField<ResetPasswordRequest>[] = [
@@ -19,37 +20,36 @@ export function ResetPasswordPage({ token }: { token: string }) {
 
   if (fetcher.data?.status === 'password_reset') {
     return (
-      <section className="mx-auto max-w-md py-8" aria-live="polite">
-        <h1 className="text-3xl font-semibold">{c.doneTitle}</h1>
-        <p className="mt-4 text-muted-foreground">{c.doneBody}</p>
-        <p className="mt-6">
-          <a className="text-link underline" href="/login">
-            {c.logIn}
-          </a>
-        </p>
-      </section>
+      <AuthCard live title={c.doneTitle} lead={c.doneBody}>
+        <AuthNextLink href="/login">{c.logIn}</AuthNextLink>
+      </AuthCard>
     )
   }
 
   if (!token) {
     return (
-      <section className="mx-auto max-w-md py-8">
-        <h1 className="text-3xl font-semibold">{c.invalidTitle}</h1>
-        <p role="alert" className="mt-4">
+      <AuthCard title={c.invalidTitle}>
+        <p role="alert" className="mt-3 text-[15px] leading-relaxed">
           {c.invalidBody}
         </p>
-        <p className="mt-6">
-          <a className="text-link underline" href="/forgot-password">
-            {c.requestNew}
-          </a>
-        </p>
-      </section>
+        <AuthNextLink href="/forgot-password">{c.requestNew}</AuthNextLink>
+      </AuthCard>
     )
   }
 
   return (
-    <section className="mx-auto max-w-md py-8">
-      <h1 className="text-3xl font-semibold">{c.title}</h1>
+    <AuthCard
+      title={c.title}
+      footer={
+        fetcher.data?.formError ? (
+          <p>
+            <a className="text-link underline" href="/forgot-password">
+              {c.requestNew}
+            </a>
+          </p>
+        ) : undefined
+      }
+    >
       <AuthForm
         schema={resetPasswordRequestSchema}
         fields={fields}
@@ -57,13 +57,6 @@ export function ResetPasswordPage({ token }: { token: string }) {
         submitLabel={c.submit}
         fetcher={fetcher}
       />
-      {fetcher.data?.formError ? (
-        <p className="mt-6 text-sm">
-          <a className="text-link underline" href="/forgot-password">
-            {c.requestNew}
-          </a>
-        </p>
-      ) : null}
-    </section>
+    </AuthCard>
   )
 }

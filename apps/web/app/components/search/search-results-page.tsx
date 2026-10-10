@@ -8,13 +8,14 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, Input, Label } from '@reprint/ui'
+import { Button, Label } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
 import { AuthorMatchCard } from '../books/author-match-card.js'
+import { InitialsAvatar } from '../books/avatar.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
 import { SearchResultCard, type SearchResultData } from './search-result-card.js'
 
@@ -37,7 +38,7 @@ const LANGUAGES = [
 const DECADES = Array.from({ length: 24 }, (_, i) => 2020 - i * 10)
 const RATINGS = [4, 3, 2, 1]
 const SELECT_CLASS =
-  'h-10 w-full rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 w-full rounded-[10px] border border-input-border bg-surface px-3 text-[15px] font-medium text-foreground'
 
 function languageName(code: string): string {
   return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code
@@ -82,7 +83,7 @@ function Tabs({ query }: { query: SearchQuery }) {
     { type: 'authors' as const, label: c.authorsTab },
   ]
   return (
-    <nav aria-label={c.tabsLabel} className="flex gap-2 border-b border-border">
+    <nav aria-label={c.tabsLabel} className="flex gap-7 border-b border-border">
       {tabs.map((tab) => (
         <Link
           key={tab.type}
@@ -99,11 +100,11 @@ function Tabs({ query }: { query: SearchQuery }) {
             { type: tab.type, page: 1 },
           )}
           aria-current={query.type === tab.type ? 'page' : undefined}
-          className={
+          className={`-mb-px inline-flex h-[52px] items-center border-b-2 text-base font-medium ${
             query.type === tab.type
-              ? 'border-b-2 border-primary px-3 py-2 font-semibold'
-              : 'px-3 py-2 text-muted-foreground hover:text-foreground'
-          }
+              ? 'border-accent text-foreground'
+              : 'border-transparent text-[#334155] hover:text-foreground'
+          }`}
         >
           {tab.label}
         </Link>
@@ -120,6 +121,53 @@ function flattenGenres(nodes: GenreNode[], depth = 0): { slug: string; label: st
   ])
 }
 
+function clearHref(query: SearchQuery): string {
+  return searchHref({
+    ...query,
+    genre: undefined,
+    language: undefined,
+    decade: undefined,
+    minRating: undefined,
+    sort: 'relevance',
+    page: 1,
+  })
+}
+
+/** Sort sits above the results; a GET form that keeps the query and filters, so it works without JS. */
+function SortForm({ query }: { query: SearchQuery }) {
+  const c = copy.search
+  return (
+    <form action="/search" method="get" className="flex items-center gap-2.5">
+      <input type="hidden" name="q" value={query.q} />
+      {query.genre ? <input type="hidden" name="genre" value={query.genre} /> : null}
+      {query.language ? <input type="hidden" name="language" value={query.language} /> : null}
+      {query.decade ? <input type="hidden" name="decade" value={query.decade} /> : null}
+      {query.minRating ? <input type="hidden" name="minRating" value={query.minRating} /> : null}
+      <label htmlFor="results-sort" className="text-sm text-muted-foreground">
+        {c.sort}
+      </label>
+      <select
+        id="results-sort"
+        name="sort"
+        defaultValue={query.sort}
+        className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
+      >
+        {SEARCH_SORTS.map((sort) => (
+          <option key={sort} value={sort}>
+            {c.sorts[sort]}
+          </option>
+        ))}
+      </select>
+      <button
+        type="submit"
+        className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
+      >
+        {c.applySort}
+      </button>
+    </form>
+  )
+}
+
 function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] }) {
   const c = copy.search
   return (
@@ -127,11 +175,20 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
       action="/search"
       method="get"
       aria-label={c.filtersLabel}
-      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-6"
     >
+      <div className="hidden items-center justify-between lg:flex">
+        <h2 className="text-[17px] font-semibold">{c.filtersLabel}</h2>
+        <Link to={clearHref(query)} className="text-sm text-link hover:underline">
+          {c.clearAll}
+        </Link>
+      </div>
       <input type="hidden" name="q" value={query.q} />
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="filter-genre">{c.genre}</Label>
+      <input type="hidden" name="sort" value={query.sort} />
+      <div className="flex flex-col gap-2.5">
+        <Label className="text-[15px] font-semibold" htmlFor="filter-genre">
+          {c.genre}
+        </Label>
         <select
           id="filter-genre"
           name="genre"
@@ -146,8 +203,10 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="filter-language">{c.language}</Label>
+      <div className="flex flex-col gap-2.5">
+        <Label className="text-[15px] font-semibold" htmlFor="filter-language">
+          {c.language}
+        </Label>
         <select
           id="filter-language"
           name="language"
@@ -162,8 +221,10 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="filter-decade">{c.decade}</Label>
+      <div className="flex flex-col gap-2.5">
+        <Label className="text-[15px] font-semibold" htmlFor="filter-decade">
+          {c.decade}
+        </Label>
         <select
           id="filter-decade"
           name="decade"
@@ -178,8 +239,10 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="filter-min-rating">{c.minRating}</Label>
+      <div className="flex flex-col gap-2.5">
+        <Label className="text-[15px] font-semibold" htmlFor="filter-min-rating">
+          {c.minRating}
+        </Label>
         <select
           id="filter-min-rating"
           name="minRating"
@@ -194,31 +257,13 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="filter-sort">{c.sort}</Label>
-        <select id="filter-sort" name="sort" defaultValue={query.sort} className={SELECT_CLASS}>
-          {SEARCH_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {c.sorts[sort]}
-            </option>
-          ))}
-        </select>
-      </div>
       <Button type="submit">{c.apply}</Button>
-      <Link
-        to={searchHref({
-          ...query,
-          genre: undefined,
-          language: undefined,
-          decade: undefined,
-          minRating: undefined,
-          sort: 'relevance',
-          page: 1,
-        })}
-        className="text-link underline"
-      >
+      <Link to={clearHref(query)} className="text-sm text-link underline lg:hidden">
         {c.clear}
       </Link>
+      <p className="border-t border-border pt-4 text-[13px] leading-normal text-muted-foreground">
+        {c.catalogOnly}
+      </p>
     </form>
   )
 }
@@ -241,7 +286,7 @@ function FilterPanel({ children }: { children: React.ReactNode }) {
   }, [])
   return (
     <details ref={ref} className="group lg:[&::details-content]:[content-visibility:visible]">
-      <summary className="cursor-pointer rounded-md border border-border bg-surface px-4 py-2 text-sm font-semibold lg:hidden">
+      <summary className="flex h-11 cursor-pointer items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold lg:hidden">
         {copy.search.filtersToggle}
       </summary>
       <div className="mt-2 lg:mt-0">{children}</div>
@@ -258,7 +303,7 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
         <Link
           rel="prev"
           to={searchHref(query, { page: query.page - 1 })}
-          className="text-link underline"
+          className="inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold hover:bg-surface-raised"
         >
           {c.previous}
         </Link>
@@ -270,7 +315,7 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
         <Link
           rel="next"
           to={searchHref(query, { page: query.page + 1 })}
-          className="text-link underline"
+          className="inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold hover:bg-surface-raised"
         >
           {c.next}
         </Link>
@@ -285,7 +330,7 @@ const trackResultClick = () => trackEvent(ANALYTICS_EVENTS.searchResultClick)
 
 function Results({ results, signedIn }: { results: SearchResponse; signedIn: boolean }) {
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col border-t border-border">
       {results.items.map((item) => {
         if (item.kind === 'book') {
           return (
@@ -294,7 +339,7 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
                 book={fromSummary(item.book, item.topReview)}
                 href={`/books/${item.book.slug}`}
                 onNavigate={trackResultClick}
-                shelf={<BookShelfSelector book={item.book} signedIn={signedIn} />}
+                shelf={<BookShelfSelector book={item.book} signedIn={signedIn} variant="outline" />}
               />
             </li>
           )
@@ -311,6 +356,7 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
                     target={{ kind: 'candidate', ref: item.candidate.ref }}
                     title={item.candidate.title}
                     signedIn={signedIn}
+                    variant="outline"
                   />
                 }
               />
@@ -321,8 +367,9 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
           <li key={`author-${item.author.id}`}>
             <Link
               to={`/authors/${item.author.slug}`}
-              className="block rounded-lg border border-border bg-surface p-4 text-link underline"
+              className="flex items-center gap-4 border-b border-border py-4 font-serif text-[22px] font-medium text-foreground hover:underline"
             >
+              <InitialsAvatar name={item.author.name} colorKey={item.author.slug} size="md" />
               {item.author.name}
             </Link>
           </li>
@@ -350,22 +397,14 @@ export function SearchResultsPage({
 }) {
   const c = copy.search
   return (
-    <section className="flex flex-col gap-4 py-8">
-      <h1 className="font-serif text-3xl font-medium">
-        {query.q ? c.headingFor(query.q) : c.heading}
-      </h1>
-      <search>
-        <form action="/search" method="get" className="flex gap-2">
-          <Label htmlFor="results-query" className="sr-only">
-            {c.queryLabel}
-          </Label>
-          <Input id="results-query" name="q" type="search" defaultValue={query.q} maxLength={100} />
-          {query.type === 'authors' ? <input type="hidden" name="type" value="authors" /> : null}
-          <Button type="submit">{copy.shell.search.submit}</Button>
-        </form>
-      </search>
-      <Tabs query={query} />
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+    <section className="flex flex-col gap-7 pt-2 pb-16 md:pt-2">
+      <div className="flex flex-col gap-5">
+        <h1 className="font-serif text-[32px] leading-[1.1] font-medium tracking-[-0.01em] md:text-[44px]">
+          {query.q ? c.headingFor(query.q) : c.heading}
+        </h1>
+        <Tabs query={query} />
+      </div>
+      <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
         {query.type === 'books' ? (
           <aside aria-label={c.filtersLabel}>
             <FilterPanel>
@@ -374,7 +413,7 @@ export function SearchResultsPage({
           </aside>
         ) : null}
         <div
-          className={`flex min-w-0 flex-col gap-4 ${query.type === 'books' ? '' : 'lg:col-span-2'}`}
+          className={`flex min-w-0 flex-col gap-6 ${query.type === 'books' ? '' : 'lg:col-span-2'}`}
         >
           {failed ? (
             <p role="alert" className="text-danger">
@@ -385,12 +424,9 @@ export function SearchResultsPage({
           ) : (
             <>
               {results.sourceUnavailable ? (
-                <p role="status" className="rounded-md border border-border bg-surface p-3 text-sm">
+                <p role="status" className="rounded-xl border border-border bg-surface p-4 text-sm">
                   {c.sourceUnavailable}
                 </p>
-              ) : null}
-              {(query.genre || query.language || query.minRating) && query.type === 'books' ? (
-                <p className="text-sm text-muted-foreground">{c.catalogOnly}</p>
               ) : null}
               {authorMatch ? (
                 <AuthorMatchCard name={authorMatch.name} href={`/authors/${authorMatch.slug}`} />
@@ -399,18 +435,27 @@ export function SearchResultsPage({
                 <p>{c.empty}</p>
               ) : (
                 <>
-                  <p role="status" className="text-sm text-muted-foreground">
-                    {query.type === 'books'
-                      ? c.resultSplit(
-                          results.items.filter((item) => item.kind === 'book').length,
-                          results.items.filter((item) => item.kind === 'candidate').length,
-                        )
-                      : c.resultCount(results.items.length)}
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <p role="status" className="text-[15px] text-muted-foreground">
+                      {query.type === 'books'
+                        ? c.resultSplit(
+                            results.items.filter((item) => item.kind === 'book').length,
+                            results.items.filter((item) => item.kind === 'candidate').length,
+                          )
+                        : c.resultCount(results.items.length)}
+                    </p>
+                    {query.type === 'books' ? <SortForm query={query} /> : null}
+                  </div>
                   <Results results={results} signedIn={viewer !== null} />
                 </>
               )}
               <Pagination query={query} hasMore={results.hasMore} />
+              {query.type === 'books' ? (
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[14px] border border-dashed border-[#a8a29e] px-6 py-5">
+                  <span className="font-semibold">{c.isbnHint}</span>
+                  <span className="text-[15px] text-muted-foreground">{c.isbnHintNote}</span>
+                </p>
+              ) : null}
             </>
           )}
         </div>

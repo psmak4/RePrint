@@ -172,6 +172,7 @@ describe('presentational components', () => {
     renderInRouter(
       <GenreTile
         name="Science fiction"
+        slug="science-fiction"
         href="/genres/science-fiction"
         bookCount={1}
         books={[{ slug: 'dune', title: 'Dune', cover: null }]}
@@ -197,10 +198,11 @@ describe('presentational components', () => {
       />,
     )
     expect(screen.getByText('<b>Gripping</b> from page one…')).toBeTruthy()
-    expect(screen.getByText('by Ana')).toBeTruthy()
-    expect(
-      screen.getByRole('link', { name: 'Read the full review of Dune' }).getAttribute('href'),
-    ).toBe('/books/dune#reviews')
+    expect(screen.getByText('Ana')).toBeTruthy()
+    expect(screen.getByText('“A classic”')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Dune' }).getAttribute('href')).toBe(
+      '/books/dune#reviews',
+    )
   })
 
   it('FactsRow and DetailsList leave out empty entries', () => {
@@ -232,8 +234,8 @@ describe('presentational components', () => {
         ]}
       />,
     )
-    expect(screen.getByText("You're here")).toBeTruthy()
-    expect(screen.getByText('Book 1 of 6')).toBeTruthy()
+    expect(screen.getByText(/You're here/)).toBeTruthy()
+    expect(screen.getByText(/^Book 1 of 6/)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' }).getAttribute('href')).toBe(
       '/books/dune-messiah',
     )

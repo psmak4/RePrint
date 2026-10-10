@@ -7,7 +7,7 @@ import { ScrollRegion } from './scroll-region.js'
 const text = copy.admin.audit
 
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type Filters = {
   actor: string
@@ -51,7 +51,10 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
 
   return (
     <section aria-labelledby="audit-heading" className="flex flex-col gap-4">
-      <h2 id="audit-heading" className="text-2xl font-semibold">
+      <h2
+        id="audit-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       <Form method="get" className="flex flex-wrap items-end gap-3">
@@ -134,7 +137,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
             <thead>
               <tr className="border-b border-border">
                 {(['time', 'actor', 'action', 'target', 'ip', 'changes'] as const).map((column) => (
-                  <th key={column} scope="col" className="py-2 pr-4">
+                  <th key={column} scope="col" className="py-3 pr-4">
                     {text.columns[column]}
                   </th>
                 ))}
@@ -143,20 +146,20 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
             <tbody>
               {entries.items.map((entry) => (
                 <tr key={entry.id} className="border-b border-border align-top">
-                  <td className="py-2 pr-4">
+                  <td className="py-3 pr-4">
                     <time dateTime={entry.createdAt}>
                       {timeFormat.format(new Date(entry.createdAt))}
                     </time>
                   </td>
-                  <td className="py-2 pr-4">{entry.actor?.username ?? text.noActor}</td>
-                  <td className="py-2 pr-4 font-medium">{entry.action}</td>
-                  <td className="py-2 pr-4 break-all">
+                  <td className="py-3 pr-4">{entry.actor?.username ?? text.noActor}</td>
+                  <td className="py-3 pr-4 font-medium">{entry.action}</td>
+                  <td className="py-3 pr-4 break-all">
                     {entry.targetType}
                     {entry.targetId ? (
                       <span className="block text-muted-foreground">{entry.targetId}</span>
                     ) : null}
                   </td>
-                  <td className="py-2 pr-4">{entry.ip ?? text.noIp}</td>
+                  <td className="py-3 pr-4">{entry.ip ?? text.noIp}</td>
                   <td className="py-2">
                     <dl className="flex flex-col gap-1">
                       <Values label={text.before} values={entry.before} />

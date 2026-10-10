@@ -18,6 +18,7 @@ import { VerificationBanner } from './components/auth/verification-banner.js'
 import { ErrorPage } from './components/error-page.js'
 import { AccountMenu } from './components/shell/account-menu.js'
 import { AppShell } from './components/shell/app-shell.js'
+import { MainNav } from './components/shell/main-nav.js'
 import { NotificationBell } from './components/shell/notification-bell.js'
 import { SearchBox } from './components/shell/search-box.js'
 import { analyticsConfig } from './lib/analytics.js'
@@ -68,6 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppShell
+          navSlot={<MainNav viewer={viewer} />}
           searchSlot={<SearchBox />}
           accountSlot={
             <>

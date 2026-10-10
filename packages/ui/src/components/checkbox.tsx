@@ -7,7 +7,7 @@ export function Checkbox({ className, ...props }: Omit<React.ComponentProps<'inp
     <input
       type="checkbox"
       className={cn(
-        'size-5 shrink-0 rounded border border-input-border bg-surface accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50',
+        'size-5 shrink-0 rounded border border-input-border bg-surface accent-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50',
         className,
       )}
       {...props}

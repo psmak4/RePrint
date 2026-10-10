@@ -1,7 +1,8 @@
 import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
 import { copy } from '../../copy/index.js'
-import { BookCard } from './book-card.js'
+import { BookGrid } from './book-tile.js'
 import { summaryCard } from './genre-pages.js'
+import { PageHero } from './page-hero.js'
 import { BookShelfSelector } from './shelf-selector.js'
 
 const text = copy.series
@@ -16,32 +17,34 @@ export function SeriesPage({
 }) {
   const { series, items } = detail
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold">{series.name}</h1>
-        {series.description ? <p className="text-muted-foreground">{series.description}</p> : null}
-      </header>
-      <section aria-labelledby="series-books">
-        <h2 id="series-books" className="text-xl font-semibold">
+    <div className="flex flex-col gap-10 md:gap-14">
+      <PageHero
+        eyebrow={
+          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:text-[13px]">
+            {text.eyebrow}
+          </p>
+        }
+        title={series.name}
+        lead={series.description ?? text.bookCount(items.length)}
+      />
+      <section aria-labelledby="series-books" className="flex flex-col gap-5 md:gap-6">
+        <h2
+          id="series-books"
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
           {text.booksHeading}
         </h2>
         {items.length === 0 ? (
-          <p className="mt-2 text-muted-foreground">{text.noBooks}</p>
+          <p className="text-muted-foreground">{text.noBooks}</p>
         ) : (
-          <ol className="mt-3 flex flex-col gap-3">
-            {items.map(({ position, book }) => (
-              <li key={book.id} className="flex flex-col gap-1">
-                <span className="text-sm font-semibold text-muted-foreground">
-                  {position === null ? text.noPosition : text.position(position)}
-                </span>
-                <BookCard
-                  book={summaryCard(book)}
-                  href={`/books/${book.slug}`}
-                  shelf={<BookShelfSelector book={book} signedIn={viewer !== null} />}
-                />
-              </li>
-            ))}
-          </ol>
+          <BookGrid
+            items={items.map(({ position, book }) => ({
+              slug: book.slug,
+              book: summaryCard(book),
+              eyebrow: position === null ? text.noPosition : text.position(position),
+              shelf: <BookShelfSelector book={book} signedIn={viewer !== null} variant="icon" />,
+            }))}
+          />
         )}
       </section>
     </div>

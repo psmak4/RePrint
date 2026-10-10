@@ -1,6 +1,7 @@
 import { Button } from '@reprint/ui'
 import { Form, Link, useNavigation } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AuthCard } from '../auth/auth-card.js'
 
 export type ResolvePageProps = {
   state: 'failed' | 'notFound'
@@ -16,30 +17,26 @@ export function ResolvePage({ state, candidateRef }: ResolvePageProps) {
 
   if (state === 'notFound' || candidateRef === null) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">{c.notFoundHeading}</h1>
-        <p className="mt-3 text-muted-foreground">{c.notFoundBody}</p>
-        <Button asChild className="mt-6">
+      <AuthCard title={c.notFoundHeading} lead={c.notFoundBody}>
+        <Button asChild size="lg" className="mt-6 w-full">
           <Link to="/search">{c.backToSearch}</Link>
         </Button>
-      </main>
+      </AuthCard>
     )
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-      <h1 className="text-2xl font-semibold">{c.failedHeading}</h1>
-      <p className="mt-3 text-muted-foreground">{c.failedBody}</p>
+    <AuthCard title={c.failedHeading} lead={c.failedBody}>
       {/* A GET form to the same URL runs the loader again, so retry works without JavaScript. */}
       <Form method="get" action="/resolve" className="mt-6">
         <input type="hidden" name="ref" value={candidateRef} />
-        <Button type="submit" disabled={retrying}>
+        <Button type="submit" size="lg" className="w-full" disabled={retrying}>
           {retrying ? c.loading : c.retry}
         </Button>
       </Form>
       <p role="status" className="sr-only">
         {retrying ? c.loading : ''}
       </p>
-    </main>
+    </AuthCard>
   )
 }

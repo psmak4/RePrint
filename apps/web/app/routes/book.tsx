@@ -264,6 +264,7 @@ async function loadSeries(
         title: item.book.title,
         cover: item.book.cover,
         position: item.position === null ? null : String(item.position),
+        rating: item.book.rating,
       })),
     }
   } catch (error) {

@@ -115,14 +115,14 @@ export function DecisionPanel({
         )}
       </div>
       {rejecting ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
           <div className="flex flex-col gap-1">
             <Label htmlFor={phraseId}>{text.phraseLabel}</Label>
             <select
               id={phraseId}
               value=""
               onChange={(event) => setReason(event.target.value)}
-              className="h-10 rounded-md border border-input-border bg-background px-3 text-sm"
+              className="h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px]"
             >
               <option value="">{text.phrasePlaceholder}</option>
               {text.phrases.map((phrase) => (

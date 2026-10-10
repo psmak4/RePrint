@@ -6,7 +6,8 @@ export type SectionNavItem = { id: string; label: string; count?: number }
 
 /**
  * Sticky in-page navigation. Each item jumps to the section with that id and the one in view is
- * marked `aria-current`. Callers leave out items for empty sections.
+ * marked `aria-current`. Callers leave out items for empty sections. The bar's background and
+ * bottom rule reach the viewport edges with box-shadows, so the page never scrolls sideways.
  */
 export function SectionNav({ items }: { items: SectionNavItem[] }) {
   const [current, setCurrent] = useState(items[0]?.id)
@@ -38,9 +39,9 @@ export function SectionNav({ items }: { items: SectionNavItem[] }) {
   return (
     <nav
       aria-label={copy.redesign.sectionNav.label}
-      className="sticky top-0 z-10 border-b border-border bg-surface"
+      className="sticky top-0 z-20 bg-[rgba(251,250,247,0.96)] shadow-[0_0_0_100vmax_rgba(251,250,247,0.96),0_1px_0_100vmax_var(--color-border)] backdrop-blur-sm [clip-path:inset(0_-100vmax_-1px)]"
     >
-      <ul className="mx-auto flex max-w-page gap-1 overflow-x-auto px-4 sm:px-6">
+      <ul className="flex gap-6 overflow-x-auto [scrollbar-width:none] md:gap-7">
         {items.map((item) => {
           const active = item.id === current
           return (
@@ -50,15 +51,17 @@ export function SectionNav({ items }: { items: SectionNavItem[] }) {
                 aria-current={active ? 'location' : undefined}
                 onClick={() => setCurrent(item.id)}
                 className={cn(
-                  'inline-flex h-11 items-center gap-2 border-b-2 px-3 text-sm font-medium',
+                  'inline-flex h-[52px] items-center gap-1.5 border-b-2 px-1 text-[15px] font-medium whitespace-nowrap md:h-14',
                   active
                     ? 'border-accent text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                    : 'border-transparent text-[#334155] hover:text-foreground',
                 )}
               >
                 {item.label}
                 {item.count !== undefined ? (
-                  <span className="rounded-full bg-surface-raised px-2 text-xs">{item.count}</span>
+                  <span className="rounded-full bg-[#ece8e0] px-[7px] py-0.5 text-xs font-semibold text-[#334155]">
+                    {item.count}
+                  </span>
                 ) : null}
               </a>
             </li>

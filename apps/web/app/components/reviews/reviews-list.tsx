@@ -4,9 +4,13 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
+import type { ReactNode } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
+import { InitialsAvatar } from '../books/avatar.js'
+import { StarRating } from '../books/star-rating.js'
+import { TrustBadge } from '../books/trust-badge.js'
 import { HelpfulVote } from './helpful-vote.js'
 import { ReportReview } from './report-review.js'
 import { SpoilerToggle } from './spoiler-toggle.js'
@@ -46,30 +50,48 @@ function ReviewItem({
   // Voting and reporting are for verified Members on other people's reviews (PRD §7.6, §7.9).
   const canInteract = viewer?.verified === true && viewer.username !== review.author.username
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4">
+    <li className="flex flex-col gap-3 border-b border-border py-5 md:gap-3.5 md:py-7">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span role="img" aria-label={text.ratingOf(review.rating)} className="text-warning">
-          {'★'.repeat(review.rating)}
-          <span className="text-input-border">{'★'.repeat(5 - review.rating)}</span>
-        </span>
-        {review.headline ? <h3 className="font-semibold">{review.headline}</h3> : null}
+        <InitialsAvatar
+          name={review.author.displayName}
+          colorKey={review.author.username}
+          size="md"
+          className="size-9 md:size-10"
+        />
+        <Link
+          to={`/u/${review.author.username}`}
+          className="text-[15px] font-semibold text-foreground hover:underline md:text-base"
+        >
+          <span className="sr-only">{text.by('')}</span>
+          {review.author.displayName}
+        </Link>
+        <time dateTime={review.submittedAt} className="ml-auto text-[13px] text-muted-foreground">
+          {dateFormat.format(new Date(review.submittedAt))}
+        </time>
       </div>
-      <p className="text-sm text-muted-foreground">
-        <Link to={`/u/${review.author.username}`} className="text-link underline">
-          {text.by(review.author.displayName)}
-        </Link>{' '}
-        ·{' '}
-        <time dateTime={review.submittedAt}>{dateFormat.format(new Date(review.submittedAt))}</time>
-      </p>
-      {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
-      <div className="flex flex-wrap items-center gap-3">
+      <span role="img" aria-label={text.ratingOf(review.rating)} className="w-max">
+        <StarRating average={review.rating} className="text-base md:text-lg" />
+      </span>
+      {review.headline ? (
+        <h3 className="font-serif text-[21px] leading-tight font-medium md:text-2xl">
+          {review.headline}
+        </h3>
+      ) : null}
+      <div className="text-[15px] leading-[1.65] text-[#1e293b] md:text-base md:leading-[1.7]">
+        {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
+      </div>
+      <div className="flex flex-wrap items-center gap-4">
         <HelpfulVote
           reviewId={review.id}
           count={review.helpfulCount}
           voted={voted}
           canVote={canInteract}
         />
-        {canInteract ? <ReportReview reviewId={review.id} /> : null}
+        {canInteract ? (
+          <span className="ml-auto">
+            <ReportReview reviewId={review.id} />
+          </span>
+        ) : null}
       </div>
     </li>
   )
@@ -78,7 +100,7 @@ function ReviewItem({
 function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
   // A plain GET form, so sorting works without JavaScript; changing sort resets to page 1.
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-4">
       <nav aria-label={copy.redesign.bookPage.filterByRating}>
         <ul className="flex flex-wrap gap-2">
           {[undefined, 5, 4, 3, 2, 1].map((stars) => {
@@ -89,7 +111,7 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
                   to={reviewsHref(slug, query, { rating: stars, page: 1 })}
                   aria-current={active ? 'true' : undefined}
                   aria-label={stars ? text.starsOnly(stars) : undefined}
-                  className={`inline-flex min-h-8 items-center rounded-full border px-3 text-sm ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-input-border bg-surface hover:bg-surface-raised'}`}
+                  className={`inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-[#d9d4ca] bg-surface text-[#1e293b] hover:border-input-border'}`}
                 >
                   {stars
                     ? copy.redesign.bookPage.starChip(stars)
@@ -103,14 +125,14 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
       <Form
         method="get"
         action={`/books/${slug}#reviews`}
-        className="flex flex-wrap items-end gap-3"
+        className="flex flex-wrap items-center gap-2.5"
       >
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex items-center gap-2.5 text-sm text-muted-foreground">
           {text.sortLabel}
           <select
             name="sort"
             defaultValue={query.sort}
-            className="rounded-md border border-input-border bg-background px-2 py-1.5"
+            className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
           >
             {REVIEW_SORTS.map((sort) => (
               <option key={sort} value={sort}>
@@ -122,14 +144,14 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
         {query.rating ? <input type="hidden" name="rating" value={query.rating} /> : null}
         <button
           type="submit"
-          className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface"
+          className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
         >
           {text.apply}
         </button>
         {query.rating ? (
           <Link
             to={reviewsHref(slug, query, { rating: undefined, page: 1 })}
-            className="py-1.5 text-sm text-link underline"
+            className="text-sm text-link underline"
           >
             {text.clearFilter}
           </Link>
@@ -186,6 +208,7 @@ export function ReviewsList({
   hasAnyReviews,
   viewer = null,
   votedReviewIds = [],
+  summary,
 }: {
   slug: string
   reviews: BookReviewsResponse | null
@@ -193,12 +216,25 @@ export function ReviewsList({
   hasAnyReviews: boolean
   viewer?: Viewer | null
   votedReviewIds?: string[]
+  /** The rating breakdown and the viewer's own review panel, shown under the heading. */
+  summary?: ReactNode
 }) {
   return (
-    <section id="reviews" aria-labelledby="reviews-heading" className="flex flex-col gap-4">
-      <h2 id="reviews-heading" className="font-serif text-2xl font-medium">
-        {text.heading}
-      </h2>
+    <section
+      id="reviews"
+      aria-labelledby="reviews-heading"
+      className="flex scroll-mt-16 flex-col gap-5 md:gap-6"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2
+          id="reviews-heading"
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
+          {text.heading}
+        </h2>
+        <TrustBadge variant="inline" label={copy.redesign.bookPage.moderated} />
+      </div>
+      {summary}
       {reviews === null ? (
         <p role="alert" className="text-muted-foreground">
           {text.loadFailed}
@@ -211,7 +247,7 @@ export function ReviewsList({
               {query.rating || hasAnyReviews ? text.emptyFiltered : text.empty}
             </p>
           ) : (
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col border-t border-border">
               {reviews.items.map((review) => (
                 <ReviewItem
                   key={review.id}

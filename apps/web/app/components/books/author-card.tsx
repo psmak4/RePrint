@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { InitialsAvatar } from './avatar.js'
 
 const text = copy.redesign.author
 
@@ -9,24 +10,17 @@ function Photo({ name, photoUrl }: { name: string; photoUrl: string | null }) {
       <img
         src={photoUrl}
         alt=""
-        width={56}
-        height={56}
+        width={64}
+        height={64}
         loading="lazy"
-        className="h-14 w-14 rounded-full object-cover"
+        className="size-16 shrink-0 rounded-full object-cover"
       />
     )
   }
-  return (
-    <span
-      aria-hidden="true"
-      className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-raised font-serif text-2xl"
-    >
-      {name.trim().charAt(0).toUpperCase()}
-    </span>
-  )
+  return <InitialsAvatar name={name} size="lg" />
 }
 
-/** A compact Author panel: photo (or initial), life dates, a two-line bio, and a link to the page. */
+/** A compact Author panel: photo (or initials), life dates, a two-line bio, and a link to the page. */
 export function AuthorCard({
   name,
   href,
@@ -48,27 +42,29 @@ export function AuthorCard({
   return (
     <section
       aria-labelledby="author-card-heading"
-      className="rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-3.5 rounded-2xl border border-border bg-surface p-[22px]"
     >
-      <h3 id="author-card-heading" className="sr-only">
+      <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
         {text.heading}
-      </h3>
-      <div className="flex items-center gap-3">
+      </p>
+      <div className="flex items-center gap-3.5">
         <Photo name={name} photoUrl={photoUrl} />
-        <div className="min-w-0">
-          <p className="font-serif text-xl font-medium">{name}</p>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h2 id="author-card-heading" className="font-serif text-[22px] leading-tight font-medium">
+            {name}
+          </h2>
           {life ? <p className="text-sm text-muted-foreground">{life}</p> : null}
         </div>
       </div>
-      {bio ? <p className="mt-3 line-clamp-2 text-sm">{bio}</p> : null}
-      {bookCount !== undefined ? (
-        <p className="mt-2 text-sm text-muted-foreground">{text.bookCount(bookCount)}</p>
+      {bio ? (
+        <p className="line-clamp-3 text-[15px] leading-relaxed text-[#334155]">{bio}</p>
       ) : null}
-      <p className="mt-3 text-sm">
-        <Link to={href} className="text-link underline">
-          {text.viewAuthor(name)}
-        </Link>
-      </p>
+      {bookCount !== undefined ? (
+        <p className="text-sm text-muted-foreground">{text.bookCount(bookCount)}</p>
+      ) : null}
+      <Link to={href} className="text-[15px] font-semibold text-link hover:underline">
+        {text.viewAuthor(name)}
+      </Link>
     </section>
   )
 }

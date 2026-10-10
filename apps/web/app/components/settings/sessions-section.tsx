@@ -19,7 +19,7 @@ function SessionRow({ session }: { session: SessionInfo }) {
         <p className="font-medium">
           {session.device}
           {session.current ? (
-            <span className="ml-2 rounded-md border border-border px-2 py-0.5 text-xs">
+            <span className="ml-2 rounded-full bg-[#ecfdf3] px-2.5 py-0.5 text-xs font-medium text-success">
               {c.thisDevice}
             </span>
           ) : null}
@@ -58,11 +58,14 @@ export function SessionsSection({ sessions }: { sessions: SessionInfo[] }) {
   const logoutAll = useFetcher<{ formError?: string }>()
   const busy = logoutAll.state !== 'idle'
   return (
-    <section aria-labelledby="sessions-heading">
-      <h2 id="sessions-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="sessions-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="sessions-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.lead}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>
       {sessions.length === 0 ? (
         <p className="mt-4">{c.empty}</p>
       ) : (

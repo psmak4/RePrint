@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { PageHero } from '../books/page-hero.js'
 
 export type AdminNavItem = { to: string; label: string }
 
@@ -12,7 +13,7 @@ export function AdminLayout({ items }: { items: AdminNavItem[] }) {
           <NavLink
             to={item.to}
             end
-            className="block rounded-md px-3 py-2 text-sm hover:bg-surface aria-[current=page]:bg-surface aria-[current=page]:font-semibold"
+            className="flex h-10 items-center rounded-lg px-3 text-[15px] font-medium text-[#334155] hover:bg-surface-raised hover:text-foreground aria-[current=page]:bg-surface aria-[current=page]:text-foreground aria-[current=page]:shadow-[inset_0_0_0_1px_var(--color-border)]"
           >
             {item.label}
           </NavLink>
@@ -21,12 +22,14 @@ export function AdminLayout({ items }: { items: AdminNavItem[] }) {
     </ul>
   )
   return (
-    <div className="py-8">
-      <h1 className="text-3xl font-semibold">{copy.admin.title}</h1>
-      <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+    <div className="flex flex-col gap-8">
+      <PageHero title={copy.admin.title} />
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
         <nav aria-label={copy.admin.navLabel} className="lg:w-56 lg:shrink-0">
-          <details className="rounded-md border border-border lg:hidden">
-            <summary className="cursor-pointer px-3 py-2 text-sm">{copy.admin.navToggle}</summary>
+          <details className="rounded-xl border border-border bg-surface lg:hidden">
+            <summary className="flex h-11 cursor-pointer items-center px-4 text-sm font-semibold">
+              {copy.admin.navToggle}
+            </summary>
             <div className="p-2">{links}</div>
           </details>
           <div className="hidden lg:block">{links}</div>

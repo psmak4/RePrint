@@ -34,7 +34,7 @@ export function NotificationBell({
     <details className="relative" onToggle={onToggle}>
       <summary
         aria-label={unread > 0 ? c.unreadLabel(unread) : c.label}
-        className="flex h-9 cursor-pointer list-none items-center gap-1 rounded-md px-3 text-sm font-medium hover:bg-surface"
+        className="flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-3 text-sm font-medium hover:bg-surface-raised"
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-none stroke-current">
           <path
@@ -45,18 +45,21 @@ export function NotificationBell({
           />
         </svg>
         {unread > 0 ? (
-          <span aria-hidden="true" className="rounded-full bg-accent px-1.5 text-xs">
+          <span
+            aria-hidden="true"
+            className="rounded-full bg-accent px-1.5 text-xs text-accent-foreground"
+          >
             {unread}
           </span>
         ) : null}
       </summary>
-      <div className="absolute right-0 z-40 mt-2 w-80 max-w-[90vw] rounded-md border border-border bg-surface p-1">
+      <div className="absolute right-0 z-40 mt-2 w-80 max-w-[90vw] rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)]">
         {notifications.items.length === 0 ? (
           <p className="p-3 text-sm">{c.empty}</p>
         ) : (
           <ul aria-label={c.label}>
             {notifications.items.map((item) => (
-              <li key={item.id} className="rounded-md p-3 text-sm">
+              <li key={item.id} className="rounded-lg p-3 text-sm">
                 <p>
                   {fresh.has(item.id) ? <strong className="sr-only">{c.unreadMark} </strong> : null}
                   {c.messages[item.type]}

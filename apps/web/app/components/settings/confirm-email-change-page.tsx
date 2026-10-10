@@ -1,4 +1,5 @@
 import { copy } from '../../copy/index.js'
+import { AuthCard, AuthNextLink } from '../auth/auth-card.js'
 
 export function ConfirmEmailChangePage({
   changed,
@@ -9,23 +10,21 @@ export function ConfirmEmailChangePage({
 }) {
   const c = copy.settings.confirmEmail
   return (
-    <section className="mx-auto max-w-md py-8">
-      <h1 className="text-3xl font-semibold">{changed ? c.successTitle : c.failedTitle}</h1>
-      {changed ? (
-        <p className="mt-4 text-muted-foreground">{c.successBody}</p>
-      ) : (
+    <AuthCard
+      title={changed ? c.successTitle : c.failedTitle}
+      lead={changed ? c.successBody : undefined}
+    >
+      {changed ? null : (
         <>
-          <p role="alert" className="mt-4">
+          <p role="alert" className="mt-3 text-[15px] leading-relaxed">
             {c.failedBody}
           </p>
-          <p className="mt-2 text-muted-foreground">{c.failedHelp}</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">{c.failedHelp}</p>
         </>
       )}
-      <p className="mt-6">
-        <a className="text-link underline" href={signedIn ? '/' : '/login'}>
-          {signedIn ? c.continue : c.logIn}
-        </a>
-      </p>
-    </section>
+      <AuthNextLink href={signedIn ? '/' : '/login'}>
+        {signedIn ? c.continue : c.logIn}
+      </AuthNextLink>
+    </AuthCard>
   )
 }

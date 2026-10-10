@@ -93,49 +93,53 @@ export function BookPage({
     ...(hasSimilar ? [{ id: 'similar', label: labels.sections.similar }] : []),
   ]
   const rating = book.rating
+  const rated = rating.average !== null && rating.count > 0
   return (
-    <article className="flex flex-col gap-8">
-      <div className="-mt-8 bg-ground-deep py-8 shadow-[0_0_0_100vmax_var(--color-ground-deep)] [clip-path:inset(0_-100vmax)]">
+    <article className="flex flex-col">
+      <div className="-mt-8 bg-ground-deep pt-6 pb-7 shadow-[0_0_0_100vmax_var(--color-ground-deep)] [clip-path:inset(0_-100vmax)] md:pt-7 md:pb-14">
         <BookHeader book={book} series={series} signedIn={viewer !== null} />
       </div>
       <SectionNav items={navItems} />
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="flex flex-col gap-8 lg:col-span-8">
+      <div className="grid gap-12 pt-9 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-14 lg:pt-12">
+        <div className="flex min-w-0 flex-col gap-12 lg:gap-16">
           <Description text={book.description} />
           <BookDetails book={book} />
-          <div className="flex flex-col gap-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              {rating.average !== null && rating.count > 0 ? (
-                <RatingBreakdown
-                  average={rating.average}
-                  count={rating.count}
-                  distribution={rating.distribution}
-                  selected={reviewQuery.rating ?? null}
-                  onSelect={(stars) =>
-                    navigate(
-                      reviewsHref(book.slug, reviewQuery, {
-                        rating: stars ?? undefined,
-                        page: 1,
-                      }),
-                    )
-                  }
-                />
-              ) : null}
-              <div id="write-review" className="scroll-mt-16">
-                <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
+          <ReviewsList
+            slug={book.slug}
+            reviews={reviews}
+            query={reviewQuery}
+            hasAnyReviews={rating.count > 0}
+            viewer={viewer}
+            votedReviewIds={votedReviewIds}
+            summary={
+              // While the review form is open, the panel takes the card's full width (`:has`).
+              <div
+                className={`grid items-center gap-6 rounded-2xl border border-border bg-surface p-[18px] md:p-7 ${rated ? 'xl:grid-cols-[minmax(0,1fr)_240px] xl:gap-7 xl:has-[form]:grid-cols-1' : ''}`}
+              >
+                {rated && rating.average !== null ? (
+                  <RatingBreakdown
+                    average={rating.average}
+                    count={rating.count}
+                    distribution={rating.distribution}
+                    selected={reviewQuery.rating ?? null}
+                    onSelect={(stars) =>
+                      navigate(
+                        reviewsHref(book.slug, reviewQuery, {
+                          rating: stars ?? undefined,
+                          page: 1,
+                        }),
+                      )
+                    }
+                  />
+                ) : null}
+                <div id="write-review" className="scroll-mt-20">
+                  <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
+                </div>
               </div>
-            </div>
-            <ReviewsList
-              slug={book.slug}
-              reviews={reviews}
-              query={reviewQuery}
-              hasAnyReviews={rating.count > 0}
-              viewer={viewer}
-              votedReviewIds={votedReviewIds}
-            />
-          </div>
+            }
+          />
         </div>
-        <aside className="flex flex-col gap-6 lg:col-span-4">
+        <aside className="flex min-w-0 flex-col gap-6">
           {series ? (
             <div id="series" className="scroll-mt-16">
               <SeriesCard
@@ -165,6 +169,7 @@ export function BookPage({
               <EditionsCard
                 editions={editions.map((edition) => ({
                   id: edition.id,
+                  primary: edition.id === book.primaryEdition?.id,
                   format: edition.format,
                   publisher: edition.publisherName,
                   publishedYear: edition.publishedDate
@@ -178,12 +183,25 @@ export function BookPage({
         </aside>
       </div>
       {hasSimilar ? (
-        <div id="similar" className="flex scroll-mt-16 flex-col gap-8">
+        <div
+          id="similar"
+          className="flex scroll-mt-16 flex-col gap-14 pt-12 md:gap-[72px] md:pt-16"
+        >
           {moreByAuthor ? (
             <Row
               id="more-by-author"
               heading={text.moreByHeading(moreByAuthor.authorName)}
               books={moreByAuthor.books}
+              action={
+                author ? (
+                  <Link
+                    to={`/authors/${moreByAuthor.authorSlug}`}
+                    className="text-[15px] font-semibold text-link hover:underline"
+                  >
+                    {labels.allBooks(author.bookCount)}
+                  </Link>
+                ) : null
+              }
             />
           ) : null}
           {moreInGenre ? (
@@ -191,6 +209,14 @@ export function BookPage({
               id="more-in-genre"
               heading={labels.moreInGenre(moreInGenre.genreName)}
               books={moreInGenre.books}
+              action={
+                <Link
+                  to={`/genres/${moreInGenre.genreSlug}`}
+                  className="text-[15px] font-semibold text-link hover:underline"
+                >
+                  {labels.browseGenre(moreInGenre.genreName)}
+                </Link>
+              }
             />
           ) : null}
         </div>
@@ -199,14 +225,31 @@ export function BookPage({
   )
 }
 
-function Row({ id, heading, books }: { id: string; heading: string; books: BookSummary[] }) {
+function Row({
+  id,
+  heading,
+  books,
+  action,
+}: {
+  id: string
+  heading: string
+  books: BookSummary[]
+  action?: ReactNode
+}) {
   if (books.length === 0) return null
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-4">
-      <h2 id={id} className="font-serif text-2xl font-medium">
-        {heading}
-      </h2>
+    <section aria-labelledby={id} className="flex flex-col gap-5 md:gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <h2
+          id={id}
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
+          {heading}
+        </h2>
+        {action}
+      </div>
       <BookRail
+        columns={6}
         label={heading}
         items={books.map((book) => ({ slug: book.slug, book: summaryCard(book) }))}
       />
@@ -219,7 +262,8 @@ function CopyLinkButton() {
   return (
     <button
       type="button"
-      className="inline-flex h-11 items-center rounded-md border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised"
+      aria-label={copied ? labels.linkCopied : labels.copyLink}
+      className="inline-flex size-11 items-center justify-center rounded-full border border-input-border bg-surface text-foreground hover:bg-surface-raised"
       onClick={() => {
         void navigator.clipboard
           ?.writeText(window.location.href.split('#')[0] ?? window.location.href)
@@ -227,7 +271,25 @@ function CopyLinkButton() {
           .catch(() => setCopied(false))
       }}
     >
-      {copied ? labels.linkCopied : labels.copyLink}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="size-[18px]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {copied ? (
+          <path d="M20 6 9 17l-5-5" />
+        ) : (
+          <>
+            <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />
+            <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+          </>
+        )}
+      </svg>
       <span role="status" className="sr-only">
         {copied ? labels.linkCopied : ''}
       </span>
@@ -265,88 +327,134 @@ function BookHeader({
   const facts = candidates.filter((fact): fact is Fact => fact !== null)
 
   return (
-    <header className="flex flex-col gap-4">
+    <header className="flex flex-col gap-6 md:gap-8">
       <nav aria-label={labels.breadcrumbLabel} className="text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-x-2">
           <li>
-            <Link to="/" className="underline">
+            <Link to="/" className="text-[#334155] hover:underline">
               {labels.discover}
             </Link>
           </li>
           {firstGenre ? (
             <li className="flex gap-2">
-              <span aria-hidden="true">›</span>
-              <Link to={`/genres/${firstGenre.slug}`} className="underline">
+              <span aria-hidden="true">/</span>
+              <Link to={`/genres/${firstGenre.slug}`} className="text-[#334155] hover:underline">
                 {firstGenre.name}
               </Link>
             </li>
           ) : null}
           <li className="flex gap-2">
-            <span aria-hidden="true">›</span>
-            <span aria-current="page">{book.title}</span>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="text-foreground">
+              {book.title}
+            </span>
           </li>
         </ol>
       </nav>
-      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start lg:gap-10">
+      <div className="flex flex-col items-center gap-[18px] text-center md:grid md:grid-cols-[200px_minmax(0,1fr)] md:items-start md:gap-8 md:text-left lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-14">
         <Cover
           cover={book.cover ?? edition?.cover ?? null}
           title={book.title}
           authorName={groups[0]?.people[0]?.name}
           slug={book.slug}
           size="large"
-          className="shrink-0 shadow-md lg:w-72"
+          className="w-44 shadow-[inset_5px_0_0_rgba(0,0,0,0.25),0_30px_50px_-22px_rgba(15,23,42,0.6)] md:w-full"
         />
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex w-full min-w-0 flex-col items-center gap-[18px] md:items-start md:gap-[22px] md:pt-2">
           {membership ? (
-            <p>
-              <Link
-                to={`/series/${membership.series.slug}`}
-                className="inline-block rounded-full bg-surface px-3 py-1 text-sm text-link underline"
+            <Link
+              to={`/series/${membership.series.slug}`}
+              className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-[#d9d4ca] bg-surface px-3 text-[13px] text-[#1e293b] hover:border-input-border"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-[15px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {labels.seriesPill(
-                  membership.series.name,
-                  membership.position === null ? null : String(membership.position),
-                  series?.total ?? null,
-                )}
-              </Link>
-            </p>
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+              </svg>
+              {labels.seriesPill(
+                membership.series.name,
+                membership.position === null ? null : String(membership.position),
+                series?.total ?? null,
+              )}
+            </Link>
           ) : null}
-          <h1 className="font-serif text-[38px] leading-10 font-medium tracking-[-0.02em] break-words lg:text-6xl lg:leading-[62px]">
-            {book.title}
-          </h1>
-          {book.subtitle ? <p className="text-lg text-muted-foreground">{book.subtitle}</p> : null}
-          {groups.map((group) => (
-            <p key={group.role} className="text-base">
-              {text.roles[group.role]}{' '}
-              {group.people.map((person, i) => (
-                <span key={person.slug}>
-                  {i > 0 ? ', ' : ''}
-                  <Link to={`/authors/${person.slug}`} className="text-link underline">
-                    {person.name}
-                  </Link>
-                </span>
-              ))}
-            </p>
-          ))}
+          <div className="flex flex-col gap-2.5">
+            <h1 className="font-serif text-[38px] leading-[1.04] font-medium tracking-[-0.02em] break-words lg:text-6xl lg:leading-[1.02]">
+              {book.title}
+            </h1>
+            {book.subtitle ? (
+              <p className="text-lg text-muted-foreground">{book.subtitle}</p>
+            ) : null}
+            {groups.length > 0 ? (
+              <p className="text-base text-[#334155] md:text-lg">
+                {groups.map((group, g) => (
+                  <span key={group.role}>
+                    {g > 0 ? <span className="text-muted-foreground"> · </span> : null}
+                    <span className={g > 0 ? 'text-muted-foreground' : ''}>
+                      {text.roles[group.role]}
+                    </span>{' '}
+                    {group.people.map((person, i) => (
+                      <span key={person.slug}>
+                        {i > 0 ? ', ' : ''}
+                        <Link
+                          to={`/authors/${person.slug}`}
+                          className="font-semibold text-foreground underline underline-offset-2"
+                        >
+                          {person.name}
+                        </Link>
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </p>
+            ) : null}
+          </div>
           <RatingRow rating={book.rating} />
-          <FactsRow facts={facts} />
-          <div className="flex flex-wrap items-center gap-3">
-            <BookShelfSelector book={book} signedIn={signedIn} />
+          <div className="w-full md:w-auto">
+            <FactsRow facts={facts} />
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2.5 md:flex md:w-auto md:flex-wrap md:items-center md:gap-3">
+            <BookShelfSelector book={book} signedIn={signedIn} variant="primary" />
             <a
               href="#write-review"
-              className="inline-flex h-11 items-center rounded-md border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-input-border bg-surface px-5 text-[15px] font-semibold whitespace-nowrap hover:bg-surface-raised"
             >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-[18px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
               {labels.writeReview}
             </a>
-            <CopyLinkButton />
+            <span className="hidden md:inline-flex">
+              <CopyLinkButton />
+            </span>
           </div>
           {book.genres.length > 0 ? (
-            <ul aria-label={text.genresLabel} className="flex flex-wrap gap-2">
+            <ul
+              aria-label={text.genresLabel}
+              className="flex flex-wrap justify-center gap-2 md:justify-start"
+            >
               {book.genres.map((genre) => (
                 <li key={genre.slug}>
                   <Link
                     to={`/genres/${genre.slug}`}
-                    className="inline-block rounded-full border border-border bg-surface px-3 py-1 text-sm"
+                    className="inline-flex h-[34px] items-center rounded-full border border-[#d9d4ca] bg-surface px-3.5 text-sm text-[#1e293b] hover:border-input-border"
                   >
                     {genre.name}
                   </Link>
@@ -365,10 +473,10 @@ function RatingRow({ rating }: { rating: BookDetail['rating'] }) {
     return <p className="text-sm text-muted-foreground">{copy.books.noReviews}</p>
   }
   return (
-    <p className="flex flex-wrap items-center gap-2 text-sm">
-      <StarRating average={rating.average} className="text-lg" />
-      <span className="font-semibold">{rating.average.toFixed(1)}</span>
-      <a href="#reviews" className="text-link underline">
+    <p className="flex flex-wrap items-center justify-center gap-2.5 md:justify-start md:gap-3.5">
+      <StarRating average={rating.average} className="text-xl md:text-[26px]" />
+      <span className="text-lg font-semibold md:text-2xl">{rating.average.toFixed(1)}</span>
+      <a href="#reviews" className="text-base text-link underline">
         {labels.reviewsLink(rating.count)}
       </a>
     </p>
@@ -400,9 +508,15 @@ function BookDetails({ book }: { book: BookDetail }) {
   if (!rows.some((row) => row.value)) return null
   return (
     <section aria-labelledby="book-details" className="flex flex-col gap-3">
-      <h2 id="book-details" className="font-serif text-2xl font-medium">
-        {labels.detailsHeading}
-      </h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2
+          id="book-details"
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
+          {labels.detailsHeading}
+        </h2>
+        <span className="text-sm text-muted-foreground">{labels.fromPrimaryEdition}</span>
+      </div>
       <DetailsList rows={rows} />
     </section>
   )
@@ -413,22 +527,29 @@ function Description({ text: description }: { text: string | null }) {
   const body = description?.trim() ?? ''
   const collapsible = body.length > COLLAPSE_AFTER_CHARACTERS || body.split('\n').length > 6
   return (
-    <section id="overview" aria-labelledby="book-description" className="scroll-mt-16">
-      <h2 id="book-description" className="font-serif text-2xl font-medium">
+    <section
+      id="overview"
+      aria-labelledby="book-description"
+      className="flex scroll-mt-16 flex-col gap-4"
+    >
+      <h2
+        id="book-description"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.descriptionHeading}
       </h2>
       {body ? (
         <>
           <p
             id="book-description-text"
-            className={`mt-2 whitespace-pre-line ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
+            className={`font-serif text-lg leading-[1.6] whitespace-pre-line text-[#1e293b] md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
           >
             {body}
           </p>
           {collapsible ? (
             <button
               type="button"
-              className="mt-2 text-sm text-link underline"
+              className="self-start py-1 text-[15px] font-semibold text-link underline underline-offset-[3px]"
               aria-expanded={expanded}
               aria-controls="book-description-text"
               onClick={() => setExpanded((open) => !open)}
@@ -438,7 +559,7 @@ function Description({ text: description }: { text: string | null }) {
           ) : null}
         </>
       ) : (
-        <p className="mt-2 text-muted-foreground">{text.noDescription}</p>
+        <p className="text-muted-foreground">{text.noDescription}</p>
       )}
     </section>
   )

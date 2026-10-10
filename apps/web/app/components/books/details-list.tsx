@@ -1,4 +1,4 @@
-/** Label and value pairs as a description list; rows without a value are left out. */
+/** Label and value pairs as a description list in two columns; rows without a value are left out. */
 export function DetailsList({
   rows,
 }: {
@@ -7,11 +7,14 @@ export function DetailsList({
   const shown = rows.filter((row) => row.value)
   if (shown.length === 0) return null
   return (
-    <dl className="divide-y divide-border rounded-lg border border-border bg-surface">
+    <dl className="grid gap-x-10 md:grid-cols-2">
       {shown.map((row) => (
-        <div key={row.label} className="grid gap-1 px-4 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
-          <dt className="text-sm text-muted-foreground">{row.label}</dt>
-          <dd className="text-base break-words">{row.value}</dd>
+        <div
+          key={row.label}
+          className="flex justify-between gap-4 border-b border-border py-3 text-[15px] md:grid md:grid-cols-[150px_minmax(0,1fr)] md:py-3.5"
+        >
+          <dt className="text-muted-foreground">{row.label}</dt>
+          <dd className="text-right break-words md:text-left">{row.value}</dd>
         </div>
       ))}
     </dl>

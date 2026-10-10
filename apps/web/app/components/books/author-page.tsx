@@ -1,9 +1,10 @@
 import type { AuthorDetail, BookSummary, ContributionRole } from '@reprint/shared'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
-import { BookCard } from './book-card.js'
+import { BookGrid } from './book-tile.js'
+import { PageHero } from './page-hero.js'
 
 const { author: text } = copy
 
@@ -47,48 +48,70 @@ export function lifeDates(birthDate: string | null, deathDate: string | null): s
 
 export function AuthorPage({ author }: { author: AuthorDetail }) {
   const groups = groupWorks(author.works)
+  const dates = lifeDates(author.birthDate, author.deathDate)
   return (
-    <article className="flex flex-col gap-8">
-      <AuthorHeader author={author} />
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="flex flex-col gap-8 lg:col-span-8">
+    <article className="flex flex-col gap-10 md:gap-14">
+      <PageHero
+        eyebrow={
+          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:text-[13px]">
+            {text.eyebrow}
+          </p>
+        }
+        leading={<AuthorPhoto photo={author.photo} name={author.name} />}
+        title={author.name}
+        lead={
+          dates || author.alternateNames.length > 0 ? (
+            <>
+              {dates ? <span className="block">{dates}</span> : null}
+              {author.alternateNames.length > 0 ? (
+                <span className="block text-[15px] text-muted-foreground">
+                  {text.alsoKnownAs(author.alternateNames.join(', '))}
+                </span>
+              ) : null}
+            </>
+          ) : undefined
+        }
+      />
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-14">
+        <div className="flex min-w-0 flex-col gap-12">
           {groups.length === 0 ? (
-            <section aria-labelledby="author-books">
-              <h2 id="author-books" className="text-xl font-semibold">
+            <section aria-labelledby="author-books" className="flex flex-col gap-4">
+              <h2 id="author-books" className={SECTION_HEADING}>
                 {text.booksHeading}
               </h2>
-              <p className="mt-2 text-muted-foreground">{text.noBooks}</p>
+              <p className="text-muted-foreground">{text.noBooks}</p>
             </section>
           ) : (
             groups.map(({ group, books }) => (
-              <section key={group} aria-labelledby={`author-books-${group}`}>
-                <h2 id={`author-books-${group}`} className="text-xl font-semibold">
+              <section
+                key={group}
+                aria-labelledby={`author-books-${group}`}
+                className="flex flex-col gap-5 md:gap-6"
+              >
+                <h2 id={`author-books-${group}`} className={SECTION_HEADING}>
                   {text.roleHeadings[group]}
                 </h2>
-                <ul className="mt-3 flex flex-col gap-4">
-                  {books.map((book) => (
-                    <li key={book.id}>
-                      <BookCard
-                        href={`/books/${book.slug}`}
-                        book={{
-                          title: book.title,
-                          subtitle: book.subtitle,
-                          cover: book.cover,
-                          firstPublishedYear: book.firstPublishedYear,
-                          authorNames: book.contributions
-                            .filter((c) => groupOf(c.role) === 'author')
-                            .map((c) => c.author.name),
-                          rating: book.rating,
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
+                <BookGrid
+                  narrow
+                  items={books.map((book) => ({
+                    slug: book.slug,
+                    book: {
+                      title: book.title,
+                      subtitle: book.subtitle,
+                      cover: book.cover,
+                      firstPublishedYear: book.firstPublishedYear,
+                      authorNames: book.contributions
+                        .filter((c) => groupOf(c.role) === 'author')
+                        .map((c) => c.author.name),
+                      rating: book.rating,
+                    },
+                  }))}
+                />
               </section>
             ))
           )}
         </div>
-        <aside className="lg:col-span-4">
+        <aside className="min-w-0">
           <Bio bio={author.bio} />
         </aside>
       </div>
@@ -96,26 +119,11 @@ export function AuthorPage({ author }: { author: AuthorDetail }) {
   )
 }
 
-function AuthorHeader({ author }: { author: AuthorDetail }) {
-  const dates = lifeDates(author.birthDate, author.deathDate)
-  return (
-    <header className="flex flex-col gap-6 sm:flex-row sm:items-center">
-      <AuthorPhoto photo={author.photo} name={author.name} />
-      <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="text-3xl font-semibold break-words">{author.name}</h1>
-        {dates ? <p className="text-muted-foreground">{dates}</p> : null}
-        {author.alternateNames.length > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {text.alsoKnownAs(author.alternateNames.join(', '))}
-          </p>
-        ) : null}
-      </div>
-    </header>
-  )
-}
+const SECTION_HEADING =
+  'font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]'
 
 const PHOTO_FRAME =
-  'flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-raised md:size-36'
+  'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#bfdbfe] md:size-28'
 
 /** The Author's photo, or their initial when there is none or it fails to load. */
 function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: string }) {
@@ -132,8 +140,8 @@ function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: stri
   if (!url || failed) {
     return (
       <div role="img" aria-label={text.photoAlt(name)} className={PHOTO_FRAME}>
-        <span aria-hidden="true" className="text-4xl font-semibold text-muted-foreground">
-          {Array.from(name)[0]?.toUpperCase()}
+        <span aria-hidden="true" className="font-serif text-3xl font-medium md:text-[40px]">
+          {initialsOf(name)}
         </span>
       </div>
     )
@@ -155,14 +163,20 @@ function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: stri
 function Bio({ bio }: { bio: string | null }) {
   const body = bio?.trim()
   return (
-    <section aria-labelledby="author-bio">
-      <h2 id="author-bio" className="text-lg font-semibold">
+    <section
+      aria-labelledby="author-bio"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-[22px]"
+    >
+      <h2
+        id="author-bio"
+        className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase"
+      >
         {text.aboutHeading}
       </h2>
       {body ? (
-        <p className="mt-2 whitespace-pre-line">{body}</p>
+        <p className="text-[15px] leading-relaxed whitespace-pre-line text-[#334155]">{body}</p>
       ) : (
-        <p className="mt-2 text-muted-foreground">{text.noBio}</p>
+        <p className="text-[15px] text-muted-foreground">{text.noBio}</p>
       )}
     </section>
   )

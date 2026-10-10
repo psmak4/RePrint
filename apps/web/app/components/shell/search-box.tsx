@@ -1,6 +1,6 @@
 import { SEARCH_MIN_LENGTH, SEARCH_QUERY_MAX_LENGTH } from '@reprint/shared'
 import { type KeyboardEvent, useEffect, useId, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { fetchSuggestions, type Option, type Suggest, toOptions } from '../../lib/search-suggest.js'
 
@@ -20,7 +20,7 @@ function renderOption(option: Option, id: string, selected: boolean, choose: () 
       // Keep focus in the input while the pointer picks an option.
       onMouseDown={(event) => event.preventDefault()}
       onClick={choose}
-      className="flex cursor-pointer items-baseline justify-between gap-3 rounded-md px-3 py-2 text-sm aria-selected:bg-surface-raised hover:bg-surface-raised"
+      className="flex cursor-pointer items-baseline justify-between gap-3 rounded-lg px-3 py-2.5 text-sm aria-selected:bg-surface-raised hover:bg-surface-raised"
     >
       <span>
         <span className="font-medium">{option.label}</span>
@@ -40,8 +40,15 @@ function renderOption(option: Option, id: string, selected: boolean, choose: () 
 export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest }) {
   const c = copy.shell.search
   const navigate = useNavigate()
+  const location = useLocation()
   const listId = useId()
-  const [query, setQuery] = useState('')
+  // On the results page the box shows the current query, so the page needs no second search field.
+  const current =
+    location.pathname === '/search' ? (new URLSearchParams(location.search).get('q') ?? '') : ''
+  const [query, setQuery] = useState(current)
+  useEffect(() => {
+    setQuery(current)
+  }, [current])
   const [options, setOptions] = useState<Option[]>([])
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
@@ -104,11 +111,29 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
     <form
       action="/search"
       method="get"
-      className="relative flex gap-2"
+      className="relative flex h-11 items-center gap-1 rounded-full border border-input-border bg-surface pr-4 pl-1 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
       }}
     >
+      <button
+        type="submit"
+        aria-label={c.submit}
+        className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-surface-raised hover:text-foreground"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="size-[18px]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
       <input
         type="text"
         name="q"
@@ -128,20 +153,14 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={onKeyDown}
-        className="h-11 w-full rounded-md border border-input-border bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-10"
+        className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
       />
-      <button
-        type="submit"
-        className="h-11 shrink-0 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-10"
-      >
-        {c.submit}
-      </button>
       <div
         id={listId}
         role="listbox"
         aria-label={c.suggestionsLabel}
         hidden={!expanded}
-        className="absolute left-0 right-0 top-full z-40 mt-2 max-h-96 overflow-auto rounded-md border border-border bg-surface p-1"
+        className="absolute left-0 right-0 top-full z-40 mt-2 max-h-96 overflow-auto rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)]"
       >
         {options.map((option, index) =>
           renderOption(option, optionId(index), index === active, () => go(option.href)),

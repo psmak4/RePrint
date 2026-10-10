@@ -59,7 +59,7 @@ function QueueList({
               to={queueHref(item.id, cursor)}
               aria-label={text.open(item.book.title)}
               aria-current={item.id === selectedId ? 'true' : undefined}
-              className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-3 hover:border-primary aria-[current=true]:border-primary"
+              className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-4 hover:border-accent aria-[current=true]:border-accent"
             >
               <span className="font-semibold">{item.book.title}</span>
               <span className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -93,7 +93,7 @@ function ClaimNotice({ claim }: { claim: ClaimState }) {
           : text.claimFailed
         : text.claimFailed
   return (
-    <p role="status" className="rounded-md border border-border bg-surface px-3 py-2 text-sm">
+    <p role="status" className="rounded-xl border border-border bg-surface px-4 py-3 text-sm">
       {message}
     </p>
   )
@@ -113,7 +113,7 @@ function ReviewDetail({
     <article aria-label={text.detailLabel} className="flex flex-col gap-4">
       {claim ? <ClaimNotice claim={claim} /> : null}
       <header className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold">
+        <h2 className="font-serif text-2xl leading-tight font-medium">
           <Link to={`/books/${item.book.slug}`} className="text-link underline">
             {item.book.title}
           </Link>
@@ -202,7 +202,9 @@ export function ReviewQueue({
   const nextHref = following ? queueHref(following.id, cursor) : null
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-semibold">{text.title}</h2>
+      <h2 className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]">
+        {text.title}
+      </h2>
       <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
         <QueueList queue={queue} selectedId={selected?.id ?? null} cursor={cursor} now={now} />
         <div className="min-w-0">

@@ -74,7 +74,7 @@ function Actions({
 
   return (
     <section aria-label={actions.heading} className="flex flex-col gap-3">
-      <h3 className="text-lg font-semibold">{actions.heading}</h3>
+      <h3 className="font-serif text-xl leading-tight font-medium">{actions.heading}</h3>
       {canAssign ? (
         <fieldset className="flex flex-wrap gap-3">
           <legend className="sr-only">{actions.rolesHeading}</legend>
@@ -152,7 +152,7 @@ function Actions({
             if (reason.trim() === '') return
             send({ intent: 'suspend', reason, ...(until ? { until } : {}) })
           }}
-          className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3"
+          className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
         >
           <div className="flex flex-col gap-1">
             <Label htmlFor={reasonId}>{actions.reasonLabel}</Label>
@@ -240,7 +240,10 @@ export function UserDetail({
         {text.back}
       </Link>
       <header className="flex flex-col gap-1">
-        <h2 id="user-heading" className="text-2xl font-semibold">
+        <h2
+          id="user-heading"
+          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+        >
           {user.displayName}
         </h2>
         <p className="text-muted-foreground">
@@ -261,7 +264,7 @@ export function UserDetail({
       <Actions detail={detail} canAssign={canAssign} canSuspend={canSuspend} />
 
       <section aria-label={d.profile} className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold">{d.profile}</h3>
+        <h3 className="font-serif text-xl leading-tight font-medium">{d.profile}</h3>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">{d.email}</dt>
           <dd className="break-all">
@@ -286,7 +289,7 @@ export function UserDetail({
       </section>
 
       <section aria-label={d.reviewsHeading} className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold">{d.reviewsHeading}</h3>
+        <h3 className="font-serif text-xl leading-tight font-medium">{d.reviewsHeading}</h3>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           {REVIEW_STATUSES.map((status) => (
             <div key={status} className="contents">
@@ -298,7 +301,7 @@ export function UserDetail({
       </section>
 
       <section aria-label={d.reportsHeading} className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold">{d.reportsHeading}</h3>
+        <h3 className="font-serif text-xl leading-tight font-medium">{d.reportsHeading}</h3>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">{d.reportsFiled}</dt>
           <dd>{detail.reports.filed}</dd>
@@ -310,13 +313,13 @@ export function UserDetail({
       {admin ? (
         <>
           <section aria-label={d.sessionsHeading} className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold">{d.sessionsHeading}</h3>
+            <h3 className="font-serif text-xl leading-tight font-medium">{d.sessionsHeading}</h3>
             {admin.sessions.length === 0 ? (
               <p className="text-sm text-muted-foreground">{d.noSessions}</p>
             ) : (
               <ul className="flex flex-col gap-2 text-sm">
                 {admin.sessions.map((session) => (
-                  <li key={session.id} className="rounded-md border border-border p-2">
+                  <li key={session.id} className="rounded-xl border border-border bg-surface p-3">
                     <p className="font-medium">{session.device}</p>
                     <p className="text-muted-foreground">
                       {d.sessionMeta(session.ip, fmt(session.lastSeenAt))}
@@ -327,13 +330,13 @@ export function UserDetail({
             )}
           </section>
           <section aria-label={d.auditHeading} className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold">{d.auditHeading}</h3>
+            <h3 className="font-serif text-xl leading-tight font-medium">{d.auditHeading}</h3>
             {admin.audit.length === 0 ? (
               <p className="text-sm text-muted-foreground">{d.noAudit}</p>
             ) : (
               <ul className="flex flex-col gap-2 text-sm">
                 {admin.audit.map((entry) => (
-                  <li key={entry.id} className="rounded-md border border-border p-2">
+                  <li key={entry.id} className="rounded-xl border border-border bg-surface p-3">
                     <p className="font-medium">{entry.action}</p>
                     <p className="text-muted-foreground">
                       {d.auditBy(entry.actor?.username ?? null)} ·{' '}

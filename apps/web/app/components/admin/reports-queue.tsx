@@ -131,7 +131,7 @@ function ReportActions({
               })
             }
           }}
-          className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3"
+          className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
         >
           <ReasonField
             label={panel === 'unpublish' ? text.reasonLabel : text.suspendReasonLabel}
@@ -243,7 +243,7 @@ function ReportedReview({
           <h4 className="text-sm font-semibold">{text.reportsHeading}</h4>
           <ul className="flex flex-col gap-2 text-sm">
             {item.reports.map((report) => (
-              <li key={report.id} className="rounded-md border border-border bg-surface p-2">
+              <li key={report.id} className="rounded-xl border border-border bg-surface p-3">
                 <p className="font-medium">{text.reasons[report.reason]}</p>
                 {report.note ? (
                   <p className="whitespace-pre-line break-words">{report.note}</p>
@@ -279,7 +279,10 @@ export function ReportsQueue({
 }) {
   return (
     <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
-      <h2 id="reports-heading" className="text-2xl font-semibold">
+      <h2
+        id="reports-heading"
+        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+      >
         {text.title}
       </h2>
       {queue.items.length === 0 ? (

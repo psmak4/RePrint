@@ -1,6 +1,7 @@
 import { type LoginRequest, loginRequestSchema } from '@reprint/shared'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AuthCard } from './auth-card.js'
 import { type AuthField, AuthForm } from './auth-form.js'
 
 const fields: AuthField<LoginRequest>[] = [
@@ -17,8 +18,24 @@ export function LoginPage() {
   const fetcher = useFetcher()
   const c = copy.auth.login
   return (
-    <section className="mx-auto max-w-md py-8">
-      <h1 className="text-3xl font-semibold">{c.title}</h1>
+    <AuthCard
+      title={c.title}
+      footer={
+        <>
+          <p>
+            <a className="text-link underline" href="/forgot-password">
+              {c.forgotLink}
+            </a>
+          </p>
+          <p>
+            {c.noAccount}{' '}
+            <a className="font-semibold text-link underline" href="/register">
+              {c.registerLink}
+            </a>
+          </p>
+        </>
+      }
+    >
       <AuthForm
         schema={loginRequestSchema}
         fields={fields}
@@ -26,17 +43,6 @@ export function LoginPage() {
         submitLabel={c.submit}
         fetcher={fetcher}
       />
-      <p className="mt-6 text-sm">
-        <a className="text-link underline" href="/forgot-password">
-          {c.forgotLink}
-        </a>
-      </p>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {c.noAccount}{' '}
-        <a className="text-link underline" href="/register">
-          {c.registerLink}
-        </a>
-      </p>
-    </section>
+    </AuthCard>
   )
 }

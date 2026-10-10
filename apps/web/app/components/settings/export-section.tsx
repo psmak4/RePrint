@@ -4,15 +4,18 @@ import { copy } from '../../copy/index.js'
 export function ExportSection() {
   const c = copy.settings.security.export
   return (
-    <section aria-labelledby="export-heading">
-      <h2 id="export-heading" className="text-xl font-semibold">
+    <section
+      aria-labelledby="export-heading"
+      className="rounded-2xl border border-border bg-surface p-6 md:p-8"
+    >
+      <h2 id="export-heading" className="font-serif text-2xl leading-tight font-medium">
         {c.title}
       </h2>
-      <p className="mt-1 text-muted-foreground">{c.lead}</p>
+      <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>
       <a
         href="/settings/export"
         download
-        className="mt-4 inline-flex rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-surface"
+        className="mt-5 inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-[15px] font-semibold hover:bg-surface-raised"
       >
         {c.download}
       </a>

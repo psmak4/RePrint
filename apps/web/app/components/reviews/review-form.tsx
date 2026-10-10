@@ -26,7 +26,7 @@ export type ReviewActionResult = {
 }
 
 const SELECT_CLASS =
-  'flex h-10 w-full rounded-md border border-input-border bg-surface px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+  'flex h-11 w-full rounded-[10px] border border-input-border bg-surface px-3.5 py-2 text-[15px] text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
 const FIELDS = ['rating', 'headline', 'body', 'hasSpoilers', 'editionId'] as const
 
 /** Writes or edits the viewer's Review, validated with the shared schema; the book route's action saves it. */
@@ -98,7 +98,10 @@ export function ReviewForm({
       )}
     >
       {fetcher.data?.formError ? (
-        <p role="alert" className="rounded-md border border-danger px-3 py-2 text-sm text-danger">
+        <p
+          role="alert"
+          className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+        >
           {fetcher.data.formError}
         </p>
       ) : null}
