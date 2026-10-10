@@ -29,6 +29,12 @@ export const featuredReviewSchema = z.object({
 })
 export type FeaturedReview = z.infer<typeof featuredReviewSchema>
 
+/** A "Most reviewed this month" Book with the Approved reviews that ranked it (D-179). */
+export const mostReviewedItemSchema = bookSummarySchema.extend({
+  recentReviewCount: z.number().int().nonnegative(),
+})
+export type MostReviewedItem = z.infer<typeof mostReviewedItemSchema>
+
 export const justApprovedItemSchema = z.object({
   review: reviewExcerptSchema,
   book: bookSummarySchema,
@@ -39,7 +45,7 @@ export type JustApprovedItem = z.infer<typeof justApprovedItemSchema>
 export const discoverResponseSchema = z.object({
   recentlyReviewed: z.array(bookSummarySchema).nullable(),
   topRated: z.array(bookSummarySchema).nullable(),
-  mostReviewedThisMonth: z.array(bookSummarySchema).nullable(),
+  mostReviewedThisMonth: z.array(mostReviewedItemSchema).nullable(),
   featuredGenres: z.array(genreLinkSchema).nullable(),
   featuredReview: featuredReviewSchema.nullable(),
   /** The newest Approved reviews, one per Book (D-177). */

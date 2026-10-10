@@ -12,6 +12,7 @@ import {
   type FeaturedReview,
   type GenreLink,
   type JustApprovedItem,
+  type MostReviewedItem,
   WEIGHTED_RATING_C,
 } from '@reprint/shared'
 import { and, asc, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
@@ -71,21 +72,28 @@ export async function buildTopRated(db: Database, siteMean: number): Promise<Boo
   return visible(await loadBookSummaries(db, bookIds))
 }
 
-/** Books with the most Approved reviews decided in the last 30 days. */
+/** Books with the most Approved reviews decided in the last 30 days, with that count. */
 export async function buildMostReviewedThisMonth(
   db: Database,
   now: Date,
-): Promise<BookSummary[] | null> {
+): Promise<MostReviewedItem[] | null> {
   const since = new Date(now.getTime() - DISCOVER_RECENT_DAYS * 24 * 60 * 60 * 1000)
-  const bookIds = await ids(
-    db,
-    sql`select r.book_id as id from reviews r
+  const ranked = await db.execute<{ id: string; recent_review_count: number }>(
+    sql`select r.book_id as id, count(*)::int as recent_review_count from reviews r
       where ${PUBLIC_REVIEW} and r.decided_at >= ${since.toISOString()}::timestamptz
       group by r.book_id
       order by count(*) desc, max(r.decided_at) desc, r.book_id
       limit ${DISCOVER_ROW_SIZE}`,
   )
-  return visible(await loadBookSummaries(db, bookIds))
+  const summaries = await loadBookSummaries(
+    db,
+    ranked.map((row) => row.id),
+  )
+  const items = ranked.flatMap((row) => {
+    const book = summaries.find((summary) => summary.id === row.id)
+    return book ? [{ ...book, recentReviewCount: row.recent_review_count }] : []
+  })
+  return items.length >= DISCOVER_MIN_ROW_BOOKS ? items : null
 }
 
 /** The Genres admins picked, in their chosen order; `null` when none are picked. */

@@ -13377,6 +13377,11 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "recentReviewCount": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
                               }
                             },
                             "required": [
@@ -13387,7 +13392,8 @@
                               "cover",
                               "firstPublishedYear",
                               "contributions",
-                              "rating"
+                              "rating",
+                              "recentReviewCount"
                             ],
                             "additionalProperties": false
                           }

@@ -4,7 +4,7 @@ import type { Redis } from 'ioredis'
 import { buildRow, computeSiteMean, DISCOVER_ROW_KEYS, type DiscoverRowKey } from './rows.js'
 
 /** Bump the version when a row's shape changes so old entries are never read (D-135). */
-const KEY_PREFIX = 'discover:v2'
+const KEY_PREFIX = 'discover:v3'
 const SITE_MEAN_KEY = `${KEY_PREFIX}:site-mean`
 /** The rebuild job runs every 10 minutes; an entry outlives a few missed runs, then expires. */
 export const DISCOVER_CACHE_TTL_SECONDS = 60 * 60

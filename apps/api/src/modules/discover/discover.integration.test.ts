@@ -144,6 +144,19 @@ describe('GET /v1/discover', () => {
     expect(body.topRated?.map((book) => book.slug)).toContain('old')
   })
 
+  it("counts each Book's recent Approved reviews, matching the ranking", async () => {
+    await fillCatalog()
+    await makeBook('busy', [5, 4, 3, 2, 5, 4, 3], { decidedDaysAgo: 2 })
+    await makeBook('older', [5, 5, 5, 5], { decidedDaysAgo: 45 })
+    const { body } = await discover()
+    const row = body.mostReviewedThisMonth ?? []
+    expect(row[0]).toMatchObject({ slug: 'busy', recentReviewCount: 7 })
+    expect(row.slice(1).every((item) => item.recentReviewCount === 5)).toBe(true)
+    const counts = row.map((item) => item.recentReviewCount)
+    expect(counts).toEqual([...counts].sort((a, b) => b - a))
+    expect(row.map((item) => item.slug)).not.toContain('older')
+  })
+
   it('ignores reviews that are not approved', async () => {
     await fillCatalog()
     await makeBook('pending', [5, 5, 5, 5, 5], { status: 'pending' })
@@ -213,14 +226,14 @@ describe('GET /v1/discover', () => {
     await rebuild()
     expect((await discover()).body.recentlyReviewed?.map((book) => book.slug)).toContain('late')
     // One key per row, plus the cached site mean.
-    expect((await stack.redis.keys('discover:v2:*')).sort()).toEqual([
-      'discover:v2:row:featuredGenres',
-      'discover:v2:row:featuredReview',
-      'discover:v2:row:justApproved',
-      'discover:v2:row:mostReviewedThisMonth',
-      'discover:v2:row:recentlyReviewed',
-      'discover:v2:row:topRated',
-      'discover:v2:site-mean',
+    expect((await stack.redis.keys('discover:v3:*')).sort()).toEqual([
+      'discover:v3:row:featuredGenres',
+      'discover:v3:row:featuredReview',
+      'discover:v3:row:justApproved',
+      'discover:v3:row:mostReviewedThisMonth',
+      'discover:v3:row:recentlyReviewed',
+      'discover:v3:row:topRated',
+      'discover:v3:site-mean',
     ])
   })
 

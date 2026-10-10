@@ -589,7 +589,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `reviewExcerptSchema` lives in `packages/shared`; `discoverResponseSchema` gains a nullable `justApproved` row and Catalog search items gain `topReview` (nullable), as described in D-177, and the OpenAPI spec is regenerated
   - Accept: integration tests show spoiler, auto-hidden, pending, rejected, and unpublished reviews are never excerpted, one excerpt per Book in `justApproved`, and `topReview` is the most helpful eligible review with ties to newest
   - Accept: the excerpt is plain text, at most 200 characters, cut at a word boundary (unit tests), and the row is hidden under 3 items
-- [ ] M9-T04 · API: `recentReviewCount` on "Most reviewed this month" items · deps: M8-T09 · PRD: §7.2
+- [x] M9-T04 · API: `recentReviewCount` on "Most reviewed this month" items · deps: M8-T09 · PRD: §7.2
   - Accept: each item in `mostReviewedThisMonth` has `recentReviewCount`, the number of Approved reviews in the last `DISCOVER_RECENT_DAYS`, matching the row's ranking (integration test), and the OpenAPI spec is regenerated (D-179)
 - [ ] M9-T05 · Web: shell and Discover redesign · deps: M9-T02, M9-T03, M9-T04 · PRD: §7.2, §7.7, §11
   - Accept: header, footer, and `/` match the Discover template in `docs/DESIGN.md` at 360, 768, and 1280 px, with new strings in `apps/web/app/copy/`

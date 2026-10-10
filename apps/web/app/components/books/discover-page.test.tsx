@@ -42,7 +42,7 @@ const empty: DiscoverResponse = {
 const full: DiscoverResponse = {
   recentlyReviewed: books('Recent'),
   topRated: books('Top'),
-  mostReviewedThisMonth: books('Month'),
+  mostReviewedThisMonth: books('Month').map((book) => ({ ...book, recentReviewCount: 4 })),
   featuredGenres: [
     { slug: 'science-fiction', name: 'Science Fiction' },
     { slug: 'fantasy', name: 'Fantasy' },

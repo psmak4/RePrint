@@ -613,3 +613,7 @@ Entry format:
 ### 2026-10-10 · M9-T03 · PR pending
 - `reviewExcerptSchema`, `excerptOf`, and `REVIEW_EXCERPT_MAX` in `packages/shared/src/reviews.ts`. `GET /discover` gains `justApproved` (`{ review, book }` items, newest per Book, max 6, hidden under 3; built by `discover.rebuild`, cache key now `discover:v2`); search `book` items gain `topReview` (nullable). Eligibility SQL and `loadTopReviews` are in `apps/api/src/modules/reviews/excerpts.ts`. Tests: `excerpts.integration.test.ts`, `excerptOf` unit tests. D-182 records the headline/excerpt split.
 - Next iteration: M9-T04 (`recentReviewCount`). Web fixtures for `DiscoverResponse` and search items now need `justApproved` / `topReview` (added to existing tests; M9-T05 and M9-T07 render them). OpenAPI is generated at build and checked by `pnpm check`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
+
+### 2026-10-10 · M9-T04 · PR pending
+- `mostReviewedItemSchema` (Book summary plus `recentReviewCount`) in `packages/shared/src/discover-api.ts`; `buildMostReviewedThisMonth` returns the count from its ranking query. Integration test checks counts, order, and the 30-day cut-off. Cache key is now `discover:v3` (D-183); OpenAPI regenerated.
+- Next iteration: M9-T05 (shell and Discover redesign) can show "N new reviews" from `recentReviewCount`. Local shell needs Node 24 on PATH (`~/.nvm/versions/node/v24.19.0/bin`).
