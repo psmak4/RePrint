@@ -599,7 +599,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/books/:slug` matches the Book page template in `docs/DESIGN.md`; the series, More in Genre, and author data come from the existing Series, Genre, and Author endpoints in the loader, and the page still renders when any of them fails
   - Accept: section nav items for empty sections are left out
   - Accept: rating bars and star chips filter through the URL like today (`?rating=`), and component tests cover the bars, the Editions format filter, and the description toggle
-- [ ] M9-T07 · Web: search results redesign · deps: M9-T02, M9-T03 · PRD: §7.3
+- [x] M9-T07 · Web: search results redesign · deps: M9-T02, M9-T03 · PRD: §7.3
   - Accept: `/search` matches the Search results template in `docs/DESIGN.md`, including the `AuthorMatchCard` when an Author result matches the query and the `topReview` quote on Catalog Books
   - Accept: Source candidates show the dashed generated cover and "Not on RePrint yet", and filters still collapse into a disclosure below `lg`
 - [ ] M9-T08 · M9 verification: run the Redesign acceptance criteria end to end, fix gaps, update docs · deps: M9-T01, M9-T05, M9-T06, M9-T07 · PRD: §3, §11, §12

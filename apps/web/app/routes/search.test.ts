@@ -44,8 +44,11 @@ function routed(search: unknown) {
   )
 }
 
+/** The Books search call; the Author-match lookup (`type=authors`) is a separate call. */
 function searchCall(fetchMock: ReturnType<typeof routed>): URL {
-  const call = fetchMock.mock.calls.find(([url]) => String(url).includes('/v1/search'))
+  const call = fetchMock.mock.calls.find(
+    ([url]) => String(url).includes('/v1/search') && !String(url).includes('type=authors'),
+  )
   return new URL(String(call?.[0]))
 }
 
@@ -72,6 +75,37 @@ describe('search loader', () => {
     await ask(fetchMock as never, '?q=dune&decade=1961&minRating=9&language=')
     const url = searchCall(fetchMock)
     expect(Object.fromEntries(url.searchParams)).toEqual({ q: 'dune' })
+  })
+
+  it('adds the Author a Books query names, and skips the card when the lookup fails or on page 2', async () => {
+    const authors = {
+      ...empty,
+      items: [
+        {
+          kind: 'author',
+          author: {
+            id: '0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b',
+            slug: 'frank-herbert',
+            name: 'Frank Herbert',
+          },
+        },
+      ],
+    }
+    const fetchMock = vi.fn(async (url: URL) =>
+      String(url).includes('/v1/genres')
+        ? Response.json(tree)
+        : Response.json(String(url).includes('type=authors') ? authors : empty),
+    )
+    const hit = (await ask(fetchMock as never, '?q=frank+herbert')) as {
+      authorMatch: { slug: string } | null
+    }
+    expect(hit.authorMatch?.slug).toBe('frank-herbert')
+    const page2 = (await ask(fetchMock as never, '?q=frank+herbert&page=2')) as {
+      authorMatch: unknown
+    }
+    expect(page2.authorMatch).toBeNull()
+    const miss = (await ask(fetchMock as never, '?q=dune')) as { authorMatch: unknown }
+    expect(miss.authorMatch).toBeNull()
   })
 
   it('does not search for a query under 2 characters', async () => {

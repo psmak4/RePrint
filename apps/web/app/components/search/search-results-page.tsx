@@ -1,4 +1,5 @@
 import {
+  type AuthorSuggestion,
   type BookSummary,
   type GenreNode,
   SEARCH_SORTS,
@@ -8,12 +9,14 @@ import {
   type Viewer,
 } from '@reprint/shared'
 import { Button, Input, Label } from '@reprint/ui'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
-import { BookCard, type BookCardData } from '../books/book-card.js'
+import { AuthorMatchCard } from '../books/author-match-card.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
+import { SearchResultCard, type SearchResultData } from './search-result-card.js'
 
 const LANGUAGES = [
   'en',
@@ -34,14 +37,19 @@ const LANGUAGES = [
 const DECADES = Array.from({ length: 24 }, (_, i) => 2020 - i * 10)
 const RATINGS = [4, 3, 2, 1]
 const SELECT_CLASS =
-  'h-10 rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
+  'h-10 w-full rounded-md border border-input-border bg-surface px-3 text-sm text-foreground'
 
 function languageName(code: string): string {
   return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code
 }
 
-function fromSummary(book: BookSummary): BookCardData {
+function fromSummary(
+  book: BookSummary,
+  topReview: SearchResultData['topReview'],
+): SearchResultData {
   return {
+    slug: book.slug,
+    topReview,
     title: book.title,
     subtitle: book.subtitle,
     cover: book.cover,
@@ -53,8 +61,9 @@ function fromSummary(book: BookSummary): BookCardData {
   }
 }
 
-function fromCandidate(candidate: SearchCandidate): BookCardData {
+function fromCandidate(candidate: SearchCandidate): SearchResultData {
   return {
+    candidate: true,
     title: candidate.title,
     subtitle: candidate.subtitle,
     cover: candidate.cover,
@@ -118,7 +127,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
       action="/search"
       method="get"
       aria-label={c.filtersLabel}
-      className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4"
     >
       <input type="hidden" name="q" value={query.q} />
       <div className="flex flex-col gap-1">
@@ -214,6 +223,32 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
   )
 }
 
+/**
+ * Filters sit in a disclosure below `lg` and in the left panel from `lg`; the one form is opened on
+ * wide screens so there is never a second copy of the fields.
+ */
+function FilterPanel({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDetailsElement>(null)
+  useEffect(() => {
+    const wide = window.matchMedia?.('(min-width: 1024px)')
+    if (!wide) return
+    const sync = () => {
+      if (ref.current && wide.matches) ref.current.open = true
+    }
+    sync()
+    wide.addEventListener('change', sync)
+    return () => wide.removeEventListener('change', sync)
+  }, [])
+  return (
+    <details ref={ref} className="group lg:[&::details-content]:[content-visibility:visible]">
+      <summary className="cursor-pointer rounded-md border border-border bg-surface px-4 py-2 text-sm font-semibold lg:hidden">
+        {copy.search.filtersToggle}
+      </summary>
+      <div className="mt-2 lg:mt-0">{children}</div>
+    </details>
+  )
+}
+
 function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }) {
   const c = copy.search
   if (query.page === 1 && !hasMore) return null
@@ -255,8 +290,8 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
         if (item.kind === 'book') {
           return (
             <li key={`book-${item.book.id}`}>
-              <BookCard
-                book={fromSummary(item.book)}
+              <SearchResultCard
+                book={fromSummary(item.book, item.topReview)}
                 href={`/books/${item.book.slug}`}
                 onNavigate={trackResultClick}
                 shelf={<BookShelfSelector book={item.book} signedIn={signedIn} />}
@@ -267,7 +302,7 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
         if (item.kind === 'candidate') {
           return (
             <li key={`candidate-${item.candidate.ref}`}>
-              <BookCard
+              <SearchResultCard
                 book={fromCandidate(item.candidate)}
                 href={resolveHref(item.candidate.ref)}
                 onNavigate={trackResultClick}
@@ -304,17 +339,21 @@ export function SearchResultsPage({
   failed,
   genres = [],
   viewer = null,
+  authorMatch = null,
 }: {
   query: SearchQuery
   results: SearchResponse | null
   failed: boolean
   genres?: GenreNode[]
   viewer?: Viewer | null
+  authorMatch?: AuthorSuggestion | null
 }) {
   const c = copy.search
   return (
-    <section className="mx-auto flex max-w-3xl flex-col gap-4 py-8">
-      <h1 className="text-3xl font-semibold">{c.heading}</h1>
+    <section className="flex flex-col gap-4 py-8">
+      <h1 className="font-serif text-3xl font-medium">
+        {query.q ? c.headingFor(query.q) : c.heading}
+      </h1>
       <search>
         <form action="/search" method="get" className="flex gap-2">
           <Label htmlFor="results-query" className="sr-only">
@@ -326,36 +365,56 @@ export function SearchResultsPage({
         </form>
       </search>
       <Tabs query={query} />
-      {query.type === 'books' ? <Filters query={query} genres={genres} /> : null}
-      {failed ? (
-        <p role="alert" className="text-danger">
-          {c.loadFailed}
-        </p>
-      ) : results === null ? (
-        <p className="text-muted-foreground">{c.prompt}</p>
-      ) : (
-        <>
-          {results.sourceUnavailable ? (
-            <p role="status" className="rounded-md border border-border bg-surface p-3 text-sm">
-              {c.sourceUnavailable}
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        {query.type === 'books' ? (
+          <aside aria-label={c.filtersLabel}>
+            <FilterPanel>
+              <Filters query={query} genres={genres} />
+            </FilterPanel>
+          </aside>
+        ) : null}
+        <div
+          className={`flex min-w-0 flex-col gap-4 ${query.type === 'books' ? '' : 'lg:col-span-2'}`}
+        >
+          {failed ? (
+            <p role="alert" className="text-danger">
+              {c.loadFailed}
             </p>
-          ) : null}
-          {(query.genre || query.language || query.minRating) && query.type === 'books' ? (
-            <p className="text-sm text-muted-foreground">{c.catalogOnly}</p>
-          ) : null}
-          {results.items.length === 0 ? (
-            <p>{c.empty}</p>
+          ) : results === null ? (
+            <p className="text-muted-foreground">{c.prompt}</p>
           ) : (
             <>
-              <p role="status" className="text-sm text-muted-foreground">
-                {c.resultCount(results.items.length)}
-              </p>
-              <Results results={results} signedIn={viewer !== null} />
+              {results.sourceUnavailable ? (
+                <p role="status" className="rounded-md border border-border bg-surface p-3 text-sm">
+                  {c.sourceUnavailable}
+                </p>
+              ) : null}
+              {(query.genre || query.language || query.minRating) && query.type === 'books' ? (
+                <p className="text-sm text-muted-foreground">{c.catalogOnly}</p>
+              ) : null}
+              {authorMatch ? (
+                <AuthorMatchCard name={authorMatch.name} href={`/authors/${authorMatch.slug}`} />
+              ) : null}
+              {results.items.length === 0 ? (
+                <p>{c.empty}</p>
+              ) : (
+                <>
+                  <p role="status" className="text-sm text-muted-foreground">
+                    {query.type === 'books'
+                      ? c.resultSplit(
+                          results.items.filter((item) => item.kind === 'book').length,
+                          results.items.filter((item) => item.kind === 'candidate').length,
+                        )
+                      : c.resultCount(results.items.length)}
+                  </p>
+                  <Results results={results} signedIn={viewer !== null} />
+                </>
+              )}
+              <Pagination query={query} hasMore={results.hasMore} />
             </>
           )}
-          <Pagination query={query} hasMore={results.hasMore} />
-        </>
-      )}
+        </div>
+      </div>
     </section>
   )
 }
