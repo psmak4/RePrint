@@ -22,18 +22,20 @@ export function GenreTile({
       to={href}
       className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 hover:bg-surface-raised"
     >
-      <span aria-hidden="true" className="flex h-16 items-end justify-center -space-x-4">
-        {books.slice(0, 3).map((book, i) => (
-          <Cover
-            key={book.slug}
-            cover={book.cover}
-            title={book.title}
-            slug={book.slug}
-            size="small"
-            className={`w-10 origin-bottom shadow-md ${ROTATE[i] ?? ''}`}
-          />
-        ))}
-      </span>
+      {books.length > 0 ? (
+        <span aria-hidden="true" className="flex h-16 items-end justify-center -space-x-4">
+          {books.slice(0, 3).map((book, i) => (
+            <Cover
+              key={book.slug}
+              cover={book.cover}
+              title={book.title}
+              slug={book.slug}
+              size="small"
+              className={`w-10 origin-bottom shadow-md ${ROTATE[i] ?? ''}`}
+            />
+          ))}
+        </span>
+      ) : null}
       <span className="font-serif text-lg leading-6 font-medium">{name}</span>
       {bookCount !== undefined ? (
         <span className="text-sm text-muted-foreground">

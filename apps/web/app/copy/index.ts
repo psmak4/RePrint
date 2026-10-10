@@ -69,6 +69,48 @@ export const copy = {
     featuredReview: 'Featured review',
     featuredReviewOn: 'Review of',
     readMore: 'Read the full review',
+    hero: {
+      searchLabel: 'Search RePrint',
+      queryLabel: 'Search books and authors',
+      placeholder: 'Search by title, author, or ISBN',
+      submit: 'Search',
+      try: 'Try',
+    },
+    yourReading: {
+      heading: 'Your reading',
+      reading: 'Reading now',
+      wantToRead: 'Up next',
+      finishedPrompt: 'Finished something?',
+      writeReview: 'Write a review',
+    },
+    genresNote: 'Pick a genre to see its top-rated books.',
+    topRatedNote: 'Averages are weighted, so a few reviews cannot top the list.',
+    thisMonth: {
+      mostReviewedHeading: 'Most reviewed this month',
+      newReviews: (count: number) => `${count} new ${count === 1 ? 'review' : 'reviews'}`,
+      justApprovedHeading: 'Just approved',
+      justApprovedNote: 'Fresh from the moderators.',
+    },
+    pitch: {
+      heading: 'Keep track of what you read',
+      shelves: 'Sort Books onto three Shelves: Want to Read, Reading, and Read.',
+      reviews: 'Write one review per Book. A moderator reads it before it is published.',
+      helpful: 'Mark the reviews that helped you choose.',
+      create: 'Create a free account',
+      logIn: 'Log in',
+    },
+    howItWorks: {
+      heading: 'How a review gets here',
+      steps: [
+        { title: 'A Member writes it', body: 'Only verified accounts can review, once per Book.' },
+        {
+          title: 'A moderator reads it',
+          body: 'Nothing is published until someone has approved it.',
+        },
+        { title: 'You read it', body: 'Approved reviews appear on the Book page and in search.' },
+      ],
+      guidelines: 'Read the Community Guidelines',
+    },
   },
   shelves: {
     label: (title: string) => `Shelf for ${title}`,

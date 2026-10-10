@@ -2,7 +2,7 @@ import { copy } from '../../copy/index.js'
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer className="mt-12 border-t border-border bg-ground-deep">
       <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-4 py-6 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:justify-between">
         <p>
           {copy.shell.openLibraryCredit}{' '}

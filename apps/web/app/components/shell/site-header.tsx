@@ -9,12 +9,12 @@ export function SiteHeader({
   accountSlot?: ReactNode
 }) {
   return (
-    <header className="border-b border-border bg-background">
+    <header className="border-b border-border bg-surface">
       <div className="mx-auto flex w-full max-w-page flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
         <a
           href="/"
           aria-label={copy.shell.homeLinkLabel}
-          className="text-xl font-semibold text-foreground"
+          className="text-2xl font-serif font-medium text-foreground"
         >
           {copy.shell.brand}
         </a>
