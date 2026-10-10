@@ -1211,3 +1211,8 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: `reviewExcerptSchema` carries `headline` (the Review's own, or `null`) and `excerpt` (the body as one line of plain text, whitespace collapsed, cut at the last word boundary that fits 200 characters including a trailing `…`, trailing punctuation dropped). D-177's "the headline if there is one, otherwise the body" is read as "the web shows the headline as the title and the excerpt below it". `approvedAt` is `decided_at`, falling back to `submitted_at`. The excerpt rules live in `excerptOf` and `EXCERPTABLE_REVIEW` (`apps/api/src/modules/reviews/excerpts.ts`); reviews by deleted accounts are also left out (D-043). The Discover cache key is now `discover:v2` because a row was added.
 - Why: The D-177 field list names both `headline` and `excerpt`, so they have to be separate fields; the web can still lead with the headline.
 - Affects: `packages/shared/src/reviews.ts`, `discover-api.ts`, `search-api.ts`, M9-T05, M9-T07
+
+### D-183 · Discover cache key `discover:v3` for `recentReviewCount`
+- Status: Decided (loop)
+- Decision: `mostReviewedThisMonth` items use `mostReviewedItemSchema` (`bookSummarySchema` plus `recentReviewCount`, D-179). The row builder takes the count from the same query that ranks the row. The Discover cache key is now `discover:v3`, so rows cached with the old shape are never served against the new response schema.
+- Affects: `packages/shared/src/discover-api.ts`, `apps/api/src/modules/discover/`
