@@ -22,38 +22,61 @@ function contrast(a: string, b: string): number {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
 }
 
+const GROUNDS = ['background', 'surface', 'surface-raised', 'ground-deep']
+
 describe('theme tokens', () => {
-  it('uses the brand palette', () => {
-    expect(token('background')).toBe('#0f172a')
-    expect(token('accent')).toBe('#3b82f6')
-    expect(token('foreground')).toBe('#f8fafc')
+  it('uses the light palette (D-176)', () => {
+    expect(token('background')).toBe('#fbfaf7')
+    expect(token('ground-deep')).toBe('#f3efe8')
+    expect(token('surface')).toBe('#ffffff')
+    expect(token('foreground')).toBe('#0f172a')
+    expect(token('accent')).toBe('#2563eb')
+    expect(token('accent-foreground')).toBe('#ffffff')
+    expect(token('link')).toBe('#1d4ed8')
+    expect(token('star')).toBe('#a8500a')
+    expect(token('warning')).toBe(token('star'))
+  })
+
+  it('is light only', () => {
+    expect(css).toContain('color-scheme: light')
+    expect(css).not.toContain('color-scheme: dark')
+    expect(css).not.toMatch(/prefers-color-scheme|\.dark\b/)
+    // The old dark palette's values must be gone.
+    for (const dark of ['#1e293b', '#273449', '#94a3b8', '#334155', '#3b82f6', '#60a5fa']) {
+      expect(css.toLowerCase()).not.toContain(dark)
+    }
+  })
+
+  it('defines the two font stacks (D-180)', () => {
+    expect(css).toMatch(/--font-sans:[^;]*Instrument Sans Variable/)
+    expect(css).toMatch(/--font-serif:[^;]*Newsreader Variable/)
   })
 
   // WCAG 2.2 AA: 4.5:1 for text, 3:1 for UI component boundaries and focus indicators.
-  const text: [string, string][] = [
-    ['foreground', 'background'],
-    ['foreground', 'surface'],
-    ['foreground', 'surface-raised'],
-    ['muted-foreground', 'background'],
-    ['muted-foreground', 'surface'],
-    ['link', 'background'],
-    ['link', 'surface'],
-    ['danger', 'background'],
-    ['danger', 'surface'],
-    ['success', 'background'],
-    ['warning', 'background'],
-    ['accent-foreground', 'accent'],
+  const textColours = [
+    'foreground',
+    'muted-foreground',
+    'link',
+    'danger',
+    'success',
+    'warning',
+    'star',
   ]
+  const text = textColours.flatMap((fg) => GROUNDS.map((bg): [string, string] => [fg, bg]))
   it.each(text)('text %s on %s meets 4.5:1', (fg, bg) => {
     expect(contrast(token(fg), token(bg))).toBeGreaterThanOrEqual(4.5)
   })
 
-  const ui: [string, string][] = [
-    ['ring', 'background'],
-    ['ring', 'surface'],
-    ['input-border', 'background'],
-    ['input-border', 'surface'],
-  ]
+  it('accent-foreground on accent meets 4.5:1', () => {
+    expect(contrast(token('accent-foreground'), token('accent'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('accent-foreground on accent-hover meets 4.5:1', () => {
+    expect(contrast(token('accent-foreground'), token('accent-hover'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  const uiColours = ['ring', 'input-border']
+  const ui = uiColours.flatMap((fg) => GROUNDS.map((bg): [string, string] => [fg, bg]))
   it.each(ui)('UI colour %s on %s meets 3:1', (fg, bg) => {
     expect(contrast(token(fg), token(bg))).toBeGreaterThanOrEqual(3)
   })

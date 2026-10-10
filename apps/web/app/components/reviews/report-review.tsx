@@ -67,7 +67,7 @@ export function ReportReview({ reviewId }: { reviewId: string }) {
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="m-auto w-full max-w-md rounded-lg border border-border bg-background p-4 text-foreground backdrop:bg-black/60"
+        className="m-auto w-full max-w-md rounded-lg border border-border bg-background p-4 text-foreground backdrop:bg-foreground/60"
       >
         <form
           method="post"

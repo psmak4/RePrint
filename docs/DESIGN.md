@@ -71,7 +71,8 @@ Exposed as Tailwind v4 theme variables (`bg-background`, `text-muted-foreground`
 | `border` | `#e4e0d8` | Decorative dividers and card edges only |
 | `input-border` | `#7a7f88` | Input and outline-button boundaries |
 | `accent` | `#2563eb` | Primary buttons, selected state, focus ring (`ring`) |
-| `accent-foreground` | `#ffffff` | Text on `accent` |
+| `accent-foreground` | `#ffffff` | Text on `accent` and `accent-hover` |
+| `accent-hover` | `#1d4ed8` | Hover state of primary buttons (a solid colour: a translucent `accent` over a light ground fails contrast) |
 | `link` | `#1d4ed8` | Text links (underlined in running text) |
 | `danger` / `success` / `warning` | `#b91c1c` / `#166534` / `#a8500a` | Status text and icons; never colour alone, always with text or an icon |
 | `star` | `#a8500a` (same value as `warning`) | Filled stars and rating bars only. Empty stars and bar tracks use `#d6d3d1` / `#ece8e0` (decorative: a rating always shows its number too) |
@@ -92,7 +93,7 @@ Every pair is checked on all four grounds: background / surface / surface-raised
 | warning and star | 5.3 / 5.5 / 4.9 / 4.8 | Text 4.5:1 (so amber labels are safe too) |
 | accent (focus ring) | 5.0 / 5.2 / 4.6 / 4.5 | UI 3:1 |
 | input-border | 3.9 / 4.0 / 3.6 / 3.5 | UI 3:1 |
-| accent-foreground on accent | 5.2 | Text 4.5:1 |
+| accent-foreground on accent / accent-hover | 5.2 / 6.7 | Text 4.5:1 |
 
 Amber (`star`) only ever means a rating or a featured label; it is never an action colour. Body copy that needs more weight than `muted-foreground` uses `#334155` (9.9:1 on background).
 
