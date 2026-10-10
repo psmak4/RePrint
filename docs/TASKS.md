@@ -572,3 +572,36 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M8-T17 · Absolute session lifetime · deps: M8-T10 · PRD: §11
   - Accept: a session cannot be renewed past an absolute maximum age (set in `SESSION_MAX_DAYS`, documented in `.env.example`; the value is an implementation detail, recorded in `docs/DECISIONS.md`); the Member signs in again after it
   - Accept: an integration test shows a session older than the maximum is refused even when it was used yesterday, and `docs/security/asvs-l2.md` marks the gap closed
+
+## M9 · Redesign
+
+- [ ] M9-T01 · Light theme tokens and fonts: self-hosted Newsreader and Instrument Sans · deps: M8-T09 · PRD: §8, §11
+  - Accept: `packages/ui/src/theme.css` holds the light palette from `docs/DESIGN.md` (D-176) with `ground-deep` and `star`, sets `color-scheme: light`, and no dark values remain; `packages/ui/src/theme.test.ts` asserts the new palette and checks every pair in the DESIGN.md contrast table on all four grounds
+  - Accept: `@fontsource-variable/newsreader` and `@fontsource-variable/instrument-sans` (D-180) provide `--font-serif` and `--font-sans`, Latin subset only, with the above-the-fold WOFF2 files preloaded from the root route
+  - Accept: a built page requests no Google domain (Playwright network check), and `buildCsp` is unchanged (`font-src 'self'`, `style-src 'self'`)
+  - Accept: every existing page still passes axe in the light theme (pages not redesigned in M9 just take the new tokens), and the M8-T08 web vitals check passes on the Book page (LCP ≤ 2.5 s, CLS ≤ 0.1, mobile profile)
+- [ ] M9-T02 · Web: generated cover, star rating, and the shared redesign components · deps: M9-T01 · PRD: §6, §7.4, §11
+  - Accept: `Cover`'s fallback is the generated cover from `docs/DESIGN.md`, its colour picked from the slug (a unit test shows the same slug always gets the same colour), with space reserved at 2:3
+  - Accept: `StarRating` shows partial fill for averages and exposes "Rated X out of 5" as its accessible name
+  - Accept: `BookRail`, `GenreTile`, `ReviewExcerpt`, `SectionNav`, `FactsRow`, `DetailsList`, `RatingBreakdown`, `SeriesCard`, `AuthorCard`, `EditionsCard`, `AuthorMatchCard`, and `TrustBadge` exist with component tests for every interactive one (bars toggle a filter, format filter, section nav current item)
+- [ ] M9-T03 · API: review excerpts on Discover (`justApproved`) and search (`topReview`) · deps: M8-T09 · PRD: §7.2, §7.3, §10
+  - Accept: `reviewExcerptSchema` lives in `packages/shared`; `discoverResponseSchema` gains a nullable `justApproved` row and Catalog search items gain `topReview` (nullable), as described in D-177, and the OpenAPI spec is regenerated
+  - Accept: integration tests show spoiler, auto-hidden, pending, rejected, and unpublished reviews are never excerpted, one excerpt per Book in `justApproved`, and `topReview` is the most helpful eligible review with ties to newest
+  - Accept: the excerpt is plain text, at most 200 characters, cut at a word boundary (unit tests), and the row is hidden under 3 items
+- [ ] M9-T04 · API: `recentReviewCount` on "Most reviewed this month" items · deps: M8-T09 · PRD: §7.2
+  - Accept: each item in `mostReviewedThisMonth` has `recentReviewCount`, the number of Approved reviews in the last `DISCOVER_RECENT_DAYS`, matching the row's ranking (integration test), and the OpenAPI spec is regenerated (D-179)
+- [ ] M9-T05 · Web: shell and Discover redesign · deps: M9-T02, M9-T03, M9-T04 · PRD: §7.2, §7.7, §11
+  - Accept: header, footer, and `/` match the Discover template in `docs/DESIGN.md` at 360, 768, and 1280 px, with new strings in `apps/web/app/copy/`
+  - Accept: the "Your reading" strip appears only for signed-in Members with a Reading or Want to Read Shelf entry, and the sign-up pitch only for Visitors
+  - Accept: hidden rows leave no heading or gap, and component tests cover both viewer states
+- [ ] M9-T06 · Web: Book page redesign · deps: M9-T02 · PRD: §7.4, §7.5, §7.6, §7.7
+  - Accept: `/books/:slug` matches the Book page template in `docs/DESIGN.md`; the series, More in Genre, and author data come from the existing Series, Genre, and Author endpoints in the loader, and the page still renders when any of them fails
+  - Accept: section nav items for empty sections are left out
+  - Accept: rating bars and star chips filter through the URL like today (`?rating=`), and component tests cover the bars, the Editions format filter, and the description toggle
+- [ ] M9-T07 · Web: search results redesign · deps: M9-T02, M9-T03 · PRD: §7.3
+  - Accept: `/search` matches the Search results template in `docs/DESIGN.md`, including the `AuthorMatchCard` when an Author result matches the query and the `topReview` quote on Catalog Books
+  - Accept: Source candidates show the dashed generated cover and "Not on RePrint yet", and filters still collapse into a disclosure below `lg`
+- [ ] M9-T08 · M9 verification: run the Redesign acceptance criteria end to end, fix gaps, update docs · deps: M9-T01, M9-T05, M9-T06, M9-T07 · PRD: §3, §11, §12
+  - Accept: every acceptance criterion in `docs/milestones/M9-redesign.md` is checked off in the PR body with the command that proved it
+  - Accept: axe passes on Discover, Book, and search at phone and desktop widths; `pnpm check` and `pnpm test:e2e` pass; screenshots of the three pages are attached to the PR
+  - Accept: `docs/DESIGN.md` matches what shipped, and `docs/PROGRESS.md` is updated
