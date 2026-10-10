@@ -49,6 +49,11 @@ export type SeriesSummary = {
   name: string
   slug: string
   total: number
+  /**
+   * True when RePrint has every Book at positions 1 to `total`, so "Book 2 of 3" is true. A Series
+   * RePrint holds only part of says "Book 2" instead.
+   */
+  complete: boolean
   books: SeriesCardBook[]
 }
 
@@ -82,12 +87,14 @@ export function BookPage({
 }) {
   const navigate = useNavigate()
   const hasSimilar = moreByAuthor !== null || moreInGenre !== null
+  // The Source may know of more Editions than the Catalog stores (D-190).
+  const knownEditions = Math.max(book.sourceEditionCount ?? 0, book.editionCount)
   const navItems: SectionNavItem[] = [
     { id: 'overview', label: labels.sections.overview },
     { id: 'reviews', label: labels.sections.reviews, count: book.rating.count },
     ...(series ? [{ id: 'series', label: labels.sections.series, count: series.total }] : []),
     ...(editions.length > 0
-      ? [{ id: 'editions', label: labels.sections.editions, count: editions.length }]
+      ? [{ id: 'editions', label: labels.sections.editions, count: knownEditions }]
       : []),
     ...(author ? [{ id: 'author', label: labels.sections.author }] : []),
     ...(hasSimilar ? [{ id: 'similar', label: labels.sections.similar }] : []),
@@ -147,7 +154,7 @@ export function BookPage({
                 href={`/series/${series.slug}`}
                 books={series.books}
                 currentSlug={book.slug}
-                total={series.total}
+                total={series.complete ? series.total : null}
               />
             </div>
           ) : null}
@@ -167,6 +174,7 @@ export function BookPage({
           {editions.length > 0 ? (
             <div id="editions" className="scroll-mt-16">
               <EditionsCard
+                known={knownEditions}
                 editions={editions.map((edition) => ({
                   id: edition.id,
                   primary: edition.id === book.primaryEdition?.id,
@@ -321,7 +329,10 @@ function BookHeader({
       ? { label: labels.facts.originalLanguage, value: languageName(book.originalLanguage) }
       : null,
     book.editionCount > 0
-      ? { label: labels.facts.editions, value: String(book.editionCount) }
+      ? {
+          label: labels.facts.editions,
+          value: String(Math.max(book.sourceEditionCount ?? 0, book.editionCount)),
+        }
       : null,
   ]
   const facts = candidates.filter((fact): fact is Fact => fact !== null)
@@ -383,7 +394,7 @@ function BookHeader({
               {labels.seriesPill(
                 membership.series.name,
                 membership.position === null ? null : String(membership.position),
-                series?.total ?? null,
+                series?.complete ? series.total : null,
               )}
             </Link>
           ) : null}

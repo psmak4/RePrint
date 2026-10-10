@@ -17,6 +17,17 @@ describe('choosePrimaryEdition', () => {
     expect(choosePrimaryEdition([])).toBeNull()
   })
 
+  it('prefers the Edition whose cover is the Book cover, before the PRD order', () => {
+    const list = [
+      edition('reissue', { coverRef: 'open_library:2', publishedDate: '2016-07-11' }),
+      edition('first', { coverRef: 'open_library:1', isbn13: null, publishedDate: '1979-01-01' }),
+    ]
+    expect(choosePrimaryEdition(list, 'open_library:1')).toBe('first')
+    // Without a Book cover to match, the PRD order applies.
+    expect(choosePrimaryEdition(list)).toBe('reissue')
+    expect(choosePrimaryEdition(list, 'open_library:9')).toBe('reissue')
+  })
+
   it('prefers English over a newer translation with a cover and ISBN', () => {
     const list = [
       edition('es', { language: 'es', publishedDate: '2020-01-01' }),

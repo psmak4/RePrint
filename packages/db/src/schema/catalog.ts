@@ -46,6 +46,11 @@ export const books = pgTable(
     ratingSum: integer('rating_sum').notNull().default(0),
     /** Count of Approved Reviews at 1 to 5 stars, index 0 being one star. */
     ratingCounts: integer('rating_counts').array().notNull().default(sql`'{0,0,0,0,0}'::integer[]`),
+    /**
+     * How many Editions the Source knows of, when it says (D-190). The Catalog stores only a page of
+     * them, so this can be larger than the stored count. Source metadata: never edited by an admin.
+     */
+    sourceEditionCount: integer('source_edition_count'),
     /** When a Source last refreshed this Book; drives the 30-day stale refresh (PRD §6). */
     refreshedAt: timestamptz('refreshed_at'),
     ...timestamps(),

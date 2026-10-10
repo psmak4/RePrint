@@ -212,6 +212,7 @@ describe('side lists', () => {
         name: 'Dune Saga',
         slug: 'dune-saga',
         total: 2,
+        complete: true,
         books: [
           { slug: 'dune-abc123', title: 'Dune', cover: null, position: '1' },
           { slug: 'messiah-def456', title: 'Dune Messiah', cover: null, position: '2' },
@@ -259,6 +260,7 @@ describe('section nav', () => {
         name: 'Dune Saga',
         slug: 'dune-saga',
         total: 1,
+        complete: true,
         books: [{ slug: 'dune-abc123', title: 'Dune', cover: null, position: '1' }],
       },
     })

@@ -1247,3 +1247,27 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Not matched, because the API does not send the data: reviewer totals ("38 reviews · 412 helpful votes") and the "edition read" tag on review cards, "See all" and arrow buttons on Top rated (no such page), and D-184's facet counts and numbered pagination on search.
 - Why: The owner reported that the M9 build did not look like the canvas.
 - Affects: `packages/ui/src/components/button.tsx`, `apps/web/app/components/{shell,books,reviews,search}/`, `apps/web/app/copy/index.ts`, `apps/web/app/lib/avatar.ts`
+
+### D-189 · Genre rules match whole words and need support
+- Status: Implementation
+- Decision: A rule matches a Subject only as whole words (plural `s`, `es`, `y`→`ies` allowed), so `art` no longer matches "Arthur" or "earth". A Genre is kept when one match is strong (priority 50 or more, or a Subject that is exactly the pattern) or two Subjects support it. Migration 0019 adds `humorous` and `teenagers`, which the old substring matches covered.
+- Why: The Hitchhiker's Guide got Arts & Photography (from "Arthur Dent"), Travel ("Interstellar travel"), and Drama ("Radio plays").
+- Affects: `apps/api/src/catalog/enrichment/genres.ts`, `packages/db/drizzle/0019_whole_word_genre_rules.sql`
+
+### D-190 · Show the Source's Edition total
+- Status: Decided (owner)
+- Decision: The Catalog still stores the first 50 Editions, but `books.source_edition_count` keeps the total Open Library reports (`size`), and the Book page shows it ("130 known", "RePrint lists 45 of them so far"). It is Source metadata outside field origins; a Source that does not say leaves it unchanged.
+- Why: The owner saw 45 on RePrint and 130 on Open Library.
+- Affects: `packages/db/src/schema/catalog.ts` (migration 0018), the adapter, ingest, `bookDetailSchema`, the Book page
+
+### D-191 · Primary Edition matches the Book's cover first
+- Status: Decided (owner). Proposes a change to PRD §5.1's order.
+- Decision: The Edition whose cover is the Book's own cover ranks first; PRD §5.1's order (English, cover, ISBN, most recent) follows.
+- Why: "Most recent" picked a 2016 print-on-demand reissue for a Book whose cover is the 1979 first edition, so the header mixed two printings.
+- Affects: `apps/api/src/catalog/enrichment/primary-edition.ts`, `enrich.ts`
+
+### D-192 · Series text must look like a Series, not an imprint
+- Status: Implementation (amends the Series heuristic in the M3-T06 entry)
+- Decision: Spellings of one name count together; a name carried by Editions from two or more publishers is a Series; a name from one publisher counts only with a position of 30 or less and when it does not contain the publisher's name. The Book page says "of N" only when RePrint holds every position 1 to N.
+- Why: "Compactos No. 454" (an Anagrama imprint) beat the real Series, and "Book 454 of 1" counted only stored Books.
+- Affects: `apps/api/src/catalog/sources/open-library/record.ts`, `apps/web/app/routes/book.tsx`

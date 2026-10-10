@@ -84,7 +84,11 @@ const editionRecordSchema = z.object({
 type EditionRecord = z.infer<typeof editionRecordSchema>
 
 /** The part of an editions response the adapter reads. */
-export const editionsResponseSchema = z.object({ entries: z.array(z.unknown()) })
+export const editionsResponseSchema = z.object({
+  entries: z.array(z.unknown()),
+  /** How many Editions the work has in all; the response holds only one page of them. */
+  size: z.number().int().min(0).optional(),
+})
 
 const positive = (values: number[] | undefined) => values?.find((id) => id > 0)
 
@@ -112,13 +116,16 @@ function toEdition(record: EditionRecord): BookCandidateEdition | { error: strin
   return parsed.success ? parsed.data : { error: z.prettifyError(parsed.error) }
 }
 
+/** A Series text from one Edition, with that Edition's publisher (to tell Series from imprints). */
+export type SeriesText = { text: string; publisher: string | null }
+
 /** Translates an editions response; an Edition that does not parse or validate is reported and skipped. */
 export function toEditions(
   entries: unknown[],
   onInvalid: (reason: string) => void,
-): { editions: BookCandidateEdition[]; series: string[] } {
+): { editions: BookCandidateEdition[]; series: SeriesText[] } {
   const editions: BookCandidateEdition[] = []
-  const series: string[] = []
+  const series: SeriesText[] = []
   for (const entry of entries) {
     const record = editionRecordSchema.safeParse(entry)
     if (!record.success) {
@@ -128,32 +135,77 @@ export function toEditions(
     const edition = toEdition(record.data)
     if ('error' in edition) onInvalid(edition.error)
     else editions.push(edition)
-    series.push(...(record.data.series ?? []))
+    const publisher = record.data.publishers?.[0]?.trim() || null
+    for (const text of record.data.series ?? []) series.push({ text, publisher })
   }
   return { editions, series }
 }
 
+const SERIES_TEXT =
+  /^(.+?)\s*(?:,\s*|;\s*|\(\s*|--\s*)?(?:#|no\.?\s*|book\s+|bk\.?\s*|vol\.?\s*|v\.\s*|;\s*)(\d+(?:\.\d+)?)\.?\)?\s*$/i
+
+/** One key for spellings of the same name: case, apostrophes, punctuation, and a leading "The". */
+const seriesKey = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[’'`]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/^the /, '')
+
+const mostCommon = <T>(values: T[]): T | undefined => {
+  const counts = new Map<T, number>()
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1)
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
+}
+
+/** A publisher's numbered line runs into the hundreds (`Compactos No. 454`); a Series rarely does. */
+const MAX_SINGLE_PUBLISHER_POSITION = 30
+
 /**
- * Open Library holds Series only as free text on Editions, mixed with publishers' imprints
- * (`Oscar Moderni Cult`). A Series is recognized only when the text carries a position, as in
- * `Hainish Cycle, #4`, `Discworld ; 12`, or `Earthsea (book 2)`. The most common name wins.
+ * Open Library holds Series only as free text on Editions, mixed with publishers' numbered lines
+ * (`Compactos No. 454`, `Ullstein Buch 22491`). A Series is recognized only when the text carries a
+ * position, as in `Hainish Cycle, #4`, `Discworld ; 12`, `Earthsea (book 2)`, or `Hitchhiker's
+ * trilogy -- bk. 1.` (D-192). Spellings of one name count together. A name that Editions from two
+ * or more publishers carry is a Series; a publisher's own line never crosses publishers. A name from
+ * one publisher counts only when its position is small and the name does not contain the
+ * publisher's name. Names from more publishers, then more Editions, win.
  */
-export function toSeries(texts: string[]): { name: string; position: number | null }[] {
-  const counts = new Map<string, { name: string; position: number | null; count: number }>()
-  for (const text of texts) {
-    const match =
-      /^(.+?)\s*(?:,\s*|;\s*|\(\s*)?(?:#|no\.?\s*|book\s+|vol\.?\s*|v\.\s*|;\s*)(\d+(?:\.\d+)?)\)?\s*$/i.exec(
-        text.trim(),
-      )
-    const name = match?.[1]?.replace(/[\s,;(]+$/, '').trim()
+export function toSeries(texts: SeriesText[]): { name: string; position: number | null }[] {
+  const groups = new Map<
+    string,
+    { names: string[]; positions: number[]; publishers: Set<string>; count: number }
+  >()
+  for (const { text, publisher } of texts) {
+    const match = SERIES_TEXT.exec(text.trim())
+    const name = match?.[1]?.replace(/[\s,;(-]+$/, '').trim()
     if (!name || !match?.[2]) continue
-    const key = name.toLowerCase()
-    const entry = counts.get(key) ?? { name, position: Number(match[2]), count: 0 }
-    entry.count += 1
-    counts.set(key, entry)
+    const key = seriesKey(name)
+    if (!key) continue
+    const group = groups.get(key) ?? { names: [], positions: [], publishers: new Set(), count: 0 }
+    group.names.push(name)
+    group.positions.push(Number(match[2]))
+    if (publisher) group.publishers.add(seriesKey(publisher))
+    group.count += 1
+    groups.set(key, group)
   }
-  const best = [...counts.values()].sort((a, b) => b.count - a.count)[0]
-  return best ? [{ name: best.name, position: best.position }] : []
+  const looksLikeSeries = (
+    key: string,
+    group: { positions: number[]; publishers: Set<string> },
+  ) => {
+    if (group.publishers.size >= 2) return true
+    const position = mostCommon(group.positions) ?? 0
+    const namesPublisher = [...group.publishers].some(
+      (publisher) => publisher.length > 2 && key.includes(publisher),
+    )
+    return position <= MAX_SINGLE_PUBLISHER_POSITION && !namesPublisher
+  }
+  const best = [...groups.entries()]
+    .filter(([key, group]) => looksLikeSeries(key, group))
+    .map(([, group]) => group)
+    .sort((a, b) => b.publishers.size - a.publishers.size || b.count - a.count)[0]
+  if (!best) return []
+  return [{ name: mostCommon(best.names) ?? '', position: mostCommon(best.positions) ?? null }]
 }
 
 /** Subject labels worth keeping: no machine tags (`award:hugo_award=1970`), no duplicates, capped. */
@@ -179,7 +231,8 @@ export function toFullBook(
   work: Work,
   bylineDoc: unknown,
   editions: BookCandidateEdition[],
-  seriesTexts: string[],
+  seriesTexts: SeriesText[],
+  sourceEditionCount: number | null = null,
 ): BookCandidate | { error: string } {
   const base = toBookCandidate(bylineDoc, '', true)
   if ('error' in base) return base
@@ -195,6 +248,7 @@ export function toFullBook(
       cover: coverId ? toCover(coverId) : base.book.cover,
       series: toSeries(seriesTexts),
       subjects: toSubjects(work.subjects),
+      sourceEditionCount,
     },
     // With no usable Edition on record, the search result's placeholder Edition keeps the Book valid.
     editions: editions.length > 0 ? editions : base.editions,

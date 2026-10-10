@@ -1,16 +1,36 @@
 export interface GenreRule {
-  /** A case-insensitive substring of a Subject label. */
+  /** A case-insensitive word or phrase in a Subject label; a plural (`s`, `es`) also matches. */
   pattern: string
   genreId: string
   priority: number
 }
 
-function bestRule(label: string, rules: readonly GenreRule[]): GenreRule | undefined {
-  const text = label.toLowerCase()
+/** A rule at or above this priority is specific enough that one Subject is evidence on its own. */
+export const STRONG_PRIORITY = 50
+/** How many Subjects must support a Genre when none of its matches is strong. */
+const WEAK_SUPPORT = 2
+
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** The pattern with its plural: `travel(s)`, `mystery`/`mysteries`, `class(es)`. */
+function withPlural(pattern: string): string {
+  return /[^aeiou]y$/i.test(pattern)
+    ? `${escape(pattern.slice(0, -1))}(?:y|ies)`
+    : `${escape(pattern)}(?:e?s)?`
+}
+
+/** The pattern as whole words: `art` matches "Art" and "Arts" but not "Arthur" or "earth". */
+function wordMatcher(pattern: string): RegExp {
+  return new RegExp(`(?:^|[^\\p{L}\\p{N}])${withPlural(pattern)}(?=$|[^\\p{L}\\p{N}])`, 'iu')
+}
+
+function bestRule(
+  label: string,
+  rules: readonly { rule: GenreRule; matcher: RegExp }[],
+): GenreRule | undefined {
   let best: GenreRule | undefined
-  for (const rule of rules) {
-    const pattern = rule.pattern.trim().toLowerCase()
-    if (pattern === '' || !text.includes(pattern)) continue
+  for (const { rule, matcher } of rules) {
+    if (!matcher.test(label)) continue
     if (!best || outranks(rule, best)) best = rule
   }
   return best
@@ -23,18 +43,36 @@ function outranks(a: GenreRule, b: GenreRule): boolean {
   return `${a.pattern}:${a.genreId}` < `${b.pattern}:${b.genreId}`
 }
 
+/** A Subject that is the pattern and nothing else ("Travel" for `travel`) is strong evidence. */
+function isWholeLabel(label: string, pattern: string): boolean {
+  return new RegExp(`^${withPlural(pattern)}$`, 'iu').test(label.trim())
+}
+
 /**
- * Maps Subject labels to Genre IDs (PRD §5.4). Each Subject goes to the Genre of its best matching
- * rule; a Subject that matches nothing maps to nothing. The result has no repeats, in Subject order.
+ * Maps Subject labels to Genre IDs (PRD §5.4, D-189). Each Subject goes to the Genre of its best
+ * matching rule, matched as whole words. A Genre is kept when one of its matches is strong (a
+ * high-priority rule, or a Subject that is exactly the pattern) or when at least two Subjects
+ * support it, so one stray Subject ("Radio plays" on a novel) cannot add a Genre by itself. The
+ * result has no repeats, in Subject order.
  */
 export function mapSubjectsToGenres(
   labels: readonly string[],
   rules: readonly GenreRule[],
 ): string[] {
-  const genreIds: string[] = []
+  const compiled = rules
+    .filter((rule) => rule.pattern.trim() !== '')
+    .map((rule) => ({ rule, matcher: wordMatcher(rule.pattern.trim()) }))
+  const support = new Map<string, { strong: boolean; subjects: number }>()
   for (const label of labels) {
-    const rule = bestRule(label, rules)
-    if (rule && !genreIds.includes(rule.genreId)) genreIds.push(rule.genreId)
+    const rule = bestRule(label, compiled)
+    if (!rule) continue
+    const strong = rule.priority >= STRONG_PRIORITY || isWholeLabel(label, rule.pattern.trim())
+    const entry = support.get(rule.genreId) ?? { strong: false, subjects: 0 }
+    entry.strong ||= strong
+    entry.subjects += 1
+    support.set(rule.genreId, entry)
   }
-  return genreIds
+  return [...support.entries()]
+    .filter(([, entry]) => entry.strong || entry.subjects >= WEAK_SUPPORT)
+    .map(([genreId]) => genreId)
 }

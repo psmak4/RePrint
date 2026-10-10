@@ -171,6 +171,8 @@ export const bookCandidateBookSchema = z.object({
     z.object({ name: z.string().trim().min(1), position: z.number().min(0).nullable() }),
   ),
   subjects: z.array(subjectSchema),
+  /** How many Editions the Source knows of in all, when it says; it may send only some of them. */
+  sourceEditionCount: z.number().int().min(0).nullable().optional(),
 })
 
 export const bookCandidateEditionSchema = editionSchema

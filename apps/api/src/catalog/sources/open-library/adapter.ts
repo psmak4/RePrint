@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { type SourceAdapter, SourceError } from '../types.js'
 import {
   editionsResponseSchema,
+  type SeriesText,
   toAuthorRecord,
   toEditions,
   toFullBook,
@@ -133,6 +134,7 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
         doc.success ? doc.data.docs[0] : undefined,
         editions.editions,
         editions.series,
+        editions.total,
       )
       if ('error' in candidate) {
         options.onInvalid?.('Skipped an invalid Book record', {
@@ -169,11 +171,12 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
 
   async function readEditions(
     workId: string,
-  ): Promise<{ editions: BookCandidateEdition[]; series: string[] }> {
+  ): Promise<{ editions: BookCandidateEdition[]; series: SeriesText[]; total: number | null }> {
     const body = editionsResponseSchema.safeParse(await getJson(editionsPath(workId)))
-    if (!body.success) return { editions: [], series: [] }
-    return toEditions(body.data.entries, (reason) =>
+    if (!body.success) return { editions: [], series: [], total: null }
+    const read = toEditions(body.data.entries, (reason) =>
       options.onInvalid?.('Skipped an invalid Edition record', { reason, sourceId: workId }),
     )
+    return { ...read, total: body.data.size ?? null }
   }
 }

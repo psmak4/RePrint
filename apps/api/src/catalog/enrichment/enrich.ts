@@ -2,6 +2,7 @@ import {
   bookGenres,
   bookSubjects,
   books,
+  covers,
   type Database,
   editions,
   genres,
@@ -18,17 +19,31 @@ type Tx = Parameters<Parameters<Database['transaction']>[0]>[0]
 
 /** Sets the Primary Edition unless an admin locked it (`primaryEdition`). Returns the chosen ID. */
 async function applyPrimaryEdition(tx: Tx, bookId: string): Promise<string | null> {
-  const list = await tx
+  const rows = await tx
     .select({
       id: editions.id,
       language: editions.language,
       coverId: editions.coverId,
       isbn13: editions.isbn13,
       publishedDate: editions.publishedDate,
+      coverOrigin: covers.origin,
+      coverOriginRef: covers.originRef,
     })
     .from(editions)
+    .leftJoin(covers, eq(covers.id, editions.coverId))
     .where(eq(editions.bookId, bookId))
-  const chosen = choosePrimaryEdition(list)
+  const [book] = await tx
+    .select({ origin: covers.origin, originRef: covers.originRef })
+    .from(books)
+    .innerJoin(covers, eq(covers.id, books.coverId))
+    .where(eq(books.id, bookId))
+  const refOf = (origin: string | null, ref: string | null) =>
+    origin && ref ? `${origin}:${ref}` : null
+  const list = rows.map(({ coverOrigin, coverOriginRef, ...edition }) => ({
+    ...edition,
+    coverRef: refOf(coverOrigin, coverOriginRef),
+  }))
+  const chosen = choosePrimaryEdition(list, refOf(book?.origin ?? null, book?.originRef ?? null))
   await tx.update(books).set({ primaryEditionId: chosen }).where(eq(books.id, bookId))
   return chosen
 }

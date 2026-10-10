@@ -162,6 +162,7 @@ async function upsertBook(
 }> {
   const { source, candidate, now, existingId, priorityOf } = input
   const coverId = await resolveCover(tx, candidate.book.cover)
+  const sourceEditionCount = candidate.book.sourceEditionCount ?? null
   const incoming: IncomingField[] = [
     { field: 'title', column: 'title', value: candidate.book.title },
     { field: 'subtitle', column: 'subtitle', value: candidate.book.subtitle },
@@ -196,6 +197,8 @@ async function upsertBook(
         ...(plan.set as Partial<typeof books.$inferInsert>),
         fieldOrigins: plan.origins,
         refreshedAt: now,
+        // Source metadata, not an editable field: kept when a Source does not say (D-190).
+        ...(sourceEditionCount !== null ? { sourceEditionCount } : {}),
       })
       .where(eq(books.id, existingId))
     return {
@@ -216,6 +219,7 @@ async function upsertBook(
     title: candidate.book.title,
     fieldOrigins: plan.origins,
     refreshedAt: now,
+    sourceEditionCount,
   })
   return { id, slug, created: true, lockedFields: [], origins: plan.origins }
 }

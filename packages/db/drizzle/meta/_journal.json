@@ -127,6 +127,20 @@
       "when": 1790983942793,
       "tag": "0017_featured_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791665723862,
+      "tag": "0018_little_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791665734361,
+      "tag": "0019_whole_word_genre_rules",
+      "breakpoints": true
     }
   ]
 }
