@@ -38,6 +38,14 @@ export function AuthForm<T extends FieldValues>({
   submitLabel,
   fetcher,
 }: AuthFormProps<T>) {
+  // Visible fields get no default: React Hook Form writes a field's default into the input when it
+  // registers it, which happens at hydration and would wipe anything typed before the page finished
+  // loading (seen on slow WebKit). Without one it reads the input's current value instead. Hidden
+  // values such as the reset token keep their defaults.
+  const shown = new Set<string>(fields.map((field) => field.name))
+  const hiddenDefaults = Object.fromEntries(
+    Object.entries(defaultValues).filter(([name]) => !shown.has(name)),
+  )
   const {
     register,
     handleSubmit,
@@ -45,7 +53,7 @@ export function AuthForm<T extends FieldValues>({
     formState: { errors },
   } = useForm<T>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as never,
+    defaultValues: hiddenDefaults as never,
   })
 
   const failure = failureOf(fetcher.data)
