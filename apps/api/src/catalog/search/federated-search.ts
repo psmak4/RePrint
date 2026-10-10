@@ -16,6 +16,7 @@ import {
 import { and, eq, inArray } from 'drizzle-orm'
 import type { Redis } from 'ioredis'
 import { loadAuthorSuggestions, loadBookSummaries } from '../../modules/catalog/read.js'
+import { loadTopReviews } from '../../modules/reviews/excerpts.js'
 import type { CandidateRefs } from '../candidate-refs.js'
 import type { InteractiveCall } from '../resolve.js'
 import type { SourceAdapter } from '../sources/types.js'
@@ -266,8 +267,9 @@ export async function federatedSearch(
     }
   }
   const storedIds = [...stored.keys()]
-  const [summaries, isbnRows] = await Promise.all([
+  const [summaries, topReviews, isbnRows] = await Promise.all([
     loadBookSummaries(db, storedIds),
+    loadTopReviews(db, storedIds),
     isbn && storedIds.length > 0
       ? db
           .select({ bookId: editions.bookId })
@@ -292,7 +294,11 @@ export async function federatedSearch(
       score: entry.score + REVIEW_BOOST * Math.log1p(summary.rating.count),
       isbnMatch: entry.isbnMatch,
       order: ranked.length,
-      item: async () => ({ kind: 'book', book: summary }),
+      item: async () => ({
+        kind: 'book',
+        book: summary,
+        topReview: topReviews.get(summary.id) ?? null,
+      }),
     })
   }
   const seenSourceIds = new Set<string>()

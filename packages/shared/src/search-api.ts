@@ -7,6 +7,7 @@ import {
   slugSchema,
 } from './catalog.js'
 import { bookSummarySchema, candidateRefSchema } from './catalog-api.js'
+import { reviewExcerptSchema } from './reviews.js'
 
 /** Request and response shapes for Catalog search (PRD §7.3, §10). */
 
@@ -73,7 +74,12 @@ export const searchCandidateSchema = z.object({
 export type SearchCandidate = z.infer<typeof searchCandidateSchema>
 
 export const searchResultItemSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('book'), book: bookSummarySchema }),
+  z.object({
+    kind: z.literal('book'),
+    book: bookSummarySchema,
+    /** The Book's most helpful eligible review, ties to newest; `null` when it has none (D-177). */
+    topReview: reviewExcerptSchema.nullable(),
+  }),
   z.object({ kind: z.literal('candidate'), candidate: searchCandidateSchema }),
   z.object({ kind: z.literal('author'), author: authorSuggestionSchema }),
 ])

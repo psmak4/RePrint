@@ -2,6 +2,8 @@ import { type Database, featuredItems, genres, reviews, users } from '@reprint/d
 import {
   type BookSummary,
   DISCOVER_FEATURED_GENRES,
+  DISCOVER_JUST_APPROVED_SIZE,
+  DISCOVER_MIN_JUST_APPROVED,
   DISCOVER_MIN_ROW_BOOKS,
   DISCOVER_RECENT_DAYS,
   DISCOVER_ROW_SIZE,
@@ -9,10 +11,17 @@ import {
   type DiscoverResponse,
   type FeaturedReview,
   type GenreLink,
+  type JustApprovedItem,
   WEIGHTED_RATING_C,
 } from '@reprint/shared'
 import { and, asc, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
 import { loadBookSummaries } from '../catalog/read.js'
+import {
+  EXCERPT_COLUMNS,
+  EXCERPTABLE_REVIEW,
+  type ExcerptRow,
+  toExcerpt,
+} from '../reviews/excerpts.js'
 
 /** Approved, not auto-hidden (D-040) reviews by Members whose account still exists (D-043). */
 const PUBLIC_REVIEW = sql`r.status = 'approved' and r.hidden_at is null
@@ -156,12 +165,33 @@ export async function buildFeaturedReview(db: Database): Promise<FeaturedReview 
   return first ?? null
 }
 
+/** The newest excerptable reviews, one per Book (D-177); hidden under 3 items. */
+export async function buildJustApproved(db: Database): Promise<JustApprovedItem[] | null> {
+  const rows = await db.execute<ExcerptRow>(
+    sql`select * from (
+        select distinct on (r.book_id) ${EXCERPT_COLUMNS}
+        from reviews r join users au on au.id = r.user_id
+        where ${EXCERPTABLE_REVIEW}
+        order by r.book_id, coalesce(r.decided_at, r.submitted_at) desc, r.id
+      ) newest
+      order by approved_at desc, id
+      limit ${DISCOVER_JUST_APPROVED_SIZE}`,
+  )
+  const summaries = await loadBookSummaries(db, [...new Set(rows.map((row) => row.book_id))])
+  const items = rows.flatMap((row) => {
+    const book = summaries.find((summary) => summary.id === row.book_id)
+    return book ? [{ review: toExcerpt(row), book }] : []
+  })
+  return items.length >= DISCOVER_MIN_JUST_APPROVED ? items : null
+}
+
 export const DISCOVER_ROW_KEYS = [
   'recentlyReviewed',
   'topRated',
   'mostReviewedThisMonth',
   'featuredGenres',
   'featuredReview',
+  'justApproved',
 ] as const
 export type DiscoverRowKey = (typeof DISCOVER_ROW_KEYS)[number]
 
@@ -177,6 +207,7 @@ export function buildRow<Key extends DiscoverRowKey>(
     mostReviewedThisMonth: () => buildMostReviewedThisMonth(db, context.now),
     featuredGenres: () => buildFeaturedGenres(db),
     featuredReview: () => buildFeaturedReview(db),
+    justApproved: () => buildJustApproved(db),
   }
   return builders[key]()
 }

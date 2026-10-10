@@ -585,7 +585,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `Cover`'s fallback is the generated cover from `docs/DESIGN.md`, its colour picked from the slug (a unit test shows the same slug always gets the same colour), with space reserved at 2:3
   - Accept: `StarRating` shows partial fill for averages and exposes "Rated X out of 5" as its accessible name
   - Accept: `BookRail`, `GenreTile`, `ReviewExcerpt`, `SectionNav`, `FactsRow`, `DetailsList`, `RatingBreakdown`, `SeriesCard`, `AuthorCard`, `EditionsCard`, `AuthorMatchCard`, and `TrustBadge` exist with component tests for every interactive one (bars toggle a filter, format filter, section nav current item)
-- [ ] M9-T03 · API: review excerpts on Discover (`justApproved`) and search (`topReview`) · deps: M8-T09 · PRD: §7.2, §7.3, §10
+- [x] M9-T03 · API: review excerpts on Discover (`justApproved`) and search (`topReview`) · deps: M8-T09 · PRD: §7.2, §7.3, §10
   - Accept: `reviewExcerptSchema` lives in `packages/shared`; `discoverResponseSchema` gains a nullable `justApproved` row and Catalog search items gain `topReview` (nullable), as described in D-177, and the OpenAPI spec is regenerated
   - Accept: integration tests show spoiler, auto-hidden, pending, rejected, and unpublished reviews are never excerpted, one excerpt per Book in `justApproved`, and `topReview` is the most helpful eligible review with ties to newest
   - Accept: the excerpt is plain text, at most 200 characters, cut at a word boundary (unit tests), and the row is hidden under 3 items

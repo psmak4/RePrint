@@ -34,6 +34,7 @@ const base: SearchResponse = {
         ],
         rating: { average: 4.3, count: 12 },
       },
+      topReview: null,
     },
     {
       kind: 'candidate',

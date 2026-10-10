@@ -150,6 +150,36 @@ export const publicReviewSchema = z.object({
 })
 export type PublicReview = z.infer<typeof publicReviewSchema>
 
+/** Longest excerpt shown on Discover and in search results (D-177). */
+export const REVIEW_EXCERPT_MAX = 200
+
+/**
+ * A short, plain-text piece of an Approved Review for Discover and search (D-177). The headline is
+ * the Review's own; the excerpt is its body cut at a word boundary.
+ */
+export const reviewExcerptSchema = z.object({
+  id: z.uuid(),
+  rating: z.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX),
+  headline: z.string().nullable(),
+  excerpt: z.string().max(REVIEW_EXCERPT_MAX),
+  author: z.object({ username: z.string(), displayName: z.string() }),
+  approvedAt: z.iso.datetime(),
+})
+export type ReviewExcerpt = z.infer<typeof reviewExcerptSchema>
+
+/**
+ * The body as one line of plain text, at most `max` characters. A longer body is cut at the last
+ * word boundary that leaves room for the ellipsis (a single word longer than that is cut hard).
+ */
+export function excerptOf(body: string, max: number = REVIEW_EXCERPT_MAX): string {
+  const text = body.replace(/\s+/g, ' ').trim()
+  if (text.length <= max) return text
+  const room = text.slice(0, max - 1)
+  const lastSpace = room.lastIndexOf(' ')
+  const cut = lastSpace > 0 && text[max - 1] !== ' ' ? room.slice(0, lastSpace) : room
+  return `${cut.trimEnd().replace(/[\s.,;:!?-]+$/, '')}…`
+}
+
 export const bookReviewsResponseSchema = pageOf(publicReviewSchema)
 export type BookReviewsResponse = z.infer<typeof bookReviewsResponseSchema>
 

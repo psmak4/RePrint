@@ -22,6 +22,7 @@ const NO_ROWS: DiscoverResponse = {
   mostReviewedThisMonth: null,
   featuredGenres: null,
   featuredReview: null,
+  justApproved: null,
 }
 
 /** The Discover rows from the API's cache (PRD §7.2). If they can't load, the page still renders without rows. */

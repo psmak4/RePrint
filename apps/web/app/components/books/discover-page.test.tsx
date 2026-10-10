@@ -36,6 +36,7 @@ const empty: DiscoverResponse = {
   mostReviewedThisMonth: null,
   featuredGenres: null,
   featuredReview: null,
+  justApproved: null,
 }
 
 const full: DiscoverResponse = {
@@ -59,6 +60,7 @@ const full: DiscoverResponse = {
     },
     book: summary(60, 'Dune'),
   },
+  justApproved: null,
 }
 
 const viewer = { username: 'member1', verified: true } as unknown as Viewer
