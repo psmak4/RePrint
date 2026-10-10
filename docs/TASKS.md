@@ -595,7 +595,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: header, footer, and `/` match the Discover template in `docs/DESIGN.md` at 360, 768, and 1280 px, with new strings in `apps/web/app/copy/`
   - Accept: the "Your reading" strip appears only for signed-in Members with a Reading or Want to Read Shelf entry, and the sign-up pitch only for Visitors
   - Accept: hidden rows leave no heading or gap, and component tests cover both viewer states
-- [ ] M9-T06 · Web: Book page redesign · deps: M9-T02 · PRD: §7.4, §7.5, §7.6, §7.7
+- [x] M9-T06 · Web: Book page redesign · deps: M9-T02 · PRD: §7.4, §7.5, §7.6, §7.7
   - Accept: `/books/:slug` matches the Book page template in `docs/DESIGN.md`; the series, More in Genre, and author data come from the existing Series, Genre, and Author endpoints in the loader, and the page still renders when any of them fails
   - Accept: section nav items for empty sections are left out
   - Accept: rating bars and star chips filter through the URL like today (`?rating=`), and component tests cover the bars, the Editions format filter, and the description toggle

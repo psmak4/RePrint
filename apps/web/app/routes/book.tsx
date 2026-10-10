@@ -6,14 +6,22 @@ import {
   bookReviewsQuerySchema,
   bookReviewsResponseSchema,
   deleteMyReviewResponseSchema,
+  genreDetailResponseSchema,
   myHelpfulVotesResponseSchema,
   myReviewSchema,
   reviewInputSchema,
+  seriesDetailResponseSchema,
   slugSchema,
 } from '@reprint/shared'
 import { data, redirect } from 'react-router'
 import { z } from 'zod'
-import { BookPage, type MoreByAuthor } from '../components/books/book-page.js'
+import {
+  type AuthorSummary,
+  BookPage,
+  type MoreByAuthor,
+  type MoreInGenre,
+  type SeriesSummary,
+} from '../components/books/book-page.js'
 import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
@@ -78,12 +86,18 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     ? { sort: parsedQuery.data.sort, rating: parsedQuery.data.rating, page: parsedQuery.data.page }
     : { sort: 'most_helpful', page: 1 }
 
-  const [editions, moreByAuthor, session, reviews] = await Promise.all([
+  const firstSeries = book.series[0]?.series
+  const firstGenre = book.genres[0]
+  const [editions, authorData, series, moreInGenre, session, reviews] = await Promise.all([
     loadEditions(api, book.slug),
-    byline ? loadMoreByAuthor(api, byline.slug, book.id) : null,
+    byline ? loadAuthor(api, byline.slug, book.id) : null,
+    firstSeries ? loadSeries(api, firstSeries.slug) : null,
+    firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
     loadSession(request),
     loadReviews(api, book.slug, reviewQuery),
   ])
+  const moreByAuthor = authorData?.moreByAuthor ?? null
+  const authorCard = authorData?.card ?? null
   const viewer = session.viewer
   const [myReview, votedReviewIds] = viewer
     ? await Promise.all([loadMyReview(api, book.slug), loadVotedReviewIds(api, book.slug)])
@@ -107,6 +121,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     book,
     editions,
     moreByAuthor,
+    authorCard,
+    series,
+    moreInGenre,
     viewer,
     myReview,
     reviews,
@@ -196,23 +213,78 @@ async function loadEditions(api: ReturnType<typeof apiClientFor>, slug: string) 
   }
 }
 
-async function loadMoreByAuthor(
+async function loadAuthor(
   api: ReturnType<typeof apiClientFor>,
   authorSlug: string,
   bookId: string,
-): Promise<MoreByAuthor | null> {
+): Promise<{ moreByAuthor: MoreByAuthor | null; card: AuthorSummary } | null> {
   try {
     const response = await api.get(`/v1/authors/${authorSlug}`)
     if (!response.ok) return null
     const author = authorDetailSchema.parse(await response.json())
-    const seen = new Set<string>([bookId])
-    const books = author.works
+    const seen = new Set<string>()
+    const all = author.works
       .flatMap((work) => work.books)
       .filter((other) => !seen.has(other.id) && seen.add(other.id))
-      .slice(0, MORE_BY_AUTHOR_LIMIT)
-    return books.length > 0 ? { authorName: author.name, authorSlug: author.slug, books } : null
+    const books = all.filter((other) => other.id !== bookId).slice(0, MORE_BY_AUTHOR_LIMIT)
+    return {
+      moreByAuthor:
+        books.length > 0 ? { authorName: author.name, authorSlug: author.slug, books } : null,
+      card: {
+        name: author.name,
+        slug: author.slug,
+        photo: author.photo,
+        born: author.birthDate,
+        died: author.deathDate,
+        bio: author.bio,
+        bookCount: all.length,
+      },
+    }
   } catch (error) {
-    logger.warn({ err: error }, 'could not load more by author')
+    logger.warn({ err: error }, 'could not load author')
+    return null
+  }
+}
+
+async function loadSeries(
+  api: ReturnType<typeof apiClientFor>,
+  seriesSlug: string,
+): Promise<SeriesSummary | null> {
+  try {
+    const response = await api.get(`/v1/series/${seriesSlug}`)
+    if (!response.ok) return null
+    const detail = seriesDetailResponseSchema.parse(await response.json())
+    if (detail.items.length === 0) return null
+    return {
+      name: detail.series.name,
+      slug: detail.series.slug,
+      total: detail.items.length,
+      books: detail.items.map((item) => ({
+        slug: item.book.slug,
+        title: item.book.title,
+        cover: item.book.cover,
+        position: item.position === null ? null : String(item.position),
+      })),
+    }
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load series')
+    return null
+  }
+}
+
+async function loadMoreInGenre(
+  api: ReturnType<typeof apiClientFor>,
+  genre: { slug: string; name: string },
+  bookId: string,
+): Promise<MoreInGenre | null> {
+  try {
+    const response = await api.get(`/v1/genres/${genre.slug}?sort=top_rated`)
+    if (!response.ok) return null
+    const detail = genreDetailResponseSchema.parse(await response.json())
+    const books = detail.items.filter((other) => other.id !== bookId).slice(0, MORE_BY_AUTHOR_LIMIT)
+    return books.length > 0 ? { genreName: genre.name, genreSlug: genre.slug, books } : null
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load more in genre')
     return null
   }
 }
@@ -225,6 +297,9 @@ export default function Book({ loaderData }: Route.ComponentProps) {
         book={loaderData.book}
         editions={loaderData.editions}
         moreByAuthor={loaderData.moreByAuthor}
+        author={loaderData.authorCard}
+        series={loaderData.series}
+        moreInGenre={loaderData.moreInGenre}
         viewer={loaderData.viewer}
         myReview={loaderData.myReview}
         reviews={loaderData.reviews}

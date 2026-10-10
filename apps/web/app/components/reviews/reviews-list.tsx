@@ -78,51 +78,64 @@ function ReviewItem({
 function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
   // A plain GET form, so sorting works without JavaScript; changing sort resets to page 1.
   return (
-    <Form method="get" action={`/books/${slug}#reviews`} className="flex flex-wrap items-end gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        {text.sortLabel}
-        <select
-          name="sort"
-          defaultValue={query.sort}
-          className="rounded-md border border-input-border bg-background px-2 py-1.5"
-        >
-          {REVIEW_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {text.sorts[sort]}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        {text.filterLabel}
-        <select
-          name="rating"
-          defaultValue={query.rating ?? ''}
-          className="rounded-md border border-input-border bg-background px-2 py-1.5"
-        >
-          <option value="">{text.allRatings}</option>
-          {[5, 4, 3, 2, 1].map((stars) => (
-            <option key={stars} value={stars}>
-              {text.starsOnly(stars)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        type="submit"
-        className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface"
+    <div className="flex flex-col gap-3">
+      <nav aria-label={copy.redesign.bookPage.filterByRating}>
+        <ul className="flex flex-wrap gap-2">
+          {[undefined, 5, 4, 3, 2, 1].map((stars) => {
+            const active = query.rating === stars
+            return (
+              <li key={stars ?? 'all'}>
+                <Link
+                  to={reviewsHref(slug, query, { rating: stars, page: 1 })}
+                  aria-current={active ? 'true' : undefined}
+                  aria-label={stars ? text.starsOnly(stars) : undefined}
+                  className={`inline-flex min-h-8 items-center rounded-full border px-3 text-sm ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-input-border bg-surface hover:bg-surface-raised'}`}
+                >
+                  {stars
+                    ? copy.redesign.bookPage.starChip(stars)
+                    : copy.redesign.bookPage.allRatings}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+      <Form
+        method="get"
+        action={`/books/${slug}#reviews`}
+        className="flex flex-wrap items-end gap-3"
       >
-        {text.apply}
-      </button>
-      {query.rating ? (
-        <Link
-          to={reviewsHref(slug, query, { rating: undefined, page: 1 })}
-          className="py-1.5 text-sm text-link underline"
+        <label className="flex flex-col gap-1 text-sm">
+          {text.sortLabel}
+          <select
+            name="sort"
+            defaultValue={query.sort}
+            className="rounded-md border border-input-border bg-background px-2 py-1.5"
+          >
+            {REVIEW_SORTS.map((sort) => (
+              <option key={sort} value={sort}>
+                {text.sorts[sort]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {query.rating ? <input type="hidden" name="rating" value={query.rating} /> : null}
+        <button
+          type="submit"
+          className="rounded-md border border-input-border px-3 py-1.5 text-sm hover:bg-surface"
         >
-          {text.clearFilter}
-        </Link>
-      ) : null}
-    </Form>
+          {text.apply}
+        </button>
+        {query.rating ? (
+          <Link
+            to={reviewsHref(slug, query, { rating: undefined, page: 1 })}
+            className="py-1.5 text-sm text-link underline"
+          >
+            {text.clearFilter}
+          </Link>
+        ) : null}
+      </Form>
+    </div>
   )
 }
 
@@ -183,7 +196,7 @@ export function ReviewsList({
 }) {
   return (
     <section id="reviews" aria-labelledby="reviews-heading" className="flex flex-col gap-4">
-      <h2 id="reviews-heading" className="text-xl font-semibold">
+      <h2 id="reviews-heading" className="font-serif text-2xl font-medium">
         {text.heading}
       </h2>
       {reviews === null ? (

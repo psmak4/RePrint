@@ -95,6 +95,59 @@ describe('book loader reviews', () => {
   })
 })
 
+describe('book loader side data', () => {
+  const withShelves = {
+    ...book,
+    series: [{ series: { slug: 'dune-saga', name: 'Dune Saga' }, position: 1 }],
+    genres: [{ slug: 'science-fiction', name: 'Science fiction' }],
+  }
+  const side = (url: URL) => {
+    if (url.pathname === '/v1/books/dune-abc123') return Response.json(withShelves)
+    if (url.pathname === '/v1/series/dune-saga')
+      return Response.json({
+        series: { slug: 'dune-saga', name: 'Dune Saga', description: null },
+        items: [
+          { position: 1, book: summary(1, 'dune-abc123') },
+          { position: 2.5, book: summary(2, 'messiah') },
+        ],
+      })
+    if (url.pathname === '/v1/genres/science-fiction')
+      return Response.json({
+        genre: { slug: 'science-fiction', name: 'Science fiction', description: null },
+        parent: null,
+        children: [],
+        items: [summary(1, 'dune-abc123'), summary(3, 'neuromancer')],
+        page: 1,
+        pageSize: 20,
+        hasMore: false,
+      })
+    return respond(url)
+  }
+
+  it('loads the Series, More in Genre, and Author card data', async () => {
+    const result = await load(side)
+    expect(result.series).toMatchObject({ name: 'Dune Saga', total: 2 })
+    expect(result.series?.books.map((b) => b.position)).toEqual(['1', '2.5'])
+    expect(result.moreInGenre?.books.map((b) => b.slug)).toEqual(['neuromancer'])
+    expect(result.authorCard).toMatchObject({ name: 'Frank Herbert', bookCount: 8 })
+  })
+
+  it('still renders the Book when the Series, Genre, and Author requests fail', async () => {
+    const failing = (url: URL) =>
+      url.pathname.startsWith('/v1/series') ||
+      url.pathname.startsWith('/v1/genres') ||
+      url.pathname.startsWith('/v1/authors')
+        ? new Response(null, { status: 500 })
+        : side(url)
+    const result = await load(failing)
+    expect(result.book.title).toBe('Dune')
+    expect(result.series).toBeNull()
+    expect(result.moreInGenre).toBeNull()
+    expect(result.authorCard).toBeNull()
+    expect(result.moreByAuthor).toBeNull()
+  })
+})
+
 describe('book loader', () => {
   it('loads the Book, Editions, and up to 6 more Books by the author without this one', async () => {
     const result = await load(respond)
