@@ -1,10 +1,16 @@
 # RePrint design system
 
-Source of truth for UI work (PRD §8, §11). Tokens live in `packages/ui/src/theme.css`; strings live in `apps/web/app/copy/`. Dark theme only for v1.
+Source of truth for UI work (PRD §8, §11). Tokens live in `packages/ui/src/theme.css`; strings live in `apps/web/app/copy/`. Light theme only (D-176 replaces the earlier dark-only palette; there is no theme switcher).
+
+This document describes the redesign (D-176), built in milestone M9. Until an M9 task lands, the code for that area still follows the previous spec in git history; the reference mockups are on the owner's design canvas "RePrint Redesign".
 
 ## Principles
 
-- Reading and reviews come first: content on a calm dark surface, one accent colour for actions.
+- Reading and reviews come first: content on a calm, warm light surface, one accent colour for actions.
+- Books lead with their covers. Every Book shows a cover: the real one, or a designed generated cover.
+- Show what readers said, not only scores: review excerpts appear on Discover and in search results (D-177).
+- Information is one glance or one jump away: key facts sit beside the cover, and long pages have a section nav.
+- Not a store: no prices, carts, "buy" links, or retailer branding anywhere.
 - Server-rendered first paint; no layout shift (reserve cover and image space with `aspect-ratio`).
 - WCAG 2.2 AA everywhere (PRD §11). Every interactive element is keyboard-operable with a visible focus ring.
 
@@ -24,19 +30,27 @@ Source of truth for UI work (PRD §8, §11). Tokens live in `packages/ui/src/the
 
 ## Type scale
 
-System font stack (`--font-sans`); no web fonts, so nothing blocks first paint.
+Two typefaces (D-180), self-hosted from the Google Fonts files via Fontsource, Latin subset, preloaded, `font-display: swap`, with metric-adjusted fallbacks:
 
-| Role | Tailwind | Size / line height | Weight |
+- `--font-serif`: Newsreader (variable). Titles, section headings, review headlines, Book descriptions, and review excerpts.
+- `--font-sans`: Instrument Sans (variable). Everything else: UI, labels, meta, body text of reviews.
+
+| Role | Font | Size / line height (base → `md`) | Weight |
 | --- | --- | --- | --- |
-| Page title (h1) | `text-3xl md:text-4xl` | 30/36, 36/40 | 600 |
-| Section title (h2) | `text-2xl` | 24/32 | 600 |
-| Subsection (h3) | `text-xl` | 20/28 | 600 |
-| Card title | `text-base` | 16/24 | 600 |
-| Body | `text-base` | 16/24 | 400 |
-| Lead / description | `text-lg` | 18/28 | 400 |
-| Secondary, meta | `text-sm text-muted-foreground` | 14/20 | 400 |
+| Hero title (Discover h1) | serif | 40/42 → 64/66, tracking −0.02em | 500 |
+| Book title (Book page h1) | serif | 38/40 → 60/62, tracking −0.02em | 500 |
+| Page title (other h1) | serif | 32/36 → 44/48 | 500 |
+| Section title (h2) | serif | 26/30 → 32/36 (Discover rows 36/40) | 500 |
+| Card or panel title (h3) | serif | 21/26 → 22/28 | 500 |
+| Review headline | serif | 21/26 → 24/30 | 500 |
+| Book title on a card | serif | 16/20 → 18/22 | 500 |
+| Long text (description) | serif | 18/29 → 19/31 | 400 |
+| Body | sans | 16/24 (review bodies 16/27) | 400 |
+| Lead | sans | 16/25 → 19/29 | 400 |
+| Secondary, meta | sans `text-muted-foreground` | 14/20 | 400 |
+| Eyebrow label | sans, uppercase, tracking 0.12em | 12/16 → 13/16 | 600 |
 
-One `h1` per page; do not skip heading levels. Body text never goes below 14 px.
+One `h1` per page; do not skip heading levels. Body text never goes below 14 px; only eyebrow labels and badge counts use 12 or 13 px.
 
 ## Spacing scale
 
@@ -48,31 +62,43 @@ Exposed as Tailwind v4 theme variables (`bg-background`, `text-muted-foreground`
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `background` | `#0f172a` | Page background |
-| `foreground` | `#f8fafc` | Body text |
-| `surface` | `#1e293b` | Cards, inputs, menus |
-| `surface-raised` | `#273449` | Hover state, popovers |
-| `muted-foreground` | `#94a3b8` | Secondary text |
-| `border` | `#334155` | Decorative dividers only |
-| `input-border` | `#64748b` | Input and outline-button boundaries |
-| `accent` | `#3b82f6` | Primary buttons, selected state, focus ring (`ring`) |
-| `accent-foreground` | `#020617` | Text on `accent` |
-| `link` | `#60a5fa` | Text links (underlined) |
-| `danger` / `success` / `warning` | `#f87171` / `#4ade80` / `#fbbf24` | Status text and icons; never colour alone, always with text or an icon |
+| `background` | `#fbfaf7` | Page background (warm off-white) |
+| `ground-deep` | `#f3efe8` | Hero bands (Discover hero, Book header) and the footer |
+| `surface` | `#ffffff` | Header, cards, inputs, menus |
+| `surface-raised` | `#f3f1ec` | Hover state, selected rows, inset panels |
+| `foreground` | `#0f172a` | Body text and headings |
+| `muted-foreground` | `#475569` | Secondary text |
+| `border` | `#e4e0d8` | Decorative dividers and card edges only |
+| `input-border` | `#7a7f88` | Input and outline-button boundaries |
+| `accent` | `#2563eb` | Primary buttons, selected state, focus ring (`ring`) |
+| `accent-foreground` | `#ffffff` | Text on `accent` |
+| `link` | `#1d4ed8` | Text links (underlined in running text) |
+| `danger` / `success` / `warning` | `#b91c1c` / `#166534` / `#a8500a` | Status text and icons; never colour alone, always with text or an icon |
+| `star` | `#a8500a` (same value as `warning`) | Filled stars and rating bars only. Empty stars and bar tracks use `#d6d3d1` / `#ece8e0` (decorative: a rating always shows its number too) |
+
+`color-scheme: light`. Shadows are soft and navy-tinted (`rgba(15, 23, 42, …)`), used on raised cards, menus, and covers.
 
 ### Contrast (WCAG AA), enforced by `packages/ui/src/theme.test.ts`
 
+Every pair is checked on all four grounds: background / surface / surface-raised / ground-deep.
+
 | Pair | Ratio | Rule |
 | --- | --- | --- |
-| foreground on background / surface | 17.1 / 14.0 | Text 4.5:1 |
-| muted-foreground on background / surface | 7.0 / 5.7 | Text 4.5:1 |
-| link on background / surface | 7.0 / 5.7 | Text 4.5:1 |
-| danger on background / surface | 6.5 / 5.3 | Text 4.5:1 |
-| accent-foreground on accent | 5.5 | Text 4.5:1 |
-| accent (focus ring) on background / surface | 4.9 / 4.0 | UI 3:1 |
-| input-border on background / surface | 3.8 / 3.1 | UI 3:1 |
+| foreground | 17.1 / 17.9 / 15.8 / 15.6 | Text 4.5:1 |
+| muted-foreground | 7.3 / 7.6 / 6.7 / 6.6 | Text 4.5:1 |
+| link | 6.4 / 6.7 / 5.9 / 5.9 | Text 4.5:1 |
+| danger | 6.2 / 6.5 / 5.7 / 5.7 | Text 4.5:1 |
+| success | 6.8 / 7.1 / 6.3 / 6.2 | Text 4.5:1 |
+| warning and star | 5.3 / 5.5 / 4.9 / 4.8 | Text 4.5:1 (so amber labels are safe too) |
+| accent (focus ring) | 5.0 / 5.2 / 4.6 / 4.5 | UI 3:1 |
+| input-border | 3.9 / 4.0 / 3.6 / 3.5 | UI 3:1 |
+| accent-foreground on accent | 5.2 | Text 4.5:1 |
 
-Do not use `accent` for text (4.0:1 on `surface`); use `link`. Do not put `foreground` on `accent` (3.5:1).
+Amber (`star`) only ever means a rating or a featured label; it is never an action colour. Body copy that needs more weight than `muted-foreground` uses `#334155` (9.9:1 on background).
+
+### Generated covers
+
+A Book with no Cover image gets a generated cover: a solid colour chosen by hashing the slug into this list, `#1e3a8a #312e81 #155e75 #134e4a #14532d #3f6212 #713f12 #7c2d12 #9a3412 #831843 #4c1d95 #57534e`, with a 1 px inset frame at 32% opacity, the author in small uppercase at the top, the title in the serif in the middle, and a short rule below. Text is `#fdfaf3` (at least 6.5:1 on every colour; the author line at 88% opacity stays above 4.5:1). Sizes scale with the cover through container query units, so one component serves 44 px thumbnails and the 300 px Book header.
 
 ## Component inventory
 
@@ -91,6 +117,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Books | `Cover` (2:3, generated fallback), `BookCard` (cover, title link, authors, first published year, rating), `RatingDisplay` (average and count, or "No RePrint reviews yet"), in `apps/web/app/components/books/` | Built (M3-T15) |
 | Author page | `AuthorPage` (round photo with initial fallback, name, life dates, bio; Books under a Role heading as `BookCard`s), in `apps/web/app/components/books/` | Built (M3-T20) |
 | Book page | `BookPage` (header, collapsible description, native `<details>` Editions, More by author) in `apps/web/app/components/books/book-page.tsx` | Built (M3-T18) |
+| Redesign (M9) | `GeneratedCover`, `StarRating` (partial fill for averages), `BookRail` (cover-first row: grid from `lg`, horizontal scroll below), `GenreTile` (three fanned mini covers), `ReviewExcerpt` (D-177), `SectionNav` (sticky in-page tabs with counts), `FactsRow` and `DetailsList` (`<dl>`), `RatingBreakdown` (bars are toggle buttons that filter), `SeriesCard`, `AuthorCard`, `EditionsCard` (format filter), `AuthorMatchCard` (search), `TrustBadge` (shield + "Read by a moderator") | M9 |
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
 
 Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
@@ -103,13 +130,30 @@ Skip link (first focusable) → header → `main#main` (`tabIndex=-1`, `max-w-pa
 
 Every template starts with one `h1`, is server-rendered by its loader, and has loading, empty, and error states.
 
+### Discover (`/`)
+
+1. **Hero band** (`ground-deep`): `TrustBadge`, the hero `h1`, a lead, a large search field (60 px tall) with a Search button, and "Try" chips. From `lg` the featured review sits on the right as a card with its cover, stars, headline, excerpt, reviewer, and "Read the full review".
+2. **Your reading** (signed in only): Books on the viewer's Reading Shelf (and up to one Want to Read), plus a "Finished something? Write a review" prompt.
+3. **Browse by genre:** 12 `GenreTile`s (6 across from `lg`, 3 at `md`, 2 at base) and "All genres".
+4. **Top rated on RePrint:** a `BookRail` of 7 (with a note that the average is weighted), shelf button on each cover.
+5. **This month** (5/7 split from `lg`): "Most reviewed this month" as a numbered list with `recentReviewCount` (D-179), beside "Just approved" `ReviewExcerpt` cards (D-177).
+6. **Sign-up pitch** (visitors only): the three Shelves, writing reviews, helpful votes; "Create a free account" and "Log in".
+7. **How a review gets here:** three steps ending in a link to the Community Guidelines.
+
+Hidden rows (PRD §7.2) leave no heading or gap.
+
 ### Book page (`/books/:slug`)
 
-Header band: Cover (2/3 aspect, 160 px at base, 224 px from `md`) beside title, subtitle, contributors with roles, Series link, and meta row (year, pages, publisher); Genre tags below. Then, in one 8/4 grid from `lg`: main column with description (collapsed at 6 lines), rating summary, "my controls", reviews (sort and star filter above, 10 per page); side column with Editions (collapsible) and More by this author. Below `lg` the side column follows the reviews.
+1. **Header band** (`ground-deep`): breadcrumb (Discover › first Genre › title); Cover (300 px from `lg`, 200 px at `md`, 176 px centred at base) beside: Series pill ("Series · Book N of M"), `h1`, byline with roles ("by …, translated by …"), rating row (stars, average, and review count linking to `#reviews`), `FactsRow` (first published, pages, publisher, original language, Edition count), actions (shelf selector as the primary button, "Write a review", copy link), and Genre chips.
+2. **`SectionNav`** (sticky): Overview, Reviews (count), Series (count), Editions (count), Author, Similar books. Items for empty sections are left out.
+3. **8/4 grid from `lg`.** Main column: About this book (serif, collapsed after 6 lines), Details (`DetailsList` from the Primary Edition: format, published date, publisher, pages, language, original language, ISBN-13, translators), Reviews (rating breakdown card with the viewer's controls on the right, star filter chips and sort, review list, pagination). Side column: `SeriesCard` (reading order, "You're here", up-next shortcut), `AuthorCard` (photo, life dates, two-line bio, counts, link), `EditionsCard` (format filter, 5 Editions, "See all").
+4. **Rows below** (full width): "More by <Author>" and "More in <first Genre>", 6 Books each.
+
+Below `lg` the side column follows the reviews; on phones the actions become a two-button row and the facts a 2 × 2 grid.
 
 ### Search results (`/search`)
 
-Tabs (Books, Authors) under the `h1` "Results for …". Filters (genre, language, minimum rating, decade) and sort in a left 3-column panel from `lg`, in a collapsible disclosure above the list below it. Results are a vertical list of `BookCard`s (cover left, text right), 20 per page, with numbered pagination. Source-unavailable note sits above the list as an `Alert`.
+`h1` "Results for “…”" with Books and Authors tabs (counts). From `lg`, filters sit in a 260 px left panel (Genre checkboxes with counts, minimum rating, first-published decade chips, language, and the note that Genre, rating, and language filters only show Books already on RePrint); below `lg` they collapse into a disclosure. Above the list: an `AuthorMatchCard` when the query matches an Author well, the result count split by Catalog and Source, and Sort. Each result: cover (112 px), Series line, serif title, Author and first published year, stars with average and review count, the `topReview` excerpt as a quote (D-177), Genre chips, and the shelf control. A Source candidate shows a dashed generated cover, "Not on RePrint yet", and "No RePrint reviews yet. Open it to be the first." 20 per page, numbered pagination.
 
 ### Review form
 

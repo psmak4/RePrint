@@ -32,7 +32,7 @@ apps/api         Fastify 5 API (src/server.ts) + BullMQ worker (src/worker.ts โ
 packages/shared  Zod schemas, domain types, permission names, constants, pure domain logic (weighted rating, slugs, ISBN)
 packages/db      Drizzle schema, drizzle-kit migrations, seed scripts, test DB helpers
 packages/email   React Email templates
-packages/ui      shadcn/ui components + Tailwind v4 theme (dark palette #0f172a / #3b82f6 / #f8fafc)
+packages/ui      shadcn/ui components + Tailwind v4 theme (light palette #fbfaf7 / #2563eb / #0f172a, D-176; replaces PRD ยง8's dark palette)
 packages/config  Shared tsconfig bases and Biome config
 e2e/             Playwright specs + axe checks (root workspace package)
 docs/            TASKS, PROGRESS, BLOCKERS, DECISIONS, DESIGN, milestones/
