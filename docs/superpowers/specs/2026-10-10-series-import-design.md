@@ -54,14 +54,14 @@ Open Library added Series records in 2026. Checked on live data:
 
 ### 3. Import flow
 
-- After `resolve` or `refresh` stores a Book, each of its Series that has a Source link and was not synced in the last 30 days gets a `catalog.series-sync` job (`jobId: catalog.series-sync-<seriesId>-<UTC day>`, background priority).
+- After `resolve` or `refresh` stores a Book, and whenever a stored Book's page is viewed, each of its Series that has a Source link and was not synced in the last 30 days gets a `catalog.series-sync` job at background priority. Jobs use BullMQ deduplication (`catalog.series-sync-<seriesId>`): a Series already waiting or syncing is not queued twice, and once a sync has run, `members_synced_at` keeps it from being due again. (Amended during implementation: the view trigger and deduplication replace a per-day `jobId`, which blocked a second sync on the same day and left Books stored before this change unsynced until their next refresh.)
 - The job:
   1. Calls `getSeriesMembers` through the shared rate limiter at background priority, so interactive searches and first views go first.
   2. Sets `source_member_count`.
-  3. For each member not already linked to a Catalog Book, fetches it with `getBook` and stores it through `ingestBook`, marked as a Series import, so it does not queue Series syncs (rule 3). Members already in the Catalog are not fetched again; their own ingest records the membership and position.
+  3. For each member not already linked to a Catalog Book, fetches it with `getBook` and stores it through `ingestBook`; the sync has no job queue, so imported members do not queue Series syncs (rule 3). Members already in the Catalog are not fetched again, but the sync adds their membership and position if missing, unless an admin locked that Book's Series. (Amended: without this, a Book stored before its Series record was missing from the list until its own refresh.)
   4. Sets `members_synced_at` when the list was read, even if some members failed.
 - A member that fails (Source error, invalid record) is logged and skipped; the next sync retries it. A failure to read the list fails the job, which BullMQ retries with backoff.
-- New releases arrive on a later sync (at most every 30 days per Series, when one of its reached Books is stored or refreshed).
+- New releases arrive on a later sync (at most every 30 days per Series).
 
 ### 4. Display
 

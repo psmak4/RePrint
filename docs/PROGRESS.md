@@ -688,3 +688,9 @@ Entry format:
 ### 2026-10-10 · M9-T17 · owner report · feat/styled-selects
 - Eleven hand-styled selects now use the shared `Select` (D-198). Checked in Chromium (open list drawn by the page) and WebKit (closed look) with screenshots from a throwaway Playwright spec. The overlaid shelf select was tried with the page-drawn list and did not open (Chromium), so it keeps the system menu.
 - Two sort labels that wrapped their select now use `htmlFor`, since Biome's label rule does not see through the component.
+
+### 2026-10-11 · M9-T18 · owner request · feat/series-import
+- Whole Series from Open Library (D-199), built from `docs/superpowers/plans/2026-10-10-series-import.md` in the worktree `.claude/worktrees/series-import`. Open Library's 2026 Series records come with every search result, so a Book's Series costs no extra request; one search lists the members. Hitchhiker's: 6 members, positions 1 to 6.
+- Changed from the spec while building (spec amended): Series also sync when a stored Book is viewed; the sync adds the membership of members already stored; jobs use BullMQ deduplication instead of a per-day job ID. The e2e spec found all three: Books stored before this change stayed out of their Series, and a same-day job ID blocked a second sync.
+- New fixtures: the Hitchhiker's work, byline, Editions, cover Edition, and Series member search. The stub Source gains a Middle-earth Series (The Hobbit, and a new The Fellowship of the Ring).
+- Existing Books get their Series records on their next refresh (admin Refresh now, or the 30-day refresh on view); after that, viewing them fills in the Series.

@@ -1,4 +1,4 @@
-import { books, createDb, series, sourceLinks } from '@reprint/db'
+import { bookSeries, books, createDb, series, sourceLinks } from '@reprint/db'
 import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -98,6 +98,49 @@ describe('syncSeries', () => {
     )
   })
 
+  it('adds the membership of a member stored before it had the Series, without fetching it', async () => {
+    // The Hobbit stored earlier with no Series (as before Series records existed).
+    const hobbit = await stub.getBook('stub-book-hobbit')
+    const fellowship = await stub.getBook('stub-book-fellowship')
+    if (!hobbit || !fellowship) throw new Error('missing stub data')
+    const old = await ingestBook(db, {
+      source: stub,
+      candidate: { ...hobbit, book: { ...hobbit.book, series: [] } },
+    })
+    await ingestBook(db, { source: stub, candidate: fellowship })
+    const [row] = await db.select().from(series)
+    if (!row) throw new Error('no series')
+    const getBook = vi.spyOn(stub, 'getBook')
+    await syncSeries({ db, source: stub, seriesId: row.id })
+    expect(getBook).not.toHaveBeenCalled()
+    const members = await db
+      .select({ bookId: bookSeries.bookId, position: bookSeries.position })
+      .from(bookSeries)
+      .where(eq(bookSeries.seriesId, row.id))
+    expect(members).toContainEqual({ bookId: old.bookId, position: 1 })
+    getBook.mockRestore()
+  })
+
+  it('leaves alone a stored member whose Series an admin locked', async () => {
+    const hobbit = await stub.getBook('stub-book-hobbit')
+    const fellowship = await stub.getBook('stub-book-fellowship')
+    if (!hobbit || !fellowship) throw new Error('missing stub data')
+    const old = await ingestBook(db, {
+      source: stub,
+      candidate: { ...hobbit, book: { ...hobbit.book, series: [] } },
+    })
+    await db
+      .update(books)
+      .set({ lockedFields: ['series'] })
+      .where(eq(books.id, old.bookId))
+    await ingestBook(db, { source: stub, candidate: fellowship })
+    const [row] = await db.select().from(series)
+    if (!row) throw new Error('no series')
+    await syncSeries({ db, source: stub, seriesId: row.id })
+    const members = await db.select().from(bookSeries).where(eq(bookSeries.bookId, old.bookId))
+    expect(members).toEqual([])
+  })
+
   it('answers not_found, not_linked, and unsupported', async () => {
     const { seriesId } = await storeHobbit()
     await db
@@ -115,19 +158,19 @@ describe('syncSeries', () => {
 })
 
 describe('queueSeriesSyncs', () => {
-  it('queues one background job per Series per UTC day', async () => {
+  it('queues one background job per Series, deduplicated while one is waiting or running', async () => {
     const enqueue = vi.fn(async () => 'id')
-    await queueSeriesSyncs({ enqueue }, ['s1', 's2'], new Date('2026-10-10T12:00:00.000Z'))
+    await queueSeriesSyncs({ enqueue }, ['s1', 's2'])
     expect(enqueue.mock.calls).toEqual([
       [
         'catalog.series-sync',
         { seriesId: 's1' },
-        { jobId: 'catalog.series-sync-s1-2026-10-10', priority: 10 },
+        { deduplicationId: 'catalog.series-sync-s1', priority: 10 },
       ],
       [
         'catalog.series-sync',
         { seriesId: 's2' },
-        { jobId: 'catalog.series-sync-s2-2026-10-10', priority: 10 },
+        { deduplicationId: 'catalog.series-sync-s2', priority: 10 },
       ],
     ])
   })

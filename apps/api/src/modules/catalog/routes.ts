@@ -20,6 +20,7 @@ import { isStale } from '../../catalog/refresh.js'
 import type { InteractiveCall } from '../../catalog/resolve.js'
 import { searchCatalogAuthors, searchCatalogBooks } from '../../catalog/search/catalog-search.js'
 import { federatedSearch } from '../../catalog/search/federated-search.js'
+import { queueSeriesSyncs, seriesDueForBook } from '../../catalog/series-sync.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
@@ -139,6 +140,14 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
           )
           .catch((error: unknown) =>
             request.log.warn({ err: error, bookId: book.id }, 'could not queue book refresh'),
+          )
+      }
+      if (jobs) {
+        // A Book stored before its Series was synced fills it in on view (D-199); never fails the page.
+        await seriesDueForBook(db, book.id)
+          .then((due) => queueSeriesSyncs(jobs, due))
+          .catch((error: unknown) =>
+            request.log.warn({ err: error, bookId: book.id }, 'could not queue Series syncs'),
           )
       }
       const detail = await loadBookDetail(db, book)

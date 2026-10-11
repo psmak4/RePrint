@@ -646,3 +646,8 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a shared native `Select` in `packages/ui` replaces the hand-styled selects (same height, border, and font; our chevron 14 px from the right edge; a 40 px `compact` size for toolbars) (D-198)
   - Accept: where the browser supports `appearance: base-select` (Chrome and Edge), the open list is drawn by the page: white rounded card, shadow, site font at 15 px, 40 px rows, a check on the current choice; elsewhere the system menu stays
   - Accept: the shelf buttons keep their hidden native select and the system menu; `pnpm check` and `pnpm test:e2e` pass
+- [x] M9-T18 · Import whole Series from the Source · deps: M9-T17 · PRD: §5.1, §6, §7.4, §7.5
+  - Accept: Open Library Series records are read from search results and linked through `source_links`; a Series stored earlier by name is linked, not duplicated (D-199)
+  - Accept: storing, refreshing, or viewing a Book whose Series is due queues one `catalog.series-sync` per Series; the sync imports every missing member at background priority, adds the membership of members already stored (unless their Series is locked), records the Source's member count and sync time, skips members that fail, and starts no syncs for the Books it imports
+  - Accept: the Book page says "Book N of M" only when the Source's size is known; the Series card highlights the current Book without a label and shows up to 8 Books with "See all N"; the Series page says "Still adding books from this series." while fewer are stored than the Source lists
+  - Accept: contract, unit, integration, component, and e2e tests (stub Middle-earth Series); `pnpm check` and `pnpm test:e2e` pass

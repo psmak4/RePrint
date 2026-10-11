@@ -89,6 +89,23 @@ describe('worker (dist/worker.js)', () => {
     ])
   })
 
+  it('adds a deduplicated job once while it waits, and again after it is gone', async () => {
+    // Paused, so the worker cannot take the job between the two adds.
+    await jobQueue.queue.pause()
+    try {
+      const options = { deduplicationId: 'dedup-test' }
+      const first = await jobQueue.enqueue('system.heartbeat', { note: 'a' }, options)
+      const second = await jobQueue.enqueue('system.heartbeat', { note: 'b' }, options)
+      expect(second).toBe(first)
+      await (await jobQueue.queue.getJob(first))?.remove()
+      const third = await jobQueue.enqueue('system.heartbeat', { note: 'c' }, options)
+      expect(third).not.toBe(first)
+      await (await jobQueue.queue.getJob(third))?.remove()
+    } finally {
+      await jobQueue.queue.resume()
+    }
+  })
+
   it('rejects an invalid payload before it is enqueued', async () => {
     // biome-ignore lint/suspicious/noExplicitAny: deliberately violates the payload type
     await expect(jobQueue.enqueue('system.heartbeat', { note: 5 } as any)).rejects.toThrow()
