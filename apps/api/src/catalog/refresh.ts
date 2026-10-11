@@ -4,14 +4,11 @@ import { and, eq, lt } from 'drizzle-orm'
 import { ingestBook } from './ingest/ingest.js'
 import type { SourceAdapter } from './sources/types.js'
 
-/** A stored Book is refreshed when it is older than this (PRD §6). */
-export const STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000
+// Kept here too for the callers that import them from the refresh module.
+export { isStale, STALE_AFTER_MS } from './staleness.js'
+
 /** Source records are kept this long for debugging (PRD §5.2). */
 export const SOURCE_RECORD_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
-
-export function isStale(refreshedAt: Date | null, now: Date = new Date()): boolean {
-  return refreshedAt === null || now.getTime() - refreshedAt.getTime() > STALE_AFTER_MS
-}
 
 export type RefreshOutcome = 'refreshed' | 'not_linked' | 'not_found' | 'missing_book'
 

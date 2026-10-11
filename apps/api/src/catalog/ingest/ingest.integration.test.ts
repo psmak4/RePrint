@@ -183,6 +183,70 @@ describe('ingestBook', () => {
     ])
   })
 
+  it('removes the Source link of a Series it deletes for having no Books', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const link = { source: 'stub', entityType: 'series', sourceId: 'stub-series-old' } as const
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...candidate,
+        book: {
+          ...candidate.book,
+          series: [{ name: 'Old', position: 1, sourceLink: link }],
+          seriesReported: true,
+        },
+      },
+    })
+    await ingestBook(db, {
+      source: stub,
+      candidate: { ...candidate, book: { ...candidate.book, series: [], seriesReported: true } },
+    })
+    expect(await db.select().from(series)).toHaveLength(0)
+    expect(
+      await db.select().from(sourceLinks).where(eq(sourceLinks.entityType, 'series')),
+    ).toHaveLength(0)
+  })
+
+  it('links a Series record to an existing Series of the same name, and reports it for a sync', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const link = { source: 'stub', entityType: 'series', sourceId: 'stub-series-dune' } as const
+    // First from Edition text (no link), then from a Series record with a link.
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...candidate,
+        book: { ...candidate.book, series: [{ name: 'Dune', position: 1 }] },
+      },
+    })
+    const second = await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...candidate,
+        book: { ...candidate.book, series: [{ name: 'dune', position: 1, sourceLink: link }] },
+      },
+    })
+    const rows = await db.select().from(series)
+    expect(rows).toHaveLength(1)
+    const [stored] = await db.select().from(sourceLinks).where(eq(sourceLinks.entityType, 'series'))
+    expect(stored).toMatchObject({ entityId: rows[0]?.id, sourceId: 'stub-series-dune' })
+    expect(second.seriesToSync).toEqual([rows[0]?.id])
+  })
+
+  it('reports no sync for a Series synced in the last 30 days or without a Source link', async () => {
+    const candidate = await stubCandidate('stub-book-hobbit')
+    const first = await ingestBook(db, { source: stub, candidate })
+    const [row] = await db.select().from(series)
+    expect(first.seriesToSync).toEqual([row?.id])
+    await db.update(series).set({ membersSyncedAt: new Date() })
+    expect((await ingestBook(db, { source: stub, candidate })).seriesToSync).toEqual([])
+    const plain = await stubCandidate('stub-book-dune')
+    const noLink = await ingestBook(db, {
+      source: stub,
+      candidate: { ...plain, book: { ...plain.book, series: [{ name: 'Guessed', position: 1 }] } },
+    })
+    expect(noLink.seriesToSync).toEqual([])
+  })
+
   it('keeps Series when the Source list is not whole, and keeps a Series an admin edited', async () => {
     const candidate = await stubCandidate('stub-book-dune')
     const first = await ingestBook(db, {
