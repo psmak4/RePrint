@@ -1,6 +1,6 @@
 import { type BookCandidateEdition, type BookSearchPage, toIsbn13 } from '@reprint/shared'
 import { z } from 'zod'
-import { type SourceAdapter, SourceError } from '../types.js'
+import { type SeriesMembers, type SourceAdapter, SourceError } from '../types.js'
 import {
   editionsResponseSchema,
   type SeriesText,
@@ -10,6 +10,7 @@ import {
   workSchema,
 } from './record.js'
 import { SOURCE_NAME, searchResponseSchema, toBookCandidate } from './search.js'
+import { SERIES_PAGE_SIZE, seriesMembersPath, toPosition } from './series.js'
 
 export const OPEN_LIBRARY_URL = 'https://openlibrary.org'
 export const SEARCH_PAGE_SIZE = 10
@@ -49,8 +50,17 @@ const editionPath = (editionId: string) => `/books/${editionId}.json`
 const workIdSchema = z.string().regex(/^OL\d+W$/)
 const authorIdSchema = z.string().regex(/^OL\d+A$/)
 const editionIdSchema = z.string().regex(/^OL\d+M$/)
+const seriesIdSchema = z.string().regex(/^OL\d+L$/)
 /** The search result's pointer to the Edition the work's Cover comes from. */
 const coverEditionKeySchema = z.object({ cover_edition_key: z.string().optional() })
+/** The part of a Series member's search result the adapter reads (D-199). */
+const memberDocSchema = z.object({
+  key: z.string().regex(/^\/works\/OL\d+W$/),
+  title: z.string(),
+  series_key: z.array(z.string()).optional(),
+  series_name: z.array(z.string()).optional(),
+  series_position: z.array(z.string()).optional(),
+})
 
 export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAdapter {
   const baseUrl = options.baseUrl ?? OPEN_LIBRARY_URL
@@ -185,6 +195,40 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
         return null
       }
       return author
+    },
+
+    async getSeriesMembers(sourceId): Promise<SeriesMembers | null> {
+      const id = seriesIdSchema.safeParse(sourceId)
+      if (!id.success) return null
+      const members: SeriesMembers['members'] = []
+      let name: string | null = null
+      for (let page = 1; ; page += 1) {
+        const body = searchResponseSchema.safeParse(await getJson(seriesMembersPath(id.data, page)))
+        if (!body.success) break
+        for (const raw of body.data.docs) {
+          const doc = memberDocSchema.safeParse(raw)
+          if (!doc.success) continue
+          const index = doc.data.series_key?.indexOf(id.data) ?? -1
+          if (index < 0) continue
+          name ??= doc.data.series_name?.[index]?.trim() || null
+          members.push({
+            sourceId: doc.data.key.replace('/works/', ''),
+            position: toPosition(doc.data.series_position?.[index]),
+            title: doc.data.title,
+          })
+        }
+        const lastPage =
+          body.data.docs.length < SERIES_PAGE_SIZE || page * SERIES_PAGE_SIZE >= body.data.numFound
+        if (lastPage) break
+      }
+      if (!name || members.length === 0) return null
+      // Reading order: by position, unnumbered last, then title.
+      members.sort(
+        (a, b) =>
+          (a.position ?? Number.POSITIVE_INFINITY) - (b.position ?? Number.POSITIVE_INFINITY) ||
+          a.title.localeCompare(b.title),
+      )
+      return { name, members }
     },
   }
 

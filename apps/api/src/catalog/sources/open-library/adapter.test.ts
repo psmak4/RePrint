@@ -339,3 +339,45 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     await expect(failing.getAuthor('OL1A')).rejects.toBeInstanceOf(SourceError)
   })
 })
+
+describe('Open Library getSeriesMembers', () => {
+  it('lists every member in reading order with the Series name', async () => {
+    const series = await adapter.getSeriesMembers?.('OL326782L')
+    expect(series?.name).toBe("The Hitchhiker's Guide to the Galaxy")
+    expect(series?.members.map((m) => [m.position, m.sourceId])).toEqual([
+      [1, 'OL2163649W'],
+      [2, 'OL2163655W'],
+      [3, 'OL2163623W'],
+      [4, 'OL2163719W'],
+      [5, 'OL2163638W'],
+      [6, 'OL5725953W'],
+    ])
+  })
+
+  it('reads further pages until it has every member', async () => {
+    const doc = (n: number) => ({
+      key: `/works/OL${n}W`,
+      title: `Book ${n}`,
+      series_key: ['OL9L'],
+      series_name: ['Long'],
+      series_position: [String(n)],
+    })
+    const pages: Record<string, unknown> = {
+      '1': { numFound: 101, docs: Array.from({ length: 100 }, (_, i) => doc(i + 1)) },
+      '2': { numFound: 101, docs: [doc(101)] },
+    }
+    const long = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        Response.json(pages[new URL(String(input)).searchParams.get('page') ?? '1']),
+    })
+    const series = await long.getSeriesMembers?.('OL9L')
+    expect(series?.members).toHaveLength(101)
+    expect(series?.members.at(-1)).toEqual({ sourceId: 'OL101W', position: 101, title: 'Book 101' })
+  })
+
+  it('answers null for a Series with no members and for a malformed ID', async () => {
+    const empty = createOpenLibraryAdapter({ fetch: replay('{"numFound":0,"docs":[]}') })
+    expect(await empty.getSeriesMembers?.('OL1L')).toBeNull()
+    expect(await adapter.getSeriesMembers?.('../x')).toBeNull()
+  })
+})
