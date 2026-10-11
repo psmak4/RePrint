@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { toAuthorRecord, toEditions, toFormat, toIsoDate, toSeries, toSubjects } from './record.js'
+import {
+  toAuthorRecord,
+  toDescription,
+  toEditions,
+  toFormat,
+  toIsoDate,
+  toSeries,
+  toSubjects,
+} from './record.js'
 
 describe('toIsoDate', () => {
   it.each([
@@ -142,5 +150,24 @@ describe('toAuthorRecord', () => {
       photos: [-1],
     })
     expect(author).toMatchObject({ bio: 'Hello', birthDate: null, photo: null })
+  })
+})
+
+describe('toDescription', () => {
+  it('drops the divider and the Open Library lists after it, and unlinks Markdown links', () => {
+    const raw =
+      'The first of six books.\r\n\r\nSee [the radio series](https://example.org/radio).\r\n\r\n---\r\n\r\nAlso contained in:\r\n\r\n- [A Trilogy in Four Parts](https://openlibrary.org/works/OL2163692W)'
+    expect(toDescription(raw)).toBe('The first of six books.\n\nSee the radio series.')
+  })
+
+  it('accepts a longer divider and keeps text with no divider as it is', () => {
+    expect(toDescription('Body.\n----------\nSee also: x')).toBe('Body.')
+    expect(toDescription('A line - with a dash.\n\nMore.')).toBe('A line - with a dash.\n\nMore.')
+  })
+
+  it('keeps the text when the description opens with a divider, and gives null for nothing', () => {
+    expect(toDescription('---\nOnly text.')).toBe('---\nOnly text.')
+    expect(toDescription('  ')).toBeNull()
+    expect(toDescription(undefined)).toBeNull()
   })
 })

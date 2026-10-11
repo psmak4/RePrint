@@ -680,6 +680,11 @@ Entry format:
 - Tests: `book-editor.test.tsx` updated for the radio picker and the save bar; new cases for chips matching checkboxes, Discard, the Edition card details, and no request when nothing changed. Axe passes.
 - Seen while checking, not fixed here: the Hitchhiker's Primary Edition is still the 2016 CreateSpace one after a refresh (the cover-first rule found no Edition with the Book's Cover), and its description carries Open Library's "Also contained in" list with links to openlibrary.org work pages.
 
+### 2026-10-10 · M9-T16 · owner report · fix/catalog-cover-edition-description
+- Hitchhiker's Primary Edition: the Book's Cover belongs to Edition 117 of 130, outside the stored first page, so the cover-first rule (D-192) had no match. The adapter now fetches the Edition named by the search result's `cover_edition_key` when it is missing (D-197). Checked on live data: 51 Editions, Primary Edition the 1979 Harmony Books hardcover, and the description ends before Open Library's "Also contained in" list.
+- New fixture `edition-left-hand-cover` (recorded by hand with curl, same format as the recorder). The Left Hand of Darkness has the same shape: its cover Edition is not in the first 50.
+- The Harmony Edition's date is just "1979", which `toIsoDate` does not turn into a full date, so that Edition shows no published date.
+
 ### 2026-10-10 · M9-T17 · owner report · feat/styled-selects
 - Eleven hand-styled selects now use the shared `Select` (D-198). Checked in Chromium (open list drawn by the page) and WebKit (closed look) with screenshots from a throwaway Playwright spec. The overlaid shelf select was tried with the page-drawn list and did not open (Chromium), so it keeps the system menu.
 - Two sort labels that wrapped their select now use `htmlFor`, since Biome's label rule does not see through the component.

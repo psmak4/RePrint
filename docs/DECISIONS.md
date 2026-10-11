@@ -1296,6 +1296,12 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: The owner found the page hard to scan: one long column, the save button mid-page, a wall of Genre checkboxes, and a raw Primary Edition select.
 - Affects: `apps/web/app/components/admin/book-editor.tsx`, `apps/web/app/copy/index.ts`
 
+### D-197 · The cover's Edition and Open Library descriptions
+- Status: Decided (owner approved)
+- Decision: (1) The Open Library search result for a work names the Edition its Cover comes from (`cover_edition_key`). When the first page of Editions (D-190) does not include it, the adapter fetches that one Edition (`/books/:id.json`) and adds it, so a Book can store 51 Editions; a failure of that request is ignored and the Book is read without it. (2) A work description is cut at the first line made only of dashes, Open Library's divider before footers like "Also contained in:" and "See also", Markdown links `[text](url)` become their text, and line endings become `\n`. Both apply on a Book's next refresh.
+- Why: The Hitchhiker's Guide's Cover is on the 1979 Harmony hardcover, the 117th of 130 Editions, so D-192's cover-first rule had nothing to match and chose a 2016 reissue. Its description ended with links to openlibrary.org work pages, which put Source IDs in front of readers (PRD §5).
+- Affects: `apps/api/src/catalog/sources/open-library/adapter.ts`, `record.ts`, `record-fixtures.ts`, `__fixtures__/edition-left-hand-cover.json`
+
 ### D-198 · Dropdowns stay native selects, styled
 - Status: Decided (owner chose this over a shadcn/Radix Select)
 - Decision: One `Select` component in `packages/ui` wraps a native `<select>`: no browser arrow, a chevron drawn as a CSS background (a `data:` SVG, allowed by `img-src`), consistent height, border, and font, and a `compact` size. Where `appearance: base-select` is supported (Chrome and Edge from 2025), the class `ui-select-menu` lets the page draw the open list: white rounded card, shadow, site font, roomy rows, a check on the current choice. Safari and Firefox keep the system menu (on macOS it follows the system's dark mode). The shelf buttons keep their invisible overlaid select and its system menu, because a page-drawn list does not open from a hidden select.

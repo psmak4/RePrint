@@ -177,6 +177,56 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     expect(book?.book.seriesReported).toBe(true)
   })
 
+  it('adds the Edition behind the work Cover when the first page of Editions lacks it', async () => {
+    const book = await adapter.getBook('OL59800W')
+    const coverEdition = book?.editions.find((e) => e.sourceLink?.sourceId === 'OL31935740M')
+    expect(coverEdition).toMatchObject({
+      format: 'ebook',
+      publisherName: 'ACE',
+      cover: { origin: 'open_library', originRef: '10618463' },
+    })
+    expect(book?.book.cover?.originRef).toBe('10618463')
+  })
+
+  it('asks for the cover Edition only when the first page of Editions lacks it', async () => {
+    const fixtures = createFixtureFetch()
+    const paths: string[] = []
+    const counting: typeof fetch = async (input, init) => {
+      paths.push(new URL(String(input)).pathname)
+      return fixtures(input, init)
+    }
+    await createOpenLibraryAdapter({ fetch: counting }).getBook('OL59800W')
+    expect(paths.filter((path) => path.startsWith('/books/'))).toEqual(['/books/OL31935740M.json'])
+
+    // When the Editions already include it, nothing more is fetched.
+    const editions = JSON.parse(fixture('work-left-hand-editions'))
+    editions.entries.push(JSON.parse(fixture('edition-left-hand-cover')))
+    paths.length = 0
+    const withCover: typeof fetch = async (input, init) => {
+      const url = new URL(String(input))
+      paths.push(url.pathname)
+      return url.pathname.endsWith('/editions.json')
+        ? Response.json(editions)
+        : fixtures(input, init)
+    }
+    const book = await createOpenLibraryAdapter({ fetch: withCover }).getBook('OL59800W')
+    expect(paths.filter((path) => path.startsWith('/books/'))).toEqual([])
+    expect(book?.editions.filter((e) => e.sourceLink?.sourceId === 'OL31935740M')).toHaveLength(1)
+  })
+
+  it('still reads the Book when the cover Edition request fails', async () => {
+    const fixtures = createFixtureFetch()
+    const flaky = createOpenLibraryAdapter({
+      fetch: async (input, init) =>
+        new URL(String(input)).pathname.startsWith('/books/')
+          ? new Response('busy', { status: 503 })
+          : fixtures(input, init),
+    })
+    const book = await flaky.getBook('OL59800W')
+    expect(book?.book.title).toBe('The Left Hand of Darkness')
+    expect(book?.editions.some((e) => e.sourceLink?.sourceId === 'OL31935740M')).toBe(false)
+  })
+
   it('says its Series list is not whole when the Editions could not be read', async () => {
     const fixtures = createFixtureFetch()
     const noEditions = createOpenLibraryAdapter({
