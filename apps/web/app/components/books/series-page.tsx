@@ -16,6 +16,8 @@ export function SeriesPage({
   viewer?: Viewer | null
 }) {
   const { series, items } = detail
+  // The Source may list Books not stored yet; a Series sync is adding them (D-199).
+  const stillAdding = series.memberCount !== null && items.length < series.memberCount
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       <PageHero
@@ -25,7 +27,7 @@ export function SeriesPage({
           </p>
         }
         title={series.name}
-        lead={series.description ?? text.bookCount(items.length)}
+        lead={series.description ?? text.bookCount(series.memberCount ?? items.length)}
       />
       <section aria-labelledby="series-books" className="flex flex-col gap-5 md:gap-6">
         <h2
@@ -34,6 +36,11 @@ export function SeriesPage({
         >
           {text.booksHeading}
         </h2>
+        {stillAdding ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            {text.stillAdding}
+          </p>
+        ) : null}
         {items.length === 0 ? (
           <p className="text-muted-foreground">{text.noBooks}</p>
         ) : (

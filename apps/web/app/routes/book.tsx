@@ -258,8 +258,8 @@ async function loadSeries(
     return {
       name: detail.series.name,
       slug: detail.series.slug,
-      total: detail.items.length,
-      complete: detail.items.every((item, index) => item.position === index + 1),
+      // The Source's count, not the stored Books: "Book 1 of 1" was wrong while the rest were missing.
+      total: detail.series.memberCount,
       books: detail.items.map((item) => ({
         slug: item.book.slug,
         title: item.book.title,

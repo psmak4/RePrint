@@ -234,11 +234,69 @@ describe('presentational components', () => {
         ]}
       />,
     )
-    expect(screen.getByText(/You're here/)).toBeTruthy()
-    expect(screen.getByText(/^Book 1 of 6/)).toBeTruthy()
+    // The current Book is highlighted, not labelled (D-199).
+    const current = screen.getByText('Book 1 of 6').closest('[aria-current="page"]')
+    expect(current?.textContent).toContain('Dune')
+    expect(current?.textContent).not.toContain('Messiah')
+    expect(screen.queryByText(/You're here/)).toBeNull()
     expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' }).getAttribute('href')).toBe(
       '/books/dune-messiah',
     )
+  })
+
+  it('SeriesCard shows 8 Books around the current one and links to the whole Series', () => {
+    const books = Array.from({ length: 41 }, (_, i) => ({
+      slug: `book-${i + 1}`,
+      title: `Book number ${i + 1}`,
+      cover: null,
+      position: String(i + 1),
+    }))
+    renderInRouter(
+      <SeriesCard
+        name="Discworld"
+        href="/series/discworld"
+        currentSlug="book-20"
+        total={41}
+        books={books}
+      />,
+    )
+    const items = within(screen.getByRole('list')).getAllByRole('listitem')
+    expect(items).toHaveLength(8)
+    expect(items[0]?.textContent).toContain('Book number 17')
+    expect(items[7]?.textContent).toContain('Book number 24')
+    expect(screen.getByRole('link', { name: 'See all 41' }).getAttribute('href')).toBe(
+      '/series/discworld',
+    )
+  })
+
+  it('SeriesCard says "See all" when the Source lists more Books than are stored', () => {
+    renderInRouter(
+      <SeriesCard
+        name="Hitchhiker"
+        href="/series/hitchhiker"
+        currentSlug="one"
+        total={6}
+        books={[{ slug: 'one', title: 'One', cover: null, position: '1' }]}
+      />,
+    )
+    expect(screen.getByRole('link', { name: 'See all 6' })).toBeTruthy()
+  })
+
+  it('SeriesCard says only "Book N" when the Series size is unknown', () => {
+    renderInRouter(
+      <SeriesCard
+        name="Saga"
+        href="/series/saga"
+        currentSlug="one"
+        total={null}
+        books={[
+          { slug: 'one', title: 'One', cover: null, position: '1' },
+          { slug: 'two', title: 'Two', cover: null, position: '2' },
+        ]}
+      />,
+    )
+    expect(screen.getByText(/^Book 1$/)).toBeTruthy()
+    expect(screen.queryByRole('link', { name: /See all/ })).toBeNull()
   })
 
   it('AuthorCard and AuthorMatchCard link to the Author', () => {

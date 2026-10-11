@@ -175,4 +175,19 @@ describe('SeriesPage', () => {
     renderInRouter(<SeriesPage detail={{ ...series, items: [] }} />)
     expect(screen.getByText('No books in this series yet')).toBeTruthy()
   })
+
+  it('says it is still adding Books while fewer are stored than the Source lists (D-199)', () => {
+    const withCount = (memberCount: number | null) => ({
+      ...series,
+      series: { ...series.series, memberCount },
+    })
+    renderInRouter(<SeriesPage detail={withCount(6)} />)
+    expect(screen.getByText('Still adding books from this series.')).toBeTruthy()
+    cleanup()
+    renderInRouter(<SeriesPage detail={withCount(3)} />)
+    expect(screen.queryByText('Still adding books from this series.')).toBeNull()
+    cleanup()
+    renderInRouter(<SeriesPage detail={withCount(null)} />)
+    expect(screen.queryByText('Still adding books from this series.')).toBeNull()
+  })
 })

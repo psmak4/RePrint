@@ -49,12 +49,8 @@ export type AuthorSummary = {
 export type SeriesSummary = {
   name: string
   slug: string
-  total: number
-  /**
-   * True when RePrint has every Book at positions 1 to `total`, so "Book 2 of 3" is true. A Series
-   * RePrint holds only part of says "Book 2" instead.
-   */
-  complete: boolean
+  /** How many Books the Source lists in the Series (D-199); `null` when unknown, which says "Book N". */
+  total: number | null
   books: SeriesCardBook[]
 }
 
@@ -93,7 +89,15 @@ export function BookPage({
   const navItems: SectionNavItem[] = [
     { id: 'overview', label: labels.sections.overview },
     { id: 'reviews', label: labels.sections.reviews, count: book.rating.count },
-    ...(series ? [{ id: 'series', label: labels.sections.series, count: series.total }] : []),
+    ...(series
+      ? [
+          {
+            id: 'series',
+            label: labels.sections.series,
+            count: series.total ?? series.books.length,
+          },
+        ]
+      : []),
     ...(editions.length > 0
       ? [{ id: 'editions', label: labels.sections.editions, count: knownEditions }]
       : []),
@@ -160,7 +164,7 @@ export function BookPage({
                 href={`/series/${series.slug}`}
                 books={series.books}
                 currentSlug={book.slug}
-                total={series.complete ? series.total : null}
+                total={series.total}
               />
             </div>
           ) : null}
@@ -426,7 +430,7 @@ function BookHeader({
               {labels.seriesPill(
                 membership.series.name,
                 membership.position === null ? null : String(membership.position),
-                series?.complete ? series.total : null,
+                series?.total ?? null,
               )}
             </Link>
           ) : null}
