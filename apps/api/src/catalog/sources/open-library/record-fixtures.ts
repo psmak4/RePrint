@@ -26,6 +26,8 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   { name: 'work-left-hand', path: '/works/OL59800W.json' },
   { name: 'work-left-hand-byline', path: '/search.json?q=key%3A%2Fworks%2FOL59800W&limit=1' },
   { name: 'work-left-hand-editions', path: '/works/OL59800W/editions.json?limit=50' },
+  // The Edition behind the work's Cover, which is not in the first page of Editions.
+  { name: 'edition-left-hand-cover', path: '/books/OL31935740M.json' },
   { name: 'author-le-guin', path: '/authors/OL31353A.json' },
 ]
 

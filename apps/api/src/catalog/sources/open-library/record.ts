@@ -223,6 +223,25 @@ export function toSubjects(labels: string[] | undefined): { label: string }[] {
   return subjects
 }
 
+/** A line of only dashes: Open Library's divider before footers such as "Also contained in:". */
+const DIVIDER = /\r?\n[ \t]*-{3,}[ \t]*(?=\r?\n|$)/
+/** A Markdown link, `[text](url)`. */
+const MARKDOWN_LINK = /\[([^\]\n]+)\]\(\s*[^()\s]+\s*\)/g
+
+/**
+ * A work description as reader-facing text (D-197). Open Library writes Markdown and ends some
+ * descriptions with a divider and lists of its own pages, so the text stops at the first divider,
+ * links keep only their text, and line endings become `\n`.
+ */
+export function toDescription(raw: string | undefined): string | null {
+  if (!raw) return null
+  const text = raw.replace(/\r\n?/g, '\n')
+  const [head = ''] = text.split(DIVIDER)
+  // A description that opens with a divider keeps its text rather than becoming empty.
+  const body = head.trim() ? head : text
+  return body.replace(MARKDOWN_LINK, '$1').trim() || null
+}
+
 /**
  * Builds the full Book candidate from a work record, the search result that names its byline, and its
  * Editions. Returns `{ error }` when the result does not validate.
@@ -237,7 +256,7 @@ export function toFullBook(
   const base = toBookCandidate(bylineDoc, '', true)
   if ('error' in base) return base
   const coverId = positive(work.covers)
-  const description = work.description?.trim()
+  const description = toDescription(work.description)
   return {
     ...base,
     book: {
