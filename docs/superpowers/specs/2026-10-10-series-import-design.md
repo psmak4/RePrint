@@ -62,6 +62,7 @@ Open Library added Series records in 2026. Checked on live data:
   4. Sets `members_synced_at` when the list was read, even if some members failed.
 - A member that fails (Source error, invalid record) is logged and skipped; the next sync retries it. A failure to read the list fails the job, which BullMQ retries with backoff.
 - New releases arrive on a later sync (at most every 30 days per Series).
+- (Amended after the final review.) The sync job only reads the list, records the count first, links stored members, and queues one `catalog.series-member` job per missing member, so a long Series never holds a worker and each member retries on its own. One level only is enforced by `books.series_import_only` on Books a member job creates: they queue no syncs on refresh or view until a Member opens them from search. An unreadable list page fails the job; a missing Series is recorded as synced. The Book page loads only the 8 Books around the current one (`GET /series/:slug?around=`), and the Series page's note follows an `adding` flag (a sync in the last day left Books out).
 
 ### 4. Display
 

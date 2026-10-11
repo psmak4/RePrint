@@ -101,16 +101,26 @@ describe('book loader side data', () => {
     series: [{ series: { slug: 'dune-saga', name: 'Dune Saga' }, position: 1 }],
     genres: [{ slug: 'science-fiction', name: 'Science fiction' }],
   }
+  const seriesQueries: string[] = []
   const side = (url: URL) => {
     if (url.pathname === '/v1/books/dune-abc123') return Response.json(withShelves)
-    if (url.pathname === '/v1/series/dune-saga')
+    if (url.pathname === '/v1/series/dune-saga') {
+      seriesQueries.push(url.search)
       return Response.json({
-        series: { slug: 'dune-saga', name: 'Dune Saga', description: null, memberCount: 2 },
+        series: {
+          slug: 'dune-saga',
+          name: 'Dune Saga',
+          description: null,
+          memberCount: 6,
+          adding: false,
+        },
         items: [
           { position: 1, book: summary(1, 'dune-abc123') },
           { position: 2.5, book: summary(2, 'messiah') },
         ],
+        total: 2,
       })
+    }
     if (url.pathname === '/v1/genres/science-fiction')
       return Response.json({
         genre: { slug: 'science-fiction', name: 'Science fiction', description: null },
@@ -126,7 +136,9 @@ describe('book loader side data', () => {
 
   it('loads the Series, More in Genre, and Author card data', async () => {
     const result = await load(side)
-    expect(result.series).toMatchObject({ name: 'Dune Saga', total: 2 })
+    // Only the Books around this one, and "of 6" from the Source while 2 are stored (D-199).
+    expect(seriesQueries).toEqual(['?around=dune-abc123'])
+    expect(result.series).toMatchObject({ name: 'Dune Saga', total: 6, stored: 2 })
     expect(result.series?.books.map((b) => b.position)).toEqual(['1', '2.5'])
     expect(result.moreInGenre?.books.map((b) => b.slug)).toEqual(['neuromancer'])
     expect(result.authorCard).toMatchObject({ name: 'Frank Herbert', bookCount: 8 })

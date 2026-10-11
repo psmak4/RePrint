@@ -207,6 +207,45 @@ describe('ingestBook', () => {
     ).toHaveLength(0)
   })
 
+  it('marks a Book a Series sync creates, and reports no syncs for it (one level only)', async () => {
+    const hobbit = await stubCandidate('stub-book-hobbit')
+    const imported = await ingestBook(db, { source: stub, candidate: hobbit, seriesImport: true })
+    expect(imported.seriesToSync).toEqual([])
+    const [row] = await db.select().from(books).where(eq(books.id, imported.bookId))
+    expect(row?.seriesImportOnly).toBe(true)
+    // A Book a Member already reached keeps its standing when a sync meets it again.
+    const dune = await stubCandidate('stub-book-dune')
+    const reached = await ingestBook(db, { source: stub, candidate: dune })
+    await ingestBook(db, { source: stub, candidate: dune, seriesImport: true })
+    const [kept] = await db.select().from(books).where(eq(books.id, reached.bookId))
+    expect(kept?.seriesImportOnly).toBe(false)
+  })
+
+  it('keeps two Source Series with the same name apart', async () => {
+    const dune = await stubCandidate('stub-book-dune')
+    const hobbit = await stubCandidate('stub-book-hobbit')
+    const linked = (sourceId: string) =>
+      ({ source: 'stub', entityType: 'series', sourceId }) as const
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...dune,
+        book: { ...dune.book, series: [{ name: 'Saga', position: 1, sourceLink: linked('s-a') }] },
+      },
+    })
+    await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...hobbit,
+        book: {
+          ...hobbit.book,
+          series: [{ name: 'Saga', position: 1, sourceLink: linked('s-b') }],
+        },
+      },
+    })
+    expect(await db.select().from(series)).toHaveLength(2)
+  })
+
   it('links a Series record to an existing Series of the same name, and reports it for a sync', async () => {
     const candidate = await stubCandidate('stub-book-dune')
     const link = { source: 'stub', entityType: 'series', sourceId: 'stub-series-dune' } as const

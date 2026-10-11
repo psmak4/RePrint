@@ -375,6 +375,38 @@ describe('Open Library getSeriesMembers', () => {
     expect(series?.members.at(-1)).toEqual({ sourceId: 'OL101W', position: 101, title: 'Book 101' })
   })
 
+  it('throws rather than return a short list when a page cannot be read', async () => {
+    const doc = (n: number) => ({
+      key: `/works/OL${n}W`,
+      title: `Book ${n}`,
+      series_key: ['OL9L'],
+      series_name: ['Long'],
+      series_position: [String(n)],
+    })
+    const firstPage = { numFound: 101, docs: Array.from({ length: 100 }, (_, i) => doc(i + 1)) }
+    const brokenSecond = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        new URL(String(input)).searchParams.get('page') === '2'
+          ? new Response('{"docs": 4}', { status: 200 })
+          : Response.json(firstPage),
+    })
+    await expect(brokenSecond.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+    const missingSecond = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        new URL(String(input)).searchParams.get('page') === '2'
+          ? new Response('gone', { status: 404 })
+          : Response.json(firstPage),
+    })
+    await expect(missingSecond.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+    const malformed = createOpenLibraryAdapter({ fetch: replay('{"docs": 4}') })
+    await expect(malformed.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+  })
+
+  it('answers null when the first page is not found', async () => {
+    const missing = createOpenLibraryAdapter({ fetch: replay('gone', 404) })
+    expect(await missing.getSeriesMembers?.('OL9L')).toBeNull()
+  })
+
   it('answers null for a Series with no members and for a malformed ID', async () => {
     const empty = createOpenLibraryAdapter({ fetch: replay('{"numFound":0,"docs":[]}') })
     expect(await empty.getSeriesMembers?.('OL1L')).toBeNull()

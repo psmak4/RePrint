@@ -10,6 +10,7 @@ import {
   searchResponseSchema,
   searchSuggestQuerySchema,
   searchSuggestResponseSchema,
+  seriesDetailQuerySchema,
   seriesDetailResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
@@ -36,7 +37,7 @@ import {
   loadBookSummaries,
   loadEditions,
 } from './read.js'
-import { findSeriesBySlug, loadSeriesEntries } from './series.js'
+import { findSeriesBySlug, isAdding, loadSeriesEntries } from './series.js'
 
 /** Refresh jobs run behind everything else. */
 const REFRESH_PRIORITY = 10
@@ -213,12 +214,18 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
 
   app.get(
     '/series/:slug',
-    { schema: { params: slugParamsSchema, response: { 200: seriesDetailResponseSchema } } },
+    {
+      schema: {
+        params: slugParamsSchema,
+        querystring: seriesDetailQuerySchema,
+        response: { 200: seriesDetailResponseSchema },
+      },
+    },
     async (request) => {
       if (!db) throw new Error('catalog routes need a database')
       const found = await findSeriesBySlug(db, request.params.slug)
       if (!found) throw new HttpProblem(404, 'We could not find that series.')
-      const items = await loadSeriesEntries(db, found)
+      const { items, total } = await loadSeriesEntries(db, found, request.query.around)
       await addViewerShelves(
         db,
         request,
@@ -230,8 +237,10 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
           name: found.name,
           description: found.description,
           memberCount: found.sourceMemberCount,
+          adding: isAdding(found, total),
         },
         items,
+        total,
       }
     },
   )

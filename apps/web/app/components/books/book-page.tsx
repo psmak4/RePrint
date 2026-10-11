@@ -51,6 +51,8 @@ export type SeriesSummary = {
   slug: string
   /** How many Books the Source lists in the Series (D-199); `null` when unknown, which says "Book N". */
   total: number | null
+  /** How many Books of the Series the Catalog holds; `books` is only the window around this one. */
+  stored?: number
   books: SeriesCardBook[]
 }
 
@@ -94,7 +96,7 @@ export function BookPage({
           {
             id: 'series',
             label: labels.sections.series,
-            count: series.total ?? series.books.length,
+            count: series.total ?? series.stored ?? series.books.length,
           },
         ]
       : []),
@@ -165,6 +167,7 @@ export function BookPage({
                 books={series.books}
                 currentSlug={book.slug}
                 total={series.total}
+                stored={series.stored ?? series.books.length}
               />
             </div>
           ) : null}

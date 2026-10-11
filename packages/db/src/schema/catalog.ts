@@ -51,6 +51,12 @@ export const books = pgTable(
      * them, so this can be larger than the stored count. Source metadata: never edited by an admin.
      */
     sourceEditionCount: integer('source_edition_count'),
+    /**
+     * True while the Book is in the Catalog only because a Series sync imported it: it starts no
+     * Series syncs of its own until a Member reaches it (opens it from search), which clears this
+     * (D-199, one level only).
+     */
+    seriesImportOnly: boolean('series_import_only').notNull().default(false),
     /** When a Source last refreshed this Book; drives the 30-day stale refresh (PRD §6). */
     refreshedAt: timestamptz('refreshed_at'),
     ...timestamps(),

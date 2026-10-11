@@ -1,4 +1,4 @@
-import type { Cover as CoverData } from '@reprint/shared'
+import { type Cover as CoverData, SERIES_WINDOW } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -16,12 +16,12 @@ export type SeriesCardBook = {
   rating?: { average: number | null; count: number } | null
 }
 
-/** How many Books the card lists; a longer Series shows the ones around the current Book. */
-const WINDOW = 8
+const WINDOW = SERIES_WINDOW
 
 /**
  * The Series a Book belongs to, in reading order: the current Book gently highlighted, what is
- * next, and "See all" when the Series is longer than the card shows (D-199).
+ * next, and "See all" when the Series is longer than the card shows (D-199). `books` may be only
+ * the window around the current Book; `stored` is then how many the Catalog holds in all.
  */
 export function SeriesCard({
   name,
@@ -29,19 +29,21 @@ export function SeriesCard({
   books,
   currentSlug,
   total,
+  stored = books.length,
 }: {
   name: string
   href: string
   books: SeriesCardBook[]
   currentSlug: string
   total?: number | null
+  stored?: number
 }) {
   const index = books.findIndex((book) => book.slug === currentSlug)
   const next = index >= 0 ? books[index + 1] : undefined
   // Up to WINDOW Books, the current one just before the middle, never past either end.
   const start = Math.max(0, Math.min(index - WINDOW / 2 + 1, books.length - WINDOW))
   const shown = books.length > WINDOW ? books.slice(start, start + WINDOW) : books
-  const size = Math.max(total ?? 0, books.length)
+  const size = Math.max(total ?? 0, stored, books.length)
   return (
     <section
       aria-labelledby="series-card-heading"

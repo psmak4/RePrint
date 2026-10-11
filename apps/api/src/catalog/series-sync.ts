@@ -1,6 +1,6 @@
 import { bookSeries, books, type Database, series, sourceLinks } from '@reprint/db'
 import type { AuthorRecord } from '@reprint/shared'
-import { and, eq, exists, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, exists, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import type { JobQueue } from '../jobs/queue.js'
 import { isLocked } from './ingest/fields.js'
 import { ingestBook } from './ingest/ingest.js'
@@ -10,26 +10,62 @@ import { STALE_AFTER_MS } from './staleness.js'
 /** Series imports wait behind interactive work and Admin refreshes (PRD §6). */
 export const SERIES_SYNC_PRIORITY = 10
 
+/** How many Source IDs one lookup of stored Books checks at a time. */
+const LOOKUP_CHUNK = 500
+
+/** One member a sync found missing, for a `catalog.series-member` job. */
+export interface SeriesMemberImport {
+  seriesId: string
+  sourceId: string
+  position: number | null
+}
+
 export type SeriesSyncOutcome =
-  | { outcome: 'synced'; imported: number; failed: number }
+  | { outcome: 'synced'; toImport: SeriesMemberImport[] }
   | { outcome: 'not_linked' | 'not_found' | 'unsupported' }
 
+type Call = <T>(fn: () => Promise<T>) => Promise<T>
+const direct: Call = (fn) => fn()
+
+/** The stored Books for these Source IDs, by Source ID. */
+async function storedBooks(
+  db: Database,
+  source: string,
+  sourceIds: string[],
+): Promise<Map<string, string>> {
+  const found = new Map<string, string>()
+  for (let start = 0; start < sourceIds.length; start += LOOKUP_CHUNK) {
+    const rows = await db
+      .select({ sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
+      .from(sourceLinks)
+      .where(
+        and(
+          eq(sourceLinks.entityType, 'book'),
+          eq(sourceLinks.source, source),
+          inArray(sourceLinks.sourceId, sourceIds.slice(start, start + LOOKUP_CHUNK)),
+        ),
+      )
+    for (const row of rows) found.set(row.sourceId, row.bookId)
+  }
+  return found
+}
+
 /**
- * Imports every member of a Series that is not stored yet (D-199). Members are stored through
- * `ingestBook` like any Book, but their own Series are not synced: this function has no job queue
- * and ignores each member's `seriesToSync` (one level only). A member that fails is skipped; the
- * next sync tries it again.
+ * Reads a Series' member list from its Source (D-199). It records the Source's count at once, adds
+ * the membership of members already stored, and returns the missing members, each to be imported
+ * by its own `catalog.series-member` job so one long Series never holds a worker. A list that
+ * cannot be read throws, so the job retries; a Series the Source no longer has is recorded as
+ * synced, so views stop queuing it.
  */
 export async function syncSeries(options: {
   db: Database
   source: SourceAdapter
   seriesId: string
-  call?: <T>(fn: () => Promise<T>) => Promise<T>
+  call?: Call
   now?: Date
-  onMemberError?: (sourceId: string, error: unknown) => void
 }): Promise<SeriesSyncOutcome> {
   const { db, source, seriesId } = options
-  const call = options.call ?? (<T>(fn: () => Promise<T>) => fn())
+  const call = options.call ?? direct
   const now = options.now ?? new Date()
   const getSeriesMembers = source.getSeriesMembers?.bind(source)
   if (!getSeriesMembers) return { outcome: 'unsupported' }
@@ -43,49 +79,78 @@ export async function syncSeries(options: {
         eq(sourceLinks.source, source.name),
       ),
     )
+    .orderBy(sourceLinks.sourceId)
     .limit(1)
   if (!link) return { outcome: 'not_linked' }
   const list = await call(() => getSeriesMembers(link.sourceId))
-  if (!list) return { outcome: 'not_found' }
+  if (!list) {
+    await db.update(series).set({ membersSyncedAt: now }).where(eq(series.id, seriesId))
+    return { outcome: 'not_found' }
+  }
+  // The count first, so "Book N of M" is right while the members are still being imported.
+  await db
+    .update(series)
+    .set({ sourceMemberCount: list.members.length })
+    .where(eq(series.id, seriesId))
 
-  const stored = await db
-    .select({ sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
-    .from(sourceLinks)
-    .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.source, source.name)))
-  const have = new Map(stored.map((row) => [row.sourceId, row.bookId]))
-  let imported = 0
-  let failed = 0
+  const have = await storedBooks(
+    db,
+    source.name,
+    list.members.map((member) => member.sourceId),
+  )
+  const toImport: SeriesMemberImport[] = []
   for (const member of list.members) {
     const bookId = have.get(member.sourceId)
     if (bookId) {
-      // Stored before it had this Series: record the membership now, without asking the Source,
-      // unless an admin locked the Book's Series.
+      // Stored before it had this Series: record the membership now, without asking the Source.
       await addMembership(db, bookId, seriesId, member.position)
-      continue
-    }
-    try {
-      const candidate = await call(() => source.getBook(member.sourceId))
-      if (!candidate) continue
-      const authorRecords = new Map<string, AuthorRecord>()
-      for (const contribution of candidate.book.contributions) {
-        const authorLink = contribution.sourceLink
-        if (!authorLink || authorRecords.has(authorLink.sourceId)) continue
-        const record = await call(() => source.getAuthor(authorLink.sourceId))
-        if (record) authorRecords.set(authorLink.sourceId, record)
-      }
-      const ingested = await ingestBook(db, { source, candidate, authorRecords, now })
-      have.set(member.sourceId, ingested.bookId)
-      imported += 1
-    } catch (error) {
-      failed += 1
-      options.onMemberError?.(member.sourceId, error)
+    } else {
+      toImport.push({ seriesId, sourceId: member.sourceId, position: member.position })
     }
   }
-  await db
-    .update(series)
-    .set({ sourceMemberCount: list.members.length, membersSyncedAt: now })
-    .where(eq(series.id, seriesId))
-  return { outcome: 'synced', imported, failed }
+  await db.update(series).set({ membersSyncedAt: now }).where(eq(series.id, seriesId))
+  return { outcome: 'synced', toImport }
+}
+
+/**
+ * Imports one member a sync found missing (D-199). The Book is stored as a Series import, so it
+ * starts no Series syncs of its own (one level only), and added to the Series. A Source failure
+ * throws, so the job retries.
+ */
+export async function importSeriesMember(options: {
+  db: Database
+  source: SourceAdapter
+  seriesId: string
+  sourceId: string
+  position: number | null
+  call?: Call
+  now?: Date
+}): Promise<'imported' | 'linked' | 'not_found'> {
+  const { db, source, seriesId, sourceId, position } = options
+  const call = options.call ?? direct
+  const stored = (await storedBooks(db, source.name, [sourceId])).get(sourceId)
+  if (stored) {
+    await addMembership(db, stored, seriesId, position)
+    return 'linked'
+  }
+  const candidate = await call(() => source.getBook(sourceId))
+  if (!candidate) return 'not_found'
+  const authorRecords = new Map<string, AuthorRecord>()
+  for (const contribution of candidate.book.contributions) {
+    const authorLink = contribution.sourceLink
+    if (!authorLink || authorRecords.has(authorLink.sourceId)) continue
+    const record = await call(() => source.getAuthor(authorLink.sourceId))
+    if (record) authorRecords.set(authorLink.sourceId, record)
+  }
+  const ingested = await ingestBook(db, {
+    source,
+    candidate,
+    authorRecords,
+    seriesImport: true,
+    ...(options.now ? { now: options.now } : {}),
+  })
+  await addMembership(db, ingested.bookId, seriesId, position)
+  return 'imported'
 }
 
 /** Adds a Book to a Series at `position` unless it is there already or its Series are locked. */
@@ -118,9 +183,12 @@ export async function seriesDueForBook(
     .select({ id: series.id })
     .from(bookSeries)
     .innerJoin(series, eq(series.id, bookSeries.seriesId))
+    .innerJoin(books, eq(books.id, bookSeries.bookId))
     .where(
       and(
         eq(bookSeries.bookId, bookId),
+        // A Book only a Series sync brought in starts no syncs of its own (one level only).
+        eq(books.seriesImportOnly, false),
         or(isNull(series.membersSyncedAt), lt(series.membersSyncedAt, syncedBefore)),
         exists(
           db
@@ -147,5 +215,18 @@ export async function queueSeriesSyncs(
       { seriesId },
       { deduplicationId: `catalog.series-sync-${seriesId}`, priority: SERIES_SYNC_PRIORITY },
     )
+  }
+}
+
+/** Queues one background import per missing member, each retried on its own (D-199). */
+export async function queueSeriesMemberImports(
+  jobs: Pick<JobQueue, 'enqueue'>,
+  members: readonly SeriesMemberImport[],
+): Promise<void> {
+  for (const member of members) {
+    await jobs.enqueue('catalog.series-member', member, {
+      deduplicationId: `catalog.series-member-${member.seriesId}-${member.sourceId}`,
+      priority: SERIES_SYNC_PRIORITY,
+    })
   }
 }

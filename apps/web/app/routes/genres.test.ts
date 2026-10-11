@@ -100,8 +100,10 @@ describe('series loader', () => {
           name: 'Dune Chronicles',
           description: null,
           memberCount: null,
+          adding: false,
         },
         items: [{ position: 1, book }],
+        total: 1,
       }),
     )
     const result = await load()

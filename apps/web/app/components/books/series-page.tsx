@@ -16,8 +16,8 @@ export function SeriesPage({
   viewer?: Viewer | null
 }) {
   const { series, items } = detail
-  // The Source may list Books not stored yet; a Series sync is adding them (D-199).
-  const stillAdding = series.memberCount !== null && items.length < series.memberCount
+  // A recent Series sync is still importing Books the Source lists (D-199).
+  const stillAdding = series.adding
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       <PageHero

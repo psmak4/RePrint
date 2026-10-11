@@ -18,7 +18,12 @@ import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
-import { queueSeriesSyncs, syncSeries } from '../catalog/series-sync.js'
+import {
+  importSeriesMember,
+  queueSeriesMemberImports,
+  queueSeriesSyncs,
+  syncSeries,
+} from '../catalog/series-sync.js'
 import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
@@ -230,21 +235,44 @@ export const jobs = {
     retry: { attempts: 3, backoffMs: 60_000 },
   }),
   'catalog.series-sync': defineJob({
-    // Imports the members of a Series not stored yet, behind interactive requests (D-199).
+    // Reads a Series' members and queues one import per missing member, behind interactive
+    // requests (D-199). Short, so a long Series never holds a worker.
     payload: z.object({ seriesId: z.uuid() }),
-    handler: async ({ seriesId }, { db, log, catalog }) => {
+    handler: async ({ seriesId }, { db, log, catalog, enqueue }) => {
       const result = await syncSeries({
         db,
         source: catalog.source,
         seriesId,
         call: catalog.background,
-        onMemberError: (sourceId, error) =>
-          log.warn({ err: error, seriesId, sourceId }, 'could not import a Series member'),
       })
-      log.info({ seriesId, ...result }, 'series synced')
-      return result
+      if (result.outcome === 'synced') await queueSeriesMemberImports({ enqueue }, result.toImport)
+      const queued = result.outcome === 'synced' ? result.toImport.length : 0
+      log.info({ seriesId, outcome: result.outcome, queued }, 'series synced')
+      return { outcome: result.outcome, queued }
     },
     retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.series-member': defineJob({
+    // Imports one Series member as a Series import; retried on its own if the Source fails (D-199).
+    payload: z.object({
+      seriesId: z.uuid(),
+      sourceId: z.string().min(1).max(200),
+      position: z.number().min(0).nullable(),
+    }),
+    handler: async ({ seriesId, sourceId, position }, { db, log, catalog }) => {
+      const outcome = await importSeriesMember({
+        db,
+        source: catalog.source,
+        seriesId,
+        sourceId,
+        position,
+        call: catalog.background,
+      })
+      log.info({ seriesId, sourceId, outcome }, 'series member imported')
+      return { outcome }
+    },
+    // Up to about half an hour of backoff, so a short Source outage does not lose a member.
+    retry: { attempts: 5, backoffMs: 120_000 },
   }),
   'catalog.purgeSourceRecords': defineJob({
     // `now` overrides the clock so tests can purge without waiting 30 days.

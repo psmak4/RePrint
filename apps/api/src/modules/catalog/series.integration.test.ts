@@ -74,6 +74,7 @@ describe('GET /v1/series/:slug', () => {
       name: 'EXPANSE',
       description: null,
       memberCount: null,
+      adding: false,
     })
     expect(body.items.map((entry) => [entry.book.slug, entry.position])).toEqual([
       ['book-one', 1],
@@ -95,6 +96,47 @@ describe('GET /v1/series/:slug', () => {
     const body = seriesDetailResponseSchema.parse(response.json())
     expect(body.series.memberCount).toBe(6)
     expect(body.items).toHaveLength(1)
+    expect(body.total).toBe(1)
+  })
+
+  it('says a Series is still being added to only while a recent sync left Books out', async () => {
+    const found = await makeSeries('saga')
+    await addBook(found.id, 'saga-one', 1)
+    const adding = async () =>
+      seriesDetailResponseSchema.parse(
+        (await app.inject({ method: 'GET', url: '/v1/series/saga' })).json(),
+      ).series.adding
+    expect(await adding()).toBe(false)
+    await db().update(series).set({ sourceMemberCount: 6, membersSyncedAt: new Date() })
+    expect(await adding()).toBe(true)
+    const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+    await db().update(series).set({ membersSyncedAt: twoDaysAgo })
+    expect(await adding()).toBe(false)
+  })
+
+  it('sends only the 8 Books around a Book when asked, with the stored total', async () => {
+    const found = await makeSeries('discworld')
+    for (let n = 1; n <= 12; n += 1) await addBook(found.id, `disc-${n}`, n)
+    const response = await app.inject({ method: 'GET', url: '/v1/series/discworld?around=disc-7' })
+    expect(response.statusCode).toBe(200)
+    const body = seriesDetailResponseSchema.parse(response.json())
+    expect(body.items.map((entry) => entry.book.slug)).toEqual([
+      'disc-4',
+      'disc-5',
+      'disc-6',
+      'disc-7',
+      'disc-8',
+      'disc-9',
+      'disc-10',
+      'disc-11',
+    ])
+    expect(body.total).toBe(12)
+    // A Book not in the Series gives the start of the Series.
+    const other = seriesDetailResponseSchema.parse(
+      (await app.inject({ method: 'GET', url: '/v1/series/discworld?around=nope' })).json(),
+    )
+    expect(other.items[0]?.book.slug).toBe('disc-1')
+    expect(other.items).toHaveLength(8)
   })
 
   it('answers 200 with no Books for an empty Series', async () => {

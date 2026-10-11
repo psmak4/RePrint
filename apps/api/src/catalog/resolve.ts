@@ -2,6 +2,7 @@ import { books, type Database, sourceLinks } from '@reprint/db'
 import type { AuthorRecord, BookCandidate } from '@reprint/shared'
 import { and, eq } from 'drizzle-orm'
 import { ingestBook } from './ingest/ingest.js'
+import { seriesDueForBook } from './series-sync.js'
 import { type SourceAdapter, SourceError } from './sources/types.js'
 
 /** Runs a Source call as an interactive request that may take at most `timeoutMs`. */
@@ -27,7 +28,7 @@ export async function resolveCandidate(options: {
   const link = candidate.sourceLink
 
   const [stored] = await db
-    .select({ slug: books.slug })
+    .select({ id: books.id, slug: books.slug, importOnly: books.seriesImportOnly })
     .from(sourceLinks)
     .innerJoin(books, eq(books.id, sourceLinks.entityId))
     .where(
@@ -38,7 +39,12 @@ export async function resolveCandidate(options: {
       ),
     )
     .limit(1)
-  if (stored) return { slug: stored.slug, seriesToSync: [] }
+  if (stored) {
+    if (!stored.importOnly) return { slug: stored.slug, seriesToSync: [] }
+    // A Member opening a Book a Series sync brought in has reached it, so its Series may fill in.
+    await db.update(books).set({ seriesImportOnly: false }).where(eq(books.id, stored.id))
+    return { slug: stored.slug, seriesToSync: await seriesDueForBook(db, stored.id) }
+  }
   if (link.source !== source.name) return { notFound: true }
 
   const deadline = Date.now() + timeoutMs

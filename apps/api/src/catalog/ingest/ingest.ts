@@ -54,6 +54,11 @@ export interface IngestInput {
   authorRecords?: ReadonlyMap<string, AuthorRecord>
   /** The response to keep in `source_records` for 30 days; defaults to the candidate itself. */
   rawRecord?: unknown
+  /**
+   * True when a Series sync is storing a member: a Book created this way is marked
+   * `series_import_only` and starts no Series syncs of its own (D-199, one level only).
+   */
+  seriesImport?: boolean
   now?: Date
 }
 
@@ -463,10 +468,16 @@ async function upsertSeries(
     const linkedId = link ? await linkedEntityId(tx, 'series', link.source, link.sourceId) : null
     let row: { id: string } | undefined = linkedId ? { id: linkedId } : undefined
     if (!row) {
+      // By name: with a Source link, only a Series that Source has not linked yet (one stored from
+      // Edition text), so two Source Series that share a name stay apart.
+      const sameName = sql`lower(${series.name}) = lower(${membership.name})`
+      const unlinked = link
+        ? sql`not exists (select 1 from ${sourceLinks} where ${sourceLinks.entityType} = 'series' and ${sourceLinks.entityId} = ${series.id} and ${sourceLinks.source} = ${link.source})`
+        : undefined
       ;[row] = await tx
         .select({ id: series.id })
         .from(series)
-        .where(sql`lower(${series.name}) = lower(${membership.name})`)
+        .where(unlinked ? and(sameName, unlinked) : sameName)
         .limit(1)
     }
     if (!row) {
@@ -684,14 +695,38 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
       created: book.created,
       mergeCandidateBookIds,
       skippedEditions,
-      seriesToSync: await seriesDueSync(tx, linkedSeries, now),
+      seriesToSync: await seriesDueSync(
+        tx,
+        book.id,
+        book.created && input.seriesImport === true,
+        linkedSeries,
+        now,
+      ),
     }
   })
 }
 
-/** The Series among `ids` whose members were never synced or not in the last 30 days (D-199). */
-async function seriesDueSync(tx: Tx, ids: string[], now: Date): Promise<string[]> {
-  if (ids.length === 0) return []
+/**
+ * Marks a Book a Series sync just created, then returns the Series among `ids` whose members were
+ * never synced or not in the last 30 days, or none for a Book only a Series sync brought in
+ * (D-199, one level only).
+ */
+async function seriesDueSync(
+  tx: Tx,
+  bookId: string,
+  markImported: boolean,
+  ids: string[],
+  now: Date,
+): Promise<string[]> {
+  if (markImported) {
+    await tx.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+    return []
+  }
+  const [row] = await tx
+    .select({ importOnly: books.seriesImportOnly })
+    .from(books)
+    .where(eq(books.id, bookId))
+  if (row?.importOnly || ids.length === 0) return []
   const syncedBefore = new Date(now.getTime() - STALE_AFTER_MS)
   const rows = await tx
     .select({ id: series.id })

@@ -269,6 +269,20 @@ describe('presentational components', () => {
     )
   })
 
+  it('SeriesCard says "See all" from the stored count when given only a window of Books', () => {
+    renderInRouter(
+      <SeriesCard
+        name="Discworld"
+        href="/series/discworld"
+        currentSlug="disc-1"
+        total={null}
+        stored={41}
+        books={[{ slug: 'disc-1', title: 'One', cover: null, position: '1' }]}
+      />,
+    )
+    expect(screen.getByRole('link', { name: 'See all 41' })).toBeTruthy()
+  })
+
   it('SeriesCard says "See all" when the Source lists more Books than are stored', () => {
     renderInRouter(
       <SeriesCard

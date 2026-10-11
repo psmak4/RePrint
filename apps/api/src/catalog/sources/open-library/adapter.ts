@@ -203,8 +203,14 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
       const members: SeriesMembers['members'] = []
       let name: string | null = null
       for (let page = 1; ; page += 1) {
-        const body = searchResponseSchema.safeParse(await getJson(seriesMembersPath(id.data, page)))
-        if (!body.success) break
+        const raw = await getJson(seriesMembersPath(id.data, page))
+        // No first page means no such Series; a later page missing or unreadable would cut the
+        // list short, so the whole read fails and the sync tries again (D-199).
+        if (raw === undefined && page === 1) return null
+        const body = searchResponseSchema.safeParse(raw)
+        if (!body.success) {
+          throw new SourceError(`Open Library returned an unreadable page ${page} of a Series`)
+        }
         for (const raw of body.data.docs) {
           const doc = memberDocSchema.safeParse(raw)
           if (!doc.success) continue

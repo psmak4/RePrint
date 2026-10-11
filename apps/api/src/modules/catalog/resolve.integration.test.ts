@@ -5,6 +5,7 @@ import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildApp } from '../../app.js'
 import { CANDIDATE_REF_TTL_SECONDS, createCandidateRefs } from '../../catalog/candidate-refs.js'
+import { ingestBook } from '../../catalog/ingest/ingest.js'
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
 import { type SourceAdapter, SourceError } from '../../catalog/sources/types.js'
 import { loadEnv } from '../../config/env.js'
@@ -152,6 +153,25 @@ describe('Series syncs (D-199)', () => {
       'catalog.series-sync',
       { seriesId: expect.any(String) },
       expect.objectContaining({ priority: 10 }),
+    )
+  })
+
+  it('treats opening a Book a Series sync brought in as reaching it', async () => {
+    const hobbit = await stub.getBook('stub-book-hobbit')
+    if (!hobbit) throw new Error('no hobbit')
+    const { bookId } = await ingestBook(stack.db.db, {
+      source: stub,
+      candidate: hobbit,
+      seriesImport: true,
+    })
+    const response = await resolve(await issueRef('stub-book-hobbit'))
+    expect(response.statusCode).toBe(200)
+    const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    expect(row?.seriesImportOnly).toBe(false)
+    expect(enqueue).toHaveBeenCalledWith(
+      'catalog.series-sync',
+      { seriesId: expect.any(String) },
+      expect.anything(),
     )
   })
 

@@ -171,6 +171,13 @@ describe('GET /v1/books/:slug', () => {
       expect(queued).toEqual([])
     })
 
+    it('queues nothing when viewing a Book only a Series sync brought in (one level, D-199)', async () => {
+      const { slug, bookId } = await ingest('stub-book-hobbit', 'stub-author-tolkien')
+      await stack.db.db.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+      await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
+      expect(queued).toEqual([])
+    })
+
     it('refreshes from the Source and keeps admin-locked fields', async () => {
       const { bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
       await stack.db.db
