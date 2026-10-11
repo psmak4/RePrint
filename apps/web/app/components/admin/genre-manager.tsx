@@ -1,13 +1,10 @@
 import type { AdminGenre, AdminSubjectRule } from '@reprint/shared'
-import { Button, Input, Label, Textarea } from '@reprint/ui'
+import { Button, Input, Label, Select, Textarea } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
 
 const text = copy.admin.genres
-
-const SELECT_CLASS =
-  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type ActionResult =
   | {
@@ -162,10 +159,9 @@ function GenreForm({
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor={`${ids}-parent`}>{text.parentLabel}</Label>
-        <select
+        <Select
           id={`${ids}-parent`}
           value={parentId}
-          className={SELECT_CLASS}
           onChange={(event) => setParentId(event.target.value)}
         >
           <option value="">{text.topLevel}</option>
@@ -174,7 +170,7 @@ function GenreForm({
               {choice.name}
             </option>
           ))}
-        </select>
+        </Select>
         <FieldError message={action.fieldErrors.parentId} />
       </div>
       <div className="flex flex-wrap gap-3">
@@ -319,10 +315,9 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${ids}-genre`}>{text.ruleGenreLabel}</Label>
-          <select
+          <Select
             id={`${ids}-genre`}
             value={chosen}
-            className={SELECT_CLASS}
             onChange={(event) => setGenreId(event.target.value)}
           >
             {live.map((genre) => (
@@ -330,7 +325,7 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
                 {genre.name}
               </option>
             ))}
-          </select>
+          </Select>
           <FieldError message={addAction.fieldErrors.genreId} />
         </div>
         <div className="flex flex-col gap-1">

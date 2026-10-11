@@ -4,7 +4,8 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
-import type { ReactNode } from 'react'
+import { Select } from '@reprint/ui'
+import { type ReactNode, useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
@@ -98,6 +99,7 @@ function ReviewItem({
 }
 
 function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
+  const sortId = useId()
   // A plain GET form, so sorting works without JavaScript; changing sort resets to page 1.
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -127,19 +129,15 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
         action={`/books/${slug}#reviews`}
         className="flex flex-wrap items-center gap-2.5"
       >
-        <label className="flex items-center gap-2.5 text-sm text-muted-foreground">
+        <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
           {text.sortLabel}
-          <select
-            name="sort"
-            defaultValue={query.sort}
-            className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
-          >
+          <Select id={sortId} name="sort" defaultValue={query.sort} compact>
             {REVIEW_SORTS.map((sort) => (
               <option key={sort} value={sort}>
                 {text.sorts[sort]}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         {query.rating ? <input type="hidden" name="rating" value={query.rating} /> : null}
         <button

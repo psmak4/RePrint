@@ -166,8 +166,9 @@ export function ShelfSelector({
       }}
       className={
         variant === 'link'
-          ? 'h-9 w-fit rounded-full border border-input-border bg-surface px-3 text-sm text-foreground'
+          ? 'ui-select ui-select-menu h-9 w-fit rounded-full border border-input-border bg-surface pr-9 pl-3 text-sm text-foreground'
           : // Invisible but on top: the drawn button shows the state, the select takes the input.
+            // It keeps the system menu: a page-drawn list (D-198) does not open from a hidden select.
             'absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-wait'
       }
     >

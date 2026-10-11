@@ -8,7 +8,7 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, Label } from '@reprint/ui'
+import { Button, Label, Select } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -37,8 +37,6 @@ const LANGUAGES = [
 ]
 const DECADES = Array.from({ length: 24 }, (_, i) => 2020 - i * 10)
 const RATINGS = [4, 3, 2, 1]
-const SELECT_CLASS =
-  'h-11 w-full rounded-[10px] border border-input-border bg-surface px-3 text-[15px] font-medium text-foreground'
 
 function languageName(code: string): string {
   return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code
@@ -146,18 +144,13 @@ function SortForm({ query }: { query: SearchQuery }) {
       <label htmlFor="results-sort" className="text-sm text-muted-foreground">
         {c.sort}
       </label>
-      <select
-        id="results-sort"
-        name="sort"
-        defaultValue={query.sort}
-        className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
-      >
+      <Select id="results-sort" name="sort" defaultValue={query.sort} compact>
         {SEARCH_SORTS.map((sort) => (
           <option key={sort} value={sort}>
             {c.sorts[sort]}
           </option>
         ))}
-      </select>
+      </Select>
       <button
         type="submit"
         className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
@@ -189,11 +182,11 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
         <Label className="text-[15px] font-semibold" htmlFor="filter-genre">
           {c.genre}
         </Label>
-        <select
+        <Select
           id="filter-genre"
           name="genre"
           defaultValue={query.genre ?? ''}
-          className={SELECT_CLASS}
+          className="w-full font-medium"
         >
           <option value="">{c.anyOption}</option>
           {flattenGenres(genres).map((genre) => (
@@ -201,17 +194,17 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
               {genre.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2.5">
         <Label className="text-[15px] font-semibold" htmlFor="filter-language">
           {c.language}
         </Label>
-        <select
+        <Select
           id="filter-language"
           name="language"
           defaultValue={query.language ?? ''}
-          className={SELECT_CLASS}
+          className="w-full font-medium"
         >
           <option value="">{c.anyOption}</option>
           {LANGUAGES.map((code) => (
@@ -219,17 +212,17 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
               {languageName(code)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2.5">
         <Label className="text-[15px] font-semibold" htmlFor="filter-decade">
           {c.decade}
         </Label>
-        <select
+        <Select
           id="filter-decade"
           name="decade"
           defaultValue={query.decade ?? ''}
-          className={SELECT_CLASS}
+          className="w-full font-medium"
         >
           <option value="">{c.anyOption}</option>
           {DECADES.map((year) => (
@@ -237,17 +230,17 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
               {c.decadeOption(year)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2.5">
         <Label className="text-[15px] font-semibold" htmlFor="filter-min-rating">
           {c.minRating}
         </Label>
-        <select
+        <Select
           id="filter-min-rating"
           name="minRating"
           defaultValue={query.minRating ?? ''}
-          className={SELECT_CLASS}
+          className="w-full font-medium"
         >
           <option value="">{c.anyOption}</option>
           {RATINGS.map((stars) => (
@@ -255,7 +248,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
               {c.minRatingOption(stars)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <Button type="submit">{c.apply}</Button>
       <Link to={clearHref(query)} className="text-sm text-link underline lg:hidden">

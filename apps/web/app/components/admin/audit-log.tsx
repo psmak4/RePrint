@@ -1,13 +1,10 @@
 import { type AdminAuditResponse, AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from '@reprint/shared'
-import { Button, Input, Label } from '@reprint/ui'
+import { Button, Input, Label, Select } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.audit
-
-const SELECT_CLASS =
-  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type Filters = {
   actor: string
@@ -70,35 +67,25 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="audit-action">{text.actionLabel}</Label>
-          <select
-            id="audit-action"
-            name="action"
-            defaultValue={filters.action}
-            className={SELECT_CLASS}
-          >
+          <Select id="audit-action" name="action" defaultValue={filters.action}>
             <option value="">{text.any}</option>
             {AUDIT_ACTIONS.map((action) => (
               <option key={action} value={action}>
                 {action}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="audit-target-type">{text.targetTypeLabel}</Label>
-          <select
-            id="audit-target-type"
-            name="targetType"
-            defaultValue={filters.targetType}
-            className={SELECT_CLASS}
-          >
+          <Select id="audit-target-type" name="targetType" defaultValue={filters.targetType}>
             <option value="">{text.any}</option>
             {AUDIT_TARGET_TYPES.map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="audit-target-id">{text.targetIdLabel}</Label>

@@ -642,3 +642,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: when the first page of Editions lacks the Edition behind the work's Cover (`cover_edition_key`), the adapter fetches that one Edition and adds it, so the Primary Edition can match the Cover; a failed fetch leaves the Book readable without it (D-197)
   - Accept: a description stops at Open Library's divider line (before "Also contained in:" and similar lists) and Markdown links keep only their text, so no Open Library URL or ID reaches readers
   - Accept: contract tests with a recorded Edition fixture; `pnpm check` passes
+- [x] M9-T17 · One styled Select for every dropdown · deps: M9-T16 · PRD: §11
+  - Accept: a shared native `Select` in `packages/ui` replaces the hand-styled selects (same height, border, and font; our chevron 14 px from the right edge; a 40 px `compact` size for toolbars) (D-198)
+  - Accept: where the browser supports `appearance: base-select` (Chrome and Edge), the open list is drawn by the page: white rounded card, shadow, site font at 15 px, 40 px rows, a check on the current choice; elsewhere the system menu stays
+  - Accept: the shelf buttons keep their hidden native select and the system menu; `pnpm check` and `pnpm test:e2e` pass

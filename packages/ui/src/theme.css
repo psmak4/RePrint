@@ -51,3 +51,72 @@ body {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
 }
+
+/*
+ * Native selects (D-198). `.ui-select` is the closed control: no browser arrow, our chevron
+ * (muted-foreground) 14 px from the right. `.ui-select-menu` styles the open list where the
+ * browser lets the page draw it (customizable select); elsewhere the system menu is used.
+ */
+@layer components {
+  .ui-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.875rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  @supports (appearance: base-select) {
+    .ui-select-menu,
+    .ui-select-menu::picker(select) {
+      appearance: base-select;
+    }
+
+    .ui-select-menu {
+      align-items: center;
+    }
+
+    .ui-select-menu::picker-icon {
+      display: none;
+    }
+
+    .ui-select-menu::picker(select) {
+      margin-block: 6px;
+      padding: 4px;
+      min-inline-size: anchor-size(self-inline);
+      max-block-size: min(22rem, 70vh);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-surface);
+      color: var(--color-foreground);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 400;
+      box-shadow:
+        0 18px 40px -14px rgb(15 23 42 / 0.3),
+        0 2px 6px rgb(15 23 42 / 0.08);
+    }
+
+    .ui-select-menu option {
+      gap: 8px;
+      min-block-size: 40px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .ui-select-menu option:hover,
+    .ui-select-menu option:focus-visible {
+      outline: none;
+      background: var(--color-surface-raised);
+    }
+
+    .ui-select-menu option:checked {
+      font-weight: 600;
+    }
+
+    .ui-select-menu option::checkmark {
+      color: var(--color-accent);
+    }
+  }
+}

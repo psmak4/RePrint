@@ -1,13 +1,10 @@
 import { ADMIN_USER_STATUSES, type AdminUsersResponse, ASSIGNABLE_ROLES } from '@reprint/shared'
-import { Button, Input, Label } from '@reprint/ui'
+import { Button, Input, Label, Select } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.users
-
-const SELECT_CLASS =
-  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type Filters = { q: string; role: string; status: string; joinedFrom: string; joinedTo: string }
 
@@ -45,7 +42,7 @@ export function UsersList({
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="users-role">{text.roleLabel}</Label>
-          <select id="users-role" name="role" defaultValue={filters.role} className={SELECT_CLASS}>
+          <Select id="users-role" name="role" defaultValue={filters.role}>
             <option value="">{text.any}</option>
             <option value="member">{text.roles.member}</option>
             {ASSIGNABLE_ROLES.map((role) => (
@@ -53,23 +50,18 @@ export function UsersList({
                 {text.roles[role]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="users-status">{text.statusLabel}</Label>
-          <select
-            id="users-status"
-            name="status"
-            defaultValue={filters.status}
-            className={SELECT_CLASS}
-          >
+          <Select id="users-status" name="status" defaultValue={filters.status}>
             <option value="">{text.any}</option>
             {ADMIN_USER_STATUSES.map((status) => (
               <option key={status} value={status}>
                 {text.statuses[status]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="users-from">{text.joinedFromLabel}</Label>
