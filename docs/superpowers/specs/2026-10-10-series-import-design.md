@@ -15,7 +15,7 @@ Readers should see how long a Series is and which Books are in it, in reading or
 Open Library added Series records in 2026. Checked on live data:
 
 - A work record has `series: [{ series: { key: "/series/OL326782L" }, position: "1" }]`.
-- `/series/OL326782L.json` gives the name ("The Hitchhiker's Guide to the Galaxy").
+- `/series/OL326782L.json` gives the name ("The Hitchhiker's Guide to the Galaxy"). Search results also carry `series_key`, `series_name`, and `series_position` (parallel arrays), including the byline search the adapter already makes for each Book, so no extra request is needed for a Book's own Series.
 - `search.json?q=series_key:OL326782L` returns every member work with `series_position`, title, authors, first publish year, and cover, in the search-result shape the adapter already parses. Hitchhiker's: 6 members, positions 1 to 6.
 - Coverage is partial: Dune, Harry Potter, A Song of Ice and Fire, and The Lord of the Rings have Series records; The Hunger Games, Earthsea, and the Hainish Cycle do not.
 
@@ -32,7 +32,7 @@ Open Library added Series records in 2026. Checked on live data:
 
 ### 1. Source adapter
 
-- `BookCandidate.book.series[]` entries gain an optional `sourceLink` (`entityType: 'series'`). Open Library fills it from the work's `series` field, with the position from that field. When a work has a Series record, it replaces the Edition-text heuristic (D-193) for that Series; works without one keep the heuristic, which carries no `sourceLink`.
+- `BookCandidate.book.series[]` entries gain an optional `sourceLink` (`entityType: 'series'`). Open Library fills them from the search result's `series_key`, `series_name`, and `series_position` (the byline search already made for each Book). When a work has Series records, they replace the Edition-text heuristic (D-193); works without any keep the heuristic, which carries no `sourceLink`. `seriesReported` is true when the work has Series records or its Editions were read.
 - `SourceAdapter` gains an optional method:
 
   ```ts
@@ -40,7 +40,7 @@ Open Library added Series records in 2026. Checked on live data:
   getSeriesMembers?(sourceId: string): Promise<SeriesMembers | null>
   ```
 
-  `SeriesMembers` is `{ name: string; members: { sourceId: string; position: number | null; title: string }[] }`. Open Library reads the name from `/series/:id.json` and the members from `search.json?q=series_key:<id>`, paging 100 at a time until all are read. A position that is not a number (or is missing) becomes `null`.
+  `SeriesMembers` is `{ name: string; members: { sourceId: string; position: number | null; title: string }[] }`. Open Library reads both from `search.json?q=series_key:<id>`, paging 100 at a time until all are read; the name is the member results' `series_name` for that key. A position that is not a number (or is missing) becomes `null`. An empty result is `null`.
 - The stub Source implements it for one fixture Series so e2e and integration tests can exercise the flow; the seed Source does not.
 - Source vocabulary and IDs stay inside `catalog/sources/open-library/`; everything outside sees `sourceId` strings and RePrint terms.
 
@@ -78,7 +78,7 @@ Open Library added Series records in 2026. Checked on live data:
 
 ### 6. Testing
 
-- **Contract:** recorded fixtures for a work's `series` field, `/series/:id.json`, and the Hitchhiker's member search; the paging of members; non-numeric positions become `null`.
+- **Contract:** recorded fixtures for the Hitchhiker's byline search (with its Series fields) and member search; the paging of members; non-numeric positions become `null`.
 - **Unit:** position parsing; Series lookup order (source link, then name).
 - **Integration:**
   - `resolve` queues a sync and the job imports the missing members.
