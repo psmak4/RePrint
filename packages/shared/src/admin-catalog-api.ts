@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { contributionRoleSchema, coverSchema, fieldOriginsSchema, formatSchema } from './catalog.js'
+import { bookSummarySchema } from './catalog-api.js'
 import { cursorPageOf, cursorQuerySchema } from './pagination.js'
+import { SEARCH_QUERY_MAX_LENGTH } from './search-api.js'
 
 /** Schemas for the Admin Catalog editing endpoint (PRD §5.2, §5.4, §7.11, D-155). */
 
@@ -23,6 +25,25 @@ export const adminSeriesInputSchema = z.object({
   /** May be decimal (2.5) or empty. */
   position: z.number().min(0).max(100_000).nullable().default(null),
 })
+
+/**
+ * `GET /admin/books?q=`: finds Books in the Catalog to edit, with the public search's matching but
+ * never a Source. A query under `SEARCH_MIN_LENGTH` is valid and finds nothing.
+ */
+export const adminBookSearchQuerySchema = z.object({
+  q: z.string().trim().max(SEARCH_QUERY_MAX_LENGTH).default(''),
+  page: z.coerce.number().int().min(1).max(50).default(1),
+})
+export type AdminBookSearchQuery = z.infer<typeof adminBookSearchQuerySchema>
+
+export const ADMIN_BOOK_SEARCH_PAGE_SIZE = 20
+
+export const adminBookSearchResponseSchema = z.object({
+  items: z.array(bookSummarySchema),
+  page: z.number().int().min(1),
+  hasMore: z.boolean(),
+})
+export type AdminBookSearchResponse = z.infer<typeof adminBookSearchResponseSchema>
 
 /**
  * `PATCH /admin/books/:id`. Only the fields present are edited; each one becomes an admin field and is

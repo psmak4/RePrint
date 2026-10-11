@@ -1,11 +1,12 @@
-import type {
-  BookDetail,
-  BookReviewsResponse,
-  BookSummary,
-  Cover as CoverData,
-  Edition,
-  MyReview,
-  Viewer,
+import {
+  type BookDetail,
+  type BookReviewsResponse,
+  type BookSummary,
+  type Cover as CoverData,
+  type Edition,
+  type MyReview,
+  PERMISSIONS,
+  type Viewer,
 } from '@reprint/shared'
 import { type ReactNode, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
@@ -104,7 +105,12 @@ export function BookPage({
   return (
     <article className="flex flex-col">
       <div className="-mt-8 bg-ground-deep pt-6 pb-7 shadow-[0_0_0_100vmax_var(--color-ground-deep)] [clip-path:inset(0_-100vmax)] md:pt-7 md:pb-14">
-        <BookHeader book={book} series={series} signedIn={viewer !== null} />
+        <BookHeader
+          book={book}
+          series={series}
+          signedIn={viewer !== null}
+          canEdit={viewer?.permissions.includes(PERMISSIONS.catalogManage) ?? false}
+        />
       </div>
       <SectionNav items={navItems} />
       <div className="grid gap-12 pt-9 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-14 lg:pt-12">
@@ -309,10 +315,13 @@ function BookHeader({
   book,
   series,
   signedIn,
+  canEdit,
 }: {
   book: BookDetail
   series: SeriesSummary | null
   signedIn: boolean
+  /** Staff who can edit the Catalog get a link to this Book's admin page (PRD §7.11). */
+  canEdit: boolean
 }) {
   const groups = groupContributors(book.contributions)
   const edition = book.primaryEdition
@@ -339,29 +348,52 @@ function BookHeader({
 
   return (
     <header className="flex flex-col gap-6 md:gap-8">
-      <nav aria-label={labels.breadcrumbLabel} className="text-sm text-muted-foreground">
-        <ol className="flex flex-wrap items-center gap-x-2">
-          <li>
-            <Link to="/" className="text-[#334155] hover:underline">
-              {labels.discover}
-            </Link>
-          </li>
-          {firstGenre ? (
-            <li className="flex gap-2">
-              <span aria-hidden="true">/</span>
-              <Link to={`/genres/${firstGenre.slug}`} className="text-[#334155] hover:underline">
-                {firstGenre.name}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <nav aria-label={labels.breadcrumbLabel} className="text-sm text-muted-foreground">
+          <ol className="flex flex-wrap items-center gap-x-2">
+            <li>
+              <Link to="/" className="text-[#334155] hover:underline">
+                {labels.discover}
               </Link>
             </li>
-          ) : null}
-          <li className="flex gap-2">
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" className="text-foreground">
-              {book.title}
-            </span>
-          </li>
-        </ol>
-      </nav>
+            {firstGenre ? (
+              <li className="flex gap-2">
+                <span aria-hidden="true">/</span>
+                <Link to={`/genres/${firstGenre.slug}`} className="text-[#334155] hover:underline">
+                  {firstGenre.name}
+                </Link>
+              </li>
+            ) : null}
+            <li className="flex gap-2">
+              <span aria-hidden="true">/</span>
+              <span aria-current="page" className="text-foreground">
+                {book.title}
+              </span>
+            </li>
+          </ol>
+        </nav>
+        {canEdit ? (
+          <Link
+            to={`/admin/books/${book.id}`}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-link underline underline-offset-2"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+            </svg>
+            {labels.editInAdmin}
+          </Link>
+        ) : null}
+      </div>
       <div className="flex flex-col items-center gap-[18px] text-center md:grid md:grid-cols-[200px_minmax(0,1fr)] md:items-start md:gap-8 md:text-left lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-14">
         <Cover
           cover={book.cover ?? edition?.cover ?? null}

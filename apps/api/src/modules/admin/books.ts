@@ -13,16 +13,20 @@ import {
   series,
 } from '@reprint/db'
 import {
+  ADMIN_BOOK_SEARCH_PAGE_SIZE,
   type AdminBook,
   type AdminBookDetail,
   type AdminBookEdit,
   type AdminBookRefreshResponse,
+  type AdminBookSearchResponse,
   adminBookCoverResponseSchema,
   adminBookDetailSchema,
   adminBookEditSchema,
   adminBookParamsSchema,
   adminBookRefreshResponseSchema,
   adminBookSchema,
+  adminBookSearchQuerySchema,
+  adminBookSearchResponseSchema,
   type FieldOrigins,
   makeSlug,
 } from '@reprint/shared'
@@ -30,12 +34,13 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { ADMIN_ORIGIN } from '../../catalog/ingest/fields.js'
 import { refreshSearchVector } from '../../catalog/ingest/ingest.js'
+import { searchCatalogBooks } from '../../catalog/search/catalog-search.js'
 import { HttpProblem } from '../../errors.js'
 import type { ImageStorage } from '../../storage/index.js'
 import { recordAudit } from '../audit/audit.js'
 import { requirePermission } from '../auth/guards.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
-import { toCover } from '../catalog/read.js'
+import { loadBookSummaries, toCover } from '../catalog/read.js'
 import { InvalidImageError } from '../me/avatar-image.js'
 import { processBookCover } from './cover-image.js'
 
@@ -210,6 +215,34 @@ export const adminBookRoutes: FastifyPluginAsyncZod<AdminBookRoutesOptions> = as
   const { env, db, storage, jobs } = options
   const manage = requirePermission('catalog.manage')
   await app.register(multipart, { limits: { fileSize: env.UPLOAD_MAX_BYTES, files: 1, fields: 0 } })
+
+  // Finds a Book to edit: the public search's matching over the Catalog alone, never a Source.
+  app.get(
+    '/admin/books',
+    {
+      preHandler: [manage],
+      schema: {
+        querystring: adminBookSearchQuerySchema,
+        response: { 200: adminBookSearchResponseSchema },
+      },
+    },
+    async (request): Promise<AdminBookSearchResponse> => {
+      if (!db) throw new Error('admin routes need a database')
+      const { q, page } = request.query
+      const hits = await searchCatalogBooks(db, {
+        q,
+        // One extra hit says whether there is another page.
+        limit: ADMIN_BOOK_SEARCH_PAGE_SIZE + 1,
+        offset: (page - 1) * ADMIN_BOOK_SEARCH_PAGE_SIZE,
+      })
+      const shown = hits.slice(0, ADMIN_BOOK_SEARCH_PAGE_SIZE)
+      const items = await loadBookSummaries(
+        db,
+        shown.map((hit) => hit.id),
+      )
+      return { items, page, hasMore: hits.length > ADMIN_BOOK_SEARCH_PAGE_SIZE }
+    },
+  )
 
   app.get(
     '/admin/books/:id',

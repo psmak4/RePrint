@@ -16,6 +16,18 @@ const adminPages = [
   '/admin/system',
 ]
 
+// The page sweep and the role flow are separate tests: together they ran past the 30 s budget on
+// WebKit in CI.
+test('every admin page has no serious accessibility issues', async ({ page }) => {
+  const admin = await registerVerifiedMember(page, 'admin')
+  await grantAdmin(admin.email)
+  for (const path of adminPages) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { level: 1, name: 'Administration' })).toBeVisible()
+    await expectNoA11yViolations(page)
+  }
+})
+
 test('an Admin grants Moderator to one Member and suspends another, who cannot log in', async ({
   browser,
 }) => {
@@ -28,12 +40,6 @@ test('an Admin grants Moderator to one Member and suspends another, who cannot l
   const promoted = await registerVerifiedMember(await promotedContext.newPage(), 'promote')
   const suspendedContext = await browser.newContext()
   const suspended = await registerVerifiedMember(await suspendedContext.newPage(), 'suspendme')
-
-  for (const path of adminPages) {
-    await adminPage.goto(path)
-    await expect(adminPage.getByRole('heading', { level: 1, name: 'Administration' })).toBeVisible()
-    await expectNoA11yViolations(adminPage)
-  }
 
   async function openUser(username: string) {
     await adminPage.goto(`/admin/users?q=${encodeURIComponent(username)}`)

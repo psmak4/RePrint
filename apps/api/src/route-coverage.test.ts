@@ -285,6 +285,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     ],
     denied: [ADMIN_AUDIT, 'denies Moderators and Members with 403 and Visitors with 401'],
   },
+  'GET /v1/admin/books': {
+    allowed: [ADMIN_BOOKS, 'finds Catalog Books by title or Author for an Admin'],
+    denied: [ADMIN_BOOKS, 'is denied to a Moderator and to a Visitor'],
+  },
   'GET /v1/admin/books/{id}': {
     allowed: [ADMIN_BOOKS, 'returns the editable view with locks and the Book’s Editions'],
     denied: [ADMIN_BOOKS, 'denies Moderators and Members with 403 and Visitors with 401'],

@@ -628,3 +628,8 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: refreshing a Book whose Source now reports a different Series removes the old membership, and removes the old Series when no Book is left in it and no admin has edited it (D-194)
   - Accept: when the Source could not read the records its Series come from, a refresh removes nothing; an admin-locked `series` field is never touched
   - Accept: `pnpm check` passes
+- [x] M9-T14 · Staff can find a Book's admin page · deps: M9-T13 · PRD: §7.11
+  - Accept: `GET /v1/admin/books?q=` (needs `catalog.manage`) finds Catalog Books with the public search's matching and never calls a Source; integration tests cover an Admin (allowed), a Moderator and a Visitor (denied), and a too-short query (D-195)
+  - Accept: `/admin/catalog` has a "Find a Book" search whose results link to each Book's admin page and public page, with paging; a failed search shows a message and keeps the dashboard
+  - Accept: the Book page shows "Edit in admin" only to viewers with `catalog.manage`
+  - Accept: `pnpm check` passes

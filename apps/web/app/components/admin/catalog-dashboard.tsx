@@ -1,6 +1,13 @@
-import type { AdminCatalogStats } from '@reprint/shared'
-import { Link } from 'react-router'
+import {
+  type AdminBookSearchResponse,
+  type AdminCatalogStats,
+  SEARCH_MIN_LENGTH,
+} from '@reprint/shared'
+import { Button, Input, Label } from '@reprint/ui'
+import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { Cover } from '../books/cover.js'
+import { PagerLinks } from '../books/page-hero.js'
 import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.catalog
@@ -16,8 +23,109 @@ function monthLabel(month: string): string {
   return monthFormat.format(new Date(`${month}-01T00:00:00Z`))
 }
 
-/** Catalog size and what was added each month (PRD §6, §7.11). */
-export function CatalogDashboard({ stats }: { stats: AdminCatalogStats }) {
+export interface CatalogSearch {
+  q: string
+  page: number
+  /** `null` before a search; `'failed'` when the API could not answer. */
+  results: AdminBookSearchResponse | 'failed' | null
+}
+
+const searchHref = (q: string, page: number) =>
+  `/admin/catalog?${new URLSearchParams(page > 1 ? { q, page: String(page) } : { q })}`
+
+/** Finds a Book already on RePrint and links to its admin page (PRD §7.11). A plain GET form. */
+function BookSearch({ search }: { search: CatalogSearch }) {
+  const { q, page, results } = search
+  return (
+    <section aria-labelledby="book-search-heading" className="flex flex-col gap-4">
+      <h3 id="book-search-heading" className="font-serif text-xl font-medium">
+        {text.searchHeading}
+      </h3>
+      <Form method="get" className="flex flex-wrap items-end gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-md">
+          <Label htmlFor="book-search-q">{text.searchLabel}</Label>
+          <Input
+            id="book-search-q"
+            name="q"
+            type="search"
+            defaultValue={q}
+            maxLength={100}
+            aria-describedby="book-search-hint"
+          />
+        </div>
+        <Button type="submit">{text.searchButton}</Button>
+        <p id="book-search-hint" className="w-full text-sm text-muted-foreground">
+          {text.searchHint}
+        </p>
+      </Form>
+      {results === null ? null : results === 'failed' ? (
+        <p role="alert" className="text-sm">
+          {text.searchFailed}
+        </p>
+      ) : q.length < SEARCH_MIN_LENGTH ? (
+        <p className="text-sm text-muted-foreground">{text.tooShort}</p>
+      ) : results.items.length === 0 ? (
+        <p className="text-muted-foreground">{text.noResults(q)}</p>
+      ) : (
+        <>
+          <ul aria-label={text.resultsLabel(q)} className="flex flex-col">
+            {results.items.map((book) => {
+              const authors = book.contributions
+                .filter((c) => c.role === 'author' || c.role === 'co_author')
+                .map((c) => c.author.name)
+              return (
+                <li
+                  key={book.id}
+                  className="flex items-center gap-4 border-b border-border py-3 last:border-b-0"
+                >
+                  <Cover
+                    cover={book.cover}
+                    title={book.title}
+                    authorName={authors[0]}
+                    slug={book.slug}
+                    size="small"
+                    className="w-11"
+                  />
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <Link
+                      to={`/admin/books/${book.id}`}
+                      className="font-serif text-lg leading-snug font-medium break-words underline underline-offset-2"
+                    >
+                      {book.title}
+                    </Link>
+                    <p className="text-sm text-muted-foreground">
+                      {[authors.join(', '), book.firstPublishedYear].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <Link to={`/books/${book.slug}`} className="shrink-0 text-sm text-link underline">
+                    {text.publicPage}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+          {page > 1 || results.hasMore ? (
+            <PagerLinks
+              label={text.pagerLabel}
+              previous={page > 1 ? { href: searchHref(q, page - 1), text: text.previous } : null}
+              next={results.hasMore ? { href: searchHref(q, page + 1), text: text.next } : null}
+              status={text.pageStatus(page)}
+            />
+          ) : null}
+        </>
+      )}
+    </section>
+  )
+}
+
+/** Catalog size, what was added each month, and a search for a Book to edit (PRD §6, §7.11). */
+export function CatalogDashboard({
+  stats,
+  search = { q: '', page: 1, results: null },
+}: {
+  stats: AdminCatalogStats
+  search?: CatalogSearch
+}) {
   const grew = stats.monthly.some((row) => row.books + row.editions + row.authors > 0)
   return (
     <section aria-labelledby="catalog-heading" className="flex flex-col gap-6">
@@ -27,6 +135,7 @@ export function CatalogDashboard({ stats }: { stats: AdminCatalogStats }) {
       >
         {text.title}
       </h2>
+      <BookSearch search={search} />
       <dl aria-label={text.totalsLabel} className="grid gap-4 sm:grid-cols-3">
         {(
           [
