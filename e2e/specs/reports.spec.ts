@@ -7,6 +7,7 @@ import {
   openDunePage,
   registerVerifiedMember,
   restoreReviewSubmittedAt,
+  withQueueLock,
 } from '../support/accounts.js'
 
 test('a Member reports a review, a Moderator unpublishes it, and the author is told', async ({
@@ -38,12 +39,17 @@ test('a Member reports a review, a Moderator unpublishes it, and the author is t
   const modPage = await modContext.newPage()
   const moderator = await registerVerifiedMember(modPage, 'reportmod')
   await grantModerator(moderator.email)
-  const reviewId = await moveReviewToQueueFront(author.email)
-  await modPage.goto('/admin/reviews')
-  await modPage.locator(`a[href*="review=${reviewId}"]`).click()
-  await modPage.getByRole('button', { name: 'Approve', exact: true }).click()
-  await expect(modPage.locator(`a[href*="review=${reviewId}"]`)).toHaveCount(0)
-  await restoreReviewSubmittedAt(author.email)
+  // Other specs decide from the same queues in parallel; the lock keeps their Moderators apart.
+  await withQueueLock(async () => {
+    const reviewId = await moveReviewToQueueFront(author.email)
+    await modPage.goto('/admin/reviews')
+    await modPage.locator(`a[href*="review=${reviewId}"]`).click()
+    await modPage.getByRole('button', { name: 'Approve', exact: true }).click()
+    await expect(modPage.locator(`a[href*="review=${reviewId}"]`)).toHaveCount(0)
+    // The queue moves on (and claims the next review) before the lock is let go.
+    await expect(modPage).not.toHaveURL(new RegExp(`review=${reviewId}`))
+    await restoreReviewSubmittedAt(author.email)
+  })
 
   // Another Member reports it from the Book page.
   const reporterContext = await browser.newContext()
@@ -61,16 +67,18 @@ test('a Member reports a review, a Moderator unpublishes it, and the author is t
   await expect(dialog.getByRole('status')).toContainText('Thank you')
 
   // A Moderator finds it in the reports queue and unpublishes it with a reason.
-  await moveReportsToQueueFront(author.email)
-  await modPage.goto('/admin/reports')
-  const item = modPage.getByRole('article').filter({ hasText: headline })
-  await expect(item).toContainText('Spam or advertising')
-  await expectNoA11yViolations(modPage)
-  await item.getByRole('button', { name: 'Unpublish', exact: true }).click()
-  await item.getByLabel(/^Reason/).fill(reason)
-  await item.getByRole('button', { name: 'Unpublish review' }).click()
-  // Its reports are resolved, so the review leaves the queue.
-  await expect(item).toHaveCount(0)
+  await withQueueLock(async () => {
+    await moveReportsToQueueFront(author.email)
+    await modPage.goto('/admin/reports')
+    const item = modPage.getByRole('article').filter({ hasText: headline })
+    await expect(item).toContainText('Spam or advertising')
+    await expectNoA11yViolations(modPage)
+    await item.getByRole('button', { name: 'Unpublish', exact: true }).click()
+    await item.getByLabel(/^Reason/).fill(reason)
+    await item.getByRole('button', { name: 'Unpublish review' }).click()
+    // Its reports are resolved, so the review leaves the queue.
+    await expect(item).toHaveCount(0)
+  })
 
   // The author sees the review taken down, plus a notification.
   await authorPage.reload()

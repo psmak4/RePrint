@@ -5,6 +5,7 @@ import {
   moveReviewToQueueFront,
   openDunePage,
   registerVerifiedMember,
+  withQueueLock,
 } from '../support/accounts.js'
 
 const reviewText = (text: string) =>
@@ -40,28 +41,34 @@ test('a Moderator approves one review and rejects another with a reason', async 
   const moderator = await registerVerifiedMember(modPage, 'mod')
   await grantModerator(moderator.email)
 
-  const likedId = await moveReviewToQueueFront(liked.member.email)
-  const dislikedId = await moveReviewToQueueFront(disliked.member.email)
+  // Other specs decide from the same queue in parallel; the lock keeps their Moderators apart.
+  await withQueueLock(async () => {
+    const likedId = await moveReviewToQueueFront(liked.member.email)
+    const dislikedId = await moveReviewToQueueFront(disliked.member.email)
 
-  await modPage.goto('/admin/reviews')
-  await modPage.locator(`a[href*="review=${likedId}"]`).click()
-  await expect(modPage.getByRole('article', { name: 'Selected review' })).toContainText(
-    'Liked it a lot',
-  )
-  await expectNoA11yViolations(modPage)
-  await modPage.getByRole('button', { name: 'Approve', exact: true }).click()
-  await expect(modPage.locator(`a[href*="review=${likedId}"]`)).toHaveCount(0)
+    await modPage.goto('/admin/reviews')
+    await modPage.locator(`a[href*="review=${likedId}"]`).click()
+    await expect(modPage.getByRole('article', { name: 'Selected review' })).toContainText(
+      'Liked it a lot',
+    )
+    await expectNoA11yViolations(modPage)
+    await modPage.getByRole('button', { name: 'Approve', exact: true }).click()
+    await expect(modPage.locator(`a[href*="review=${likedId}"]`)).toHaveCount(0)
+    // The queue moves on (and claims the next review) before the lock is let go.
+    await expect(modPage).not.toHaveURL(new RegExp(`review=${likedId}`))
 
-  await modPage.goto('/admin/reviews')
-  await modPage.locator(`a[href*="review=${dislikedId}"]`).click()
-  await expect(modPage.getByRole('article', { name: 'Selected review' })).toContainText(
-    'Too thin to publish',
-  )
-  await modPage.getByRole('button', { name: 'Reject', exact: true }).click()
-  await expectNoA11yViolations(modPage)
-  await modPage.getByLabel('Saved phrase').selectOption({ label: reasonText })
-  await modPage.getByRole('button', { name: 'Reject review' }).click()
-  await expect(modPage.locator(`a[href*="review=${dislikedId}"]`)).toHaveCount(0)
+    await modPage.goto('/admin/reviews')
+    await modPage.locator(`a[href*="review=${dislikedId}"]`).click()
+    await expect(modPage.getByRole('article', { name: 'Selected review' })).toContainText(
+      'Too thin to publish',
+    )
+    await modPage.getByRole('button', { name: 'Reject', exact: true }).click()
+    await expectNoA11yViolations(modPage)
+    await modPage.getByLabel('Saved phrase').selectOption({ label: reasonText })
+    await modPage.getByRole('button', { name: 'Reject review' }).click()
+    await expect(modPage.locator(`a[href*="review=${dislikedId}"]`)).toHaveCount(0)
+    await expect(modPage).not.toHaveURL(new RegExp(`review=${dislikedId}`))
+  })
 
   // The approved author sees the review published, plus a notification.
   await liked.page.reload()
