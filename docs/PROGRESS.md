@@ -669,3 +669,7 @@ Entry format:
 ### 2026-10-10 · M9-T13 · owner report · fix/series-refresh
 - After #158 the owner's Hitchhiker's page still showed "Compactos". Two causes: the Book had not been re-imported yet (derived data changes only on refresh), and even a refresh would have kept "Compactos", since ingest only ever added Series memberships. Ingest now replaces them when the Source says its list is whole, and removes a Series left with no Books unless an admin edited it (D-194).
 - Tests: two ingest integration tests (drop and orphan removal; nothing removed when the list is not whole, admin-edited Series kept) and an adapter test (an Editions read that fails gives `seriesReported: false`).
+
+### 2026-10-10 · M9-T14 · owner request · feat/admin-book-access
+- The owner could not find the Hitchhiker's admin page: nothing linked to `/admin/books/:id` except the merge queue. Added a "Find a Book" search on `/admin/catalog` (new `GET /v1/admin/books`, Catalog only) and an "Edit in admin" link on the Book page for `catalog.manage` viewers (D-195).
+- Tests: API integration (Admin allowed by title and by Author, short query, Moderator 403, Visitor 401), loader tests (no query, query and page passed, failed search keeps the dashboard), component tests with axe (results and links, paging, empty, too short, failed), and the Book page link shown only with `catalog.manage`. A browser check on the dev stack was skipped: signing in from the agent's browser was blocked by the session's safety rules.

@@ -298,6 +298,7 @@ export const copy = {
     bookPage: {
       breadcrumbLabel: 'Breadcrumb',
       discover: 'Discover',
+      editInAdmin: 'Edit in admin',
       seriesPill: (name: string, position: string | null, total: number | null) =>
         position ? `${name} · Book ${position}${total ? ` of ${total}` : ''}` : name,
       reviewsLink: (count: number) => `${count} ${count === 1 ? 'review' : 'reviews'}`,
@@ -799,6 +800,19 @@ export const copy = {
       noGrowth: 'Nothing was added in the last 12 months.',
       mergeLink: 'Open the merge queue',
       genresLink: 'Manage Genres and rules',
+      searchHeading: 'Find a Book',
+      searchLabel: 'Title, Author, or ISBN',
+      searchHint: 'Searches the Books already on RePrint.',
+      searchButton: 'Search',
+      tooShort: 'Type at least 2 characters to search.',
+      resultsLabel: (q: string) => `Books matching “${q}”`,
+      noResults: (q: string) => `No Books on RePrint match “${q}”.`,
+      searchFailed: 'We could not search the Catalog. Please try again in a moment.',
+      publicPage: 'Public page',
+      previous: 'Previous',
+      next: 'Next',
+      pagerLabel: 'Search result pages',
+      pageStatus: (page: number) => `Page ${page}`,
     },
     merge: {
       title: 'Merge queue',

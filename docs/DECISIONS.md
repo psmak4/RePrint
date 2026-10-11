@@ -1283,3 +1283,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: When a Source says its Series list is whole (`seriesReported: true` on the Book candidate), ingest removes the Book's memberships that the list no longer has, then deletes any of those Series left with no Books unless an admin edited one of its fields. Open Library sets the flag only when its Editions read succeeded, since Series text comes from Edition records; the seed and stub Sources leave it unset, so they only add, as before. An admin-locked `series` field is untouched, as before.
 - Why: After D-193, refreshing The Hitchhiker's Guide added the real Series but kept "Compactos", because ingest only ever added memberships.
 - Affects: `packages/shared/src/catalog.ts`, `apps/api/src/catalog/ingest/ingest.ts`, `apps/api/src/catalog/sources/open-library/adapter.ts`
+
+### D-195 · How staff reach a Book's admin page
+- Status: Decided (owner). PRD §7.11 lists Catalog editing and refresh but not how to find a Book.
+- Decision: Two ways in. (1) `/admin/catalog` gets a "Find a Book" search backed by `GET /v1/admin/books?q=&page=` (`catalog.manage`): the public search's Catalog matching (title, Author, Series, ISBN), never a Source, 20 per page with `hasMore`, returning Book summaries with IDs. (2) The public Book page shows an "Edit in admin" link beside the breadcrumb to viewers with `catalog.manage`. The search is a plain GET form, so the query lives in the URL like the Users list.
+- Why: The only link to `/admin/books/:id` was in the merge queue, so an Admin needed the Book's ID to edit or refresh it.
+- Affects: `packages/shared/src/admin-catalog-api.ts`, `apps/api/src/modules/admin/books.ts`, `apps/web/app/routes/admin-catalog.tsx`, `apps/web/app/components/admin/catalog-dashboard.tsx`, `apps/web/app/components/books/book-page.tsx`

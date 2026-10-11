@@ -124,6 +124,26 @@ describe('BookPage header', () => {
     renderPage({ primaryEdition: null, primaryEditionId: null })
     expect(screen.getByRole('heading', { level: 1, name: 'Dune' })).toBeTruthy()
   })
+
+  it('links staff who can edit the Catalog to the admin page, and nobody else', () => {
+    const viewer = (permissions: string[]) => ({
+      id,
+      username: 'staff',
+      displayName: 'Staff',
+      verified: true,
+      permissions,
+    })
+    renderPage({}, [edition], null, { viewer: viewer(['catalog.manage']) })
+    expect(screen.getByRole('link', { name: 'Edit in admin' }).getAttribute('href')).toBe(
+      `/admin/books/${id}`,
+    )
+    cleanup()
+    renderPage({}, [edition], null, { viewer: viewer(['reviews.moderate']) })
+    expect(screen.queryByRole('link', { name: 'Edit in admin' })).toBeNull()
+    cleanup()
+    renderPage()
+    expect(screen.queryByRole('link', { name: 'Edit in admin' })).toBeNull()
+  })
 })
 
 describe('description', () => {

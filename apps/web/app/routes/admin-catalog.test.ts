@@ -94,6 +94,30 @@ describe('admin catalog dashboard loader', () => {
     const error = (await thrown(() => statsLoader(getArgs()))) as { init?: { status: number } }
     expect(error.init?.status).toBe(502)
   })
+  it('searches only when there is a query', async () => {
+    const calls = stubApi({ 'GET /v1/admin/catalog/stats': { body: stats } })
+    expect((await statsLoader(getArgs())).search).toEqual({ q: '', page: 1, results: null })
+    expect(calls.map((call) => call.path)).toEqual(['/v1/admin/catalog/stats'])
+  })
+  it('passes the query and page to the Book search', async () => {
+    const found = { items: [], page: 2, hasMore: false }
+    const calls = stubApi({
+      'GET /v1/admin/catalog/stats': { body: stats },
+      'GET /v1/admin/books': { body: found },
+    })
+    const { search } = await statsLoader(getArgs('/admin/catalog?q=dune&page=2'))
+    expect(search).toEqual({ q: 'dune', page: 2, results: found })
+    expect(calls.find((call) => call.path === '/v1/admin/books')?.search).toBe('?q=dune&page=2')
+  })
+  it('keeps the dashboard when the search fails', async () => {
+    stubApi({
+      'GET /v1/admin/catalog/stats': { body: stats },
+      'GET /v1/admin/books': { status: 500 },
+    })
+    const loaded = await statsLoader(getArgs('/admin/catalog?q=dune'))
+    expect(loaded.stats.totals.books).toBe(1)
+    expect(loaded.search.results).toBe('failed')
+  })
 })
 
 describe('admin system loader', () => {

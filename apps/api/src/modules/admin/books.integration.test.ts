@@ -11,7 +11,12 @@ import {
   editions,
   genres,
 } from '@reprint/db'
-import { adminBookDetailSchema, adminBookSchema, type BookCandidate } from '@reprint/shared'
+import {
+  adminBookDetailSchema,
+  adminBookSchema,
+  adminBookSearchResponseSchema,
+  type BookCandidate,
+} from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import sharp from 'sharp'
@@ -99,6 +104,38 @@ const patch = (id: string, payload: object, cookies?: Record<string, string>) =>
     payload,
     headers: { origin: ORIGIN },
   })
+
+describe('GET /v1/admin/books', () => {
+  const search = (query: string, cookies?: Record<string, string>) =>
+    app.inject({ method: 'GET', url: `/v1/admin/books?${query}`, cookies })
+
+  it('finds Catalog Books by title or Author for an Admin, with their IDs', async () => {
+    const bookId = await dune()
+    const admin = await person(['admin'])
+    for (const q of ['dune', 'herbert']) {
+      const response = await search(new URLSearchParams({ q }).toString(), admin.cookies)
+      expect(response.statusCode).toBe(200)
+      const body = adminBookSearchResponseSchema.parse(response.json())
+      expect(body).toMatchObject({ page: 1, hasMore: false })
+      expect(body.items.map((item) => item.id)).toEqual([bookId])
+    }
+  })
+
+  it('finds nothing for a query shorter than the search minimum', async () => {
+    await dune()
+    const admin = await person(['admin'])
+    const response = await search('q=d', admin.cookies)
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({ items: [], page: 1, hasMore: false })
+  })
+
+  it('is denied to a Moderator and to a Visitor', async () => {
+    await dune()
+    const moderator = await person(['moderator'])
+    expect((await search('q=dune', moderator.cookies)).statusCode).toBe(403)
+    expect((await search('q=dune')).statusCode).toBe(401)
+  })
+})
 
 describe('GET /v1/admin/books/:id', () => {
   const get = (id: string, cookies?: Record<string, string>) =>
