@@ -42,6 +42,29 @@ describe('Cover', () => {
     expect(screen.getByText('Frank Herbert')).toBeTruthy()
   })
 
+  it('never crops the image and loads a sharper file on dense screens', () => {
+    const { container } = render(<Cover cover={olCover} title="Dune" size="medium" />)
+    const img = container.querySelector('img')
+    expect(img?.className).toContain('object-contain')
+    expect(img?.className).not.toContain('object-cover')
+    expect(img?.getAttribute('srcset')).toBe(
+      'https://covers.openlibrary.org/b/id/8231856-M.jpg?default=false 1x, https://covers.openlibrary.org/b/id/8231856-L.jpg?default=false 2x',
+    )
+    expect(img?.getAttribute('loading')).toBe('lazy')
+  })
+
+  it('fits a wide image to the width and a narrow one to the height', () => {
+    const { container } = render(<Cover cover={olCover} title="Dune" size="large" priority />)
+    const img = container.querySelector('img') as HTMLImageElement
+    expect(img.getAttribute('loading')).toBe('eager')
+    expect(img.getAttribute('srcset')).toBeNull()
+    Object.defineProperty(img, 'naturalWidth', { value: 500 })
+    Object.defineProperty(img, 'naturalHeight', { value: 500 })
+    fireEvent.load(img)
+    expect(img.classList.contains('w-full')).toBe(true)
+    expect(img.classList.contains('h-full')).toBe(false)
+  })
+
   it('has no image to load for an upload without a URL', () => {
     render(<Cover cover={{ ...olCover, origin: 'upload', originRef: 'x' }} title="Dune" />)
     expect(document.querySelector('img')).toBeNull()

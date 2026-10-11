@@ -341,6 +341,7 @@ export const copy = {
       seriesEyebrow: 'Series',
       editionsHeading: 'Editions',
       editionsKnown: (count: number) => `${count} known`,
+      editionsListed: (count: number) => `RePrint lists ${count} of them so far.`,
     },
     editions: {
       heading: (count: number) => `Editions (${count})`,

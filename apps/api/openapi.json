@@ -11189,6 +11189,18 @@
                       "minimum": 0,
                       "maximum": 9007199254740991
                     },
+                    "sourceEditionCount": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "rating": {
                       "type": "object",
                       "properties": {

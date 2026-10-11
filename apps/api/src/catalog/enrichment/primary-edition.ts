@@ -5,11 +5,22 @@ export interface RankableEdition {
   isbn13: string | null
   /** `YYYY-MM-DD`, or null when unknown. */
   publishedDate: string | null
+  /** Which image the cover is (`origin:ref`), to compare with the Book's own cover. */
+  coverRef?: string | null
 }
 
-function compare(a: RankableEdition, b: RankableEdition): number {
+function comparer(bookCoverRef: string | null) {
+  return (a: RankableEdition, b: RankableEdition) => compare(a, b, bookCoverRef)
+}
+
+function compare(a: RankableEdition, b: RankableEdition, bookCoverRef: string | null): number {
   const score = (edition: RankableEdition) =>
-    [edition.language === 'en', edition.coverId !== null, edition.isbn13 !== null].map(Number)
+    [
+      bookCoverRef !== null && edition.coverRef === bookCoverRef,
+      edition.language === 'en',
+      edition.coverId !== null,
+      edition.isbn13 !== null,
+    ].map(Number)
   const scoreA = score(a)
   const scoreB = score(b)
   for (let i = 0; i < scoreA.length; i += 1) {
@@ -25,14 +36,24 @@ function compare(a: RankableEdition, b: RankableEdition): number {
 }
 
 /**
- * Editions best first (PRD §5.1): English, then has a cover, then has an ISBN, then most recent. The
+ * Editions best first: the one whose cover is the Book's own cover (the Source's representative
+ * Edition, D-192), then PRD §5.1's order: English, has a cover, has an ISBN, most recent. The
  * criteria apply in that order; the Edition ID breaks a full tie so the choice is stable.
  */
-export function rankEditions<T extends RankableEdition>(list: readonly T[]): T[] {
-  return [...list].sort(compare)
+export function rankEditions<T extends RankableEdition>(
+  list: readonly T[],
+  bookCoverRef: string | null = null,
+): T[] {
+  return [...list].sort(comparer(bookCoverRef))
 }
 
-/** The Edition that represents the Book by default, or null when it has none. */
-export function choosePrimaryEdition(list: readonly RankableEdition[]): string | null {
-  return rankEditions(list)[0]?.id ?? null
+/**
+ * The Edition that represents the Book by default, or null when it has none. Matching the Book's
+ * cover first keeps the header's cover and its Edition details from describing different printings.
+ */
+export function choosePrimaryEdition(
+  list: readonly RankableEdition[],
+  bookCoverRef: string | null = null,
+): string | null {
+  return rankEditions(list, bookCoverRef)[0]?.id ?? null
 }

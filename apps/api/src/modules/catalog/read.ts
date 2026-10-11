@@ -198,6 +198,7 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
     genres: genreRows,
     primaryEdition: primary ? toEdition(primary, coverMap) : null,
     editionCount: editionRows.length,
+    sourceEditionCount: book.sourceEditionCount,
     rating: ratingSummary(book),
   }
 }

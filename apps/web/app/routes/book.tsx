@@ -259,6 +259,7 @@ async function loadSeries(
       name: detail.series.name,
       slug: detail.series.slug,
       total: detail.items.length,
+      complete: detail.items.every((item, index) => item.position === index + 1),
       books: detail.items.map((item) => ({
         slug: item.book.slug,
         title: item.book.title,

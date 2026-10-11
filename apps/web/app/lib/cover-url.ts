@@ -17,3 +17,22 @@ export function coverUrl(cover: Cover | null, size: CoverSize): string | null {
   }
   return null
 }
+
+/** The next size up for screens with two or more device pixels per CSS pixel (`large` is the top). */
+const DENSER: Record<CoverSize, CoverSize | null> = {
+  small: 'medium',
+  medium: 'large',
+  large: null,
+}
+
+/**
+ * A `srcset` that adds the next Open Library size for high-density screens, so a 150 px cover is
+ * drawn from a 320 px file on a retina display. Uploads and the largest size have one file only.
+ */
+export function coverSrcSet(cover: Cover | null, size: CoverSize): string | undefined {
+  const denser = DENSER[size]
+  if (!cover || cover.url || cover.origin !== 'open_library' || !cover.originRef || !denser) {
+    return undefined
+  }
+  return `${coverUrl(cover, size)} 1x, ${coverUrl(cover, denser)} 2x`
+}

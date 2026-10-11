@@ -56,9 +56,12 @@ function FormatIcon({ format }: { format: EditionsCardItem['format'] }) {
 /** Editions of a Book with a format filter. Shows five and links to the full list. */
 export function EditionsCard({
   editions,
+  known = editions.length,
   seeAllHref,
 }: {
   editions: EditionsCardItem[]
+  /** How many Editions are known in all; the Source may know of more than RePrint lists (D-191). */
+  known?: number
   seeAllHref?: string
 }) {
   const [format, setFormat] = useState<EditionsCardItem['format'] | null>(null)
@@ -75,9 +78,14 @@ export function EditionsCard({
           {copy.redesign.bookPage.editionsHeading}
         </h2>
         <span className="text-sm text-muted-foreground">
-          {copy.redesign.bookPage.editionsKnown(editions.length)}
+          {copy.redesign.bookPage.editionsKnown(known)}
         </span>
       </div>
+      {known > editions.length ? (
+        <p className="-mt-1.5 text-sm text-muted-foreground">
+          {copy.redesign.bookPage.editionsListed(editions.length)}
+        </p>
+      ) : null}
       {formats.length > 1 ? (
         <fieldset className="flex flex-wrap gap-1.5 border-0 p-0">
           <legend className="sr-only">{text.filterLabel}</legend>
