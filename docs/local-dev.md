@@ -48,6 +48,8 @@ Conventions enforced by `packages/db/src/schema/conventions.integration.test.ts`
 Run `pnpm build` first. Locally, `pnpm test:e2e` (`e2e/run.mjs`) starts or reuses an isolated Compose project, `reprint-e2e` (`docker-compose.e2e.yml`), migrates it, and runs Playwright against it: Postgres 25432, Redis 26379, Mailpit 21025/28025, web 25173, API 23000. The `reprint` database that `pnpm dev` uses never gets test Books, Members, or reviews, and a running `pnpm dev` does not clash with the specs.
 
 - In CI, or with `E2E_STACK=external`, the script runs Playwright against the environment variables already set (`DATABASE_URL`, `E2E_WEB_ORIGIN`, and so on), as the CI `e2e` job does.
+- A spec that moves items to a Moderator queue front and decides them must do it inside `withQueueLock` (`e2e/support/accounts.ts`, D-189), or parallel specs claim each other's reviews.
+- Leave about a minute between full runs: specs that browse without `useOwnClientIp` share one client IP, and a second run inside the same minute hits the 300/min anonymous-read limit.
 - The isolated stack stays up between runs. Reset it with `docker compose -p reprint-e2e -f docker-compose.yml -f docker-compose.e2e.yml down -v`.
 - Test data written into your dev database by runs before M9-T10 (stub Books such as "Dune", `e2e-` accounts, their reviews): run `pnpm db:reset` to drop it and re-seed.
 
