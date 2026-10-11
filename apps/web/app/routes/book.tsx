@@ -91,7 +91,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const [editions, authorData, series, moreInGenre, session, reviews] = await Promise.all([
     loadEditions(api, book.slug),
     byline ? loadAuthor(api, byline.slug, book.id) : null,
-    firstSeries ? loadSeries(api, firstSeries.slug) : null,
+    firstSeries ? loadSeries(api, firstSeries.slug, book.slug) : null,
     firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
     loadSession(request),
     loadReviews(api, book.slug, reviewQuery),
@@ -246,20 +246,24 @@ async function loadAuthor(
   }
 }
 
+/** The Series card's data: only the Books around this one, however long the Series is (D-199). */
 async function loadSeries(
   api: ReturnType<typeof apiClientFor>,
   seriesSlug: string,
+  bookSlug: string,
 ): Promise<SeriesSummary | null> {
   try {
-    const response = await api.get(`/v1/series/${seriesSlug}`)
+    const query = new URLSearchParams({ around: bookSlug })
+    const response = await api.get(`/v1/series/${seriesSlug}?${query}`)
     if (!response.ok) return null
     const detail = seriesDetailResponseSchema.parse(await response.json())
     if (detail.items.length === 0) return null
     return {
       name: detail.series.name,
       slug: detail.series.slug,
-      total: detail.items.length,
-      complete: detail.items.every((item, index) => item.position === index + 1),
+      // The Source's count, not the stored Books: "Book 1 of 1" was wrong while the rest were missing.
+      total: detail.series.memberCount,
+      stored: detail.total,
       books: detail.items.map((item) => ({
         slug: item.book.slug,
         title: item.book.title,

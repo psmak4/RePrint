@@ -1,0 +1,1 @@
+ALTER TABLE "books" ADD COLUMN "series_import_only" boolean DEFAULT false NOT NULL;

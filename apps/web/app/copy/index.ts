@@ -283,8 +283,8 @@ export const copy = {
       heading: 'In this series',
       position: (position: string, total: number | null) =>
         total ? `Book ${position} of ${total}` : `Book ${position}`,
-      youAreHere: "You're here",
       upNext: (title: string) => `Up next: ${title}`,
+      seeAll: (count: number) => `See all ${count}`,
       viewSeries: 'View the series',
     },
     author: {
@@ -532,6 +532,7 @@ export const copy = {
     position: (position: number) => `Book ${position}`,
     noPosition: 'Not numbered',
     noBooks: 'No books in this series yet',
+    stillAdding: 'Still adding books from this series.',
     metaDescription: (name: string) => `${name}: books in reading order, with ratings on RePrint.`,
     loadFailed: "We couldn't load this series right now. Please try again in a moment.",
   },

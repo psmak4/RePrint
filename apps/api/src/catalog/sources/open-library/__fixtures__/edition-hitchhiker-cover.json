@@ -1,0 +1,58 @@
+{
+  "publishers": ["Harmony Books"],
+  "pagination": "207 p. ;",
+  "key": "/books/OL17837787M",
+  "authors": [
+    {
+      "key": "/authors/OL272947A"
+    }
+  ],
+  "publish_places": ["New York"],
+  "edition_name": "[Book club ed.]",
+  "genres": ["Fiction."],
+  "source_records": [
+    "marc:marc_oregon_summit_records/catalog_files/washs02192008.mrc_revrev.mrc:1398988764:861"
+  ],
+  "title": "The Hitchhiker's Guide to the Galaxy",
+  "number_of_pages": 207,
+  "languages": [
+    {
+      "key": "/languages/eng"
+    }
+  ],
+  "subjects": [
+    "Prefect, Ford (Fictitious character) -- Fiction",
+    "Dent, Arthur (Fictitious character) -- Fiction"
+  ],
+  "publish_date": "1979",
+  "publish_country": "nyu",
+  "by_statement": "Douglas Adams.",
+  "works": [
+    {
+      "key": "/works/OL2163649W"
+    }
+  ],
+  "type": {
+    "key": "/type/edition"
+  },
+  "identifiers": {
+    "goodreads": ["58195567"]
+  },
+  "oclc_numbers": ["7633564", "1326507571"],
+  "ocaid": "hitchhikersguide0000doug",
+  "classifications": {},
+  "dewey_decimal_class": ["823/.914"],
+  "copyright_date": "1979",
+  "physical_format": "Hardcover",
+  "covers": [12986869],
+  "latest_revision": 7,
+  "revision": 7,
+  "created": {
+    "type": "/type/datetime",
+    "value": "2008-10-01T10:08:53.424759"
+  },
+  "last_modified": {
+    "type": "/type/datetime",
+    "value": "2022-11-04T18:44:00.292430"
+  }
+}

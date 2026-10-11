@@ -1,4 +1,4 @@
-import { authors, books, contributions, editions, sourceRecords } from '@reprint/db'
+import { authors, books, contributions, editions, series, sourceRecords } from '@reprint/db'
 import {
   authorDetailSchema,
   bookDetailSchema,
@@ -160,6 +160,24 @@ describe('GET /v1/books/:slug', () => {
       expect(options.jobId).toContain(bookId)
     })
 
+    it('queues a sync of a viewed Book’s Series when it is due (D-199)', async () => {
+      const { slug } = await ingest('stub-book-hobbit', 'stub-author-tolkien')
+      await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
+      expect(queued.map((job) => job.name)).toEqual(['catalog.series-sync'])
+
+      queued.length = 0
+      await stack.db.db.update(series).set({ membersSyncedAt: new Date() })
+      await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
+      expect(queued).toEqual([])
+    })
+
+    it('queues nothing when viewing a Book only a Series sync brought in (one level, D-199)', async () => {
+      const { slug, bookId } = await ingest('stub-book-hobbit', 'stub-author-tolkien')
+      await stack.db.db.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+      await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
+      expect(queued).toEqual([])
+    })
+
     it('refreshes from the Source and keeps admin-locked fields', async () => {
       const { bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
       await stack.db.db
@@ -172,7 +190,7 @@ describe('GET /v1/books/:slug', () => {
           refreshedAt: new Date(Date.now() - STALE_AFTER_MS - 60_000),
         })
         .where(eq(books.id, bookId))
-      const outcome = await refreshBook({ db: stack.db.db, source: stub, bookId })
+      const { outcome } = await refreshBook({ db: stack.db.db, source: stub, bookId })
       expect(outcome).toBe('refreshed')
       const [book] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
       expect(book?.title).toBe('Dune (admin title)')

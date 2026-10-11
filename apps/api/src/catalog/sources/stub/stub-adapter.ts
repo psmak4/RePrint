@@ -69,7 +69,27 @@ const EDITIONS: Record<string, BookCandidateEdition[]> = {
       sourceLink: { source: SOURCE, entityType: 'edition', sourceId: 'stub-edition-hobbit-1' },
     },
   ],
+  'stub-book-fellowship': [
+    {
+      isbn13: '9780261102354',
+      format: 'paperback',
+      language: 'en',
+      title: null,
+      publisherName: 'Allen & Unwin',
+      publishedDate: '1954-07-29',
+      pageCount: 423,
+      cover: null,
+      sourceLink: { source: SOURCE, entityType: 'edition', sourceId: 'stub-edition-fellowship-1' },
+    },
+  ],
 }
+
+/** The stub's one Series, so the Series sync can be tested end to end (D-199). */
+const MIDDLE_EARTH = {
+  source: SOURCE,
+  entityType: 'series',
+  sourceId: 'stub-series-middle-earth',
+} as const
 
 function bookCandidate(
   sourceId: string,
@@ -77,6 +97,7 @@ function bookCandidate(
   authorSourceId: string,
   authorName: string,
   confidence: number,
+  series: BookCandidate['book']['series'] = [],
 ): BookCandidate {
   return {
     book: {
@@ -89,7 +110,7 @@ function bookCandidate(
       contributions: [
         { authorName, role: 'author', position: 0, sourceLink: authorLink(authorSourceId) },
       ],
-      series: [],
+      series,
       subjects: [{ label: 'Fiction' }],
     },
     editions: EDITIONS[sourceId] ?? [],
@@ -112,6 +133,15 @@ const BOOKS: Record<string, BookCandidate> = {
     'stub-author-tolkien',
     'J. R. R. Tolkien',
     1,
+    [{ name: 'Middle-earth', position: 1, sourceLink: MIDDLE_EARTH }],
+  ),
+  'stub-book-fellowship': bookCandidate(
+    'stub-book-fellowship',
+    'The Fellowship of the Ring',
+    'stub-author-tolkien',
+    'J. R. R. Tolkien',
+    1,
+    [{ name: 'Middle-earth', position: 2, sourceLink: MIDDLE_EARTH }],
   ),
 }
 
@@ -127,7 +157,7 @@ function matches(candidate: BookCandidate, query: string): boolean {
 }
 
 /**
- * An in-memory Source with two Books, for tests and for `SOURCE_MODE=stub`. It matches a query as a
+ * An in-memory Source with three Books (two in one Series), for tests and for `SOURCE_MODE=stub`. It matches a query as a
  * case-insensitive substring of a title, an Author name, or an ISBN-13.
  */
 export function createStubSource(): SourceAdapter {
@@ -152,6 +182,16 @@ export function createStubSource(): SourceAdapter {
     },
     async getAuthor(sourceId) {
       return AUTHORS[sourceId] ?? null
+    },
+    async getSeriesMembers(sourceId) {
+      if (sourceId !== MIDDLE_EARTH.sourceId) return null
+      return {
+        name: 'Middle-earth',
+        members: [
+          { sourceId: 'stub-book-hobbit', position: 1, title: 'The Hobbit' },
+          { sourceId: 'stub-book-fellowship', position: 2, title: 'The Fellowship of the Ring' },
+        ],
+      }
     },
   }
 }

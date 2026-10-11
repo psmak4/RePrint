@@ -29,6 +29,12 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   // The Edition behind the work's Cover, which is not in the first page of Editions.
   { name: 'edition-left-hand-cover', path: '/books/OL31935740M.json' },
   { name: 'author-le-guin', path: '/authors/OL31353A.json' },
+  // A Book with an Open Library Series record, and that Series' members (D-199).
+  { name: 'work-hitchhiker', path: '/works/OL2163649W.json' },
+  { name: 'work-hitchhiker-byline', path: '/search.json?q=key%3A%2Fworks%2FOL2163649W&limit=1' },
+  { name: 'work-hitchhiker-editions', path: '/works/OL2163649W/editions.json?limit=50' },
+  { name: 'edition-hitchhiker-cover', path: '/books/OL17837787M.json' },
+  { name: 'series-hitchhiker', path: '/search.json?q=series_key%3AOL326782L&limit=100' },
 ]
 
 export interface RecordOptions {

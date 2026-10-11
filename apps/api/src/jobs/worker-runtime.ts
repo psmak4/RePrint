@@ -64,6 +64,7 @@ export async function startWorker(options: {
           storage,
           catalog,
           queue: jobQueue.queue,
+          enqueue: jobQueue.enqueue,
           sourceRps,
           alert: onAlert ?? (() => {}),
         },

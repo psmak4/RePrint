@@ -142,7 +142,14 @@ describe('GenrePage', () => {
 
 describe('SeriesPage', () => {
   const series: SeriesDetailResponse = {
-    series: { slug: 'dune-chronicles', name: 'Dune Chronicles', description: 'Six novels.' },
+    series: {
+      slug: 'dune-chronicles',
+      name: 'Dune Chronicles',
+      description: 'Six novels.',
+      memberCount: null,
+      adding: false,
+    },
+    total: 3,
     items: [
       { position: 1, book: summary(1, 'Dune', 12, 4.5) },
       { position: 2.5, book: summary(2, 'Interlude', 1, 3) },
@@ -169,5 +176,18 @@ describe('SeriesPage', () => {
   it('says so when the Series has no Books', () => {
     renderInRouter(<SeriesPage detail={{ ...series, items: [] }} />)
     expect(screen.getByText('No books in this series yet')).toBeTruthy()
+  })
+
+  it('says it is still adding Books while the API says a sync is adding them (D-199)', () => {
+    const withAdding = (adding: boolean) => ({
+      ...series,
+      series: { ...series.series, memberCount: 6, adding },
+    })
+    renderInRouter(<SeriesPage detail={withAdding(true)} />)
+    expect(screen.getByText('Still adding books from this series.')).toBeTruthy()
+    cleanup()
+    // Fewer stored than listed, but no sync is adding them: some may never arrive.
+    renderInRouter(<SeriesPage detail={withAdding(false)} />)
+    expect(screen.queryByText('Still adding books from this series.')).toBeNull()
   })
 })

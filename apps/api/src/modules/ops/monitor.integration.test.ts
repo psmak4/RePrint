@@ -121,6 +121,7 @@ describe('system.monitor job', () => {
         storage: undefined as never,
         catalog: undefined as never,
         queue,
+        enqueue: undefined as never,
         sourceRps: 2,
         alert: (alert) => reported.push(alert),
       },

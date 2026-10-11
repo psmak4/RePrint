@@ -18,6 +18,12 @@ import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
 import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
+import {
+  importSeriesMember,
+  queueSeriesMemberImports,
+  queueSeriesSyncs,
+  syncSeries,
+} from '../catalog/series-sync.js'
 import type { SourceAdapter } from '../catalog/sources/types.js'
 import type { Mailer } from '../email/mailer.js'
 import { eraseDeletedAccounts } from '../modules/accounts/erase.js'
@@ -29,6 +35,7 @@ import { recomputeRatings } from '../modules/reviews/aggregates.js'
 import { buildSitemaps } from '../modules/sitemaps/build.js'
 import type { Alert } from '../observability/sentry.js'
 import type { ImageStorage } from '../storage/index.js'
+import type { JobQueue } from './queue.js'
 
 /** What a job handler can use besides its payload. Later tasks add services here. */
 export interface JobContext {
@@ -39,6 +46,8 @@ export interface JobContext {
   storage: ImageStorage
   /** The job queue itself, for the monitor. */
   queue: Queue
+  /** Adds a job, for jobs that start others (a refresh queues Series syncs, D-199). */
+  enqueue: JobQueue['enqueue']
   /** `SOURCE_RATE_LIMIT_RPS`, the Source limit the monitor compares usage with. */
   sourceRps: number
   /** Reports an operational alert (the entry point wires this to Sentry). */
@@ -209,8 +218,8 @@ export const jobs = {
   'catalog.refresh': defineJob({
     // `interactive` marks an Admin's refresh, which goes ahead of background refreshes (PRD §6).
     payload: z.object({ bookId: z.uuid(), interactive: z.boolean().optional() }),
-    handler: async ({ bookId, interactive }, { db, log, catalog }) => {
-      const outcome = await refreshBook({
+    handler: async ({ bookId, interactive }, { db, log, catalog, enqueue }) => {
+      const { outcome, seriesToSync } = await refreshBook({
         db,
         source: catalog.source,
         bookId,
@@ -218,10 +227,52 @@ export const jobs = {
           ? (fn) => catalog.interactive(fn, ADMIN_REFRESH_TIMEOUT_MS)
           : catalog.background,
       })
+      // A refreshed Book was reached by a Member, so its Series fill in (D-199).
+      await queueSeriesSyncs({ enqueue }, seriesToSync)
       log.info({ bookId, outcome }, 'book refreshed')
       return { outcome }
     },
     retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.series-sync': defineJob({
+    // Reads a Series' members and queues one import per missing member, behind interactive
+    // requests (D-199). Short, so a long Series never holds a worker.
+    payload: z.object({ seriesId: z.uuid() }),
+    handler: async ({ seriesId }, { db, log, catalog, enqueue }) => {
+      const result = await syncSeries({
+        db,
+        source: catalog.source,
+        seriesId,
+        call: catalog.background,
+      })
+      if (result.outcome === 'synced') await queueSeriesMemberImports({ enqueue }, result.toImport)
+      const queued = result.outcome === 'synced' ? result.toImport.length : 0
+      log.info({ seriesId, outcome: result.outcome, queued }, 'series synced')
+      return { outcome: result.outcome, queued }
+    },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.series-member': defineJob({
+    // Imports one Series member as a Series import; retried on its own if the Source fails (D-199).
+    payload: z.object({
+      seriesId: z.uuid(),
+      sourceId: z.string().min(1).max(200),
+      position: z.number().min(0).nullable(),
+    }),
+    handler: async ({ seriesId, sourceId, position }, { db, log, catalog }) => {
+      const outcome = await importSeriesMember({
+        db,
+        source: catalog.source,
+        seriesId,
+        sourceId,
+        position,
+        call: catalog.background,
+      })
+      log.info({ seriesId, sourceId, outcome }, 'series member imported')
+      return { outcome }
+    },
+    // Up to about half an hour of backoff, so a short Source outage does not lose a member.
+    retry: { attempts: 5, backoffMs: 120_000 },
   }),
   'catalog.purgeSourceRecords': defineJob({
     // `now` overrides the clock so tests can purge without waiting 30 days.

@@ -8,6 +8,11 @@ export const QUEUE_NAME = 'reprint'
 export interface EnqueueOptions {
   /** A second job with the same ID is ignored while the first is still stored, so callers can dedupe. */
   jobId?: string
+  /**
+   * A second job with the same deduplication ID is ignored only while the first is waiting or
+   * running; once it completes or fails, a new one is added (D-199).
+   */
+  deduplicationId?: string
   /** BullMQ priority: 1 runs first and larger numbers wait behind smaller ones. */
   priority?: number
 }
@@ -47,6 +52,7 @@ export function createJobQueue(redisUrl: string): JobQueue {
       const retry = definition.retry
       const job = await queue.add(name, definition.payload.parse(payload), {
         ...(options?.jobId && { jobId: options.jobId }),
+        ...(options?.deduplicationId && { deduplication: { id: options.deduplicationId } }),
         ...(options?.priority && { priority: options.priority }),
         ...(retry && {
           attempts: retry.attempts,

@@ -177,6 +177,18 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     expect(book?.book.seriesReported).toBe(true)
   })
 
+  it('reads a Series record from the search result, ahead of Edition text', async () => {
+    const book = await adapter.getBook('OL2163649W')
+    expect(book?.book.series).toEqual([
+      {
+        name: "The Hitchhiker's Guide to the Galaxy",
+        position: 1,
+        sourceLink: { source: 'open_library', entityType: 'series', sourceId: 'OL326782L' },
+      },
+    ])
+    expect(book?.book.seriesReported).toBe(true)
+  })
+
   it('adds the Edition behind the work Cover when the first page of Editions lacks it', async () => {
     const book = await adapter.getBook('OL59800W')
     const coverEdition = book?.editions.find((e) => e.sourceLink?.sourceId === 'OL31935740M')
@@ -325,5 +337,79 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     await expect(failing.getBook('OL1W')).rejects.toBeInstanceOf(SourceError)
     await expect(failing.getEditions('OL1W')).rejects.toBeInstanceOf(SourceError)
     await expect(failing.getAuthor('OL1A')).rejects.toBeInstanceOf(SourceError)
+  })
+})
+
+describe('Open Library getSeriesMembers', () => {
+  it('lists every member in reading order with the Series name', async () => {
+    const series = await adapter.getSeriesMembers?.('OL326782L')
+    expect(series?.name).toBe("The Hitchhiker's Guide to the Galaxy")
+    expect(series?.members.map((m) => [m.position, m.sourceId])).toEqual([
+      [1, 'OL2163649W'],
+      [2, 'OL2163655W'],
+      [3, 'OL2163623W'],
+      [4, 'OL2163719W'],
+      [5, 'OL2163638W'],
+      [6, 'OL5725953W'],
+    ])
+  })
+
+  it('reads further pages until it has every member', async () => {
+    const doc = (n: number) => ({
+      key: `/works/OL${n}W`,
+      title: `Book ${n}`,
+      series_key: ['OL9L'],
+      series_name: ['Long'],
+      series_position: [String(n)],
+    })
+    const pages: Record<string, unknown> = {
+      '1': { numFound: 101, docs: Array.from({ length: 100 }, (_, i) => doc(i + 1)) },
+      '2': { numFound: 101, docs: [doc(101)] },
+    }
+    const long = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        Response.json(pages[new URL(String(input)).searchParams.get('page') ?? '1']),
+    })
+    const series = await long.getSeriesMembers?.('OL9L')
+    expect(series?.members).toHaveLength(101)
+    expect(series?.members.at(-1)).toEqual({ sourceId: 'OL101W', position: 101, title: 'Book 101' })
+  })
+
+  it('throws rather than return a short list when a page cannot be read', async () => {
+    const doc = (n: number) => ({
+      key: `/works/OL${n}W`,
+      title: `Book ${n}`,
+      series_key: ['OL9L'],
+      series_name: ['Long'],
+      series_position: [String(n)],
+    })
+    const firstPage = { numFound: 101, docs: Array.from({ length: 100 }, (_, i) => doc(i + 1)) }
+    const brokenSecond = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        new URL(String(input)).searchParams.get('page') === '2'
+          ? new Response('{"docs": 4}', { status: 200 })
+          : Response.json(firstPage),
+    })
+    await expect(brokenSecond.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+    const missingSecond = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        new URL(String(input)).searchParams.get('page') === '2'
+          ? new Response('gone', { status: 404 })
+          : Response.json(firstPage),
+    })
+    await expect(missingSecond.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+    const malformed = createOpenLibraryAdapter({ fetch: replay('{"docs": 4}') })
+    await expect(malformed.getSeriesMembers?.('OL9L')).rejects.toBeInstanceOf(SourceError)
+  })
+
+  it('answers null when the first page is not found', async () => {
+    const missing = createOpenLibraryAdapter({ fetch: replay('gone', 404) })
+    expect(await missing.getSeriesMembers?.('OL9L')).toBeNull()
+  })
+
+  it('answers null for a Series with no members and for a malformed ID', async () => {
+    const empty = createOpenLibraryAdapter({ fetch: replay('{"numFound":0,"docs":[]}') })
+    expect(await empty.getSeriesMembers?.('OL1L')).toBeNull()
+    expect(await adapter.getSeriesMembers?.('../x')).toBeNull()
   })
 })

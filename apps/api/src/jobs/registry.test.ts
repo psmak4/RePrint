@@ -14,6 +14,7 @@ const unusedServices = {
   storage: {} as ImageStorage,
   catalog: {} as JobContext['catalog'],
   queue: {} as Queue,
+  enqueue: async () => 'unused',
   sourceRps: 2,
   alert: () => {},
 }
@@ -21,8 +22,17 @@ const unusedServices = {
 describe('job registry', () => {
   it('recognizes registered names only', () => {
     expect(isJobName('system.heartbeat')).toBe(true)
+    expect(isJobName('catalog.series-sync')).toBe(true)
     expect(isJobName('toString')).toBe(false)
     expect(isJobName('nope')).toBe(false)
+  })
+
+  it('validates the Series sync payload', () => {
+    const payload = jobs['catalog.series-sync'].payload
+    expect(payload.safeParse({ seriesId: 'x' }).success).toBe(false)
+    expect(payload.safeParse({ seriesId: '0192a3b4-0000-7000-8000-000000000001' }).success).toBe(
+      true,
+    )
   })
 
   it('rejects an invalid payload', () => {

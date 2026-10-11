@@ -1,10 +1,13 @@
 import { expect, type Page } from '@playwright/test'
 import {
+  bookSeries,
+  books,
   createDb,
   reviewClaims,
   reviewReports,
   reviews,
   roles,
+  series,
   userRoles,
   users,
 } from '@reprint/db'
@@ -22,6 +25,46 @@ async function withDb<T>(work: (db: ReturnType<typeof createDb>['db']) => Promis
   } finally {
     await client.close()
   }
+}
+
+/** Advisory lock key for specs that reset shared Series state; any constant unused elsewhere. */
+const seriesLockKey = 199_199
+
+/**
+ * Runs `work` while holding a Postgres advisory lock, so the projects' copies of a spec that
+ * resets a shared Series run one at a time (D-199). A failed test ends its worker process, which
+ * closes the connection and drops the lock with it.
+ */
+export async function withSeriesLock<T>(work: () => Promise<T>): Promise<T> {
+  const client = createDb(databaseUrl, { max: 1 })
+  try {
+    await client.sql`select pg_advisory_lock(${seriesLockKey}::bigint)`
+    try {
+      return await work()
+    } finally {
+      await client.sql`select pg_advisory_unlock(${seriesLockKey}::bigint)`
+    }
+  } finally {
+    await client.close()
+  }
+}
+
+/**
+ * Puts a Series back to "never synced" and takes `bookTitle` out of it, as if that Book had been
+ * stored before the Series existed, so a spec can watch a sync bring it back (D-199). The e2e
+ * database is kept between local runs, so a spec cannot rely on a Series being new.
+ */
+export async function resetSeriesSync(name: string, bookTitle: string) {
+  await withDb(async (db) => {
+    const [row] = await db.select({ id: series.id }).from(series).where(eq(series.name, name))
+    if (!row) return
+    await db.update(series).set({ membersSyncedAt: null }).where(eq(series.id, row.id))
+    const [book] = await db.select({ id: books.id }).from(books).where(eq(books.title, bookTitle))
+    if (!book) return
+    await db
+      .delete(bookSeries)
+      .where(and(eq(bookSeries.seriesId, row.id), eq(bookSeries.bookId, book.id)))
+  })
 }
 
 /** Registers through the UI and confirms the email through Mailpit, leaving the browser signed in as a verified Member. */

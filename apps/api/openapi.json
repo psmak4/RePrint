@@ -12643,6 +12643,15 @@
               "type": "string",
               "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
             },
+            "in": "query",
+            "name": "around",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
             "in": "path",
             "name": "slug",
             "required": true
@@ -12672,12 +12681,29 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "memberCount": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "adding": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "slug",
                         "name",
-                        "description"
+                        "description",
+                        "memberCount",
+                        "adding"
                       ],
                       "additionalProperties": false
                     },
@@ -12937,11 +12963,17 @@
                         ],
                         "additionalProperties": false
                       }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
                     }
                   },
                   "required": [
                     "series",
-                    "items"
+                    "items",
+                    "total"
                   ],
                   "additionalProperties": false
                 }

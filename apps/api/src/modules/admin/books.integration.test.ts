@@ -478,6 +478,25 @@ describe('POST /v1/admin/books/:id/refresh', () => {
     expect(row?.title).toBe('Locked Title')
   })
 
+  it('queues a Series sync after refreshing a Book with a Series record', async () => {
+    const hobbit = await stub.getBook('stub-book-hobbit')
+    if (!hobbit) throw new Error('no hobbit')
+    const { bookId } = await ingestBook(stack.db.db, { source: stub, candidate: hobbit })
+    const enqueueJob = vi.fn(async () => 'id')
+    const run = <T>(fn: () => Promise<T>) => fn()
+    await jobs['catalog.refresh'].handler({ bookId }, {
+      db: stack.db.db,
+      log: { info: () => {} } as never,
+      catalog: { source: stub, interactive: run, background: run },
+      enqueue: enqueueJob,
+    } as never)
+    expect(enqueueJob).toHaveBeenCalledWith(
+      'catalog.series-sync',
+      { seriesId: expect.any(String) },
+      expect.objectContaining({ priority: 10 }),
+    )
+  })
+
   it('returns 404 for an unknown Book and queues nothing', async () => {
     const admin = await person(['admin'])
     const response = await refresh('019a0000-0000-7000-8000-000000000000', admin.cookies)

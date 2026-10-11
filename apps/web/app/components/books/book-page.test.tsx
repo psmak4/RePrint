@@ -120,6 +120,17 @@ describe('BookPage header', () => {
     expect(screen.queryByText(/Editions/)).toBeNull()
   })
 
+  it('says "Book N of M" only when the Series size is known (D-199)', () => {
+    const seriesWith = (total: number | null) => ({
+      series: { name: 'Dune Saga', slug: 'dune-saga', total, books: [] },
+    })
+    renderPage({}, [edition], null, seriesWith(6))
+    expect(screen.getByRole('link', { name: 'Dune Saga · Book 1 of 6' })).toBeTruthy()
+    cleanup()
+    renderPage({}, [edition], null, seriesWith(null))
+    expect(screen.getByRole('link', { name: 'Dune Saga · Book 1' })).toBeTruthy()
+  })
+
   it('works with no Primary Edition', () => {
     renderPage({ primaryEdition: null, primaryEditionId: null })
     expect(screen.getByRole('heading', { level: 1, name: 'Dune' })).toBeTruthy()
@@ -232,7 +243,6 @@ describe('side lists', () => {
         name: 'Dune Saga',
         slug: 'dune-saga',
         total: 2,
-        complete: true,
         books: [
           { slug: 'dune-abc123', title: 'Dune', cover: null, position: '1' },
           { slug: 'messiah-def456', title: 'Dune Messiah', cover: null, position: '2' },
@@ -248,7 +258,7 @@ describe('side lists', () => {
         bookCount: 4,
       },
     })
-    expect(screen.getByText(/You're here/)).toBeTruthy()
+    expect(screen.getByText('Book 1 of 2').closest('[aria-current="page"]')).not.toBeNull()
     expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' })).toBeTruthy()
     expect(screen.getByText('Wrote Dune.')).toBeTruthy()
   })
@@ -280,7 +290,6 @@ describe('section nav', () => {
         name: 'Dune Saga',
         slug: 'dune-saga',
         total: 1,
-        complete: true,
         books: [{ slug: 'dune-abc123', title: 'Dune', cover: null, position: '1' }],
       },
     })

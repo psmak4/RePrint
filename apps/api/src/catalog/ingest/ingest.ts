@@ -23,10 +23,11 @@ import {
   fieldOriginsSchema,
   makeSlug,
 } from '@reprint/shared'
-import { and, eq, inArray, isNull, ne, notInArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
 import { enrichBook } from '../enrichment/enrich.js'
 import { createPriorityLookup, type PriorityLookup } from '../enrichment/priorities.js'
 import type { SourceAdapter } from '../sources/types.js'
+import { STALE_AFTER_MS } from '../staleness.js'
 import { ADMIN_ORIGIN, type IncomingField, isLocked, planFieldUpdate } from './fields.js'
 
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0]
@@ -53,6 +54,11 @@ export interface IngestInput {
   authorRecords?: ReadonlyMap<string, AuthorRecord>
   /** The response to keep in `source_records` for 30 days; defaults to the candidate itself. */
   rawRecord?: unknown
+  /**
+   * True when a Series sync is storing a member: a Book created this way is marked
+   * `series_import_only` and starts no Series syncs of its own (D-199, one level only).
+   */
+  seriesImport?: boolean
   now?: Date
 }
 
@@ -65,7 +71,11 @@ export interface IngestResult {
   mergeCandidateBookIds: string[]
   /** Editions left out because their ISBN-13 already belongs to a different Book. */
   skippedEditions: number
+  /** The Book's Series with a Source record whose members are due a sync (D-199). */
+  seriesToSync: string[]
 }
+
+type LinkedEntity = 'book' | 'edition' | 'author' | 'series'
 
 function fieldOriginsOf(value: unknown): FieldOrigins {
   const parsed = fieldOriginsSchema.safeParse(value)
@@ -97,7 +107,7 @@ async function resolveCover(tx: Tx, cover: Cover | null): Promise<string | null>
 
 async function linkedEntityId(
   tx: Tx,
-  entityType: 'book' | 'edition' | 'author',
+  entityType: LinkedEntity,
   source: string,
   sourceId: string,
 ): Promise<string | null> {
@@ -117,7 +127,7 @@ async function linkedEntityId(
 
 async function addLink(
   tx: Tx,
-  entityType: 'book' | 'edition' | 'author',
+  entityType: LinkedEntity,
   entityId: string,
   source: string,
   sourceId: string,
@@ -439,20 +449,37 @@ async function upsertContributions(
   return names
 }
 
+/**
+ * Stores the Book's Series memberships. A Series is found by its Source link, then by name, so a
+ * Series first stored from Edition text is linked rather than duplicated (D-199). Returns the IDs of
+ * the Book's Series that have a Source link.
+ */
 async function upsertSeries(
   tx: Tx,
   candidate: BookCandidate,
   bookId: string,
   source: string,
   now: Date,
-) {
+): Promise<string[]> {
   const reported: string[] = []
+  const linked: string[] = []
   for (const membership of candidate.book.series) {
-    let [row] = await tx
-      .select({ id: series.id })
-      .from(series)
-      .where(sql`lower(${series.name}) = lower(${membership.name})`)
-      .limit(1)
+    const link = membership.sourceLink
+    const linkedId = link ? await linkedEntityId(tx, 'series', link.source, link.sourceId) : null
+    let row: { id: string } | undefined = linkedId ? { id: linkedId } : undefined
+    if (!row) {
+      // By name: with a Source link, only a Series that Source has not linked yet (one stored from
+      // Edition text), so two Source Series that share a name stay apart.
+      const sameName = sql`lower(${series.name}) = lower(${membership.name})`
+      const unlinked = link
+        ? sql`not exists (select 1 from ${sourceLinks} where ${sourceLinks.entityType} = 'series' and ${sourceLinks.entityId} = ${series.id} and ${sourceLinks.source} = ${link.source})`
+        : undefined
+      ;[row] = await tx
+        .select({ id: series.id })
+        .from(series)
+        .where(unlinked ? and(sameName, unlinked) : sameName)
+        .limit(1)
+    }
     if (!row) {
       const id = newId()
       await tx.insert(series).values({
@@ -462,6 +489,10 @@ async function upsertSeries(
         fieldOrigins: { name: { source, at: now.toISOString() } },
       })
       row = { id }
+    }
+    if (link) {
+      await addLink(tx, 'series', row.id, link.source, link.sourceId)
+      linked.push(row.id)
     }
     await tx
       .insert(bookSeries)
@@ -475,7 +506,7 @@ async function upsertSeries(
   }
   // The Source's list replaces the Book's only when it says the list is whole (D-194): a failed
   // read of the records Series come from must not erase them.
-  if (!candidate.book.seriesReported) return
+  if (!candidate.book.seriesReported) return linked
   const dropped = await tx
     .delete(bookSeries)
     .where(
@@ -484,18 +515,33 @@ async function upsertSeries(
         : eq(bookSeries.bookId, bookId),
     )
     .returning({ seriesId: bookSeries.seriesId })
-  if (dropped.length === 0) return
-  // A Series left with no Books goes too, unless an admin has edited it.
-  await tx.delete(series).where(
-    and(
-      inArray(
-        series.id,
-        dropped.map((row) => row.seriesId),
+  if (dropped.length === 0) return linked
+  // A Series left with no Books goes too, unless an admin has edited it, and so do its Source links.
+  const removed = await tx
+    .delete(series)
+    .where(
+      and(
+        inArray(
+          series.id,
+          dropped.map((row) => row.seriesId),
+        ),
+        sql`not exists (select 1 from ${bookSeries} where ${bookSeries.seriesId} = ${series.id})`,
+        sql`not exists (select 1 from jsonb_each(${series.fieldOrigins}) as origin where origin.value->>'source' = ${ADMIN_ORIGIN})`,
       ),
-      sql`not exists (select 1 from ${bookSeries} where ${bookSeries.seriesId} = ${series.id})`,
-      sql`not exists (select 1 from jsonb_each(${series.fieldOrigins}) as origin where origin.value->>'source' = ${ADMIN_ORIGIN})`,
-    ),
-  )
+    )
+    .returning({ id: series.id })
+  if (removed.length > 0) {
+    await tx.delete(sourceLinks).where(
+      and(
+        eq(sourceLinks.entityType, 'series'),
+        inArray(
+          sourceLinks.entityId,
+          removed.map((row) => row.id),
+        ),
+      ),
+    )
+  }
+  return linked
 }
 
 async function upsertSubjects(tx: Tx, candidate: BookCandidate, bookId: string) {
@@ -623,8 +669,9 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
         priorityOf,
       })
     }
+    let linkedSeries: string[] = []
     if (!isLocked('series', book.lockedFields, {})) {
-      await upsertSeries(tx, candidate, book.id, source.name, now)
+      linkedSeries = await upsertSeries(tx, candidate, book.id, source.name, now)
     }
     if (!isLocked('subjects', book.lockedFields, {})) await upsertSubjects(tx, candidate, book.id)
     const mergeCandidateBookIds = book.created
@@ -648,6 +695,47 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
       created: book.created,
       mergeCandidateBookIds,
       skippedEditions,
+      seriesToSync: await seriesDueSync(
+        tx,
+        book.id,
+        book.created && input.seriesImport === true,
+        linkedSeries,
+        now,
+      ),
     }
   })
+}
+
+/**
+ * Marks a Book a Series sync just created, then returns the Series among `ids` whose members were
+ * never synced or not in the last 30 days, or none for a Book only a Series sync brought in
+ * (D-199, one level only).
+ */
+async function seriesDueSync(
+  tx: Tx,
+  bookId: string,
+  markImported: boolean,
+  ids: string[],
+  now: Date,
+): Promise<string[]> {
+  if (markImported) {
+    await tx.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+    return []
+  }
+  const [row] = await tx
+    .select({ importOnly: books.seriesImportOnly })
+    .from(books)
+    .where(eq(books.id, bookId))
+  if (row?.importOnly || ids.length === 0) return []
+  const syncedBefore = new Date(now.getTime() - STALE_AFTER_MS)
+  const rows = await tx
+    .select({ id: series.id })
+    .from(series)
+    .where(
+      and(
+        inArray(series.id, ids),
+        or(isNull(series.membersSyncedAt), lt(series.membersSyncedAt, syncedBefore)),
+      ),
+    )
+  return rows.map((row) => row.id)
 }

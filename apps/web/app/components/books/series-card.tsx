@@ -1,4 +1,4 @@
-import type { Cover as CoverData } from '@reprint/shared'
+import { type Cover as CoverData, SERIES_WINDOW } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -16,22 +16,34 @@ export type SeriesCardBook = {
   rating?: { average: number | null; count: number } | null
 }
 
-/** The Series a Book belongs to, in reading order, marking the current Book and what is next. */
+const WINDOW = SERIES_WINDOW
+
+/**
+ * The Series a Book belongs to, in reading order: the current Book gently highlighted, what is
+ * next, and "See all" when the Series is longer than the card shows (D-199). `books` may be only
+ * the window around the current Book; `stored` is then how many the Catalog holds in all.
+ */
 export function SeriesCard({
   name,
   href,
   books,
   currentSlug,
   total,
+  stored = books.length,
 }: {
   name: string
   href: string
   books: SeriesCardBook[]
   currentSlug: string
   total?: number | null
+  stored?: number
 }) {
   const index = books.findIndex((book) => book.slug === currentSlug)
   const next = index >= 0 ? books[index + 1] : undefined
+  // Up to WINDOW Books, the current one just before the middle, never past either end.
+  const start = Math.max(0, Math.min(index - WINDOW / 2 + 1, books.length - WINDOW))
+  const shown = books.length > WINDOW ? books.slice(start, start + WINDOW) : books
+  const size = Math.max(total ?? 0, stored, books.length)
   return (
     <section
       aria-labelledby="series-card-heading"
@@ -48,7 +60,7 @@ export function SeriesCard({
         </h2>
       </div>
       <ol className="flex flex-col gap-1">
-        {books.map((book) => {
+        {shown.map((book) => {
           const here = book.slug === currentSlug
           const average = book.rating?.average ?? null
           const content = (
@@ -63,7 +75,6 @@ export function SeriesCard({
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
                   {book.position ? text.position(book.position, total ?? null) : null}
-                  {here ? ` · ${text.youAreHere}` : null}
                 </span>
                 <span className="font-serif text-[17px] leading-tight">{book.title}</span>
               </span>
@@ -87,7 +98,13 @@ export function SeriesCard({
           return (
             <li key={book.slug}>
               {here ? (
-                <div aria-current="page" className={cn(row, 'bg-[#eff6ff] outline outline-accent')}>
+                <div
+                  aria-current="page"
+                  className={cn(
+                    row,
+                    'bg-accent/5 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_30%,transparent)]',
+                  )}
+                >
                   {content}
                 </div>
               ) : (
@@ -99,6 +116,11 @@ export function SeriesCard({
           )
         })}
       </ol>
+      {size > shown.length ? (
+        <Link to={href} className="text-sm font-semibold text-link hover:underline">
+          {text.seeAll(size)}
+        </Link>
+      ) : null}
       {next ? (
         <Link
           to={`/books/${next.slug}`}

@@ -10,6 +10,7 @@ import {
   searchResponseSchema,
   searchSuggestQuerySchema,
   searchSuggestResponseSchema,
+  seriesDetailQuerySchema,
   seriesDetailResponseSchema,
   slugParamsSchema,
 } from '@reprint/shared'
@@ -20,6 +21,7 @@ import { isStale } from '../../catalog/refresh.js'
 import type { InteractiveCall } from '../../catalog/resolve.js'
 import { searchCatalogAuthors, searchCatalogBooks } from '../../catalog/search/catalog-search.js'
 import { federatedSearch } from '../../catalog/search/federated-search.js'
+import { queueSeriesSyncs, seriesDueForBook } from '../../catalog/series-sync.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
@@ -35,7 +37,7 @@ import {
   loadBookSummaries,
   loadEditions,
 } from './read.js'
-import { findSeriesBySlug, loadSeriesEntries } from './series.js'
+import { findSeriesBySlug, isAdding, loadSeriesEntries } from './series.js'
 
 /** Refresh jobs run behind everything else. */
 const REFRESH_PRIORITY = 10
@@ -141,6 +143,14 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
             request.log.warn({ err: error, bookId: book.id }, 'could not queue book refresh'),
           )
       }
+      if (jobs) {
+        // A Book stored before its Series was synced fills it in on view (D-199); never fails the page.
+        await seriesDueForBook(db, book.id)
+          .then((due) => queueSeriesSyncs(jobs, due))
+          .catch((error: unknown) =>
+            request.log.warn({ err: error, bookId: book.id }, 'could not queue Series syncs'),
+          )
+      }
       const detail = await loadBookDetail(db, book)
       await addViewerShelves(db, request, [detail])
       return detail
@@ -204,20 +214,33 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
 
   app.get(
     '/series/:slug',
-    { schema: { params: slugParamsSchema, response: { 200: seriesDetailResponseSchema } } },
+    {
+      schema: {
+        params: slugParamsSchema,
+        querystring: seriesDetailQuerySchema,
+        response: { 200: seriesDetailResponseSchema },
+      },
+    },
     async (request) => {
       if (!db) throw new Error('catalog routes need a database')
       const found = await findSeriesBySlug(db, request.params.slug)
       if (!found) throw new HttpProblem(404, 'We could not find that series.')
-      const items = await loadSeriesEntries(db, found)
+      const { items, total } = await loadSeriesEntries(db, found, request.query.around)
       await addViewerShelves(
         db,
         request,
         items.map((item) => item.book),
       )
       return {
-        series: { slug: found.slug, name: found.name, description: found.description },
+        series: {
+          slug: found.slug,
+          name: found.name,
+          description: found.description,
+          memberCount: found.sourceMemberCount,
+          adding: isAdding(found, total),
+        },
         items,
+        total,
       }
     },
   )
