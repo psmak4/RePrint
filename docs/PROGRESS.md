@@ -679,3 +679,7 @@ Entry format:
 - Rebuilt the admin Edit Book page (D-196): header with the Cover, cards, a side column from `xl`, Genre chips, icon remove buttons, radio-card Edition picker, and a save bar shown only with unsaved changes. Checked at 1440 px and 390 px with screenshots from a throwaway Playwright spec on the isolated e2e stack (deleted after).
 - Tests: `book-editor.test.tsx` updated for the radio picker and the save bar; new cases for chips matching checkboxes, Discard, the Edition card details, and no request when nothing changed. Axe passes.
 - Seen while checking, not fixed here: the Hitchhiker's Primary Edition is still the 2016 CreateSpace one after a refresh (the cover-first rule found no Edition with the Book's Cover), and its description carries Open Library's "Also contained in" list with links to openlibrary.org work pages.
+
+### 2026-10-10 · M9-T17 · owner report · feat/styled-selects
+- Eleven hand-styled selects now use the shared `Select` (D-198). Checked in Chromium (open list drawn by the page) and WebKit (closed look) with screenshots from a throwaway Playwright spec. The overlaid shelf select was tried with the page-drawn list and did not open (Chromium), so it keeps the system menu.
+- Two sort labels that wrapped their select now use `htmlFor`, since Biome's label rule does not see through the component.

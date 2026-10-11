@@ -1,4 +1,6 @@
 import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@reprint/shared'
+import { Select } from '@reprint/ui'
+import { useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type LibraryView, libraryHref } from '../../lib/library-links.js'
@@ -57,23 +59,20 @@ function Tabs({
 }
 
 function SortForm({ username, view }: { username: string; view: LibraryView }) {
+  const sortId = useId()
   // A plain GET form, so sorting works without JavaScript; the Shelf tab is kept and the page resets.
   return (
     <Form method="get" action={`/u/${username}/library`} className="flex items-center gap-2.5">
       {view.shelf ? <input type="hidden" name="shelf" value={view.shelf} /> : null}
-      <label className="flex items-center gap-2.5 text-sm text-muted-foreground">
+      <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
         {text.sortLabel}
-        <select
-          name="sort"
-          defaultValue={view.sort}
-          className="h-10 rounded-[10px] border border-input-border bg-surface px-3 text-sm font-medium text-foreground"
-        >
+        <Select id={sortId} name="sort" defaultValue={view.sort} compact>
           {LIBRARY_SORTS.map((sort) => (
             <option key={sort} value={sort}>
               {text.sorts[sort]}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       <button
         type="submit"

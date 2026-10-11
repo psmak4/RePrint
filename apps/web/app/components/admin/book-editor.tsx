@@ -6,7 +6,7 @@ import {
   CONTRIBUTION_ROLES,
   type ContributionRole,
 } from '@reprint/shared'
-import { Button, Checkbox, cn, Input, Label, Textarea } from '@reprint/ui'
+import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
 import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -14,8 +14,6 @@ import { Cover } from '../books/cover.js'
 
 const text = copy.admin.book
 const formats = copy.books.page.formats
-const SELECT_CLASS =
-  'h-11 w-full rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 const CARD = 'flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 md:p-6'
 const CARD_HEADING = 'font-serif text-xl leading-tight font-medium'
 /** The edit form's fetcher outlives the form, which remounts after a save with the stored Book. */
@@ -419,10 +417,10 @@ function EditForm({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={`${ids}-role-${row.key}`}>{text.roleLabel}</Label>
-              <select
+              <Select
                 id={`${ids}-role-${row.key}`}
                 value={row.role}
-                className={SELECT_CLASS}
+                className="w-full"
                 onChange={(event) =>
                   setContributionRows(
                     contributionRows.map((item, i) =>
@@ -438,7 +436,7 @@ function EditForm({
                     {text.roles[role]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <RemoveButton
               label={text.removeContribution(row.name)}

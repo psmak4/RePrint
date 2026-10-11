@@ -1,5 +1,5 @@
 import { type ModQueueItem, REVIEW_DECISION_REASON_MAX } from '@reprint/shared'
-import { Button, Label, Textarea } from '@reprint/ui'
+import { Button, Label, Select, Textarea } from '@reprint/ui'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useFetcher, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -118,19 +118,14 @@ export function DecisionPanel({
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
           <div className="flex flex-col gap-1">
             <Label htmlFor={phraseId}>{text.phraseLabel}</Label>
-            <select
-              id={phraseId}
-              value=""
-              onChange={(event) => setReason(event.target.value)}
-              className="h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px]"
-            >
+            <Select id={phraseId} value="" onChange={(event) => setReason(event.target.value)}>
               <option value="">{text.phrasePlaceholder}</option>
               {text.phrases.map((phrase) => (
                 <option key={phrase} value={phrase}>
                   {phrase}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor={reasonId}>{text.reasonLabel}</Label>

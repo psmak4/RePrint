@@ -7,7 +7,7 @@ import {
   REVIEW_HEADLINE_MAX,
   reviewInputSchema,
 } from '@reprint/shared'
-import { Button, Checkbox, Input, Label, Textarea } from '@reprint/ui'
+import { Button, Checkbox, Input, Label, Select, Textarea } from '@reprint/ui'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
@@ -25,8 +25,6 @@ export type ReviewActionResult = {
   fieldErrors?: Record<string, string>
 }
 
-const SELECT_CLASS =
-  'flex h-11 w-full rounded-[10px] border border-input-border bg-surface px-3.5 py-2 text-[15px] text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
 const FIELDS = ['rating', 'headline', 'body', 'hasSpoilers', 'editionId'] as const
 
 /** Writes or edits the viewer's Review, validated with the shared schema; the book route's action saves it. */
@@ -200,9 +198,9 @@ export function ReviewForm({
       {editions.length > 0 ? (
         <div className="flex flex-col gap-2">
           <Label htmlFor="review-edition">{c.editionLabel}</Label>
-          <select
+          <Select
             id="review-edition"
-            className={SELECT_CLASS}
+            className="w-full"
             aria-invalid={editionError ? true : undefined}
             aria-describedby={editionError ? 'review-edition-error' : undefined}
             {...register('editionId', { setValueAs: (value: string) => value || undefined })}
@@ -213,7 +211,7 @@ export function ReviewForm({
                 {editionLabel(edition)}
               </option>
             ))}
-          </select>
+          </Select>
           {editionError ? (
             <p id="review-edition-error" role="alert" className="text-sm text-danger">
               {editionError}

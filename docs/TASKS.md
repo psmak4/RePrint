@@ -638,3 +638,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: chosen Genres show as removable chips that match the checkboxes; Series and contribution rows use icon remove buttons with full accessible names; the Primary Edition is a list of radio cards showing format, year, publisher, ISBN, and language
   - Accept: a save bar with Discard and Save appears only while there are unsaved changes; only changed fields are sent, as before; the saved message survives the form's remount
   - Accept: `pnpm check` passes and the admin e2e axe sweep passes
+- [x] M9-T17 · One styled Select for every dropdown · deps: M9-T15 · PRD: §11
+  - Accept: a shared native `Select` in `packages/ui` replaces the hand-styled selects (same height, border, and font; our chevron 14 px from the right edge; a 40 px `compact` size for toolbars) (D-198)
+  - Accept: where the browser supports `appearance: base-select` (Chrome and Edge), the open list is drawn by the page: white rounded card, shadow, site font at 15 px, 40 px rows, a check on the current choice; elsewhere the system menu stays
+  - Accept: the shelf buttons keep their hidden native select and the system menu; `pnpm check` and `pnpm test:e2e` pass

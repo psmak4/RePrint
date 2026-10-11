@@ -4,15 +4,12 @@ import {
   DISCOVER_FEATURED_GENRES,
   type FeaturedReview,
 } from '@reprint/shared'
-import { Button, Label } from '@reprint/ui'
+import { Button, Label, Select } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
 
 const text = copy.admin.featured
-
-const SELECT_CLASS =
-  'h-11 rounded-[10px] border border-input-border bg-surface px-3 text-[15px] text-foreground'
 
 type ActionResult =
   | { done: 'genresSaved' | 'reviewSaved' | 'reviewCleared' }
@@ -143,9 +140,8 @@ function GenrePicker({
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
               <Label htmlFor={selectId}>{text.addLabel}</Label>
-              <select
+              <Select
                 id={selectId}
-                className={SELECT_CLASS}
                 value={choice}
                 disabled={full}
                 onChange={(event) => setChoice(event.target.value)}
@@ -156,7 +152,7 @@ function GenrePicker({
                     {option.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <Button type="button" variant="outline" disabled={!choice || full} onClick={add}>
               {text.add}
