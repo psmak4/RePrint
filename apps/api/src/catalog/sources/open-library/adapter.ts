@@ -155,8 +155,12 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
       }
       return {
         ...candidate,
-        // Series come from the Edition records, so the list is whole only when they were read.
-        book: { ...candidate.book, seriesReported: editions.read },
+        book: {
+          ...candidate.book,
+          // The list is whole when the Series records or the Editions behind Series text were read.
+          seriesReported:
+            editions.read || candidate.book.series.some((entry) => entry.sourceLink !== undefined),
+        },
         sourceLink: { ...candidate.sourceLink, sourceId: workId.data },
       }
     },

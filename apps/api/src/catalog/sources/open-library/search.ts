@@ -6,8 +6,11 @@ import {
 } from '@reprint/shared'
 import { z } from 'zod'
 import { toLanguage } from './languages.js'
+import { seriesOfDoc } from './series.js'
+import { SOURCE_NAME } from './source-name.js'
 
-export const SOURCE_NAME = 'open_library'
+export { SOURCE_NAME }
+
 /** A byline longer than this is a compilation's contributor list, not a byline. */
 const MAX_CONTRIBUTIONS = 10
 
@@ -29,6 +32,9 @@ const searchDocSchema = z.object({
   cover_edition_key: z.string().optional(),
   first_publish_year: z.number().int().optional(),
   language: z.array(z.string()).optional(),
+  series_key: z.array(z.string()).optional(),
+  series_name: z.array(z.string()).optional(),
+  series_position: z.array(z.string()).optional(),
 })
 export type SearchDoc = z.infer<typeof searchDocSchema>
 
@@ -125,7 +131,7 @@ export function toBookCandidate(
       originalLanguage: null,
       cover,
       contributions,
-      series: [],
+      series: seriesOfDoc(doc),
       subjects: [],
     },
     editions: [edition],

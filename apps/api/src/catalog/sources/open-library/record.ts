@@ -265,7 +265,8 @@ export function toFullBook(
       subtitle: work.subtitle?.trim() || base.book.subtitle,
       description: description || null,
       cover: coverId ? toCover(coverId) : base.book.cover,
-      series: toSeries(seriesTexts),
+      // Series records win over Series text guessed from Editions (D-193, D-199).
+      series: base.book.series.length > 0 ? base.book.series : toSeries(seriesTexts),
       subjects: toSubjects(work.subjects),
       sourceEditionCount,
     },

@@ -177,6 +177,18 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     expect(book?.book.seriesReported).toBe(true)
   })
 
+  it('reads a Series record from the search result, ahead of Edition text', async () => {
+    const book = await adapter.getBook('OL2163649W')
+    expect(book?.book.series).toEqual([
+      {
+        name: "The Hitchhiker's Guide to the Galaxy",
+        position: 1,
+        sourceLink: { source: 'open_library', entityType: 'series', sourceId: 'OL326782L' },
+      },
+    ])
+    expect(book?.book.seriesReported).toBe(true)
+  })
+
   it('adds the Edition behind the work Cover when the first page of Editions lacks it', async () => {
     const book = await adapter.getBook('OL59800W')
     const coverEdition = book?.editions.find((e) => e.sourceLink?.sourceId === 'OL31935740M')
