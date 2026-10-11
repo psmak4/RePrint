@@ -638,3 +638,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: chosen Genres show as removable chips that match the checkboxes; Series and contribution rows use icon remove buttons with full accessible names; the Primary Edition is a list of radio cards showing format, year, publisher, ISBN, and language
   - Accept: a save bar with Discard and Save appears only while there are unsaved changes; only changed fields are sent, as before; the saved message survives the form's remount
   - Accept: `pnpm check` passes and the admin e2e axe sweep passes
+- [x] M9-T16 · Open Library: the cover's Edition and clean descriptions · deps: M9-T15 · PRD: §5.1, §6
+  - Accept: when the first page of Editions lacks the Edition behind the work's Cover (`cover_edition_key`), the adapter fetches that one Edition and adds it, so the Primary Edition can match the Cover; a failed fetch leaves the Book readable without it (D-197)
+  - Accept: a description stops at Open Library's divider line (before "Also contained in:" and similar lists) and Markdown links keep only their text, so no Open Library URL or ID reaches readers
+  - Accept: contract tests with a recorded Edition fixture; `pnpm check` passes

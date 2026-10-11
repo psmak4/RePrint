@@ -43,10 +43,14 @@ export function bylinePath(workId: string): string {
 const workPath = (workId: string) => `/works/${workId}.json`
 const editionsPath = (workId: string) => `/works/${workId}/editions.json?limit=${EDITIONS_LIMIT}`
 const authorPath = (authorId: string) => `/authors/${authorId}.json`
+const editionPath = (editionId: string) => `/books/${editionId}.json`
 
 /** An ID that could be a path segment only when it is a bare Open Library ID, never a path or a query. */
 const workIdSchema = z.string().regex(/^OL\d+W$/)
 const authorIdSchema = z.string().regex(/^OL\d+A$/)
+const editionIdSchema = z.string().regex(/^OL\d+M$/)
+/** The search result's pointer to the Edition the work's Cover comes from. */
+const coverEditionKeySchema = z.object({ cover_edition_key: z.string().optional() })
 
 export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAdapter {
   const baseUrl = options.baseUrl ?? OPEN_LIBRARY_URL
@@ -129,11 +133,17 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
         readEditions(workId.data),
       ])
       const doc = searchResponseSchema.safeParse(byline)
+      const bylineDoc = doc.success ? doc.data.docs[0] : undefined
+      const coverKey = coverEditionKeySchema.safeParse(bylineDoc)
+      const coverEdition = await readCoverEdition(
+        coverKey.success ? coverKey.data.cover_edition_key : undefined,
+        editions.editions,
+      )
       const candidate = toFullBook(
         work.data,
-        doc.success ? doc.data.docs[0] : undefined,
-        editions.editions,
-        editions.series,
+        bylineDoc,
+        [...editions.editions, ...coverEdition.editions],
+        [...editions.series, ...coverEdition.series],
         editions.total,
       )
       if ('error' in candidate) {
@@ -172,6 +182,33 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
       }
       return author
     },
+  }
+
+  /**
+   * The Edition the work's Cover comes from, when the first page of Editions does not have it, so the
+   * Primary Edition can match the Book's Cover (D-192, D-197). One extra request, only then; if it
+   * fails, the Book is read without it.
+   */
+  async function readCoverEdition(
+    editionId: string | undefined,
+    read: BookCandidateEdition[],
+  ): Promise<{ editions: BookCandidateEdition[]; series: SeriesText[] }> {
+    const id = editionIdSchema.safeParse(editionId)
+    if (!id.success || read.some((edition) => edition.sourceLink?.sourceId === id.data)) {
+      return { editions: [], series: [] }
+    }
+    let body: unknown
+    try {
+      body = await getJson(editionPath(id.data))
+    } catch (error) {
+      // An extra the Book does not need: without it the Primary Edition falls back to the usual order.
+      if (error instanceof SourceError) return { editions: [], series: [] }
+      throw error
+    }
+    if (body === undefined) return { editions: [], series: [] }
+    return toEditions([body], (reason) =>
+      options.onInvalid?.('Skipped an invalid Edition record', { reason, sourceId: id.data }),
+    )
   }
 
   async function readEditions(workId: string): Promise<{

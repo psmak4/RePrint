@@ -679,3 +679,8 @@ Entry format:
 - Rebuilt the admin Edit Book page (D-196): header with the Cover, cards, a side column from `xl`, Genre chips, icon remove buttons, radio-card Edition picker, and a save bar shown only with unsaved changes. Checked at 1440 px and 390 px with screenshots from a throwaway Playwright spec on the isolated e2e stack (deleted after).
 - Tests: `book-editor.test.tsx` updated for the radio picker and the save bar; new cases for chips matching checkboxes, Discard, the Edition card details, and no request when nothing changed. Axe passes.
 - Seen while checking, not fixed here: the Hitchhiker's Primary Edition is still the 2016 CreateSpace one after a refresh (the cover-first rule found no Edition with the Book's Cover), and its description carries Open Library's "Also contained in" list with links to openlibrary.org work pages.
+
+### 2026-10-10 · M9-T16 · owner report · fix/catalog-cover-edition-description
+- Hitchhiker's Primary Edition: the Book's Cover belongs to Edition 117 of 130, outside the stored first page, so the cover-first rule (D-192) had no match. The adapter now fetches the Edition named by the search result's `cover_edition_key` when it is missing (D-197). Checked on live data: 51 Editions, Primary Edition the 1979 Harmony Books hardcover, and the description ends before Open Library's "Also contained in" list.
+- New fixture `edition-left-hand-cover` (recorded by hand with curl, same format as the recorder). The Left Hand of Darkness has the same shape: its cover Edition is not in the first 50.
+- The Harmony Edition's date is just "1979", which `toIsoDate` does not turn into a full date, so that Edition shows no published date.

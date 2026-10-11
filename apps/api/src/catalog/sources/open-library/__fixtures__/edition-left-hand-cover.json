@@ -1,0 +1,60 @@
+{
+  "works": [
+    {
+      "key": "/works/OL59800W"
+    }
+  ],
+  "title": "The Left Hand of Darkness",
+  "publishers": ["ACE"],
+  "publish_date": "2019",
+  "key": "/books/OL31935740M",
+  "type": {
+    "key": "/type/edition"
+  },
+  "covers": [10618463],
+  "identifiers": {
+    "amazon": ["B00YBA7PGW"]
+  },
+  "classifications": {},
+  "number_of_pages": 367,
+  "languages": [
+    {
+      "key": "/languages/eng"
+    }
+  ],
+  "physical_format": "eBook",
+  "edition_name": "50th Anniversary Edition",
+  "source_records": ["idb:9780441478125"],
+  "copyright_date": "1969, 1976, 2019",
+  "first_sentence": "I'll make my report as if I told a story, for I was taught as a child on my homeworld that Truth is a matter of the imagination.",
+  "publish_places": ["New York, United States"],
+  "contributors": [
+    {
+      "role": "Afterword",
+      "name": "Charlie Jane Anders"
+    },
+    {
+      "role": "Introduction",
+      "name": "David Mitchell"
+    },
+    {
+      "role": "Cover Design",
+      "name": "Jim Tierney"
+    }
+  ],
+  "isbn_13": ["9781101665398"],
+  "notes": {
+    "type": "/type/text",
+    "value": "with a new introduction by David Mitchell and a new afterword by Charlie Jane Anders"
+  },
+  "latest_revision": 10,
+  "revision": 10,
+  "created": {
+    "type": "/type/datetime",
+    "value": "2021-02-06T13:47:59.488718"
+  },
+  "last_modified": {
+    "type": "/type/datetime",
+    "value": "2024-10-05T04:50:53.595901"
+  }
+}
