@@ -12672,12 +12672,25 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "memberCount": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [
                         "slug",
                         "name",
-                        "description"
+                        "description",
+                        "memberCount"
                       ],
                       "additionalProperties": false
                     },

@@ -142,7 +142,12 @@ describe('GenrePage', () => {
 
 describe('SeriesPage', () => {
   const series: SeriesDetailResponse = {
-    series: { slug: 'dune-chronicles', name: 'Dune Chronicles', description: 'Six novels.' },
+    series: {
+      slug: 'dune-chronicles',
+      name: 'Dune Chronicles',
+      description: 'Six novels.',
+      memberCount: null,
+    },
     items: [
       { position: 1, book: summary(1, 'Dune', 12, 4.5) },
       { position: 2.5, book: summary(2, 'Interlude', 1, 3) },

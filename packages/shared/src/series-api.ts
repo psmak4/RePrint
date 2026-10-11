@@ -17,6 +17,8 @@ export const seriesDetailResponseSchema = z.object({
     slug: slugSchema,
     name: z.string().trim().min(1),
     description: z.string().nullable(),
+    /** How many members the Source lists (D-199); `null` when unknown. Stored Books may be fewer. */
+    memberCount: z.number().int().min(0).nullable(),
   }),
   items: z.array(seriesEntrySchema),
 })

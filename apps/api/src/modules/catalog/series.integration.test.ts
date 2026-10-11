@@ -69,7 +69,12 @@ describe('GET /v1/series/:slug', () => {
     const response = await app.inject({ method: 'GET', url: '/v1/series/expanse' })
     expect(response.statusCode).toBe(200)
     const body = seriesDetailResponseSchema.parse(response.json())
-    expect(body.series).toEqual({ slug: 'expanse', name: 'EXPANSE', description: null })
+    expect(body.series).toEqual({
+      slug: 'expanse',
+      name: 'EXPANSE',
+      description: null,
+      memberCount: null,
+    })
     expect(body.items.map((entry) => [entry.book.slug, entry.position])).toEqual([
       ['book-one', 1],
       ['book-two', 2],
@@ -80,6 +85,16 @@ describe('GET /v1/series/:slug', () => {
     ])
     expect(body.items[0]?.book.rating.count).toBe(4)
     expect(body.items[0]?.book.rating.average).toBe(4.5)
+  })
+
+  it('sends how many members the Source lists, which can be more than are stored (D-199)', async () => {
+    const found = await makeSeries('hitchhiker')
+    await addBook(found.id, 'book-one', 1)
+    await db().update(series).set({ sourceMemberCount: 6 })
+    const response = await app.inject({ method: 'GET', url: '/v1/series/hitchhiker' })
+    const body = seriesDetailResponseSchema.parse(response.json())
+    expect(body.series.memberCount).toBe(6)
+    expect(body.items).toHaveLength(1)
   })
 
   it('answers 200 with no Books for an empty Series', async () => {

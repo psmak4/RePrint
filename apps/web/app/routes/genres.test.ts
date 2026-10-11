@@ -95,7 +95,12 @@ describe('series loader', () => {
   it('loads the Series in reading order', async () => {
     stub(() =>
       Response.json({
-        series: { slug: 'dune-chronicles', name: 'Dune Chronicles', description: null },
+        series: {
+          slug: 'dune-chronicles',
+          name: 'Dune Chronicles',
+          description: null,
+          memberCount: null,
+        },
         items: [{ position: 1, book }],
       }),
     )

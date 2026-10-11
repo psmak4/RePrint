@@ -105,7 +105,7 @@ describe('book loader side data', () => {
     if (url.pathname === '/v1/books/dune-abc123') return Response.json(withShelves)
     if (url.pathname === '/v1/series/dune-saga')
       return Response.json({
-        series: { slug: 'dune-saga', name: 'Dune Saga', description: null },
+        series: { slug: 'dune-saga', name: 'Dune Saga', description: null, memberCount: 2 },
         items: [
           { position: 1, book: summary(1, 'dune-abc123') },
           { position: 2.5, book: summary(2, 'messiah') },

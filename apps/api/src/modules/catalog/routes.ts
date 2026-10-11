@@ -216,7 +216,12 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
         items.map((item) => item.book),
       )
       return {
-        series: { slug: found.slug, name: found.name, description: found.description },
+        series: {
+          slug: found.slug,
+          name: found.name,
+          description: found.description,
+          memberCount: found.sourceMemberCount,
+        },
         items,
       }
     },
