@@ -7,7 +7,8 @@ import { type SourceAdapter, SourceError } from './sources/types.js'
 /** Runs a Source call as an interactive request that may take at most `timeoutMs`. */
 export type InteractiveCall = <T>(fn: () => Promise<T>, timeoutMs: number) => Promise<T>
 
-export type ResolveResult = { slug: string } | { notFound: true }
+/** `seriesToSync`: the stored Book's Series due a member sync, for the caller to queue (D-199). */
+export type ResolveResult = { slug: string; seriesToSync: string[] } | { notFound: true }
 
 /**
  * Stores the Book behind a search candidate and returns its slug (PRD §6). The whole fetch has
@@ -37,7 +38,7 @@ export async function resolveCandidate(options: {
       ),
     )
     .limit(1)
-  if (stored) return { slug: stored.slug }
+  if (stored) return { slug: stored.slug, seriesToSync: [] }
   if (link.source !== source.name) return { notFound: true }
 
   const deadline = Date.now() + timeoutMs
@@ -70,5 +71,5 @@ export async function resolveCandidate(options: {
     }),
   )
   const ingested = await ingestBook(db, { source, candidate: full, authorRecords })
-  return { slug: ingested.slug }
+  return { slug: ingested.slug, seriesToSync: ingested.seriesToSync }
 }

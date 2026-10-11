@@ -102,6 +102,7 @@ async function rebuild() {
       storage: undefined as never,
       catalog: undefined as never,
       queue: undefined as never,
+      enqueue: undefined as never,
       sourceRps: 2,
       alert: () => {},
     },

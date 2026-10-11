@@ -172,7 +172,7 @@ describe('GET /v1/books/:slug', () => {
           refreshedAt: new Date(Date.now() - STALE_AFTER_MS - 60_000),
         })
         .where(eq(books.id, bookId))
-      const outcome = await refreshBook({ db: stack.db.db, source: stub, bookId })
+      const { outcome } = await refreshBook({ db: stack.db.db, source: stub, bookId })
       expect(outcome).toBe('refreshed')
       const [book] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
       expect(book?.title).toBe('Dune (admin title)')

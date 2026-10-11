@@ -2,6 +2,7 @@ import { resolveBookRequestSchema, resolveBookResponseSchema } from '@reprint/sh
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { CandidateRefs } from '../../catalog/candidate-refs.js'
 import { type InteractiveCall, resolveCandidate } from '../../catalog/resolve.js'
+import { queueSeriesSyncs } from '../../catalog/series-sync.js'
 import { type SourceAdapter, SourceError } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
@@ -19,7 +20,7 @@ export interface ResolveRoutesOptions extends AuthRoutesOptions {
 const NOT_FOUND = 'We could not find that book.'
 
 export const resolveRoutes: FastifyPluginAsyncZod<ResolveRoutesOptions> = async (app, options) => {
-  const { db, catalog, timeoutMs } = options
+  const { db, catalog, timeoutMs, jobs } = options
 
   app.post(
     '/books/resolve',
@@ -43,6 +44,12 @@ export const resolveRoutes: FastifyPluginAsyncZod<ResolveRoutesOptions> = async 
           call: catalog.call,
         })
         if ('notFound' in result) throw new HttpProblem(404, NOT_FOUND)
+        if (jobs && result.seriesToSync.length > 0) {
+          // A failed enqueue must not fail the page the reader asked for.
+          await queueSeriesSyncs(jobs, result.seriesToSync).catch((error: unknown) =>
+            request.log.warn({ err: error }, 'could not queue Series syncs'),
+          )
+        }
         return { slug: result.slug }
       } catch (error) {
         if (error instanceof SourceError) {

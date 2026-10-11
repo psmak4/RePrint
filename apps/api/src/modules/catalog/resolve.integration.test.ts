@@ -2,7 +2,7 @@ import { books, sourceLinks } from '@reprint/db'
 import { problemDetailsSchema, resolveBookResponseSchema } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildApp } from '../../app.js'
 import { CANDIDATE_REF_TTL_SECONDS, createCandidateRefs } from '../../catalog/candidate-refs.js'
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
@@ -15,6 +15,7 @@ const stub = createStubSource()
 /** What the Source does on `getBook`; tests swap it to simulate an outage or a stall. */
 let getBook: SourceAdapter['getBook'] = stub.getBook
 let getBookCalls = 0
+const enqueue = vi.fn(async () => '1')
 
 let stack: TestStack
 let app: FastifyInstance
@@ -40,7 +41,7 @@ beforeAll(async () => {
   app = await buildApp(env, {
     database: stack.db.db,
     redis: stack.redis,
-    jobs: { enqueue: async () => '1' },
+    jobs: { enqueue },
     catalog: { source, interactive: (fn) => fn() },
   })
   await app.ready()
@@ -52,6 +53,7 @@ afterAll(async () => {
 beforeEach(async () => {
   getBook = stub.getBook
   getBookCalls = 0
+  enqueue.mockClear()
   await stack.reset()
 })
 
@@ -139,5 +141,23 @@ describe('POST /v1/books/resolve', () => {
     const response = await resolve(await issueRef())
     expect(response.statusCode).toBe(503)
     expect(Date.now() - started).toBeLessThan(2000)
+  })
+})
+
+describe('Series syncs (D-199)', () => {
+  it('queues a Series sync when the resolved Book has a Series record', async () => {
+    const response = await resolve(await issueRef('stub-book-hobbit'))
+    expect(response.statusCode).toBe(200)
+    expect(enqueue).toHaveBeenCalledWith(
+      'catalog.series-sync',
+      { seriesId: expect.any(String) },
+      expect.objectContaining({ priority: 10 }),
+    )
+  })
+
+  it('queues nothing for a Book without a Series record', async () => {
+    const response = await resolve(await issueRef('stub-book-dune'))
+    expect(response.statusCode).toBe(200)
+    expect(enqueue).not.toHaveBeenCalled()
   })
 })
