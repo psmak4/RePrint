@@ -618,3 +618,9 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the Genres index, Genre pages, and Library use the same design (hero band, Genre tiles, cover-first Book grid, pill tabs and sort), at desktop and phone widths
   - Accept: every other page (Author, Series, profile, settings, account and recovery pages, static pages, error and resolve pages, and admin) uses the same type, controls, cards, and hero band
   - Accept: `pnpm check` and `pnpm test:e2e` (with axe) pass
+- [x] M9-T12 · Catalog data quality: Series, Genres, Primary Edition, and the Edition count · deps: M9-T11 · PRD: §5.1, §5.4, §7.3
+  - Accept: a publisher's numbered line ("Compactos No. 454") is not taken as a Series, and the Book page says "Book N of M" only when RePrint has every Book in the Series (D-192)
+  - Accept: Genre rules match whole words (with plurals), and one weak Subject cannot add a Genre on its own (D-189)
+  - Accept: the Primary Edition is the Edition whose Cover matches the Book's Cover when there is one, then the PRD §5.1 order (D-191)
+  - Accept: the Book page shows the Source's total Edition count next to how many RePrint lists (D-190)
+  - Accept: `pnpm check` and `pnpm test:e2e` pass

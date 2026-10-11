@@ -10,13 +10,13 @@ export const STRONG_PRIORITY = 50
 /** How many Subjects must support a Genre when none of its matches is strong. */
 const WEAK_SUPPORT = 2
 
-const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** The pattern with its plural: `travel(s)`, `mystery`/`mysteries`, `class(es)`. */
 function withPlural(pattern: string): string {
   return /[^aeiou]y$/i.test(pattern)
-    ? `${escape(pattern.slice(0, -1))}(?:y|ies)`
-    : `${escape(pattern)}(?:e?s)?`
+    ? `${escapeRegExp(pattern.slice(0, -1))}(?:y|ies)`
+    : `${escapeRegExp(pattern)}(?:e?s)?`
 }
 
 /** The pattern as whole words: `art` matches "Art" and "Arts" but not "Arthur" or "earth". */
