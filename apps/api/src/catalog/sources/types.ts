@@ -48,6 +48,12 @@ export class SourceError extends Error {
  * never raw provider data. `sourceId` values are opaque handles that only leave the adapter inside a
  * `SourceLink`.
  */
+/** A Series as its Source lists it: every member in reading order (D-199). */
+export interface SeriesMembers {
+  name: string
+  members: { sourceId: string; position: number | null; title: string }[]
+}
+
 export interface SourceAdapter {
   /** Stable name stored in `source_links.source` and field origins, such as `open_library`. */
   readonly name: string
@@ -62,6 +68,8 @@ export interface SourceAdapter {
   getEditions(sourceId: string): Promise<BookCandidateEdition[]>
   /** The full record for one Author, or `null` when the Source has no such Author. */
   getAuthor(sourceId: string): Promise<AuthorRecord | null>
+  /** Every member of a Series in reading order, or `null` when the Source has no such Series. */
+  getSeriesMembers?(sourceId: string): Promise<SeriesMembers | null>
   /** Optional and unused in v1: a bulk import if live search outgrows a Source's rate limit. */
   importBulk?(stream: AsyncIterable<Uint8Array>): Promise<{ imported: number }>
 }

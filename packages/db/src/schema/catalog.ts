@@ -192,6 +192,10 @@ export const series = pgTable('series', {
   name: text('name').notNull(),
   description: text('description'),
   fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
+  /** How many members the Source lists for this Series (D-199); `null` when unknown. */
+  sourceMemberCount: integer('source_member_count'),
+  /** When the Source's member list was last imported (D-199). */
+  membersSyncedAt: timestamptz('members_synced_at'),
   ...timestamps(),
 })
 

@@ -168,12 +168,18 @@ export const bookCandidateBookSchema = z.object({
     )
     .min(1),
   series: z.array(
-    z.object({ name: z.string().trim().min(1), position: z.number().min(0).nullable() }),
+    z.object({
+      name: z.string().trim().min(1),
+      position: z.number().min(0).nullable(),
+      /** The Source's own Series record, when it has one (D-199). */
+      sourceLink: sourceLinkSchema.optional(),
+    }),
   ),
   subjects: z.array(subjectSchema),
   /**
-   * True when the Source read the records its Series come from, so `series` is its whole list and
-   * replaces the Book's. Otherwise Series are only added, never removed (D-194).
+   * True when the Source read the records its Series come from (its Series records or its
+   * Editions), so `series` is its whole list and replaces the Book's. Otherwise Series are only
+   * added, never removed (D-194).
    */
   seriesReported: z.boolean().optional(),
   /** How many Editions the Source knows of in all, when it says; it may send only some of them. */
