@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { AdminBookDetail, AdminGenre } from '@reprint/shared'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -107,7 +107,7 @@ describe('BookEditor', () => {
   it('sends a chosen Primary Edition and new Series and contribution rows', async () => {
     const action = vi.fn(() => ({ done: 'edit', book: base }))
     renderEditor(action)
-    fireEvent.change(screen.getByLabelText('Primary Edition'), { target: { value: editionId } })
+    fireEvent.click(screen.getByRole('radio', { name: /Paperback · 2005/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Add a Series' }))
     fireEvent.change(screen.getByLabelText('Series name'), { target: { value: 'Dune' } })
     fireEvent.change(screen.getByLabelText(/Position/), { target: { value: '2.5' } })
@@ -129,12 +129,52 @@ describe('BookEditor', () => {
     })
   })
 
-  it('does not call the API when nothing changed', async () => {
+  it('shows the save bar only once something changed, and never sends an empty edit', async () => {
     const action = vi.fn()
     renderEditor(action)
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
-    expect(await screen.findByText('Change a field first.')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Save changes' })).toBeNull()
+    expect(screen.queryByText('Unsaved changes')).toBeNull()
+    // Enter in a field submits the form; with nothing changed it sends nothing.
+    fireEvent.submit(screen.getByLabelText('Title').closest('form') as HTMLFormElement)
+    await new Promise((resolve) => setTimeout(resolve, 20))
     expect(action).not.toHaveBeenCalled()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Dune Messiah' } })
+    expect(screen.getByText('Unsaved changes')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeTruthy()
+  })
+
+  it('discards changes, starting again from the stored Book', () => {
+    renderEditor()
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Dune Messiah' } })
+    fireEvent.click(screen.getByLabelText('Fantasy'))
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }))
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe('Dune')
+    expect((screen.getByLabelText('Fantasy') as HTMLInputElement).checked).toBe(false)
+    expect(screen.queryByText('Unsaved changes')).toBeNull()
+  })
+
+  it('shows the chosen Genres as chips that match the checkboxes', () => {
+    renderEditor()
+    const chosen = () =>
+      within(screen.getByRole('list', { name: 'Chosen Genres' }))
+        .getAllByRole('listitem')
+        .map((item) => item.textContent)
+    expect(chosen()).toEqual(['Science fiction'])
+    fireEvent.click(screen.getByLabelText('Fantasy'))
+    expect(chosen()).toEqual(['Fantasy', 'Science fiction'])
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Genre Science fiction' }))
+    expect(chosen()).toEqual(['Fantasy'])
+    expect((screen.getByLabelText('Science fiction') as HTMLInputElement).checked).toBe(false)
+  })
+
+  it('lists each Edition with its format, year, publisher, ISBN, and language', () => {
+    renderEditor()
+    const automatic = screen.getByRole('radio', { name: /Chosen automatically/ })
+    expect((automatic as HTMLInputElement).checked).toBe(true)
+    const edition = screen.getByRole('radio', { name: /Paperback · 2005/ })
+    const card = edition.closest('label') as HTMLElement
+    expect(within(card).getByText('Ace')).toBeTruthy()
+    expect(within(card).getByText('ISBN 9780441013593 · English')).toBeTruthy()
   })
 
   it('uploads a Cover', async () => {

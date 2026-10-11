@@ -633,3 +633,8 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `/admin/catalog` has a "Find a Book" search whose results link to each Book's admin page and public page, with paging; a failed search shows a message and keeps the dashboard
   - Accept: the Book page shows "Edit in admin" only to viewers with `catalog.manage`
   - Accept: `pnpm check` passes
+- [x] M9-T15 · Admin Edit Book page in the redesign style · deps: M9-T14 · PRD: §7.11
+  - Accept: a header with the Cover, title, and Authors; the form in cards; Cover, Refresh, and Locked fields in a side column from `xl` (one column below), with each field's lock beside its heading (D-196)
+  - Accept: chosen Genres show as removable chips that match the checkboxes; Series and contribution rows use icon remove buttons with full accessible names; the Primary Edition is a list of radio cards showing format, year, publisher, ISBN, and language
+  - Accept: a save bar with Discard and Save appears only while there are unsaved changes; only changed fields are sent, as before; the saved message survives the form's remount
+  - Accept: `pnpm check` passes and the admin e2e axe sweep passes
