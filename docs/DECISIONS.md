@@ -1277,3 +1277,9 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Decision: Spellings of one name count together; a name carried by Editions from two or more publishers is a Series; a name from one publisher counts only with a position of 30 or less and when it does not contain the publisher's name. The Book page says "of N" only when RePrint holds every position 1 to N.
 - Why: "Compactos No. 454" (an Anagrama imprint) beat the real Series, and "Book 454 of 1" counted only stored Books.
 - Affects: `apps/api/src/catalog/sources/open-library/record.ts`, `apps/web/app/routes/book.tsx`
+
+### D-194 · A refresh replaces a Book's Series with the Source's list
+- Status: Implementation
+- Decision: When a Source says its Series list is whole (`seriesReported: true` on the Book candidate), ingest removes the Book's memberships that the list no longer has, then deletes any of those Series left with no Books unless an admin edited one of its fields. Open Library sets the flag only when its Editions read succeeded, since Series text comes from Edition records; the seed and stub Sources leave it unset, so they only add, as before. An admin-locked `series` field is untouched, as before.
+- Why: After D-193, refreshing The Hitchhiker's Guide added the real Series but kept "Compactos", because ingest only ever added memberships.
+- Affects: `packages/shared/src/catalog.ts`, `apps/api/src/catalog/ingest/ingest.ts`, `apps/api/src/catalog/sources/open-library/adapter.ts`

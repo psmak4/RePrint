@@ -143,7 +143,12 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
         })
         return null
       }
-      return { ...candidate, sourceLink: { ...candidate.sourceLink, sourceId: workId.data } }
+      return {
+        ...candidate,
+        // Series come from the Edition records, so the list is whole only when they were read.
+        book: { ...candidate.book, seriesReported: editions.read },
+        sourceLink: { ...candidate.sourceLink, sourceId: workId.data },
+      }
     },
 
     async getEditions(sourceId) {
@@ -169,14 +174,17 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
     },
   }
 
-  async function readEditions(
-    workId: string,
-  ): Promise<{ editions: BookCandidateEdition[]; series: SeriesText[]; total: number | null }> {
+  async function readEditions(workId: string): Promise<{
+    editions: BookCandidateEdition[]
+    series: SeriesText[]
+    total: number | null
+    read: boolean
+  }> {
     const body = editionsResponseSchema.safeParse(await getJson(editionsPath(workId)))
-    if (!body.success) return { editions: [], series: [], total: null }
-    const read = toEditions(body.data.entries, (reason) =>
+    if (!body.success) return { editions: [], series: [], total: null, read: false }
+    const parsed = toEditions(body.data.entries, (reason) =>
       options.onInvalid?.('Skipped an invalid Edition record', { reason, sourceId: workId }),
     )
-    return { ...read, total: body.data.size ?? null }
+    return { ...parsed, total: body.data.size ?? null, read: true }
   }
 }

@@ -23,11 +23,11 @@ import {
   fieldOriginsSchema,
   makeSlug,
 } from '@reprint/shared'
-import { and, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, ne, notInArray, sql } from 'drizzle-orm'
 import { enrichBook } from '../enrichment/enrich.js'
 import { createPriorityLookup, type PriorityLookup } from '../enrichment/priorities.js'
 import type { SourceAdapter } from '../sources/types.js'
-import { type IncomingField, isLocked, planFieldUpdate } from './fields.js'
+import { ADMIN_ORIGIN, type IncomingField, isLocked, planFieldUpdate } from './fields.js'
 
 type Tx = Parameters<Parameters<Database['transaction']>[0]>[0]
 
@@ -446,6 +446,7 @@ async function upsertSeries(
   source: string,
   now: Date,
 ) {
+  const reported: string[] = []
   for (const membership of candidate.book.series) {
     let [row] = await tx
       .select({ id: series.id })
@@ -470,7 +471,31 @@ async function upsertSeries(
         // A Source that no longer knows the position must not erase one we have.
         set: { position: sql`coalesce(excluded.position, ${bookSeries.position})` },
       })
+    reported.push(row.id)
   }
+  // The Source's list replaces the Book's only when it says the list is whole (D-194): a failed
+  // read of the records Series come from must not erase them.
+  if (!candidate.book.seriesReported) return
+  const dropped = await tx
+    .delete(bookSeries)
+    .where(
+      reported.length > 0
+        ? and(eq(bookSeries.bookId, bookId), notInArray(bookSeries.seriesId, reported))
+        : eq(bookSeries.bookId, bookId),
+    )
+    .returning({ seriesId: bookSeries.seriesId })
+  if (dropped.length === 0) return
+  // A Series left with no Books goes too, unless an admin has edited it.
+  await tx.delete(series).where(
+    and(
+      inArray(
+        series.id,
+        dropped.map((row) => row.seriesId),
+      ),
+      sql`not exists (select 1 from ${bookSeries} where ${bookSeries.seriesId} = ${series.id})`,
+      sql`not exists (select 1 from jsonb_each(${series.fieldOrigins}) as origin where origin.value->>'source' = ${ADMIN_ORIGIN})`,
+    ),
+  )
 }
 
 async function upsertSubjects(tx: Tx, candidate: BookCandidate, bookId: string) {
