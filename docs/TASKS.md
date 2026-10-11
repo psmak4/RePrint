@@ -624,3 +624,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the Primary Edition is the Edition whose Cover matches the Book's Cover when there is one, then the PRD §5.1 order (D-192)
   - Accept: the Book page shows the Source's total Edition count next to how many RePrint lists (D-191)
   - Accept: `pnpm check` and `pnpm test:e2e` pass
+- [x] M9-T13 · A refresh drops Series the Source no longer reports · deps: M9-T12 · PRD: §5.1, §5.2
+  - Accept: refreshing a Book whose Source now reports a different Series removes the old membership, and removes the old Series when no Book is left in it and no admin has edited it (D-194)
+  - Accept: when the Source could not read the records its Series come from, a refresh removes nothing; an admin-locked `series` field is never touched
+  - Accept: `pnpm check` passes

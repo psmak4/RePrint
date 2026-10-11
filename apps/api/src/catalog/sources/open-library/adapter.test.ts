@@ -174,6 +174,20 @@ describe('Open Library getBook, getEditions, and getAuthor', () => {
     expect(labels).toContain('Science fiction')
     expect(labels?.some((label) => label.includes(':'))).toBe(false)
     expect(book?.editions.length).toBeGreaterThan(40)
+    expect(book?.book.seriesReported).toBe(true)
+  })
+
+  it('says its Series list is not whole when the Editions could not be read', async () => {
+    const fixtures = createFixtureFetch()
+    const noEditions = createOpenLibraryAdapter({
+      fetch: async (input, init) =>
+        String(input).includes('/editions.json')
+          ? new Response('not found', { status: 404 })
+          : fixtures(input, init),
+    })
+    const book = await noEditions.getBook('OL59800W')
+    expect(book?.book.series).toEqual([])
+    expect(book?.book.seriesReported).toBe(false)
   })
 
   it('maps the Editions: ISBN-13 from ISBN-10, the five Formats, ISO 639 languages, and covers', async () => {

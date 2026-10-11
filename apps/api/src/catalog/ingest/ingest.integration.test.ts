@@ -159,6 +159,62 @@ describe('ingestBook', () => {
     expect(membership?.position).toBe(2.5)
   })
 
+  it('drops a Series the Source no longer reports, and the Series once it has no Books', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const inSeries = (...names: string[]): BookCandidate => ({
+      ...candidate,
+      book: {
+        ...candidate.book,
+        series: names.map((name) => ({ name, position: 1 })),
+        seriesReported: true,
+      },
+    })
+    const first = await ingestBook(db, { source: stub, candidate: inSeries('Compactos', 'Dune') })
+    await ingestBook(db, { source: stub, candidate: inSeries('Dune') })
+
+    const names = await db
+      .select({ name: series.name })
+      .from(bookSeries)
+      .innerJoin(series, eq(series.id, bookSeries.seriesId))
+      .where(eq(bookSeries.bookId, first.bookId))
+    expect(names).toEqual([{ name: 'Dune' }])
+    expect((await db.select({ name: series.name }).from(series)).map((row) => row.name)).toEqual([
+      'Dune',
+    ])
+  })
+
+  it('keeps Series when the Source list is not whole, and keeps a Series an admin edited', async () => {
+    const candidate = await stubCandidate('stub-book-dune')
+    const first = await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...candidate,
+        book: { ...candidate.book, series: [{ name: 'Dune', position: 1 }] },
+      },
+    })
+    // A Source that could not read where its Series come from says nothing about them.
+    await ingestBook(db, {
+      source: stub,
+      candidate: { ...candidate, book: { ...candidate.book, series: [], seriesReported: false } },
+    })
+    expect(
+      await db.select().from(bookSeries).where(eq(bookSeries.bookId, first.bookId)),
+    ).toHaveLength(1)
+
+    await db.update(series).set({
+      description: 'Edited',
+      fieldOrigins: { description: { source: 'admin', at: '2026-01-01T00:00:00.000Z' } },
+    })
+    await ingestBook(db, {
+      source: stub,
+      candidate: { ...candidate, book: { ...candidate.book, series: [], seriesReported: true } },
+    })
+    expect(
+      await db.select().from(bookSeries).where(eq(bookSeries.bookId, first.bookId)),
+    ).toHaveLength(0)
+    expect(await db.select().from(series)).toHaveLength(1)
+  })
+
   it('records field origins and never overwrites locked fields on re-ingest', async () => {
     const candidate = await stubCandidate('stub-book-dune')
     const first = await ingestBook(db, { source: stub, candidate })
