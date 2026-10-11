@@ -259,7 +259,7 @@ describe('side lists', () => {
       },
     })
     expect(screen.getByText('Book 1 of 2').closest('[aria-current="page"]')).not.toBeNull()
-    expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' })).toBeTruthy()
+    expect(screen.queryByText(/Up next/)).toBeNull()
     expect(screen.getByText('Wrote Dune.')).toBeTruthy()
   })
 })

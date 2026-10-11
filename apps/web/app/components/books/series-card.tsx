@@ -19,9 +19,9 @@ export type SeriesCardBook = {
 const WINDOW = SERIES_WINDOW
 
 /**
- * The Series a Book belongs to, in reading order: the current Book gently highlighted, what is
- * next, and "See all" when the Series is longer than the card shows (D-199). `books` may be only
- * the window around the current Book; `stored` is then how many the Catalog holds in all.
+ * The Series a Book belongs to, in reading order: the current Book gently highlighted and "See
+ * all" when the Series is longer than the card shows (D-199). `books` may be only the window
+ * around the current Book; `stored` is then how many the Catalog holds in all.
  */
 export function SeriesCard({
   name,
@@ -39,7 +39,6 @@ export function SeriesCard({
   stored?: number
 }) {
   const index = books.findIndex((book) => book.slug === currentSlug)
-  const next = index >= 0 ? books[index + 1] : undefined
   // Up to WINDOW Books, the current one just before the middle, never past either end.
   const start = Math.max(0, Math.min(index - WINDOW / 2 + 1, books.length - WINDOW))
   const shown = books.length > WINDOW ? books.slice(start, start + WINDOW) : books
@@ -119,26 +118,6 @@ export function SeriesCard({
       {size > shown.length ? (
         <Link to={href} className="text-sm font-semibold text-link hover:underline">
           {text.seeAll(size)}
-        </Link>
-      ) : null}
-      {next ? (
-        <Link
-          to={`/books/${next.slug}`}
-          className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised p-3.5 text-sm hover:underline"
-        >
-          <span>{text.upNext(next.title)}</span>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="size-4 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m9 18 6-6-6-6" />
-          </svg>
         </Link>
       ) : null}
     </section>
