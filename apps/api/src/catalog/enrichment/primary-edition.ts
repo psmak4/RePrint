@@ -37,7 +37,7 @@ function compare(a: RankableEdition, b: RankableEdition, bookCoverRef: string | 
 
 /**
  * Editions best first: the one whose cover is the Book's own cover (the Source's representative
- * Edition, D-191), then PRD §5.1's order: English, has a cover, has an ISBN, most recent. The
+ * Edition, D-192), then PRD §5.1's order: English, has a cover, has an ISBN, most recent. The
  * criteria apply in that order; the Edition ID breaks a full tie so the choice is stable.
  */
 export function rankEditions<T extends RankableEdition>(

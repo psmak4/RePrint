@@ -49,7 +49,7 @@ function isWholeLabel(label: string, pattern: string): boolean {
 }
 
 /**
- * Maps Subject labels to Genre IDs (PRD §5.4, D-189). Each Subject goes to the Genre of its best
+ * Maps Subject labels to Genre IDs (PRD §5.4, D-190). Each Subject goes to the Genre of its best
  * matching rule, matched as whole words. A Genre is kept when one of its matches is strong (a
  * high-priority rule, or a Subject that is exactly the pattern) or when at least two Subjects
  * support it, so one stray Subject ("Radio plays" on a novel) cannot add a Genre by itself. The

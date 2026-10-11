@@ -1248,25 +1248,31 @@ Answer these before, or while, the loop reaches the tasks listed. Each has a def
 - Why: The owner reported that the M9 build did not look like the canvas.
 - Affects: `packages/ui/src/components/button.tsx`, `apps/web/app/components/{shell,books,reviews,search}/`, `apps/web/app/copy/index.ts`, `apps/web/app/lib/avatar.ts`
 
-### D-189 · Genre rules match whole words and need support
+### D-189 · e2e specs that decide from a Moderator queue take a shared lock
+- Status: Decided (owner asked for the fix; details are implementation)
+- Decision: `withQueueLock` (`e2e/support/accounts.ts`) holds a Postgres advisory lock (`pg_advisory_lock` on its own connection to the e2e database) while a spec moves its review or reports to a queue front and decides them. `moderation.spec.ts` and `reports.spec.ts` use it; `moveReviewToQueueFront` and `moveReportsToQueueFront` throw outside it. On entry the lock clears what earlier holders or failed runs left: it deletes every review claim and moves pending reviews and open reports still dated in 2000 back to now (they are not decided, so no audit rows or aggregate changes are faked). After each decision the spec waits for the queue to open the next review, so the claim that opening takes lands inside its own lock span. Product claim behaviour (D-126) is unchanged.
+- Why: specs run in parallel across three projects, and both specs put their reviews at the front of the same oldest-first queue. After a decision the queue opens and claims the next review, so one spec's Moderator could claim the other's review, whose Approve and Reject buttons then never appeared (the "load-related" `moderation.spec.ts` timeouts in PROGRESS). Leftovers made it worse: the isolated e2e database had 23 year-2000 pending reviews, more than one queue page, plus 22 stale claims.
+- Affects: `e2e/support/accounts.ts`, `e2e/specs/moderation.spec.ts`, `e2e/specs/reports.spec.ts`
+
+### D-190 · Genre rules match whole words and need support
 - Status: Implementation
 - Decision: A rule matches a Subject only as whole words (plural `s`, `es`, `y`→`ies` allowed), so `art` no longer matches "Arthur" or "earth". A Genre is kept when one match is strong (priority 50 or more, or a Subject that is exactly the pattern) or two Subjects support it. Migration 0019 adds `humorous` and `teenagers`, which the old substring matches covered.
 - Why: The Hitchhiker's Guide got Arts & Photography (from "Arthur Dent"), Travel ("Interstellar travel"), and Drama ("Radio plays").
 - Affects: `apps/api/src/catalog/enrichment/genres.ts`, `packages/db/drizzle/0019_whole_word_genre_rules.sql`
 
-### D-190 · Show the Source's Edition total
+### D-191 · Show the Source's Edition total
 - Status: Decided (owner)
 - Decision: The Catalog still stores the first 50 Editions, but `books.source_edition_count` keeps the total Open Library reports (`size`), and the Book page shows it ("130 known", "RePrint lists 45 of them so far"). It is Source metadata outside field origins; a Source that does not say leaves it unchanged.
 - Why: The owner saw 45 on RePrint and 130 on Open Library.
 - Affects: `packages/db/src/schema/catalog.ts` (migration 0018), the adapter, ingest, `bookDetailSchema`, the Book page
 
-### D-191 · Primary Edition matches the Book's cover first
+### D-192 · Primary Edition matches the Book's cover first
 - Status: Decided (owner). Proposes a change to PRD §5.1's order.
 - Decision: The Edition whose cover is the Book's own cover ranks first; PRD §5.1's order (English, cover, ISBN, most recent) follows.
 - Why: "Most recent" picked a 2016 print-on-demand reissue for a Book whose cover is the 1979 first edition, so the header mixed two printings.
 - Affects: `apps/api/src/catalog/enrichment/primary-edition.ts`, `enrich.ts`
 
-### D-192 · Series text must look like a Series, not an imprint
+### D-193 · Series text must look like a Series, not an imprint
 - Status: Implementation (amends the Series heuristic in the M3-T06 entry)
 - Decision: Spellings of one name count together; a name carried by Editions from two or more publishers is a Series; a name from one publisher counts only with a position of 30 or less and when it does not contain the publisher's name. The Book page says "of N" only when RePrint holds every position 1 to N.
 - Why: "Compactos No. 454" (an Anagrama imprint) beat the real Series, and "Book 454 of 1" counted only stored Books.

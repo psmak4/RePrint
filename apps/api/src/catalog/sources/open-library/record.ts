@@ -166,7 +166,7 @@ const MAX_SINGLE_PUBLISHER_POSITION = 30
  * Open Library holds Series only as free text on Editions, mixed with publishers' numbered lines
  * (`Compactos No. 454`, `Ullstein Buch 22491`). A Series is recognized only when the text carries a
  * position, as in `Hainish Cycle, #4`, `Discworld ; 12`, `Earthsea (book 2)`, or `Hitchhiker's
- * trilogy -- bk. 1.` (D-192). Spellings of one name count together. A name that Editions from two
+ * trilogy -- bk. 1.` (D-193). Spellings of one name count together. A name that Editions from two
  * or more publishers carry is a Series; a publisher's own line never crosses publishers. A name from
  * one publisher counts only when its position is small and the name does not contain the
  * publisher's name. Names from more publishers, then more Editions, win.

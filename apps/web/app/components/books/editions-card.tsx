@@ -60,7 +60,7 @@ export function EditionsCard({
   seeAllHref,
 }: {
   editions: EditionsCardItem[]
-  /** How many Editions are known in all; the Source may know of more than RePrint lists (D-190). */
+  /** How many Editions are known in all; the Source may know of more than RePrint lists (D-191). */
   known?: number
   seeAllHref?: string
 }) {

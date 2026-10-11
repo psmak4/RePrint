@@ -47,7 +47,7 @@ export const books = pgTable(
     /** Count of Approved Reviews at 1 to 5 stars, index 0 being one star. */
     ratingCounts: integer('rating_counts').array().notNull().default(sql`'{0,0,0,0,0}'::integer[]`),
     /**
-     * How many Editions the Source knows of, when it says (D-190). The Catalog stores only a page of
+     * How many Editions the Source knows of, when it says (D-191). The Catalog stores only a page of
      * them, so this can be larger than the stored count. Source metadata: never edited by an admin.
      */
     sourceEditionCount: integer('source_edition_count'),

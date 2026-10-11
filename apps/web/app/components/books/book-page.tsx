@@ -87,7 +87,7 @@ export function BookPage({
 }) {
   const navigate = useNavigate()
   const hasSimilar = moreByAuthor !== null || moreInGenre !== null
-  // The Source may know of more Editions than the Catalog stores (D-190).
+  // The Source may know of more Editions than the Catalog stores (D-191).
   const knownEditions = Math.max(book.sourceEditionCount ?? 0, book.editionCount)
   const navItems: SectionNavItem[] = [
     { id: 'overview', label: labels.sections.overview },

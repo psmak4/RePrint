@@ -34,7 +34,7 @@ export const bookDetailSchema = bookSchema.omit({ reviewCount: true }).extend({
   primaryEdition: editionSchema.nullable(),
   editionCount: z.number().int().min(0),
   /**
-   * How many Editions the Source knows of, when it says (D-190); the Catalog stores only some, so
+   * How many Editions the Source knows of, when it says (D-191); the Catalog stores only some, so
    * this can exceed `editionCount`. Optional so a response cached before it existed still parses.
    */
   sourceEditionCount: z.number().int().min(0).nullable().optional(),

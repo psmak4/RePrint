@@ -1,4 +1,4 @@
--- Genre rules now match whole words (D-189). These two forms used to be caught by the substring
+-- Genre rules now match whole words (D-190). These two forms used to be caught by the substring
 -- matches 'humor' and 'teen'; they keep the same Genres. A rule an admin already added is kept.
 INSERT INTO "subject_genre_rules" ("id", "pattern", "genre_id", "priority")
 SELECT uuidv7(), v."pattern", g."id", v."priority"
