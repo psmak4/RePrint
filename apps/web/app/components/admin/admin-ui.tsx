@@ -17,16 +17,20 @@ const TONES: Record<BadgeTone, string> = {
 export function Badge({
   tone = 'gray',
   dot = false,
+  wrap = false,
   children,
 }: {
   tone?: BadgeTone
   dot?: boolean
+  /** For free text that may be long: it wraps instead of widening its container. */
+  wrap?: boolean
   children: ReactNode
 }) {
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold',
+        wrap ? 'min-h-6 py-0.5 break-words whitespace-normal' : 'h-6 whitespace-nowrap',
         TONES[tone],
       )}
     >
@@ -45,6 +49,7 @@ export const USER_STATUS_TONE: Record<AdminUserStatus, BadgeTone> = {
 
 /** A white card. With `title` it is a region named by its serif `h2`. `flush` drops the padding (tables). */
 export function AdminCard({
+  id,
   title,
   label,
   actions,
@@ -52,6 +57,8 @@ export function AdminCard({
   className,
   children,
 }: {
+  /** For a button that opens this card (`aria-controls`). */
+  id?: string
   title?: ReactNode
   /** Names the region when there is no visible title. */
   label?: string
@@ -63,6 +70,7 @@ export function AdminCard({
   const titleId = useId()
   return (
     <section
+      id={id}
       aria-labelledby={title ? titleId : undefined}
       aria-label={title ? undefined : label}
       className={cn(

@@ -127,6 +127,33 @@ describe('GenreManager', () => {
     expect(await within(add).findByText('The Genre was added.')).toBeTruthy()
   })
 
+  it('drops the indent of a child whose archived parent is hidden', () => {
+    renderManager({
+      genres: [
+        ...family,
+        genre(6, { name: 'Cowboy Poetry', slug: 'cowboy-poetry', parentId: id(2) }),
+      ],
+    })
+    const row = bodyRows().find((r) => r.textContent?.includes('Cowboy Poetry')) as HTMLElement
+    const cell = within(row).getAllByRole('cell')[0]?.firstElementChild
+    expect(cell?.className).not.toContain('pl-6')
+    expect(within(row).getByText('Westerns')).toBeTruthy()
+    fireEvent.click(screen.getByLabelText('Show archived'))
+    const shown = bodyRows().find((r) => r.textContent?.includes('Cowboy Poetry')) as HTMLElement
+    expect(within(shown).getAllByRole('cell')[0]?.firstElementChild?.className).toContain('pl-6')
+  })
+
+  it('moves to the add form and marks the band button as open', () => {
+    renderManager()
+    const open = screen.getByRole('button', { name: 'Add a Genre' })
+    expect(open.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(open)
+    expect(open.getAttribute('aria-expanded')).toBe('true')
+    const card = screen.getByRole('region', { name: 'Add a Genre' })
+    expect(open.getAttribute('aria-controls')).toBe(card.id)
+    expect(document.activeElement).toBe(within(card).getByLabelText('Name'))
+  })
+
   it('keeps Edit on an archived Genre, so it can be fixed without restoring it', () => {
     renderManager({ genres: family })
     fireEvent.click(screen.getByLabelText('Show archived'))

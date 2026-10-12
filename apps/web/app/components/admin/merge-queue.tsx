@@ -81,7 +81,7 @@ function Candidate({ candidate }: { candidate: AdminMergeCandidate }) {
             {text.pairLabel(bookA.title, bookB.title)}
           </h2>
           <span>
-            <Badge>
+            <Badge wrap>
               {text.reasonLabel}: {candidate.reason}
             </Badge>
           </span>

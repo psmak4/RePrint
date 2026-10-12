@@ -74,6 +74,13 @@ describe('MergeQueue', () => {
     expect(within(card).getByRole('link', { name: 'Edit Dune' }).textContent).toBe('Edit')
   })
 
+  it('lets a long match reason wrap instead of widening the card', () => {
+    renderQueue()
+    const reason = screen.getByText('Same title and Author', { exact: false })
+    expect(reason.className).toContain('whitespace-normal')
+    expect(reason.className).not.toContain('whitespace-nowrap')
+  })
+
   it('says so when no pairs are waiting', () => {
     renderQueue([])
     expect(screen.getByText('No possible duplicates are waiting.')).toBeTruthy()

@@ -1,6 +1,6 @@
 import type { AdminGenre, AdminSubjectRule } from '@reprint/shared'
 import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { AdminPage } from './admin-page.js'
@@ -71,15 +71,22 @@ function GenreForm({
   submitLabel,
   busyLabel,
   onCancel,
+  focusOnMount = false,
 }: {
   genre?: AdminGenre
   parents: AdminGenre[]
   submitLabel: string
   busyLabel: string
   onCancel?: () => void
+  /** Moves focus to Name when the form appears, for a form opened by a button elsewhere. */
+  focusOnMount?: boolean
 }) {
   const action = useAction()
   const ids = useId()
+  const nameRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (focusOnMount) nameRef.current?.focus()
+  }, [focusOnMount])
   const [name, setName] = useState(genre?.name ?? '')
   const [slug, setSlug] = useState(genre?.slug ?? '')
   const [description, setDescription] = useState(genre?.description ?? '')
@@ -124,6 +131,7 @@ function GenreForm({
         <div className="flex flex-col gap-1">
           <Label htmlFor={`${ids}-name`}>{text.nameLabel}</Label>
           <Input
+            ref={nameRef}
             id={`${ids}-name`}
             value={name}
             required
@@ -215,10 +223,13 @@ export function orderGenres(genres: AdminGenre[]): AdminGenre[] {
 function GenreRow({
   genre,
   genres,
+  indent,
   onArchive,
 }: {
   genre: AdminGenre
   genres: AdminGenre[]
+  /** Draws the child connector; only when the parent's row is shown just above. */
+  indent: boolean
   /** Keeps the row in view after it is archived, with its message and Restore (D-201). */
   onArchive: (id: string) => void
 }) {
@@ -232,7 +243,7 @@ function GenreRow({
           <span
             className={cn(
               'flex flex-col gap-0.5',
-              parent &&
+              indent &&
                 'relative pl-6 before:absolute before:top-1 before:left-1.5 before:h-3 before:w-2.5 before:rounded-bl before:border-b-[1.5px] before:border-l-[1.5px] before:border-[#c9c3b8]',
             )}
           >
@@ -464,12 +475,14 @@ export function GenreManager({
   const [kept, setKept] = useState<ReadonlySet<string>>(() => new Set())
   const keep = (id: string) => setKept((current) => new Set(current).add(id))
   const findId = useId()
+  const addCardId = useId()
   const needle = query.trim().toLowerCase()
   const shown = orderGenres(genres).filter(
     (genre) =>
       (showArchived || !genre.archived || kept.has(genre.id)) &&
       (needle === '' || genre.name.toLowerCase().includes(needle) || genre.slug.includes(needle)),
   )
+  const shownIds = new Set(shown.map((genre) => genre.id))
   return (
     <AdminPage
       title={text.title}
@@ -481,7 +494,12 @@ export function GenreManager({
       ]}
       actions={
         tab === 'genres' ? (
-          <Button type="button" onClick={() => setAdding(true)}>
+          <Button
+            type="button"
+            aria-expanded={adding}
+            aria-controls={adding ? addCardId : undefined}
+            onClick={() => setAdding(true)}
+          >
             <AdminIcon name="plus" />
             {text.addHeading}
           </Button>
@@ -513,12 +531,13 @@ export function GenreManager({
       ) : (
         <>
           {adding ? (
-            <AdminCard title={text.addHeading}>
+            <AdminCard id={addCardId} title={text.addHeading}>
               <GenreForm
                 parents={genres}
                 submitLabel={text.add}
                 busyLabel={text.adding}
                 onCancel={() => setAdding(false)}
+                focusOnMount
               />
             </AdminCard>
           ) : null}
@@ -580,7 +599,13 @@ export function GenreManager({
                   </thead>
                   <tbody>
                     {shown.map((genre) => (
-                      <GenreRow key={genre.id} genre={genre} genres={genres} onArchive={keep} />
+                      <GenreRow
+                        key={genre.id}
+                        genre={genre}
+                        genres={genres}
+                        indent={genre.parentId !== null && shownIds.has(genre.parentId)}
+                        onArchive={keep}
+                      />
                     ))}
                   </tbody>
                 </table>
