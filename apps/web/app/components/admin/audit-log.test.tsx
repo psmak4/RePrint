@@ -82,6 +82,19 @@ describe('AuditLog', () => {
     )
   })
 
+  it('puts the title and the CSV export in the band', () => {
+    renderLog()
+    expect(screen.getByRole('heading', { level: 1, name: 'Audit log' })).toBeTruthy()
+    const exportLink = screen.getByRole('link', { name: 'Export CSV' })
+    expect(exportLink.className).toContain('rounded-full')
+    expect(exportLink.hasAttribute('download')).toBe(true)
+  })
+
+  it('puts the filters in a named card', () => {
+    renderLog()
+    expect(screen.getByRole('form', { name: 'Filter the audit log' })).toBeTruthy()
+  })
+
   it('says so when nothing matches', () => {
     renderLog({ entries: { items: [], meta: { nextCursor: null } } })
     expect(screen.getByText('No audit entries match these filters.')).toBeTruthy()
