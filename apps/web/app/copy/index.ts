@@ -841,6 +841,7 @@ export const copy = {
       counts: (editions: number, reviews: number, shelfEntries: number) =>
         `${editions} ${editions === 1 ? 'Edition' : 'Editions'} · ${reviews} ${reviews === 1 ? 'review' : 'reviews'} · ${shelfEntries} Shelf ${shelfEntries === 1 ? 'entry' : 'entries'}`,
       edit: (title: string) => `Edit ${title}`,
+      editShort: 'Edit',
       keep: (title: string) => `Keep ${title}`,
       confirmHeading: (from: string, into: string) => `Merge ${from} into ${into}?`,
       confirmHint:

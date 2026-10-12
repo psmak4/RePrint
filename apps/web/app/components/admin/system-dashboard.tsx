@@ -94,9 +94,12 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
         <AdminCard
           title={text.sourceHeading}
           actions={
-            <Badge dot tone={source.breakerOpen ? 'red' : 'green'}>
-              {source.breakerOpen ? text.breakerOpen : text.breakerClosed}
-            </Badge>
+            <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span>{text.breaker}</span>
+              <Badge dot tone={source.breakerOpen ? 'red' : 'green'}>
+                {source.breakerOpen ? text.breakerOpen : text.breakerClosed}
+              </Badge>
+            </p>
           }
         >
           <dl className={metric}>

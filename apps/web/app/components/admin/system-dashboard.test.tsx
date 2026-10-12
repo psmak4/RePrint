@@ -70,6 +70,12 @@ describe('SystemDashboard', () => {
     )
   })
 
+  it('names the breaker beside its badge', async () => {
+    renderDashboard()
+    const label = await screen.findByText('Circuit breaker')
+    expect(label.parentElement?.textContent).toContain('Closed')
+  })
+
   it('sets numbers in the sans, never the serif', async () => {
     renderDashboard()
     expect((await screen.findByText('Waiting')).nextElementSibling?.className).not.toContain(

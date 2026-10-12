@@ -40,7 +40,10 @@ function BookSummary({ book }: { book: AdminMergeBook }) {
           {text.counts(book.editionCount, book.reviewCount, book.shelfEntryCount)}
         </p>
         <Button asChild variant="outline" size="sm" className="mt-1.5 self-start">
-          <Link to={`/admin/books/${book.id}`}>{text.edit(book.title)}</Link>
+          {/* A short label: a long title on a nowrap pill would widen the card on a phone. */}
+          <Link to={`/admin/books/${book.id}`} aria-label={text.edit(book.title)}>
+            {text.editShort}
+          </Link>
         </Button>
       </div>
     </div>

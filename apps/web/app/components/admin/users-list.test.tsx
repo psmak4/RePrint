@@ -85,6 +85,8 @@ describe('UsersList', () => {
       '/admin/users/0192a3b4-0000-7000-8000-000000000002',
     ])
     expect(within(list).getByText('Joined Jan 2, 2026 · 1 review · 0 reports')).toBeTruthy()
+    // The list clips its rounded corners, so the rows draw their focus ring inside.
+    expect(links[0]?.className).toContain('focus-visible:outline-offset-[-2px]')
   })
 
   it('keeps the filter state from the URL in the form', () => {

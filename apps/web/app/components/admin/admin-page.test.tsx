@@ -107,6 +107,40 @@ describe('AdminPage', () => {
     expect([...new Set(current())]).toEqual(['Users'])
   })
 
+  it('points the Administration crumb at the first section the viewer may open', () => {
+    const reportsOnly: AdminNavGroup[] = [
+      {
+        label: 'Moderation',
+        items: [{ to: '/admin/reports', label: 'Reports queue', icon: 'reports' }],
+      },
+    ]
+    const Stub = createRoutesStub([
+      {
+        path: '/admin',
+        Component: () => <Outlet context={reportsOnly} />,
+        children: [
+          {
+            path: 'reports',
+            Component: () => (
+              <AdminPage
+                title="Reports queue"
+                crumbs={[{ label: 'Administration', to: '/admin' }, { label: 'Reports queue' }]}
+              >
+                <p>x</p>
+              </AdminPage>
+            ),
+          },
+        ],
+      },
+    ])
+    render(<Stub initialEntries={['/admin/reports']} />)
+    const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    // The dashboard needs reviews.moderate, which this viewer lacks.
+    expect(within(crumbs).getByRole('link', { name: 'Administration' }).getAttribute('href')).toBe(
+      '/admin/reports',
+    )
+  })
+
   it('renders without a nav outside the admin layout (component tests)', () => {
     const Stub = createRoutesStub([
       { path: '/', Component: () => <AdminPage title="Alone">x</AdminPage> },

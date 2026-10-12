@@ -150,7 +150,9 @@ function ReviewDetail({
   return (
     <article
       aria-label={text.detailLabel}
-      className="flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-border bg-surface"
+      // `overflow-clip`, not `overflow-hidden`: a hidden overflow would become the sticky bar's
+      // scroller, and the bar would never stay pinned.
+      className="flex min-w-0 flex-col overflow-clip rounded-[18px] border border-border bg-surface"
     >
       {claim ? <ClaimNotice claim={claim} /> : null}
       <div className="flex flex-col gap-6 p-5 md:p-6">

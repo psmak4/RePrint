@@ -62,6 +62,17 @@ describe('admin building blocks', () => {
     )
   })
 
+  it('ScrollRegion draws its focus ring inside, so a clipping card cannot hide it', () => {
+    render(
+      <ScrollRegion label="Genres" className="rounded-none border-0">
+        <p>x</p>
+      </ScrollRegion>,
+    )
+    expect(screen.getByRole('region', { name: 'Genres, scrollable table' }).className).toContain(
+      'focus-visible:outline-offset-[-2px]',
+    )
+  })
+
   it('AdminIcon is decorative', () => {
     const { container } = render(<AdminIcon name="users" />)
     expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')

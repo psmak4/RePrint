@@ -124,6 +124,12 @@ export function AdminPage({
   children: ReactNode
 }) {
   const nav = useAdminNav()
+  // The dashboard needs reviews.moderate; a viewer without it gets their first section instead.
+  const home = nav?.flatMap((group) => group.items).map((item) => item.to)
+  const root = home && !home.includes('/admin') ? home[0] : undefined
+  const shownCrumbs = crumbs?.map((crumb) =>
+    crumb.to === '/admin' && root ? { ...crumb, to: root } : crumb,
+  )
   return (
     <div className="flex flex-col gap-8">
       <div
@@ -134,7 +140,7 @@ export function AdminPage({
       >
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
           <div className="flex min-w-0 flex-col gap-2.5">
-            {crumbs ? <Crumbs crumbs={crumbs} /> : null}
+            {shownCrumbs ? <Crumbs crumbs={shownCrumbs} /> : null}
             {eyebrow ? (
               <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                 {eyebrow}

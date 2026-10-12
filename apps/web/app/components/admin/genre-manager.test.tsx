@@ -2,7 +2,7 @@
 import type { AdminGenre, AdminSubjectRule } from '@reprint/shared'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import axe from 'axe-core'
-import { createRoutesStub } from 'react-router'
+import { createRoutesStub, useLoaderData } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { GenreManager, genresTabFrom, orderGenres } from './genre-manager.js'
 
@@ -124,6 +124,37 @@ describe('GenreManager', () => {
         genre: { name: 'Horror', slug: 'horror', description: null, parentId: null },
       }),
     )
+    expect(await within(add).findByText('The Genre was added.')).toBeTruthy()
+  })
+
+  it('keeps Edit on an archived Genre, so it can be fixed without restoring it', () => {
+    renderManager({ genres: family })
+    fireEvent.click(screen.getByLabelText('Show archived'))
+    expect(screen.getByRole('button', { name: 'Edit Westerns' })).toBeTruthy()
+  })
+
+  it('keeps a Genre archived just now in view with its message after the page reloads', async () => {
+    const genres = [genre(1), genre(5, { name: 'Horror', slug: 'horror' })]
+    const Stub = createRoutesStub([
+      {
+        path: '/admin/catalog/genres',
+        // The real page reloads its data after every action; this loader does the same.
+        loader: () => ({ genres: genres.map((g) => ({ ...g })) }),
+        Component: () => {
+          const data = useLoaderData() as { genres: AdminGenre[] }
+          return <GenreManager genres={data.genres} rules={[]} tab="genres" />
+        },
+        action: async () => {
+          const target = genres.find((g) => g.id === id(1))
+          if (target) target.archived = true
+          return { done: 'archived' }
+        },
+      },
+    ])
+    render(<Stub initialEntries={['/admin/catalog/genres']} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Archive Genre 1' }))
+    expect(await screen.findByText('The Genre was archived.')).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Restore Genre 1' })).toBeTruthy()
   })
 
   it('opens a row’s edit form in place and sends only the changed fields', async () => {

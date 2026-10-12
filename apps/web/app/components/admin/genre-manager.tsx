@@ -212,7 +212,16 @@ export function orderGenres(genres: AdminGenre[]): AdminGenre[] {
   ])
 }
 
-function GenreRow({ genre, genres }: { genre: AdminGenre; genres: AdminGenre[] }) {
+function GenreRow({
+  genre,
+  genres,
+  onArchive,
+}: {
+  genre: AdminGenre
+  genres: AdminGenre[]
+  /** Keeps the row in view after it is archived, with its message and Restore (D-201). */
+  onArchive: (id: string) => void
+}) {
   const action = useAction()
   const [editing, setEditing] = useState(false)
   const parent = genres.find((candidate) => candidate.id === genre.parentId)
@@ -239,7 +248,7 @@ function GenreRow({ genre, genres }: { genre: AdminGenre; genres: AdminGenre[] }
         <td className={tdClass}>
           <span className="flex items-center justify-end gap-2">
             {genre.archived ? <Badge>{text.archivedBadge}</Badge> : null}
-            {editing || genre.archived ? null : (
+            {editing ? null : (
               <Button
                 type="button"
                 variant="outline"
@@ -256,13 +265,14 @@ function GenreRow({ genre, genres }: { genre: AdminGenre; genres: AdminGenre[] }
               size="sm"
               disabled={action.busy}
               aria-label={genre.archived ? text.restore(genre.name) : text.archive(genre.name)}
-              onClick={() =>
+              onClick={() => {
+                if (!genre.archived) onArchive(genre.id)
                 action.send({
                   intent: 'editGenre',
                   genreId: genre.id,
                   changes: { archived: !genre.archived },
                 })
-              }
+              }}
             >
               {genre.archived ? text.restoreShort : text.archiveShort}
             </Button>
@@ -449,11 +459,15 @@ export function GenreManager({
   const [adding, setAdding] = useState(false)
   const [query, setQuery] = useState('')
   const [showArchived, setShowArchived] = useState(false)
+  // Genres archived on this visit stay listed until the page is left, so their row, message, and
+  // Restore button do not vanish when the data reloads.
+  const [kept, setKept] = useState<ReadonlySet<string>>(() => new Set())
+  const keep = (id: string) => setKept((current) => new Set(current).add(id))
   const findId = useId()
   const needle = query.trim().toLowerCase()
   const shown = orderGenres(genres).filter(
     (genre) =>
-      (showArchived || !genre.archived) &&
+      (showArchived || !genre.archived || kept.has(genre.id)) &&
       (needle === '' || genre.name.toLowerCase().includes(needle) || genre.slug.includes(needle)),
   )
   return (
@@ -566,7 +580,7 @@ export function GenreManager({
                   </thead>
                   <tbody>
                     {shown.map((genre) => (
-                      <GenreRow key={genre.id} genre={genre} genres={genres} />
+                      <GenreRow key={genre.id} genre={genre} genres={genres} onArchive={keep} />
                     ))}
                   </tbody>
                 </table>

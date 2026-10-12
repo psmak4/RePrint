@@ -68,6 +68,12 @@ describe('MergeQueue', () => {
     )
   })
 
+  it('keeps the Edit pill short so a long title cannot widen the card on a phone', () => {
+    renderQueue()
+    const card = screen.getAllByRole('article')[0] as HTMLElement
+    expect(within(card).getByRole('link', { name: 'Edit Dune' }).textContent).toBe('Edit')
+  })
+
   it('says so when no pairs are waiting', () => {
     renderQueue([])
     expect(screen.getByText('No possible duplicates are waiting.')).toBeTruthy()

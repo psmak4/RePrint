@@ -238,7 +238,7 @@ export function UsersList({
               <li key={user.id} className="border-t border-[#ece8e0] first:border-t-0">
                 <Link
                   to={`/admin/users/${user.id}`}
-                  className="grid grid-cols-[40px_minmax(0,1fr)_20px] items-center gap-3 px-4 py-3.5"
+                  className="grid grid-cols-[40px_minmax(0,1fr)_20px] items-center gap-3 px-4 py-3.5 focus-visible:outline-offset-[-2px]"
                 >
                   <InitialsAvatar name={user.displayName} colorKey={user.username} size="md" />
                   <span className="flex min-w-0 flex-col gap-1.5">

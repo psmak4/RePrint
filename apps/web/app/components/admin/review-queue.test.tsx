@@ -128,6 +128,30 @@ describe('ReviewQueue', () => {
     expect(within(list).getByText('Waiting 3 hours').className).toContain('bg-[#fff7ed]')
   })
 
+  it('keeps the decision bar pinned: the review card clips without becoming a scroller', async () => {
+    renderQueue({
+      selected: item(1),
+      claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
+    })
+    const detail = await screen.findByRole('article', { name: 'Selected review' })
+    // `overflow-hidden` would make the card the sticky bar's scroller, so the bar never sticks.
+    expect(detail.className).toContain('overflow-clip')
+    expect(detail.className).not.toContain('overflow-hidden')
+    const bar = within(detail).getByRole('region', { name: 'Decision' })
+    expect(bar.className).toContain('sticky')
+  })
+
+  it('opens the reject form above the pinned bar, not inside it', async () => {
+    renderQueue({
+      selected: item(1),
+      claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
+    })
+    fireEvent.click(await screen.findByRole('button', { name: 'Reject' }))
+    const bar = screen.getByRole('region', { name: 'Decision' })
+    expect(within(bar).queryByLabelText('Saved phrase')).toBeNull()
+    expect(screen.getByLabelText('Saved phrase')).toBeTruthy()
+  })
+
   it('shows the keyboard shortcuts as keys', async () => {
     renderQueue({
       selected: item(1),

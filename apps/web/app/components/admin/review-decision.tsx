@@ -103,12 +103,10 @@ export function DecisionPanel({
     )
   }
   return (
-    <section
-      aria-label={text.actionsLabel}
-      className="sticky bottom-0 flex flex-col gap-3 border-t border-border bg-surface px-5 py-4 md:px-6"
-    >
+    <>
+      {/* The reject form sits above the pinned bar, so the bar stays small on a phone. */}
       {rejecting ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4">
+        <div className="mx-5 mb-4 flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4 md:mx-6">
           <div className="flex flex-col gap-1">
             <Label htmlFor={phraseId}>{text.phraseLabel}</Label>
             <Select id={phraseId} value="" onChange={(event) => setReason(event.target.value)}>
@@ -153,43 +151,48 @@ export function DecisionPanel({
           </div>
         </div>
       ) : null}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-muted-foreground">
-          {text.shortcutKeys.map(([key, label]) => (
-            <span key={key} className="inline-flex items-center gap-1.5">
-              <Kbd>{key}</Kbd>
-              {label}
-            </span>
-          ))}
-        </p>
-        <div className="flex flex-wrap gap-2.5">
-          {rejecting ? null : (
-            <Button
-              type="button"
-              variant="danger"
-              disabled={busy}
-              onClick={() => setRejecting(true)}
-            >
-              {text.reject}
+      <section
+        aria-label={text.actionsLabel}
+        className="sticky bottom-0 flex flex-col gap-3 border-t border-border bg-surface px-5 py-4 md:px-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-muted-foreground">
+            {text.shortcutKeys.map(([key, label]) => (
+              <span key={key} className="inline-flex items-center gap-1.5">
+                <Kbd>{key}</Kbd>
+                {label}
+              </span>
+            ))}
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {rejecting ? null : (
+              <Button
+                type="button"
+                variant="danger"
+                disabled={busy}
+                onClick={() => setRejecting(true)}
+              >
+                {text.reject}
+              </Button>
+            )}
+            <Button type="button" disabled={busy} onClick={() => decide('approve')}>
+              <AdminIcon name="check" />
+              {busy && submitting === 'approve' ? text.approving : text.approve}
             </Button>
-          )}
-          <Button type="button" disabled={busy} onClick={() => decide('approve')}>
-            <AdminIcon name="check" />
-            {busy && submitting === 'approve' ? text.approving : text.approve}
-          </Button>
+          </div>
         </div>
-      </div>
-      {decided ? (
-        <p role="status" className="text-sm">
-          {text.decided(decided)}
-        </p>
-      ) : null}
-      {failure ? (
-        <p role="alert" className="text-sm text-danger">
-          {failure}
-        </p>
-      ) : null}
-    </section>
+        {decided ? (
+          <p role="status" className="text-sm">
+            {text.decided(decided)}
+          </p>
+        ) : null}
+        {failure ? (
+          <p role="alert" className="text-sm text-danger">
+            {failure}
+          </p>
+        ) : null}
+      </section>
+    </>
   )
 }
 
