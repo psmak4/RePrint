@@ -53,34 +53,33 @@ describe('admin layout loader', () => {
       paths.push(new URL(String(url)).pathname)
       return Response.json(stats)
     })
-    expect(await loader(args)).toEqual({
-      groups: [
-        {
-          label: 'Moderation',
-          items: [
-            { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
-            { to: '/admin/reviews', label: 'Review queue', icon: 'reviews', count: 3 },
-            { to: '/admin/reports', label: 'Reports queue', icon: 'reports', count: 1 },
-          ],
-        },
-      ],
-    })
+    expect((await loader(args)).groups).toEqual([
+      {
+        label: 'Moderation',
+        items: [
+          { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
+          { to: '/admin/reviews', label: 'Review queue', icon: 'reviews', count: 3 },
+          { to: '/admin/reports', label: 'Reports queue', icon: 'reports', count: 1 },
+        ],
+      },
+    ])
     expect(paths).toEqual(['/v1/mod/stats'])
+    // The dashboard reads these instead of asking again.
+    expect((await loader(args)).stats).toEqual(stats)
   })
 
   it('never asks for the counts without reviews.moderate', async () => {
     loadSession.mockResolvedValue(viewer(['reports.resolve']))
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
-    expect(await loader(args)).toEqual({
-      groups: [
-        {
-          label: 'Moderation',
-          items: [{ to: '/admin/reports', label: 'Reports queue', icon: 'reports' }],
-        },
-      ],
-    })
+    expect((await loader(args)).groups).toEqual([
+      {
+        label: 'Moderation',
+        items: [{ to: '/admin/reports', label: 'Reports queue', icon: 'reports' }],
+      },
+    ])
     expect(fetchMock).not.toHaveBeenCalled()
+    expect((await loader(args)).stats).toBeNull()
   })
 
   it('leaves the counts off when the stats request fails', async () => {
@@ -99,49 +98,64 @@ describe('admin layout loader', () => {
     expect(groups[0]?.items.map((item) => item.count)).toEqual([undefined, undefined])
   })
 
+  it('gives up on a stats request that takes longer than two seconds', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    try {
+      loadSession.mockResolvedValue(viewer(['reviews.moderate']))
+      vi.stubGlobal(
+        'fetch',
+        (_url: URL, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener('abort', () => reject(new Error('aborted')))
+          }),
+      )
+      const pending = loader(args)
+      await vi.advanceTimersByTimeAsync(2000)
+      const result = await pending
+      expect(result.stats).toBeNull()
+      expect(result.groups[0]?.items.every((item) => item.count === undefined)).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('lists People for users.view and audit.view', async () => {
     loadSession.mockResolvedValue(viewer(['users.view', 'audit.view']))
-    expect(await loader(args)).toEqual({
-      groups: [
-        {
-          label: 'People',
-          items: [
-            { to: '/admin/users', label: 'Users', icon: 'users' },
-            { to: '/admin/audit', label: 'Audit log', icon: 'audit' },
-          ],
-        },
-      ],
-    })
+    expect((await loader(args)).groups).toEqual([
+      {
+        label: 'People',
+        items: [
+          { to: '/admin/users', label: 'Users', icon: 'users' },
+          { to: '/admin/audit', label: 'Audit log', icon: 'audit' },
+        ],
+      },
+    ])
   })
 
   it('opens the area for audit.view alone and lists only the audit log', async () => {
     loadSession.mockResolvedValue(viewer(['audit.view']))
-    expect(await loader(args)).toEqual({
-      groups: [
-        { label: 'People', items: [{ to: '/admin/audit', label: 'Audit log', icon: 'audit' }] },
-      ],
-    })
+    expect((await loader(args)).groups).toEqual([
+      { label: 'People', items: [{ to: '/admin/audit', label: 'Audit log', icon: 'audit' }] },
+    ])
   })
 
   it('lists Catalog and Operations for catalog.manage and featured.manage', async () => {
     loadSession.mockResolvedValue(viewer(['catalog.manage', 'featured.manage']))
-    expect(await loader(args)).toEqual({
-      groups: [
-        {
-          label: 'Catalog',
-          items: [
-            { to: '/admin/catalog', label: 'Catalog', icon: 'catalog' },
-            { to: '/admin/catalog/merge', label: 'Merge queue', icon: 'merge' },
-            { to: '/admin/catalog/genres', label: 'Genres and rules', icon: 'genres' },
-            { to: '/admin/featured', label: 'Featured content', icon: 'featured' },
-          ],
-        },
-        {
-          label: 'Operations',
-          items: [{ to: '/admin/system', label: 'System', icon: 'system' }],
-        },
-      ],
-    })
+    expect((await loader(args)).groups).toEqual([
+      {
+        label: 'Catalog',
+        items: [
+          { to: '/admin/catalog', label: 'Catalog', icon: 'catalog' },
+          { to: '/admin/catalog/merge', label: 'Merge queue', icon: 'merge' },
+          { to: '/admin/catalog/genres', label: 'Genres and rules', icon: 'genres' },
+          { to: '/admin/featured', label: 'Featured content', icon: 'featured' },
+        ],
+      },
+      {
+        label: 'Operations',
+        items: [{ to: '/admin/system', label: 'System', icon: 'system' }],
+      },
+    ])
   })
 
   it('is noindex', () => {
