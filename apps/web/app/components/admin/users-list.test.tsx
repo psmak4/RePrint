@@ -63,10 +63,13 @@ describe('UsersList', () => {
     expect(screen.getByRole('form', { name: 'Filter users' })).toBeTruthy()
   })
 
-  it('shows a plain Member as text and keeps emails on one line', () => {
+  it('shows a plain Member as text and the email under the name, on one line', () => {
     renderList()
     const table = screen.getByRole('table', { name: 'Users' })
+    // No Email column: the table must fit beside the nav (D-201).
+    expect(within(table).queryByRole('columnheader', { name: 'Email' })).toBeNull()
     const first = within(table).getAllByRole('row')[1] as HTMLElement
+    expect(within(first).getByRole('rowheader').textContent).toContain('u1@example.com')
     expect(within(first).getByText('Member').className).not.toContain('rounded-full')
     const email = within(first).getByText('u1@example.com')
     expect(email.className).toContain('truncate')

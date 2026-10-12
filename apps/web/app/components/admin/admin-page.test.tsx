@@ -69,6 +69,44 @@ describe('AdminPage', () => {
     ).toBeGreaterThan(0)
   })
 
+  it('marks only the exact section, except Users, which stays marked on a user’s page', () => {
+    const nested: AdminNavGroup[] = [
+      {
+        label: 'Catalog',
+        items: [
+          { to: '/admin/catalog', label: 'Catalog', icon: 'catalog' },
+          { to: '/admin/catalog/genres', label: 'Genres and rules', icon: 'genres' },
+        ],
+      },
+      { label: 'People', items: [{ to: '/admin/users', label: 'Users', icon: 'users' }] },
+    ]
+    const page = () => (
+      <AdminPage title="Page">
+        <p>x</p>
+      </AdminPage>
+    )
+    const Stub = createRoutesStub([
+      {
+        path: '/admin',
+        Component: () => <Outlet context={nested} />,
+        children: [
+          { path: 'catalog/genres', Component: page },
+          { path: 'users/:id', Component: page },
+        ],
+      },
+    ])
+    const current = () =>
+      within(screen.getByRole('navigation', { name: 'Administration sections' }))
+        .getAllByRole('link')
+        .filter((link) => link.getAttribute('aria-current') === 'page')
+        .map((link) => link.textContent)
+    const { unmount } = render(<Stub initialEntries={['/admin/catalog/genres']} />)
+    expect([...new Set(current())]).toEqual(['Genres and rules'])
+    unmount()
+    render(<Stub initialEntries={['/admin/users/42']} />)
+    expect([...new Set(current())]).toEqual(['Users'])
+  })
+
   it('renders without a nav outside the admin layout (component tests)', () => {
     const Stub = createRoutesStub([
       { path: '/', Component: () => <AdminPage title="Alone">x</AdminPage> },

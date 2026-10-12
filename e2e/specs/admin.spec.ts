@@ -30,6 +30,18 @@ test('every admin page has no serious accessibility issues', async ({ page }) =>
   }
 })
 
+test('the Users table fits beside the nav on a desktop', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile', 'phones get the row list instead')
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const admin = await registerVerifiedMember(page, 'adminwide')
+  await grantAdmin(admin.email)
+  await page.goto('/admin/users')
+  const region = page.getByRole('region', { name: 'Users, scrollable table' })
+  await expect(region).toBeVisible()
+  const overflow = await region.evaluate((el) => el.scrollWidth - el.clientWidth)
+  expect(overflow).toBeLessThanOrEqual(0)
+})
+
 test('admin pages never scroll sideways on a phone', async ({ page }) => {
   test.setTimeout(60_000)
   await page.setViewportSize({ width: 390, height: 844 })

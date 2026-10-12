@@ -151,17 +151,16 @@ export function UsersList({
         <>
           <div className="hidden md:block">
             <ScrollRegion label={text.listLabel}>
-              <table aria-label={text.listLabel} className={tableClass}>
+              {/* Tighter cells: the seven columns must fit beside the nav at 1280 px. */}
+              <table
+                aria-label={text.listLabel}
+                className={cn(tableClass, '[&_td]:px-3 [&_th]:px-3')}
+              >
                 <thead>
                   <tr>
                     <th scope="col" className={thClass}>
                       {text.columns.user}
                     </th>
-                    {canSearchEmail ? (
-                      <th scope="col" className={thClass}>
-                        {text.columns.email}
-                      </th>
-                    ) : null}
                     <th scope="col" className={thClass}>
                       {text.columns.status}
                     </th>
@@ -199,19 +198,17 @@ export function UsersList({
                             <span className="text-[13px] whitespace-nowrap text-muted-foreground">
                               @{user.username}
                             </span>
+                            {canSearchEmail ? (
+                              <span
+                                title={user.email ?? undefined}
+                                className="block max-w-[200px] truncate text-[13px] text-muted-foreground"
+                              >
+                                {user.email ?? text.noEmail}
+                              </span>
+                            ) : null}
                           </span>
                         </span>
                       </th>
-                      {canSearchEmail ? (
-                        <td className={tdClass}>
-                          <span
-                            title={user.email ?? undefined}
-                            className="block max-w-[220px] truncate text-muted-foreground"
-                          >
-                            {user.email ?? text.noEmail}
-                          </span>
-                        </td>
-                      ) : null}
                       <td className={tdClass}>
                         <Badge tone={USER_STATUS_TONE[user.status]} dot>
                           {text.statuses[user.status]}

@@ -26,7 +26,9 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
               <li key={item.to}>
                 <NavLink
                   to={item.to}
-                  end={item.to === '/admin'}
+                  // Exact matches, so Catalog is not marked on Genres and rules; a user's page
+                  // still marks Users.
+                  end={item.to !== '/admin/users'}
                   className="group flex h-10 items-center gap-3 rounded-[10px] border border-transparent px-3 text-[15px] font-medium text-[#1e293b] hover:bg-surface-raised aria-[current=page]:border-border aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
                 >
                   <AdminIcon
@@ -53,7 +55,7 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
 /** The left nav from `lg`; a disclosure above the page below it. */
 function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
   return (
-    <nav aria-label={copy.admin.navLabel} className="lg:w-60 lg:shrink-0">
+    <nav aria-label={copy.admin.navLabel} className="lg:w-56 lg:shrink-0">
       <details className="rounded-xl border border-border bg-surface lg:hidden">
         <summary className="flex h-12 cursor-pointer items-center justify-between gap-2 px-4 text-[15px] font-semibold">
           {copy.admin.navToggle}
@@ -126,7 +128,7 @@ export function AdminPage({
     <div className="flex flex-col gap-8">
       <div
         className={cn(
-          '-mt-8 flex flex-col gap-5 border-b border-border bg-ground-deep pt-7 shadow-[0_0_0_100vmax_var(--color-ground-deep)] [clip-path:inset(0_-100vmax)] md:pt-9',
+          '-mt-8 flex flex-col gap-5 bg-ground-deep pt-7 shadow-[0_0_0_100vmax_var(--color-ground-deep)] [clip-path:inset(0_-100vmax)] md:pt-9',
           below ? 'pb-0' : 'pb-8 md:pb-9',
         )}
       >
@@ -156,7 +158,7 @@ export function AdminPage({
         </div>
         {below}
       </div>
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
         {nav ? <AdminNav groups={nav} /> : null}
         <div className="flex min-w-0 flex-1 flex-col gap-6">{children}</div>
       </div>
