@@ -7,6 +7,8 @@ import AdminIndex from './admin-index.js'
 
 afterEach(cleanup)
 
+type DashboardProps = Parameters<typeof AdminIndex>[0]
+
 const stats: ModStats = {
   pendingCount: 4,
   oldestPendingAt: '2026-10-01T00:30:00.000Z',
@@ -28,7 +30,11 @@ function renderDashboard(layoutStats: ModStats | null) {
         {
           index: true,
           loader: () => ({ now: '2026-10-01T03:30:00.000Z', oldest: [] }),
-          Component: () => <AdminIndex {...({ loaderData: useLoaderData() } as never)} />,
+          Component: () => {
+            // The stub passes no route props; hand the component the loader's data the way the app does.
+            const props = { loaderData: useLoaderData() } as unknown as DashboardProps
+            return <AdminIndex {...props} />
+          },
         },
       ],
     },
