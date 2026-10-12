@@ -8,7 +8,7 @@ import {
 } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildApp } from '../../app.js'
 import { resolveCandidate } from '../../catalog/resolve.js'
 import { sourceSearchCacheKey } from '../../catalog/search/federated-search.js'
@@ -187,12 +187,22 @@ describe('GET /v1/search', () => {
 
   it('returns Catalog results alone when the Source is slower than the limit', async () => {
     await storeStubBook('stub-book-dune')
-    searchBooks = () => new Promise((resolve) => setTimeout(() => resolve(pageOf([])), 1000))
+    // The Source answers only when told to, so its late answer is cached inside this test and not
+    // in a later test's Redis (where it once showed an empty page as a cache hit).
+    let answer: (result: BookSearchPage) => void = () => {}
+    searchBooks = () =>
+      new Promise((resolve) => {
+        answer = resolve
+      })
     const started = Date.now()
     const body = await search('dune')
     expect(Date.now() - started).toBeLessThan(800)
     expect(body.sourceUnavailable).toBe(true)
     expect(body.items.map((item) => item.kind)).toEqual(['book'])
+    answer(pageOf([]))
+    await vi.waitFor(async () => {
+      expect(await stack.redis.get(sourceSearchCacheKey('dune', 1))).not.toBeNull()
+    })
   })
 
   it('returns Catalog results alone, and does not cache, when the Source fails', async () => {
