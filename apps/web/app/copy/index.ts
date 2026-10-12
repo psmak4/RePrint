@@ -1040,6 +1040,7 @@ export const copy = {
       title: 'Audit log',
       lead: 'Every Moderator and Admin action, newest first.',
       filtersLabel: 'Filter the audit log',
+      filtersToggle: 'Filters',
       loadFailed: 'We could not load the audit log. Please try again in a moment.',
       actorLabel: 'Actor (username)',
       actionLabel: 'Action',

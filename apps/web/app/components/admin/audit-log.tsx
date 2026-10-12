@@ -1,9 +1,17 @@
 import { type AdminAuditResponse, AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from '@reprint/shared'
 import { Button, cn, Input, Label, Select } from '@reprint/ui'
+import { useState } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { AdminPage } from './admin-page.js'
-import { EmptyState, tableClass, tdClass, thClass } from './admin-ui.js'
+import {
+  EmptyState,
+  FiltersToggle,
+  filtersFormClass,
+  tableClass,
+  tdClass,
+  thClass,
+} from './admin-ui.js'
 import { ScrollRegion } from './scroll-region.js'
 
 const field = 'flex min-w-0 flex-col gap-1.5'
@@ -45,6 +53,7 @@ function Values({ label, values }: { label: string; values: Record<string, unkno
 /** `/admin/audit`: filters live in the URL; a plain GET form drives them (PRD §7.11). */
 export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; filters: Filters }) {
   const active = Object.values(filters).some(Boolean)
+  const [filtersOpen, setFiltersOpen] = useState(active)
   const filterParams = new URLSearchParams()
   for (const [key, value] of Object.entries(filters)) if (value) filterParams.set(key, value)
   const nextParams = new URLSearchParams(filterParams)
@@ -64,10 +73,17 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
         </Button>
       }
     >
+      <FiltersToggle
+        open={filtersOpen}
+        onToggle={() => setFiltersOpen(!filtersOpen)}
+        controls="audit-filters"
+        label={text.filtersToggle}
+      />
       <Form
+        id="audit-filters"
         method="get"
         aria-label={text.filtersLabel}
-        className="flex flex-col gap-4 rounded-[18px] border border-border bg-surface p-5"
+        className={filtersFormClass(filtersOpen)}
       >
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           <div className={field}>

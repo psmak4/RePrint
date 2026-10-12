@@ -1,5 +1,5 @@
 import type { AdminUserStatus } from '@reprint/shared'
-import { cn } from '@reprint/ui'
+import { Button, cn } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { AdminIcon } from './icons.js'
 
@@ -122,6 +122,46 @@ export function EmptyState({ children, action }: { children: ReactNode; action?:
     </div>
   )
 }
+
+/**
+ * The full-width button that shows or hides a filter form on phones; from `md` the form is always
+ * shown. Pair it with `filtersFormClass` on the form it `controls`.
+ */
+export function FiltersToggle({
+  open,
+  onToggle,
+  controls,
+  label,
+}: {
+  open: boolean
+  onToggle: () => void
+  controls: string
+  label: string
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full justify-between md:hidden"
+      aria-expanded={open}
+      aria-controls={controls}
+      onClick={onToggle}
+    >
+      <span className="inline-flex items-center gap-2.5">
+        <AdminIcon name="filter" />
+        {label}
+      </span>
+      <AdminIcon name="chevronDown" />
+    </Button>
+  )
+}
+
+/** A filter form's card: hidden on phones until its `FiltersToggle` opens it. */
+export const filtersFormClass = (open: boolean) =>
+  cn(
+    'flex-col gap-4 rounded-[18px] border border-border bg-surface p-5 md:flex',
+    open ? 'flex' : 'hidden',
+  )
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
