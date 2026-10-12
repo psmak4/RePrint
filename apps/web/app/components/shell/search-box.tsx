@@ -2,6 +2,7 @@ import { SEARCH_MIN_LENGTH, SEARCH_QUERY_MAX_LENGTH } from '@reprint/shared'
 import { type KeyboardEvent, useEffect, useId, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { sendReached } from '../../lib/reached.js'
 import { fetchSuggestions, type Option, type Suggest, toOptions } from '../../lib/search-suggest.js'
 
 /** Wait this long after the last keystroke before asking for suggestions (PRD §7.3). */
@@ -79,9 +80,10 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
   const expanded = open && options.length > 0
   const optionId = (index: number) => `${listId}-option-${index}`
 
-  function go(href: string) {
+  function go(option: Option) {
     setOpen(false)
-    navigate(href)
+    if (option.bookSlug) sendReached(option.bookSlug)
+    navigate(option.href)
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -100,7 +102,7 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
       const chosen = expanded ? options[active] : undefined
       if (chosen) {
         event.preventDefault()
-        go(chosen.href)
+        go(chosen)
       } else if (trimmed.length === 0) {
         event.preventDefault()
       }
@@ -163,7 +165,7 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
         className="absolute left-0 right-0 top-full z-40 mt-2 max-h-96 overflow-auto rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)]"
       >
         {options.map((option, index) =>
-          renderOption(option, optionId(index), index === active, () => go(option.href)),
+          renderOption(option, optionId(index), index === active, () => go(option)),
         )}
       </div>
       <div role="status" className="sr-only">

@@ -12,6 +12,20 @@ export type InteractiveCall = <T>(fn: () => Promise<T>, timeoutMs: number) => Pr
 export type ResolveResult = { slug: string; seriesToSync: string[] } | { notFound: true }
 
 /**
+ * A Member opening a Book a Series sync brought in has reached it, so its Series may fill in
+ * (D-199, D-200). Returns those Series that are due a sync, or nothing when the Book was already
+ * reached (its page view queues those).
+ */
+export async function markReached(db: Database, bookId: string): Promise<string[]> {
+  const marked = await db
+    .update(books)
+    .set({ seriesImportOnly: false })
+    .where(and(eq(books.id, bookId), eq(books.seriesImportOnly, true)))
+    .returning({ id: books.id })
+  return marked.length > 0 ? seriesDueForBook(db, bookId) : []
+}
+
+/**
  * Stores the Book behind a search candidate and returns its slug (PRD §6). The whole fetch has
  * `timeoutMs` to finish; a Source that fails or is too slow throws `SourceError`. A Book that is already
  * stored is returned without asking the Source, so opening it works even while the Source is down.
@@ -28,7 +42,7 @@ export async function resolveCandidate(options: {
   const link = candidate.sourceLink
 
   const [stored] = await db
-    .select({ id: books.id, slug: books.slug, importOnly: books.seriesImportOnly })
+    .select({ id: books.id, slug: books.slug })
     .from(sourceLinks)
     .innerJoin(books, eq(books.id, sourceLinks.entityId))
     .where(
@@ -39,12 +53,7 @@ export async function resolveCandidate(options: {
       ),
     )
     .limit(1)
-  if (stored) {
-    if (!stored.importOnly) return { slug: stored.slug, seriesToSync: [] }
-    // A Member opening a Book a Series sync brought in has reached it, so its Series may fill in.
-    await db.update(books).set({ seriesImportOnly: false }).where(eq(books.id, stored.id))
-    return { slug: stored.slug, seriesToSync: await seriesDueForBook(db, stored.id) }
-  }
+  if (stored) return { slug: stored.slug, seriesToSync: await markReached(db, stored.id) }
   if (link.source !== source.name) return { notFound: true }
 
   const deadline = Date.now() + timeoutMs

@@ -13,6 +13,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
+import { sendReached } from '../../lib/reached.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
 import { AuthorMatchCard } from '../books/author-match-card.js'
 import { InitialsAvatar } from '../books/avatar.js'
@@ -331,7 +332,10 @@ function Results({ results, signedIn }: { results: SearchResponse; signedIn: boo
               <SearchResultCard
                 book={fromSummary(item.book, item.topReview)}
                 href={`/books/${item.book.slug}`}
-                onNavigate={trackResultClick}
+                onNavigate={() => {
+                  trackResultClick()
+                  sendReached(item.book.slug)
+                }}
                 shelf={<BookShelfSelector book={item.book} signedIn={signedIn} variant="outline" />}
               />
             </li>
