@@ -51,14 +51,14 @@ export async function withSeriesLock<T>(work: () => Promise<T>): Promise<T> {
 
 /**
  * Puts a Series back to "never synced" and takes `bookTitle` out of it, as if that Book had been
- * stored before the Series existed, so a spec can watch a sync bring it back (D-199). `reachedTitle`
- * is the Book the spec will view: it is marked as reached, since a Book that an earlier spec's
- * Series sync imported starts no syncs of its own (one level only). The e2e database is kept
- * between local runs, and specs run in any order, so a spec cannot rely on either being new.
+ * stored before the Series existed, so a spec can watch a sync bring it back (D-199).
+ * `seriesOnlyTitle`, when stored, is marked as a Book a Series sync brought in, so the spec proves
+ * that a reader's click from search reaches it (D-200). The e2e database is kept between local
+ * runs, and specs run in any order, so a spec cannot rely on either being new.
  */
-export async function resetSeriesSync(name: string, bookTitle: string, reachedTitle: string) {
+export async function resetSeriesSync(name: string, bookTitle: string, seriesOnlyTitle: string) {
   await withDb(async (db) => {
-    await db.update(books).set({ seriesImportOnly: false }).where(eq(books.title, reachedTitle))
+    await db.update(books).set({ seriesImportOnly: true }).where(eq(books.title, seriesOnlyTitle))
     const [row] = await db.select({ id: series.id }).from(series).where(eq(series.name, name))
     if (!row) return
     await db.update(series).set({ membersSyncedAt: null }).where(eq(series.id, row.id))

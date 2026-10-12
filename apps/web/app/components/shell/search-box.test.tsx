@@ -124,6 +124,20 @@ describe('SearchBox', () => {
     expect(screen.getByText('Author page')).toBeTruthy()
   })
 
+  it('tells the Catalog a chosen Book suggestion was reached, not an Author (D-200)', async () => {
+    const sendBeacon = vi.fn(() => true)
+    Object.defineProperty(navigator, 'sendBeacon', { value: sendBeacon, configurable: true })
+    const first = renderBox()
+    await type(first.input, 'dune')
+    fireEvent.click(screen.getAllByRole('option')[1] as HTMLElement)
+    expect(sendBeacon).not.toHaveBeenCalled()
+    cleanup()
+    const second = renderBox()
+    await type(second.input, 'dune')
+    fireEvent.click(screen.getAllByRole('option')[0] as HTMLElement)
+    expect(sendBeacon).toHaveBeenCalledExactlyOnceWith('/books/dune/reached')
+  })
+
   it('closes the list on Escape', async () => {
     const { input } = renderBox()
     await type(input, 'dune')
