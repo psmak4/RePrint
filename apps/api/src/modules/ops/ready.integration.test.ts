@@ -66,7 +66,7 @@ describe('GET /v1/ready', () => {
     })
   })
 
-  // Runs last: it stops the Redis container.
+  // Runs last: it shuts down Redis.
   it('returns 503 Problem Details when Redis is stopped', async () => {
     await stack.stopRedis()
     const response = await app.inject({ method: 'GET', url: '/v1/ready' })
