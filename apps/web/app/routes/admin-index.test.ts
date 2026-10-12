@@ -35,14 +35,40 @@ async function thrown(run: () => unknown) {
 describe('admin dashboard loader', () => {
   it('loads the stats for a Moderator', async () => {
     loadSession.mockResolvedValue(viewer(['reviews.moderate']))
-    const paths: string[] = []
-    vi.stubGlobal('fetch', async (url: URL) => {
-      paths.push(new URL(String(url)).pathname)
-      return Response.json(stats)
-    })
+    vi.stubGlobal('fetch', async (url: URL) =>
+      new URL(String(url)).pathname === '/v1/mod/stats'
+        ? Response.json(stats)
+        : Response.json({ items: [], meta: { nextCursor: null } }),
+    )
     const result = (await loader(args)) as { stats: unknown }
     expect(result.stats).toEqual(stats)
-    expect(paths).toEqual(['/v1/mod/stats'])
+  })
+
+  it('loads the three oldest pending reviews beside the stats', async () => {
+    loadSession.mockResolvedValue(viewer(['reviews.moderate']))
+    const requests: string[] = []
+    vi.stubGlobal('fetch', async (url: URL) => {
+      const target = new URL(String(url))
+      requests.push(`${target.pathname}${target.search}`)
+      return target.pathname === '/v1/mod/stats'
+        ? Response.json(stats)
+        : Response.json({ items: [], meta: { nextCursor: null } })
+    })
+    const result = await loader(args)
+    expect(requests.sort()).toEqual(['/v1/mod/reviews?limit=3', '/v1/mod/stats'])
+    expect(result.oldest).toEqual([])
+  })
+
+  it('still renders the stats when the queue request fails', async () => {
+    loadSession.mockResolvedValue(viewer(['reviews.moderate']))
+    vi.stubGlobal('fetch', async (url: URL) =>
+      new URL(String(url)).pathname === '/v1/mod/stats'
+        ? Response.json(stats)
+        : new Response('down', { status: 503 }),
+    )
+    const result = await loader(args)
+    expect(result.stats.pendingCount).toBe(3)
+    expect(result.oldest).toBeNull()
   })
 
   it('refuses a Member without calling the API', async () => {

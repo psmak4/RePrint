@@ -5,7 +5,7 @@ import { act, cleanup, render, screen } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { REFRESH_MS, SystemDashboard } from './system-dashboard.js'
+import { barWidth, REFRESH_MS, SystemDashboard } from './system-dashboard.js'
 
 afterEach(() => {
   cleanup()
@@ -34,7 +34,7 @@ describe('SystemDashboard', () => {
   it('shows Source rate, cache hit rate, breaker state, and queue depth', async () => {
     renderDashboard()
     expect(await screen.findByText('1.25')).toBeTruthy()
-    expect(screen.getByText('Limit: 2 per second')).toBeTruthy()
+    expect(screen.getByText('of 2 per second')).toBeTruthy()
     expect(screen.getByText('Closed')).toBeTruthy()
     expect(screen.getByText('75%')).toBeTruthy()
     expect(screen.getByText('3 hits, 1 misses')).toBeTruthy()
@@ -54,6 +54,41 @@ describe('SystemDashboard', () => {
     expect(screen.getByText('Nothing is waiting')).toBeTruthy()
   })
 
+  it('puts the title and the update time in the band', async () => {
+    renderDashboard()
+    expect(await screen.findByRole('heading', { level: 1, name: 'System' })).toBeTruthy()
+    expect(screen.getByText('Updated at 12:00:00 UTC · refreshes every 30 s')).toBeTruthy()
+  })
+
+  it('shows the breaker as a green badge when closed and a red one when open', async () => {
+    renderDashboard()
+    expect((await screen.findByText('Closed')).className).toContain('text-success')
+    cleanup()
+    renderDashboard({ ...system, source: { ...system.source, breakerOpen: true } })
+    expect((await screen.findByText('Open: Source calls are paused')).className).toContain(
+      'text-danger',
+    )
+  })
+
+  it('names the breaker beside its badge', async () => {
+    renderDashboard()
+    const label = await screen.findByText('Circuit breaker')
+    expect(label.parentElement?.textContent).toContain('Closed')
+  })
+
+  it('sets numbers in the sans, never the serif', async () => {
+    renderDashboard()
+    expect((await screen.findByText('Waiting')).nextElementSibling?.className).not.toContain(
+      'font-serif',
+    )
+    expect(screen.getByText('1,200').className).toContain('tabular-nums')
+  })
+
+  it('draws the request rate against the limit', async () => {
+    renderDashboard()
+    expect(await screen.findByRole('img', { name: '63% of the limit' })).toBeTruthy()
+  })
+
   it('reloads its data every 30 seconds', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     const loader = vi.fn(() => null)
@@ -71,5 +106,16 @@ describe('SystemDashboard', () => {
     await screen.findByText('1.25')
     const result = await axe.run(container)
     expect(result.violations).toEqual([])
+  })
+})
+
+describe('barWidth', () => {
+  it('rounds to the nearest 5% and stays within 0 to 100', () => {
+    expect(barWidth(42)).toBe('w-[40%]')
+    expect(barWidth(63)).toBe('w-[65%]')
+    expect(barWidth(0)).toBe('w-0')
+    expect(barWidth(100)).toBe('w-full')
+    expect(barWidth(140)).toBe('w-full')
+    expect(barWidth(-3)).toBe('w-0')
   })
 })

@@ -751,6 +751,14 @@ export const copy = {
     title: 'Administration',
     navLabel: 'Administration sections',
     navToggle: 'Admin menu',
+    breadcrumbLabel: 'Breadcrumb',
+    navGroups: {
+      moderation: 'Moderation',
+      people: 'People',
+      catalog: 'Catalog',
+      operations: 'Operations',
+    },
+    navCount: (n: number) => `${n} waiting`,
     scrollableTable: (name: string) => `${name}, scrollable table`,
     reviewsNav: 'Review queue',
     dashboardNav: 'Dashboard',
@@ -764,6 +772,10 @@ export const copy = {
     systemNav: 'System',
     system: {
       title: 'System',
+      lead: 'Source requests, the search cache, and background jobs.',
+      updatedBadge: (time: string) => `Updated at ${time} UTC · refreshes every 30 s`,
+      ofLimit: (limit: number) => `of ${limit} per second`,
+      usage: (percent: number) => `${percent}% of the limit`,
       loadFailed: 'We could not load the system numbers. Please try again in a moment.',
       refreshNote: 'These numbers refresh every 30 seconds.',
       updatedAt: (time: string) => `Updated at ${time} UTC`,
@@ -789,6 +801,7 @@ export const copy = {
     },
     catalog: {
       title: 'Catalog',
+      lead: 'Find a Book on RePrint and see how the Catalog grows.',
       loadFailed: 'We could not load the Catalog. Please try again in a moment.',
       totalsLabel: 'Catalog size',
       books: 'Books',
@@ -816,6 +829,7 @@ export const copy = {
     },
     merge: {
       title: 'Merge queue',
+      lead: 'Possible duplicate Books, oldest first. Keeping one moves everything onto it.',
       loadFailed: 'We could not load the merge queue. Please try again in a moment.',
       listLabel: 'Possible duplicate Books',
       empty: 'No possible duplicates are waiting.',
@@ -827,6 +841,7 @@ export const copy = {
       counts: (editions: number, reviews: number, shelfEntries: number) =>
         `${editions} ${editions === 1 ? 'Edition' : 'Editions'} · ${reviews} ${reviews === 1 ? 'review' : 'reviews'} · ${shelfEntries} Shelf ${shelfEntries === 1 ? 'entry' : 'entries'}`,
       edit: (title: string) => `Edit ${title}`,
+      editShort: 'Edit',
       keep: (title: string) => `Keep ${title}`,
       confirmHeading: (from: string, into: string) => `Merge ${from} into ${into}?`,
       confirmHint:
@@ -843,6 +858,7 @@ export const copy = {
     },
     featured: {
       title: 'Featured content',
+      lead: 'What the Discover page features.',
       loadFailed: 'We could not load featured content. Please try again in a moment.',
       genresHeading: 'Featured Genres',
       genresHint: (max: number) =>
@@ -883,6 +899,25 @@ export const copy = {
     },
     genres: {
       title: 'Genres and rules',
+      lead: 'Genres are the browse categories readers see. Subject rules map the Source’s Subjects onto them.',
+      tabsLabel: 'Genres and rules sections',
+      findLabel: 'Find a Genre',
+      showArchived: 'Show archived',
+      noMatch: 'No Genres match.',
+      shown: (shown: number, total: number) => `Showing ${shown} of ${total} Genres`,
+      columns: {
+        genre: 'Genre',
+        parent: 'Parent',
+        books: 'Books',
+        rules: 'Rules',
+        actions: 'Actions',
+        pattern: 'Pattern',
+        priority: 'Priority',
+      },
+      editShort: 'Edit',
+      archiveShort: 'Archive',
+      restoreShort: 'Restore',
+      removeShort: 'Remove',
       loadFailed: 'We could not load Genres and rules. Please try again in a moment.',
       genresHeading: 'Genres',
       listLabel: 'Genres',
@@ -1003,6 +1038,8 @@ export const copy = {
     },
     audit: {
       title: 'Audit log',
+      lead: 'Every Moderator and Admin action, newest first.',
+      filtersLabel: 'Filter the audit log',
       loadFailed: 'We could not load the audit log. Please try again in a moment.',
       actorLabel: 'Actor (username)',
       actionLabel: 'Action',
@@ -1033,6 +1070,9 @@ export const copy = {
     },
     dashboard: {
       title: 'Moderation dashboard',
+      lead: 'What is waiting for a decision.',
+      waitingHeading: 'Waiting longest',
+      seeAll: (n: number) => `See all ${n}`,
       loadFailed: 'We could not load the moderation dashboard. Please try again in a moment.',
       pendingLabel: 'Pending reviews',
       oldest: (age: string) => `Oldest has waited ${age}`,
@@ -1044,6 +1084,15 @@ export const copy = {
     },
     reviews: {
       title: 'Review queue',
+      lead: 'Oldest first. Opening a review claims it for you.',
+      editedBadge: 'Edited',
+      openShort: 'Open',
+      shortcutKeys: [
+        ['A', 'approve'],
+        ['R', 'reject'],
+        ['J', 'next'],
+        ['K', 'previous'],
+      ] as const,
       listLabel: 'Pending reviews',
       empty: 'No reviews are waiting for a decision.',
       loadFailed: 'We could not load the review queue. Please try again in a moment.',
@@ -1109,6 +1158,7 @@ export const copy = {
     },
     reports: {
       title: 'Reports queue',
+      lead: 'Reviews with open reports, oldest first.',
       listLabel: 'Reported reviews',
       empty: 'No reviews have open reports.',
       loadFailed: 'We could not load the reports queue. Please try again in a moment.',
@@ -1153,6 +1203,11 @@ export const copy = {
     },
     users: {
       title: 'Users',
+      lead: 'Every account, newest first. Open one to change its roles or suspend it.',
+      filtersLabel: 'Filter users',
+      filtersToggle: 'Filters',
+      phoneMeta: (joined: string, reviews: number, reports: number) =>
+        `Joined ${joined} · ${reviews} ${reviews === 1 ? 'review' : 'reviews'} · ${reports} ${reports === 1 ? 'report' : 'reports'}`,
       loadFailed: 'We could not load users. Please try again in a moment.',
       searchLabel: 'Search by username or email',
       searchLabelLimited: 'Search by username',
@@ -1185,6 +1240,7 @@ export const copy = {
       back: 'Back to users',
       noEmail: 'Hidden in the limited view',
       detail: {
+        joinedLine: (username: string, date: string) => `@${username} · Joined ${date}`,
         profile: 'Profile',
         email: 'Email',
         verified: (date: string) => `Verified ${date}`,

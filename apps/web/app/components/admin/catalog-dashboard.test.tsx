@@ -57,6 +57,25 @@ describe('CatalogDashboard', () => {
     expect(within(rows[1] as HTMLElement).getByText('15')).toBeTruthy()
   })
 
+  it('puts the title and the Merge queue and Genres pills in the band', () => {
+    renderDashboard()
+    expect(screen.getByRole('heading', { level: 1, name: 'Catalog' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Open the merge queue' }).className).toContain(
+      'rounded-full',
+    )
+    expect(screen.getByRole('link', { name: 'Manage Genres and rules' }).className).toContain(
+      'rounded-full',
+    )
+  })
+
+  it('shows the totals as tiles and the search in a card', () => {
+    renderDashboard()
+    expect(screen.getAllByText('Books')[0]?.parentElement?.className).toContain('rounded-xl')
+    expect(screen.getByRole('region', { name: 'Find a Book' }).className).toContain(
+      'rounded-[18px]',
+    )
+  })
+
   it('says so when nothing was added', () => {
     renderDashboard({
       ...stats,

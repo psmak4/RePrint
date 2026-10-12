@@ -57,6 +57,21 @@ function renderManager(
 }
 
 describe('FeaturedManager', () => {
+  it('puts the title in the band and each section in a card', () => {
+    renderManager()
+    expect(screen.getByRole('heading', { level: 1, name: 'Featured content' })).toBeTruthy()
+    expect(screen.getByRole('region', { name: 'Featured Genres' }).className).toContain(
+      'rounded-[18px]',
+    )
+    expect(screen.getByRole('region', { name: 'Featured review' }).className).toContain(
+      'rounded-[18px]',
+    )
+    expect(screen.getByText('Featured now').className).toContain('rounded-full')
+    expect(screen.getByRole('button', { name: 'Remove Genre 1' }).className).toContain(
+      'text-danger',
+    )
+  })
+
   it('reorders, adds, and saves the featured Genres', async () => {
     const sent: unknown[] = []
     renderManager({}, (body) => {

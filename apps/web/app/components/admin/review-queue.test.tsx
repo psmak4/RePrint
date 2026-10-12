@@ -87,9 +87,12 @@ describe('ReviewQueue', () => {
       claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
     })
     const detail = await screen.findByRole('article', { name: 'Selected review' })
-    expect(within(detail).getByText('Book 1')).toBeTruthy()
-    expect(within(detail).getByText('Ada (@ada)')).toBeTruthy()
-    expect(within(detail).getByText('2 approved · 1 rejected · 3 reported')).toBeTruthy()
+    expect(within(detail).getByRole('heading', { level: 2, name: 'Book 1' })).toBeTruthy()
+    expect(within(detail).getByText('@ada')).toBeTruthy()
+    // Reviewer history as badges.
+    for (const text of ['2 approved', '1 rejected', '3 reported']) {
+      expect(within(detail).getByText(text).className).toContain('rounded-full')
+    }
     expect(within(detail).getByText('Marked as containing spoilers')).toBeTruthy()
     expect(within(detail).getByText('First paragraph.')).toBeTruthy()
     // Review text is plain: the URL is not a link.
@@ -103,6 +106,66 @@ describe('ReviewQueue', () => {
     cleanup()
     renderQueue({ requested: true })
     expect(await screen.findByText('That review is no longer waiting for a decision.')).toBeTruthy()
+  })
+
+  it('puts the title and breadcrumb in the band', async () => {
+    renderQueue()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Review queue' })).toBeTruthy()
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeTruthy()
+  })
+
+  it('marks a review held by another Moderator in amber', async () => {
+    renderQueue({ selected: item(1), claim: { state: 'other', name: 'Bo' } })
+    const status = await screen.findByRole('status')
+    expect(status.textContent).toContain('Bo is handling this review.')
+    expect(status.className).toContain('bg-[#fff7ed]')
+  })
+
+  it('marks an edited review and flags a long wait in the list', async () => {
+    renderQueue({ queue: { items: [item(1, { version: 2 })], meta: { nextCursor: null } } })
+    const list = await screen.findByRole('list', { name: 'Pending reviews' })
+    expect(within(list).getByText('Edited')).toBeTruthy()
+    expect(within(list).getByText('Waiting 3 hours').className).toContain('bg-[#fff7ed]')
+  })
+
+  it('keeps the decision bar pinned: the review card clips without becoming a scroller', async () => {
+    renderQueue({
+      selected: item(1),
+      claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
+    })
+    const detail = await screen.findByRole('article', { name: 'Selected review' })
+    // `overflow-hidden` would make the card the sticky bar's scroller, so the bar never sticks.
+    expect(detail.className).toContain('overflow-clip')
+    expect(detail.className).not.toContain('overflow-hidden')
+    const bar = within(detail).getByRole('region', { name: 'Decision' })
+    expect(bar.className).toContain('sticky')
+  })
+
+  it('opens the reject form above the pinned bar, not inside it', async () => {
+    renderQueue({
+      selected: item(1),
+      claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
+    })
+    fireEvent.click(await screen.findByRole('button', { name: 'Reject' }))
+    const bar = screen.getByRole('region', { name: 'Decision' })
+    expect(within(bar).queryByLabelText('Saved phrase')).toBeNull()
+    expect(screen.getByLabelText('Saved phrase')).toBeTruthy()
+  })
+
+  it('shows the keyboard shortcuts as keys', async () => {
+    renderQueue({
+      selected: item(1),
+      claim: { state: 'mine', expiresAt: '2026-10-01T03:40:00.000Z' },
+    })
+    await screen.findByRole('article', { name: 'Selected review' })
+    expect(document.querySelectorAll('kbd')).toHaveLength(4)
+  })
+
+  it('offers Show more as a pill', async () => {
+    renderQueue({ queue: { items: [item(1)], meta: { nextCursor: 'c2' } } })
+    expect((await screen.findByRole('link', { name: 'Show more' })).className).toContain(
+      'rounded-full',
+    )
   })
 
   it('has no axe violations', async () => {

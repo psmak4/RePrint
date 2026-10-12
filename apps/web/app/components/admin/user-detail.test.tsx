@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { AdminUserDetail } from '@reprint/shared'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -90,6 +90,34 @@ describe('UserDetail', () => {
     expect(screen.getByText('role.grant')).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Reviews by status' })).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Reports' })).toBeTruthy()
+  })
+
+  it('puts the name, username, join date, badges, and actions in the band', () => {
+    renderDetail()
+    expect(screen.getByRole('heading', { level: 1, name: 'Ada' })).toBeTruthy()
+    expect(screen.getByText('@ada · Joined Jan 1, 2026')).toBeTruthy()
+    expect(screen.getByText('Active').className).toContain('text-success')
+    const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(crumbs).getByRole('link', { name: 'Users' }).getAttribute('href')).toBe(
+      '/admin/users',
+    )
+    expect(screen.getByRole('button', { name: 'Suspend' }).className).toContain('text-danger')
+  })
+
+  it('opens the suspend form as a card in the page body', () => {
+    renderDetail()
+    fireEvent.click(screen.getByRole('button', { name: 'Suspend' }))
+    expect(screen.getByRole('region', { name: 'Suspend' })).toBeTruthy()
+  })
+
+  it('shows reviews and reports as tiles', () => {
+    renderDetail()
+    const reviews = screen.getByRole('region', { name: 'Reviews by status' })
+    expect(within(reviews).getByText('Approved').tagName).toBe('DT')
+    expect(within(reviews).getByText('Approved').nextElementSibling?.textContent).toBe('2')
+    expect(within(reviews).getByText('Approved').parentElement?.className).toContain('rounded-xl')
+    const reports = screen.getByRole('region', { name: 'Reports' })
+    expect(within(reports).getByText('Received').nextElementSibling?.textContent).toBe('1')
   })
 
   it('shows the limited view without email, sessions, or audit history', () => {

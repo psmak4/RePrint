@@ -1,9 +1,15 @@
 import type { ModQueueItem, ModQueueResponse } from '@reprint/shared'
+import { Button, cn } from '@reprint/ui'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
 import type { ClaimState } from '../../routes/admin-reviews.js'
+import { InitialsAvatar } from '../books/avatar.js'
+import { Cover } from '../books/cover.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
+import { AdminPage } from './admin-page.js'
+import { AdminCard, Badge, EmptyState } from './admin-ui.js'
+import { AdminIcon } from './icons.js'
 import { DecisionPanel, isTypingTarget, VersionComparison } from './review-decision.js'
 
 const text = copy.admin.reviews
@@ -31,12 +37,15 @@ function queueHref(id: string, cursor: string | null): string {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span role="img" aria-label={text.ratingOf(rating)} className="text-warning">
+    <span role="img" aria-label={text.ratingOf(rating)} className="text-star">
       {'★'.repeat(rating)}
-      <span className="text-input-border">{'★'.repeat(5 - rating)}</span>
+      <span className="text-[#d6d3d1]">{'★'.repeat(5 - rating)}</span>
     </span>
   )
 }
+
+/** A review that has waited an hour or more gets an amber age badge. */
+const LONG_WAIT_MINUTES = 60
 
 function QueueList({
   queue,
@@ -49,37 +58,57 @@ function QueueList({
   cursor: string | null
   now: string
 }) {
-  if (queue.items.length === 0) return <p className="text-muted-foreground">{text.empty}</p>
+  if (queue.items.length === 0) return <EmptyState>{text.empty}</EmptyState>
   return (
-    <div className="flex flex-col gap-3">
-      <ul aria-label={text.listLabel} className="flex flex-col gap-2">
-        {queue.items.map((item) => (
-          <li key={item.id}>
-            <Link
-              to={queueHref(item.id, cursor)}
-              aria-label={text.open(item.book.title)}
-              aria-current={item.id === selectedId ? 'true' : undefined}
-              className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-4 hover:border-accent aria-[current=true]:border-accent"
-            >
-              <span className="font-semibold">{item.book.title}</span>
-              <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Stars rating={item.rating} />
-                <span>{text.age(ageText(item.submittedAt, now))}</span>
-              </span>
-              <span className="text-sm text-muted-foreground">@{item.reviewer.username}</span>
-            </Link>
-          </li>
-        ))}
+    <AdminCard label={text.listLabel} className="gap-1 p-3 md:p-3">
+      <ul aria-label={text.listLabel} className="flex flex-col gap-1">
+        {queue.items.map((item) => {
+          const minutes = (Date.parse(now) - Date.parse(item.submittedAt)) / 60_000
+          return (
+            <li key={item.id}>
+              <Link
+                to={queueHref(item.id, cursor)}
+                aria-label={text.open(item.book.title)}
+                aria-current={item.id === selectedId ? 'true' : undefined}
+                className="grid grid-cols-[40px_minmax(0,1fr)] gap-3.5 rounded-xl p-3.5 hover:bg-surface-raised aria-[current=true]:bg-accent/5 aria-[current=true]:shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_35%,transparent)]"
+              >
+                <Cover
+                  cover={null}
+                  title={item.book.title}
+                  slug={item.book.slug}
+                  size="small"
+                  className="w-10"
+                />
+                <span className="flex min-w-0 flex-col gap-1.5">
+                  <span className="font-serif text-[17px] leading-tight font-medium break-words">
+                    {item.book.title}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
+                    @{item.reviewer.username}
+                    <Stars rating={item.rating} />
+                  </span>
+                  <span className="flex flex-wrap gap-1.5">
+                    <Badge tone={minutes >= LONG_WAIT_MINUTES ? 'amber' : 'gray'}>
+                      {text.age(ageText(item.submittedAt, now))}
+                    </Badge>
+                    {item.version > 1 ? <Badge>{text.editedBadge}</Badge> : null}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          )
+        })}
       </ul>
       {queue.meta.nextCursor ? (
-        <Link
-          to={`/admin/reviews?cursor=${encodeURIComponent(queue.meta.nextCursor)}`}
-          className="text-sm text-link underline"
-        >
-          {text.next}
-        </Link>
+        <div className="flex justify-center p-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/admin/reviews?cursor=${encodeURIComponent(queue.meta.nextCursor)}`}>
+              {text.next}
+            </Link>
+          </Button>
+        </div>
       ) : null}
-    </div>
+    </AdminCard>
   )
 }
 
@@ -93,7 +122,16 @@ function ClaimNotice({ claim }: { claim: ClaimState }) {
           : text.claimFailed
         : text.claimFailed
   return (
-    <p role="status" className="rounded-xl border border-border bg-surface px-4 py-3 text-sm">
+    <p
+      role="status"
+      className={cn(
+        'flex items-center gap-2.5 border-b px-5 py-3 text-sm font-medium md:px-6',
+        claim.state === 'mine'
+          ? 'border-[#bfdbfe] bg-[#eff6ff] text-[#1e40af]'
+          : 'border-[#fed7aa] bg-[#fff7ed] text-[#9a3412]',
+      )}
+    >
+      <AdminIcon name="clock" className="size-4" />
       {message}
     </p>
   )
@@ -110,46 +148,72 @@ function ReviewDetail({
 }) {
   const { reviewer } = item
   return (
-    <article aria-label={text.detailLabel} className="flex flex-col gap-4">
+    <article
+      aria-label={text.detailLabel}
+      // `overflow-clip`, not `overflow-hidden`: a hidden overflow would become the sticky bar's
+      // scroller, and the bar would never stay pinned.
+      className="flex min-w-0 flex-col overflow-clip rounded-[18px] border border-border bg-surface"
+    >
       {claim ? <ClaimNotice claim={claim} /> : null}
-      <header className="flex flex-col gap-1">
-        <h2 className="font-serif text-2xl leading-tight font-medium">
-          <Link to={`/books/${item.book.slug}`} className="text-link underline">
-            {item.book.title}
-          </Link>
-        </h2>
-        {item.version > 1 ? (
-          <p className="text-sm text-muted-foreground">{text.editedNote(item.version)}</p>
-        ) : null}
-      </header>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-        <dt className="text-muted-foreground">{text.reviewerLabel}</dt>
-        <dd>
-          {reviewer.displayName} (@{reviewer.username})
-        </dd>
-        <dt className="text-muted-foreground">{text.historyHeading}</dt>
-        <dd>
-          {[
-            text.approved(reviewer.approvedCount),
-            text.rejected(reviewer.rejectedCount),
-            text.reported(reviewer.reportedCount),
-          ].join(' · ')}
-        </dd>
-        <dt className="text-muted-foreground">{text.ratingLabel}</dt>
-        <dd>
-          <Stars rating={item.rating} />
-        </dd>
-        <dd className="col-span-2">{item.hasSpoilers ? text.spoilerFlag : text.noSpoilerFlag}</dd>
-        {item.editionId ? <dd className="col-span-2">{text.editionNote}</dd> : null}
-      </dl>
-      <section aria-labelledby="review-text-heading" className="flex flex-col gap-2">
-        <h3 id="review-text-heading" className="font-semibold">
-          {text.bodyHeading}
-        </h3>
-        <p className="font-medium">{item.headline ?? text.untitled}</p>
-        <ReviewBody body={item.body} />
-      </section>
-      <VersionComparison item={item} />
+      <div className="flex flex-col gap-6 p-5 md:p-6">
+        <header className="flex items-center gap-4">
+          <Cover
+            cover={null}
+            title={item.book.title}
+            slug={item.book.slug}
+            size="small"
+            className="w-14 shrink-0"
+          />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              {text.bookLabel}
+            </p>
+            <h2 className="font-serif text-[26px] leading-tight font-medium break-words">
+              <Link to={`/books/${item.book.slug}`} className="hover:underline">
+                {item.book.title}
+              </Link>
+            </h2>
+            {item.version > 1 ? (
+              <p className="text-sm text-muted-foreground">{text.editedNote(item.version)}</p>
+            ) : null}
+          </div>
+        </header>
+        <div className="flex items-center gap-3.5 rounded-xl bg-[#f7f5f0] px-4 py-3.5">
+          <InitialsAvatar name={reviewer.displayName} colorKey={reviewer.username} size="md" />
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <p className="text-[15px] font-semibold break-words">
+              <span className="sr-only">{text.reviewerLabel}: </span>
+              {reviewer.displayName}{' '}
+              <span className="font-normal text-muted-foreground">@{reviewer.username}</span>
+            </p>
+            <p className="sr-only">{text.historyHeading}</p>
+            <span className="flex flex-wrap gap-1.5">
+              <Badge tone="green">{text.approved(reviewer.approvedCount)}</Badge>
+              <Badge tone="red">{text.rejected(reviewer.rejectedCount)}</Badge>
+              <Badge>{text.reported(reviewer.reportedCount)}</Badge>
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xl">
+            <Stars rating={item.rating} />
+          </span>
+          <Badge>{item.hasSpoilers ? text.spoilerFlag : text.noSpoilerFlag}</Badge>
+          {item.editionId ? <Badge>{text.editionNote}</Badge> : null}
+        </div>
+        <section aria-labelledby="review-text-heading" className="flex flex-col gap-3">
+          <h3 id="review-text-heading" className="sr-only">
+            {text.bodyHeading}
+          </h3>
+          <p className="font-serif text-[26px] leading-tight font-medium break-words">
+            {item.headline ?? text.untitled}
+          </p>
+          <div className="font-serif text-lg leading-[1.65] text-[#1e293b]">
+            <ReviewBody body={item.body} />
+          </div>
+        </section>
+        <VersionComparison item={item} />
+      </div>
       <DecisionPanel reviewId={item.id} enabled={claim?.state === 'mine'} nextHref={nextHref} />
     </article>
   )
@@ -179,7 +243,7 @@ function useQueueShortcuts(
   }, [queue, selectedId, cursor, navigate])
 }
 
-/** Two panes from `lg`: the oldest-first queue and the selected review (DESIGN.md). */
+/** Two panes from `lg`: the oldest-first queue and the selected review (DESIGN.md, D-201). */
 export function ReviewQueue({
   queue,
   selected,
@@ -200,23 +264,25 @@ export function ReviewQueue({
   const position = queue.items.findIndex((item) => item.id === selected?.id)
   const following = queue.items[position + 1] ?? (position > 0 ? queue.items[position - 1] : null)
   const nextHref = following ? queueHref(following.id, cursor) : null
+  const prompt = requested ? text.notInQueue : queue.items.length > 0 ? text.selectPrompt : null
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]">
-        {text.title}
-      </h2>
-      <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+    >
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)]">
         <QueueList queue={queue} selectedId={selected?.id ?? null} cursor={cursor} now={now} />
         <div className="min-w-0">
           {selected ? (
             <ReviewDetail item={selected} claim={claim} nextHref={nextHref} />
-          ) : (
-            <p className="text-muted-foreground">
-              {requested ? text.notInQueue : text.selectPrompt}
+          ) : prompt ? (
+            <p className="rounded-[18px] border border-dashed border-[#d9d4ca] p-6 text-muted-foreground">
+              {prompt}
             </p>
-          )}
+          ) : null}
         </div>
       </div>
-    </div>
+    </AdminPage>
   )
 }

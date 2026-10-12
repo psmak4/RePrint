@@ -84,6 +84,19 @@ function renderEditor(action: (body: unknown) => unknown = () => ({ done: 'edit'
 }
 
 describe('BookEditor', () => {
+  it('puts the breadcrumb, the title, and View the Book page in the band', () => {
+    renderEditor()
+    const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(crumbs).getByRole('link', { name: 'Catalog' }).getAttribute('href')).toBe(
+      '/admin/catalog',
+    )
+    expect(within(crumbs).getByText('Edit Book').getAttribute('aria-current')).toBe('page')
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+    const back = screen.getAllByRole('link', { name: 'View the Book page' })
+    expect(back).toHaveLength(1)
+    expect(back[0]?.className).toContain('rounded-full')
+  })
+
   it('shows locked fields with their origin', () => {
     renderEditor()
     expect(screen.getByText('Locked')).toBeTruthy()

@@ -8,6 +8,8 @@ import { Button, Label, Select } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AdminPage } from './admin-page.js'
+import { AdminCard, Badge } from './admin-ui.js'
 
 const text = copy.admin.featured
 
@@ -81,10 +83,7 @@ function GenrePicker({
   }
 
   return (
-    <section aria-labelledby="featured-genres-heading" className="flex flex-col gap-3">
-      <h3 id="featured-genres-heading" className="font-serif text-2xl leading-tight font-medium">
-        {text.genresHeading}
-      </h3>
+    <AdminCard title={text.genresHeading}>
       <p className="text-sm text-muted-foreground">
         {canEdit ? text.genresHint(DISCOVER_FEATURED_GENRES) : text.genresReadOnly}
       </p>
@@ -95,7 +94,7 @@ function GenrePicker({
           {picked.map((genre, index) => (
             <li
               key={genre.id}
-              className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-2"
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] px-4 py-2.5"
             >
               <span className="flex-1 font-medium">{genre.name}</span>
               {canEdit ? (
@@ -122,7 +121,7 @@ function GenrePicker({
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="danger"
                     size="sm"
                     aria-label={text.remove(genre.name)}
                     onClick={() => setPicked(picked.filter((item) => item.id !== genre.id))}
@@ -171,7 +170,7 @@ function GenrePicker({
           <Messages action={action} />
         </>
       ) : null}
-    </section>
+    </AdminCard>
   )
 }
 
@@ -197,13 +196,10 @@ function ReviewPicker({
 }) {
   const action = useAction()
   return (
-    <section aria-labelledby="featured-review-heading" className="flex flex-col gap-3">
-      <h3 id="featured-review-heading" className="font-serif text-2xl leading-tight font-medium">
-        {text.reviewHeading}
-      </h3>
+    <AdminCard title={text.reviewHeading}>
       <p className="text-sm text-muted-foreground">{text.reviewHint}</p>
       {current ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4">
+        <div className="flex flex-col gap-2 rounded-xl border border-[#a7f3d0] bg-[#f6fef9] p-4">
           <ReviewCard item={current} />
           <div>
             <Button
@@ -220,7 +216,7 @@ function ReviewPicker({
         <p>{text.noReview}</p>
       )}
       <Messages action={action} />
-      <h4 className="text-lg font-semibold">{text.candidatesHeading}</h4>
+      <h3 className="pt-2 text-base font-semibold">{text.candidatesHeading}</h3>
       {candidates.length === 0 ? (
         <p>{text.noCandidates}</p>
       ) : (
@@ -228,12 +224,12 @@ function ReviewPicker({
           {candidates.map((item) => (
             <li
               key={item.review.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-4"
+              className="flex flex-col gap-2 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] p-4"
             >
               <ReviewCard item={item} />
               <div>
                 {current?.review.id === item.review.id ? (
-                  <p className="text-sm font-medium">{text.current}</p>
+                  <Badge tone="green">{text.current}</Badge>
                 ) : (
                   <Button
                     type="button"
@@ -250,7 +246,7 @@ function ReviewPicker({
           ))}
         </ul>
       )}
-    </section>
+    </AdminCard>
   )
 }
 
@@ -263,19 +259,17 @@ export function FeaturedManager({
   canEditGenres: boolean
 }) {
   return (
-    <section aria-labelledby="featured-heading" className="flex flex-col gap-8">
-      <h2
-        id="featured-heading"
-        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-      >
-        {text.title}
-      </h2>
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+    >
       <GenrePicker
         initial={featured.genres}
         options={featured.genreOptions}
         canEdit={canEditGenres}
       />
       <ReviewPicker current={featured.review} candidates={featured.candidates} />
-    </section>
+    </AdminPage>
   )
 }

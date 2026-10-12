@@ -54,6 +54,7 @@ test('admin Book edit page has no serious accessibility issues', async ({ page }
   const { id } = (await response.json()) as { id: string }
 
   await page.goto(`/admin/books/${id}`)
-  await expect(page.getByRole('heading', { level: 1, name: 'Administration' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Edit Book')
+  await expect(page.getByRole('heading', { level: 1, name: 'Dune' })).toBeVisible()
   await expectNoA11yViolations(page)
 })

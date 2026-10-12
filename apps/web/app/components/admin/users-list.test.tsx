@@ -50,9 +50,43 @@ describe('UsersList', () => {
     expect(within(second).getByRole('link', { name: 'User 2' }).getAttribute('href')).toBe(
       '/admin/users/0192a3b4-0000-7000-8000-000000000002',
     )
-    expect(within(second).getByText('Suspended')).toBeTruthy()
-    expect(within(second).getByText('Member, Moderator')).toBeTruthy()
+    expect(within(second).getByText('Suspended').className).toContain('text-danger')
+    // An elevated role is a badge; plain Member is not repeated beside it.
+    expect(within(second).getByText('Moderator').className).toContain('rounded-full')
+    expect(within(second).queryByText('Member')).toBeNull()
     expect(within(second).getByText('u2@example.com')).toBeTruthy()
+  })
+
+  it('puts the title in the band and the filters in a named form', () => {
+    renderList()
+    expect(screen.getByRole('heading', { level: 1, name: 'Users' })).toBeTruthy()
+    expect(screen.getByRole('form', { name: 'Filter users' })).toBeTruthy()
+  })
+
+  it('shows a plain Member as text and the email under the name, on one line', () => {
+    renderList()
+    const table = screen.getByRole('table', { name: 'Users' })
+    // No Email column: the table must fit beside the nav (D-201).
+    expect(within(table).queryByRole('columnheader', { name: 'Email' })).toBeNull()
+    const first = within(table).getAllByRole('row')[1] as HTMLElement
+    expect(within(first).getByRole('rowheader').textContent).toContain('u1@example.com')
+    expect(within(first).getByText('Member').className).not.toContain('rounded-full')
+    const email = within(first).getByText('u1@example.com')
+    expect(email.className).toContain('truncate')
+    expect(email.getAttribute('title')).toBe('u1@example.com')
+  })
+
+  it('lists the accounts as tappable rows for phones', () => {
+    renderList()
+    const list = screen.getByRole('list', { name: 'Users' })
+    const links = within(list).getAllByRole('link')
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/admin/users/0192a3b4-0000-7000-8000-000000000001',
+      '/admin/users/0192a3b4-0000-7000-8000-000000000002',
+    ])
+    expect(within(list).getByText('Joined Jan 2, 2026 · 1 review · 0 reports')).toBeTruthy()
+    // The list clips its rounded corners, so the rows draw their focus ring inside.
+    expect(links[0]?.className).toContain('focus-visible:outline-offset-[-2px]')
   })
 
   it('keeps the filter state from the URL in the form', () => {
@@ -88,9 +122,9 @@ describe('UsersList', () => {
       filters: { ...noFilters, status: 'deleted' },
       users: { items: [user(1)], meta: { nextCursor: 'c1' } },
     })
-    expect(screen.getByRole('link', { name: 'Show more' }).getAttribute('href')).toBe(
-      '/admin/users?status=deleted&cursor=c1',
-    )
+    const more = screen.getByRole('link', { name: 'Show more' })
+    expect(more.getAttribute('href')).toBe('/admin/users?status=deleted&cursor=c1')
+    expect(more.className).toContain('rounded-full')
   })
 
   it('says so when nothing matches', () => {

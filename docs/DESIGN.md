@@ -26,7 +26,7 @@ This document describes the redesign (D-176), built in milestone M9. Until an M9
 
 - Page container: `max-w-page` (72 rem, 1152 px), centred, `px-4 sm:px-6`.
 - 12-column CSS grid from `lg`, 24 px gap. Main content spans 8 columns and a side panel 4 where a template has one. Below `lg` everything stacks.
-- No horizontal scrolling at 360 px, except inside tables (see Admin table pattern).
+- No horizontal scrolling at 360 px, except inside tables (see Admin section).
 
 ## Type scale
 
@@ -124,6 +124,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Book page | `BookPage` (`ground-deep` header band with breadcrumb, Series pill, `FactsRow`, actions; sticky `SectionNav`; collapsible description; `DetailsList`; `RatingBreakdown` beside the viewer's review panel; review list with star chips; 8/4 grid with `SeriesCard`, `AuthorCard`, `EditionsCard`; More by Author and More in Genre rails) in `apps/web/app/components/books/book-page.tsx` | Built (M3-T18, redesigned M9-T06) |
 | Redesign (M9) | `GeneratedCover`, `StarRating` (partial fill for averages), `BookRail` (cover-first row: grid from `lg`, horizontal scroll below), `GenreTile` (three fanned mini covers), `ReviewExcerpt` (D-177), `SectionNav` (sticky in-page tabs with counts), `FactsRow` and `DetailsList` (`<dl>`), `RatingBreakdown` (bars are toggle buttons that filter), `SeriesCard`, `AuthorCard`, `EditionsCard` (format filter), `AuthorMatchCard` (search), `TrustBadge` (shield + "Read by a moderator"). Built in M9-T02 under `apps/web/app/components/books/` (`ReviewExcerpt` in `reviews/`); `Cover` takes `slug` (colour) and `dashed`, and `GeneratedCover` is exported from `cover.tsx` | Built (M9-T02) |
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
+| Admin | `AdminPage` (band, grouped nav), `AdminCard`, `Badge`, `StatTile`, `EmptyState`, `Kbd`, table classes, `ScrollRegion`, `AdminIcon`, in `apps/web/app/components/admin/`; `Button` gains a `danger` variant | Built (M9-T20, D-201) |
 
 Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
 
@@ -189,6 +190,13 @@ Both open with the `PageHero` band (`ground-deep`): breadcrumb, serif `h1` (38 p
 
 Header with avatar, display name, username, bio, and join date. Below: tabs for Reviews (Approved only) and Library (if public). Same list patterns as the book page reviews and library.
 
-### Admin table pattern (`/admin/*`)
+### Admin section (`/admin/*`, D-201)
 
-Admin layout: left nav from `lg` (a top disclosure below), `noindex`. Pages have title, filter bar, then a `Table` with sortable column headers (buttons with `aria-sort`), row actions in a `DropdownMenu`, and cursor or page pagination. Below `md` the table scrolls horizontally inside a focusable region (`tabIndex=0`, labelled) instead of the page scrolling.
+Mockups: the "Admin section" row of the RePrint Redesign canvas. Every admin page renders `AdminPage`, and the `/admin` layout passes it the grouped nav through the outlet context. `noindex`.
+
+- **Band** (`ground-deep`, full bleed): a breadcrumb (Administration / section / item; the dashboard shows an "Administration" eyebrow instead), the page's own serif `h1` (34 px, 44 px from `md`), a one-line lead, and the page's main actions as pills on the right. `leading` holds an avatar (user detail) or a cover (Edit Book); `below` holds tabs (Genres and rules: underlined tabs with count chips, chosen by `?tab=rules`).
+- **Nav:** grouped Moderation (Dashboard, Review queue, Reports queue), People (Users, Audit log), Catalog (Catalog, Merge queue, Genres and rules, Featured content), Operations (System), each link with a stroke icon. Review queue and Reports queue carry a count badge from `/v1/mod/stats` for viewers who may moderate; the badge reads "…, N waiting" to screen readers and is left off when the stats fail. The current page uses a white surface, a border, and an accent icon. Left column (224 px, 32 px gap) from `lg`; a full-width "Admin menu" disclosure below.
+- **Building blocks** (`components/admin/admin-ui.tsx`): `AdminCard` (white, 18 px corners, serif `h2` title that names the region, optional `actions`, `flush` for tables), `Badge` (green, amber, red, blue, gray; optional dot; `USER_STATUS_TONE` for account status), `StatTile` (label and number in the sans with `tabular-nums`, never the serif), `EmptyState` (dashed box, green check, one sentence), `Kbd`, and the table classes (tinted header row, uppercase 12 px headers, right-aligned numbers, long values truncated with a `title`).
+- **Actions** are pills (`Button`, or `Button asChild` around a link): primary for the one main action, outline for the rest, `danger` (red outline) for Reject, Unpublish, Suspend, Merge, and Remove. Row actions are small buttons in the last column (there is no dropdown menu component). "Show more" is a centred outline pill.
+- **Tables** sit in `ScrollRegion` (focusable, labelled, `relative` so sr-only text cannot widen the page); the page never scrolls sideways at 390 px (an e2e check). Users shows the email under the name (no Email column, so the table fits beside the nav at 1440 px, an e2e check), swaps its table for a list of tappable rows below `md`, and collapses its filters behind a "Filters" button there.
+- **Queues:** the review queue is two panes from `lg` (list card with the open review highlighted like the Series card; the review card with a blue "Claimed by you" or amber "held by" strip, reviewer history badges, serif text, and a sticky bar with the shortcut keys, Reject, and Approve). Reports and the merge queue are stacked cards.

@@ -11,6 +11,7 @@ import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { Cover } from '../books/cover.js'
+import { AdminPage } from './admin-page.js'
 
 const text = copy.admin.book
 const formats = copy.books.page.formats
@@ -723,38 +724,35 @@ export function BookEditor({ book, genres }: { book: AdminBookDetail; genres: Ad
     .filter((item) => item.role === 'author' || item.role === 'co_author')
     .map((item) => item.name)
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex items-center gap-4 md:gap-5">
+    <AdminPage
+      crumbs={[
+        { label: copy.admin.title, to: '/admin' },
+        { label: copy.admin.catalogNav, to: '/admin/catalog' },
+        { label: text.title },
+      ]}
+      leading={
         <Cover
           cover={book.cover}
           title={book.title}
           authorName={authors[0]}
           slug={book.slug}
           size="small"
-          className="w-14 md:w-16"
+          className="w-14 shrink-0 md:w-16"
         />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            {text.title}
-          </p>
-          <h1 className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] break-words md:text-[32px]">
-            {book.title}
-          </h1>
-          {authors.length > 0 ? (
-            <p className="text-sm text-[#334155]">{authors.join(', ')}</p>
-          ) : null}
+      }
+      title={book.title}
+      lead={
+        <span className="flex flex-col gap-1">
+          {authors.length > 0 ? <span>{authors.join(', ')}</span> : null}
           <SaveStatus />
-        </div>
-        <Link
-          to={`/books/${book.slug}`}
-          className="hidden h-10 shrink-0 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised sm:inline-flex"
-        >
-          {text.back}
-        </Link>
-      </header>
-      <Link to={`/books/${book.slug}`} className="-mt-3 text-sm text-link underline sm:hidden">
-        {text.back}
-      </Link>
+        </span>
+      }
+      actions={
+        <Button asChild variant="outline">
+          <Link to={`/books/${book.slug}`}>{text.back}</Link>
+        </Button>
+      }
+    >
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
         {/* The key re-reads the Book after a save, so the form starts from what the API stored. */}
         <EditForm
@@ -769,6 +767,6 @@ export function BookEditor({ book, genres }: { book: AdminBookDetail; genres: Ad
           <LockedSummary book={book} />
         </aside>
       </div>
-    </div>
+    </AdminPage>
   )
 }

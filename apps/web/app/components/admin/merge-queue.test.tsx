@@ -54,6 +54,26 @@ describe('MergeQueue', () => {
     )
   })
 
+  it('puts the title in the band and each pair in a card with pill actions', () => {
+    renderQueue()
+    expect(screen.getByRole('heading', { level: 1, name: 'Merge queue' })).toBeTruthy()
+    const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(crumbs).getByRole('link', { name: 'Catalog' }).getAttribute('href')).toBe(
+      '/admin/catalog',
+    )
+    const card = screen.getAllByRole('article')[0] as HTMLElement
+    expect(card.className).toContain('rounded-[18px]')
+    expect(within(card).getByRole('link', { name: 'Edit Dune' }).className).toContain(
+      'rounded-full',
+    )
+  })
+
+  it('keeps the Edit pill short so a long title cannot widen the card on a phone', () => {
+    renderQueue()
+    const card = screen.getAllByRole('article')[0] as HTMLElement
+    expect(within(card).getByRole('link', { name: 'Edit Dune' }).textContent).toBe('Edit')
+  })
+
   it('says so when no pairs are waiting', () => {
     renderQueue([])
     expect(screen.getByText('No possible duplicates are waiting.')).toBeTruthy()

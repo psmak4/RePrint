@@ -654,3 +654,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M9-T19 · A click from search reaches a series-only Book · deps: M9-T18 · PRD: §6, §7.3
   - Accept: clicking a stored Book in search results or suggestions sends `POST /books/:slug/reached`, which clears `series_import_only` and queues the Book's due Series syncs; unstored results and Authors send nothing (D-200)
   - Accept: integration (allowed, already reached, unknown, malformed), route, component, and e2e tests; `pnpm check` and `pnpm test:e2e` pass
+- [x] M9-T20 · Admin section in the redesign style · deps: M9-T19 · PRD: §7.10, §7.11
+  - Accept: every admin page renders `AdminPage` (breadcrumb, its own `h1`, lead, actions) with the grouped nav and queue counts; counts are never requested without `reviews.moderate` and are left off when `/v1/mod/stats` fails (D-201)
+  - Accept: dashboard, review and reports queues, users (table and phone list), user detail, audit log, catalog, merge queue, Genres and rules (tabs, filter, form cards), featured content, system, and Edit Book use the shared building blocks and pills; no admin page scrolls sideways at 390 px
+  - Accept: component tests for each page and the building blocks, route tests for the layout and dashboard loaders, and the admin e2e sweep by page title at desktop and phone widths; `pnpm check` and `pnpm test:e2e` pass

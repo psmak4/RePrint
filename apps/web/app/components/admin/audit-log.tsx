@@ -1,8 +1,12 @@
 import { type AdminAuditResponse, AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from '@reprint/shared'
-import { Button, Input, Label, Select } from '@reprint/ui'
+import { Button, cn, Input, Label, Select } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AdminPage } from './admin-page.js'
+import { EmptyState, tableClass, tdClass, thClass } from './admin-ui.js'
 import { ScrollRegion } from './scroll-region.js'
+
+const field = 'flex min-w-0 flex-col gap-1.5'
 
 const text = copy.admin.audit
 
@@ -47,84 +51,88 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
   if (entries.meta.nextCursor) nextParams.set('cursor', entries.meta.nextCursor)
 
   return (
-    <section aria-labelledby="audit-heading" className="flex flex-col gap-4">
-      <h2
-        id="audit-heading"
-        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      actions={
+        <Button asChild variant="outline">
+          {/* A plain anchor: the response is a file download, not a page. */}
+          <a href={`/admin/audit.csv?${filterParams}`} download>
+            {text.export}
+          </a>
+        </Button>
+      }
+    >
+      <Form
+        method="get"
+        aria-label={text.filtersLabel}
+        className="flex flex-col gap-4 rounded-[18px] border border-border bg-surface p-5"
       >
-        {text.title}
-      </h2>
-      <Form method="get" className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-actor">{text.actorLabel}</Label>
-          <Input
-            id="audit-actor"
-            name="actor"
-            type="search"
-            defaultValue={filters.actor}
-            maxLength={100}
-          />
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={field}>
+            <Label htmlFor="audit-actor">{text.actorLabel}</Label>
+            <Input
+              id="audit-actor"
+              name="actor"
+              type="search"
+              defaultValue={filters.actor}
+              maxLength={100}
+            />
+          </div>
+          <div className={field}>
+            <Label htmlFor="audit-action">{text.actionLabel}</Label>
+            <Select id="audit-action" name="action" defaultValue={filters.action}>
+              <option value="">{text.any}</option>
+              {AUDIT_ACTIONS.map((action) => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className={field}>
+            <Label htmlFor="audit-target-type">{text.targetTypeLabel}</Label>
+            <Select id="audit-target-type" name="targetType" defaultValue={filters.targetType}>
+              <option value="">{text.any}</option>
+              {AUDIT_TARGET_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className={field}>
+            <Label htmlFor="audit-target-id">{text.targetIdLabel}</Label>
+            <Input id="audit-target-id" name="targetId" defaultValue={filters.targetId} />
+          </div>
+          <div className={field}>
+            <Label htmlFor="audit-from">{text.fromLabel}</Label>
+            <Input id="audit-from" name="from" type="date" defaultValue={filters.from} />
+          </div>
+          <div className={field}>
+            <Label htmlFor="audit-to">{text.toLabel}</Label>
+            <Input id="audit-to" name="to" type="date" defaultValue={filters.to} />
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-action">{text.actionLabel}</Label>
-          <Select id="audit-action" name="action" defaultValue={filters.action}>
-            <option value="">{text.any}</option>
-            {AUDIT_ACTIONS.map((action) => (
-              <option key={action} value={action}>
-                {action}
-              </option>
-            ))}
-          </Select>
+        <div className="flex justify-end gap-2.5">
+          {active ? (
+            <Button asChild variant="ghost">
+              <Link to="/admin/audit">{text.clear}</Link>
+            </Button>
+          ) : null}
+          <Button type="submit">{text.filter}</Button>
         </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-target-type">{text.targetTypeLabel}</Label>
-          <Select id="audit-target-type" name="targetType" defaultValue={filters.targetType}>
-            <option value="">{text.any}</option>
-            {AUDIT_TARGET_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-target-id">{text.targetIdLabel}</Label>
-          <Input id="audit-target-id" name="targetId" defaultValue={filters.targetId} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-from">{text.fromLabel}</Label>
-          <Input id="audit-from" name="from" type="date" defaultValue={filters.from} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="audit-to">{text.toLabel}</Label>
-          <Input id="audit-to" name="to" type="date" defaultValue={filters.to} />
-        </div>
-        <Button type="submit">{text.filter}</Button>
-        {active ? (
-          <Link to="/admin/audit" className="text-sm text-link underline">
-            {text.clear}
-          </Link>
-        ) : null}
       </Form>
-      <p>
-        {/* A plain anchor: the response is a file download, not a page. */}
-        <a
-          href={`/admin/audit.csv?${filterParams}`}
-          className="text-sm text-link underline"
-          download
-        >
-          {text.export}
-        </a>
-      </p>
       {entries.items.length === 0 ? (
-        <p className="text-muted-foreground">{text.empty}</p>
+        <EmptyState>{text.empty}</EmptyState>
       ) : (
         <ScrollRegion label={text.listLabel}>
-          <table aria-label={text.listLabel} className="w-full text-left text-sm">
+          <table aria-label={text.listLabel} className={tableClass}>
             <thead>
-              <tr className="border-b border-border">
+              <tr>
                 {(['time', 'actor', 'action', 'target', 'ip', 'changes'] as const).map((column) => (
-                  <th key={column} scope="col" className="py-3 pr-4">
+                  <th key={column} scope="col" className={thClass}>
                     {text.columns[column]}
                   </th>
                 ))}
@@ -132,22 +140,26 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
             </thead>
             <tbody>
               {entries.items.map((entry) => (
-                <tr key={entry.id} className="border-b border-border align-top">
-                  <td className="py-3 pr-4">
+                <tr key={entry.id} className="hover:bg-[#fdfcfa]">
+                  <td className={cn(tdClass, 'align-top whitespace-nowrap')}>
                     <time dateTime={entry.createdAt}>
                       {timeFormat.format(new Date(entry.createdAt))}
                     </time>
                   </td>
-                  <td className="py-3 pr-4">{entry.actor?.username ?? text.noActor}</td>
-                  <td className="py-3 pr-4 font-medium">{entry.action}</td>
-                  <td className="py-3 pr-4 break-all">
+                  <td className={cn(tdClass, 'align-top')}>
+                    {entry.actor?.username ?? text.noActor}
+                  </td>
+                  <td className={cn(tdClass, 'align-top font-medium')}>{entry.action}</td>
+                  <td className={cn(tdClass, 'align-top break-all')}>
                     {entry.targetType}
                     {entry.targetId ? (
-                      <span className="block text-muted-foreground">{entry.targetId}</span>
+                      <span className="block text-[13px] text-muted-foreground">
+                        {entry.targetId}
+                      </span>
                     ) : null}
                   </td>
-                  <td className="py-3 pr-4">{entry.ip ?? text.noIp}</td>
-                  <td className="py-2">
+                  <td className={cn(tdClass, 'align-top')}>{entry.ip ?? text.noIp}</td>
+                  <td className={cn(tdClass, 'align-top')}>
                     <dl className="flex flex-col gap-1">
                       <Values label={text.before} values={entry.before} />
                       <Values label={text.after} values={entry.after} />
@@ -160,10 +172,12 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
         </ScrollRegion>
       )}
       {entries.meta.nextCursor ? (
-        <Link to={`/admin/audit?${nextParams}`} className="text-sm text-link underline">
-          {text.next}
-        </Link>
+        <div className="flex justify-center">
+          <Button asChild variant="outline">
+            <Link to={`/admin/audit?${nextParams}`}>{text.next}</Link>
+          </Button>
+        </div>
       ) : null}
-    </section>
+    </AdminPage>
   )
 }
