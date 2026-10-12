@@ -7,7 +7,10 @@ import { Button, Input, Label, Textarea } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { Cover } from '../books/cover.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
+import { AdminPage } from './admin-page.js'
+import { Badge, EmptyState } from './admin-ui.js'
 import { ageText } from './review-queue.js'
 
 const text = copy.admin.reports
@@ -97,7 +100,7 @@ function ReportActions({
         {canUnpublish && panel !== 'unpublish' ? (
           <Button
             type="button"
-            variant="outline"
+            variant="danger"
             disabled={busy}
             onClick={() => setPanel('unpublish')}
           >
@@ -107,7 +110,7 @@ function ReportActions({
         {canSuspend && panel !== 'suspend' ? (
           <Button
             type="button"
-            variant="outline"
+            variant="danger"
             disabled={busy}
             onClick={() => setPanel('suspend')}
           >
@@ -131,7 +134,7 @@ function ReportActions({
               })
             }
           }}
-          className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+          className="flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4"
         >
           <ReasonField
             label={panel === 'unpublish' ? text.reasonLabel : text.suspendReasonLabel}
@@ -211,40 +214,61 @@ function ReportedReview({
     <li>
       <article
         aria-labelledby={headingId}
-        className="flex flex-col gap-3 rounded-lg border border-border p-4"
+        className="flex flex-col gap-5 rounded-[18px] border border-border bg-surface p-5 md:p-6"
       >
-        <header className="flex flex-col gap-1">
-          <h3 id={headingId} className="font-semibold">
-            <Link to={`/books/${review.book.slug}`} className="underline">
-              {review.book.title}
-            </Link>
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            <Link to={`/u/${review.author.username}`} className="underline">
-              {text.reviewBy(review.author.displayName)}
-            </Link>{' '}
-            · {text.reportCount(item.openCount)} ·{' '}
-            {text.oldest(ageText(item.oldestReportedAt, now))}
-          </p>
-          {review.hidden ? <p className="text-sm text-warning">{text.hidden}</p> : null}
+        <header className="flex items-start gap-4">
+          <Cover
+            cover={null}
+            title={review.book.title}
+            slug={review.book.slug}
+            size="small"
+            className="w-12 shrink-0"
+          />
+          <div className="flex min-w-0 flex-col gap-2">
+            <h2
+              id={headingId}
+              className="font-serif text-[22px] leading-tight font-medium break-words"
+            >
+              <Link to={`/books/${review.book.slug}`} className="hover:underline">
+                {review.book.title}
+              </Link>
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <Link to={`/u/${review.author.username}`} className="hover:underline">
+                {text.reviewBy(review.author.displayName)}
+              </Link>
+            </p>
+            <span className="flex flex-wrap gap-1.5">
+              <Badge tone="amber">{text.reportCount(item.openCount)}</Badge>
+              <Badge>{text.oldest(ageText(item.oldestReportedAt, now))}</Badge>
+              {review.hidden ? <Badge tone="red">{text.hidden}</Badge> : null}
+            </span>
+          </div>
         </header>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span role="img" aria-label={text.ratingOf(review.rating)} className="text-warning">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <span role="img" aria-label={text.ratingOf(review.rating)} className="text-star">
             {'★'.repeat(review.rating)}
-            <span className="text-input-border">{'★'.repeat(5 - review.rating)}</span>
+            <span className="text-[#d6d3d1]">{'★'.repeat(5 - review.rating)}</span>
           </span>
-          <span className="font-medium">{review.headline ?? text.untitled}</span>
-          {review.hasSpoilers ? (
-            <span className="text-sm text-muted-foreground">{text.spoilerFlag}</span>
-          ) : null}
+          <span className="font-serif text-xl leading-tight font-medium break-words">
+            {review.headline ?? text.untitled}
+          </span>
+          {review.hasSpoilers ? <Badge>{text.spoilerFlag}</Badge> : null}
         </div>
-        <ReviewBody body={review.body} />
+        <div className="font-serif text-[17px] leading-[1.6] text-[#1e293b]">
+          <ReviewBody body={review.body} />
+        </div>
         <section aria-label={text.reportsHeading} className="flex flex-col gap-2">
-          <h4 className="text-sm font-semibold">{text.reportsHeading}</h4>
+          <h3 className="text-sm font-semibold">{text.reportsHeading}</h3>
           <ul className="flex flex-col gap-2 text-sm">
             {item.reports.map((report) => (
-              <li key={report.id} className="rounded-xl border border-border bg-surface p-3">
-                <p className="font-medium">{text.reasons[report.reason]}</p>
+              <li
+                key={report.id}
+                className="flex flex-col gap-1.5 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] p-3.5"
+              >
+                <span>
+                  <Badge>{text.reasons[report.reason]}</Badge>
+                </span>
                 {report.note ? (
                   <p className="whitespace-pre-line break-words">{report.note}</p>
                 ) : null}
@@ -278,17 +302,15 @@ export function ReportsQueue({
   canSuspend: boolean
 }) {
   return (
-    <section aria-labelledby="reports-heading" className="flex flex-col gap-4">
-      <h2
-        id="reports-heading"
-        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-      >
-        {text.title}
-      </h2>
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+    >
       {queue.items.length === 0 ? (
-        <p className="text-muted-foreground">{text.empty}</p>
+        <EmptyState>{text.empty}</EmptyState>
       ) : (
-        <ul aria-label={text.listLabel} className="flex flex-col gap-4">
+        <ul aria-label={text.listLabel} className="flex flex-col gap-5">
           {queue.items.map((item) => (
             <ReportedReview
               key={item.review.id}
@@ -301,13 +323,14 @@ export function ReportsQueue({
         </ul>
       )}
       {queue.meta.nextCursor ? (
-        <Link
-          to={`/admin/reports?${new URLSearchParams({ cursor: queue.meta.nextCursor })}`}
-          className="underline"
-        >
-          {text.next}
-        </Link>
+        <div className="flex justify-center">
+          <Button asChild variant="outline">
+            <Link to={`/admin/reports?${new URLSearchParams({ cursor: queue.meta.nextCursor })}`}>
+              {text.next}
+            </Link>
+          </Button>
+        </div>
       ) : null}
-    </section>
+    </AdminPage>
   )
 }

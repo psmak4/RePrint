@@ -70,7 +70,7 @@ describe('ReportsQueue', () => {
   it('shows each review with its reports, reasons, and notes', () => {
     renderQueue()
     const first = screen.getAllByRole('article')[0] as HTMLElement
-    expect(within(first).getByText('Book 1')).toBeTruthy()
+    expect(within(first).getByRole('heading', { name: 'Book 1' })).toBeTruthy()
     expect(within(first).getByText(/2 open reports/)).toBeTruthy()
     expect(within(first).getByText('Hidden until a moderator decides')).toBeTruthy()
     expect(within(first).getByText('Spam or advertising')).toBeTruthy()
@@ -78,6 +78,30 @@ describe('ReportsQueue', () => {
     expect(within(first).getByText('Reported by Cy', { exact: false })).toBeTruthy()
     // Review text is plain text: nothing in it is a link.
     expect(within(first).queryByRole('link', { name: /example\.com/ })).toBeNull()
+  })
+
+  it('puts the title in the band and each reported review in its own card', () => {
+    renderQueue()
+    expect(screen.getByRole('heading', { level: 1, name: 'Reports queue' })).toBeTruthy()
+    const card = screen.getAllByRole('article')[0] as HTMLElement
+    expect(card.className).toContain('rounded-[18px]')
+    expect(within(card).getByRole('heading', { level: 2, name: 'Book 1' })).toBeTruthy()
+    expect(within(card).getByText('2 open reports').className).toContain('rounded-full')
+  })
+
+  it('shows Unpublish and Suspend author as red outline pills', () => {
+    renderQueue({ canSuspend: true })
+    expect(screen.getAllByRole('button', { name: 'Unpublish' })[0]?.className).toContain(
+      'text-danger',
+    )
+    expect(screen.getAllByRole('button', { name: 'Suspend author' })[0]?.className).toContain(
+      'text-danger',
+    )
+  })
+
+  it('offers Show more as a pill', () => {
+    renderQueue({ queue: { items: [item(1)], meta: { nextCursor: 'c2' } } })
+    expect(screen.getByRole('link', { name: 'Show more' }).className).toContain('rounded-full')
   })
 
   it('says so when the queue is empty', () => {
