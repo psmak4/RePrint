@@ -1,8 +1,12 @@
 import { type AdminUserDetail, ASSIGNABLE_ROLES, REVIEW_STATUSES } from '@reprint/shared'
 import { Button, Input, Label, Textarea } from '@reprint/ui'
-import { useId, useState } from 'react'
+import { type ReactNode, useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { InitialsAvatar } from '../books/avatar.js'
+import { AdminPage } from './admin-page.js'
+import { AdminCard, Badge, StatTile, USER_STATUS_TONE } from './admin-ui.js'
+import { RoleBadges } from './users-list.js'
 
 const text = copy.admin.users
 const actions = text.actions
@@ -21,6 +25,8 @@ const dateTime = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 })
 const fmt = (iso: string) => dateTime.format(new Date(iso))
+const dateOnly = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' })
+const fmtDate = (iso: string) => dateOnly.format(new Date(iso))
 
 function doneMessage(result: ActionResult): string | null {
   if (!('done' in result)) return null
@@ -43,15 +49,12 @@ function doneMessage(result: ActionResult): string | null {
   }
 }
 
-function Actions({
-  detail,
-  canAssign,
-  canSuspend,
-}: {
-  detail: AdminUserDetail
-  canAssign: boolean
-  canSuspend: boolean
-}) {
+/** The page's actions: buttons for the band, and the suspend form and results for the page body. */
+function useUserActions(
+  detail: AdminUserDetail,
+  canAssign: boolean,
+  canSuspend: boolean,
+): { buttons: ReactNode; panel: ReactNode } {
   const fetcher = useFetcher<ActionResult>()
   const [suspending, setSuspending] = useState(false)
   const [reason, setReason] = useState('')
@@ -72,11 +75,10 @@ function Actions({
   const deleted = user.status === 'deleted'
   const showResend = user.status === 'unverified'
 
-  return (
-    <section aria-label={actions.heading} className="flex flex-col gap-3">
-      <h3 className="font-serif text-xl leading-tight font-medium">{actions.heading}</h3>
+  const buttons = (
+    <>
       {canAssign ? (
-        <fieldset className="flex flex-wrap gap-3">
+        <fieldset className="contents">
           <legend className="sr-only">{actions.rolesHeading}</legend>
           {ASSIGNABLE_ROLES.map((role) =>
             user.roles.includes(role) ? (
@@ -103,122 +105,124 @@ function Actions({
           )}
         </fieldset>
       ) : null}
-      <div className="flex flex-wrap gap-3">
-        {canSuspend && user.status === 'suspended' ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => send({ intent: 'unsuspend' })}
-          >
-            {actions.unsuspend}
-          </Button>
-        ) : null}
-        {canSuspend && !deleted && user.status !== 'suspended' && !suspending ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => setSuspending(true)}
-          >
-            {actions.suspend}
-          </Button>
-        ) : null}
-        {canSuspend ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => send({ intent: 'revoke-sessions' })}
-          >
-            {actions.revokeSessions}
-          </Button>
-        ) : null}
-        {showResend ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => send({ intent: 'resend-verification' })}
-          >
-            {actions.resend}
-          </Button>
-        ) : null}
-      </div>
-      {suspending ? (
-        <form
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (reason.trim() === '') return
-            send({ intent: 'suspend', reason, ...(until ? { until } : {}) })
-          }}
-          className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+      {canSuspend ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          onClick={() => send({ intent: 'revoke-sessions' })}
         >
-          <div className="flex flex-col gap-1">
-            <Label htmlFor={reasonId}>{actions.reasonLabel}</Label>
-            <Textarea
-              id={reasonId}
-              value={reason}
-              maxLength={REASON_MAX}
-              required
-              rows={3}
-              aria-invalid={reasonError ? true : undefined}
-              aria-describedby={reasonHintId}
-              onChange={(event) => setReason(event.target.value)}
-            />
-            <p id={reasonHintId} className="text-sm text-muted-foreground">
-              {actions.reasonHint(REASON_MAX)}
-            </p>
-            {reasonError ? (
-              <p role="alert" className="text-sm text-danger">
-                {reasonError}
-              </p>
-            ) : null}
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor={untilId}>{actions.untilLabel}</Label>
-            <Input
-              id={untilId}
-              type="date"
-              value={until}
-              aria-describedby={untilHintId}
-              onChange={(event) => setUntil(event.target.value)}
-            />
-            <p id={untilHintId} className="text-sm text-muted-foreground">
-              {actions.untilHint}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button type="submit" disabled={busy || reason.trim() === ''}>
-              {busy ? actions.suspending : actions.suspendConfirm}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy}
-              onClick={() => {
-                setSuspending(false)
-                setReason('')
-                setUntil('')
-              }}
-            >
-              {actions.cancel}
-            </Button>
-          </div>
-        </form>
+          {actions.revokeSessions}
+        </Button>
       ) : null}
-      {message ? (
-        <p role="status" className="text-sm">
-          {message}
-        </p>
+      {showResend ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          onClick={() => send({ intent: 'resend-verification' })}
+        >
+          {actions.resend}
+        </Button>
       ) : null}
-      {failure ? (
-        <p role="alert" className="text-sm text-danger">
-          {failure}
-        </p>
+      {canSuspend && user.status === 'suspended' ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          onClick={() => send({ intent: 'unsuspend' })}
+        >
+          {actions.unsuspend}
+        </Button>
       ) : null}
-    </section>
+      {canSuspend && !deleted && user.status !== 'suspended' && !suspending ? (
+        <Button type="button" variant="danger" disabled={busy} onClick={() => setSuspending(true)}>
+          {actions.suspend}
+        </Button>
+      ) : null}
+    </>
   )
+
+  const panel =
+    suspending || message || failure ? (
+      <>
+        {suspending ? (
+          <AdminCard title={actions.suspend}>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                if (reason.trim() === '') return
+                send({ intent: 'suspend', reason, ...(until ? { until } : {}) })
+              }}
+              className="flex flex-col gap-3"
+            >
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={reasonId}>{actions.reasonLabel}</Label>
+                <Textarea
+                  id={reasonId}
+                  value={reason}
+                  maxLength={REASON_MAX}
+                  required
+                  rows={3}
+                  aria-invalid={reasonError ? true : undefined}
+                  aria-describedby={reasonHintId}
+                  onChange={(event) => setReason(event.target.value)}
+                />
+                <p id={reasonHintId} className="text-sm text-muted-foreground">
+                  {actions.reasonHint(REASON_MAX)}
+                </p>
+                {reasonError ? (
+                  <p role="alert" className="text-sm text-danger">
+                    {reasonError}
+                  </p>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={untilId}>{actions.untilLabel}</Label>
+                <Input
+                  id={untilId}
+                  type="date"
+                  value={until}
+                  aria-describedby={untilHintId}
+                  onChange={(event) => setUntil(event.target.value)}
+                />
+                <p id={untilHintId} className="text-sm text-muted-foreground">
+                  {actions.untilHint}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5">
+                <Button type="submit" variant="danger" disabled={busy || reason.trim() === ''}>
+                  {busy ? actions.suspending : actions.suspendConfirm}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => {
+                    setSuspending(false)
+                    setReason('')
+                    setUntil('')
+                  }}
+                >
+                  {actions.cancel}
+                </Button>
+              </div>
+            </form>
+          </AdminCard>
+        ) : null}
+        {message ? (
+          <p role="status" className="text-sm">
+            {message}
+          </p>
+        ) : null}
+        {failure ? (
+          <p role="alert" className="text-sm text-danger">
+            {failure}
+          </p>
+        ) : null}
+      </>
+    ) : null
+  return { buttons, panel }
 }
 
 /** `/admin/users/:id`: profile, roles, sessions, reviews by status, reports, audit history, and actions. */
@@ -234,123 +238,145 @@ export function UserDetail({
 }) {
   const { user, admin } = detail
   const d = text.detail
+  const { buttons, panel } = useUserActions(detail, canAssign, canSuspend)
   return (
-    <section aria-labelledby="user-heading" className="flex flex-col gap-6">
-      <Link to="/admin/users" className="text-sm text-link underline">
-        {text.back}
-      </Link>
-      <header className="flex flex-col gap-1">
-        <h2
-          id="user-heading"
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-        >
-          {user.displayName}
-        </h2>
-        <p className="text-muted-foreground">
-          @{user.username} · {text.statuses[user.status]} ·{' '}
-          {user.roles.map((role) => text.roles[role]).join(', ')}
+    <AdminPage
+      crumbs={[
+        { label: copy.admin.title, to: '/admin' },
+        { label: text.title, to: '/admin/users' },
+        { label: `@${user.username}` },
+      ]}
+      leading={<InitialsAvatar name={user.displayName} colorKey={user.username} size="lg" />}
+      title={user.displayName}
+      lead={
+        <span className="flex flex-wrap items-center gap-2.5">
+          {d.joinedLine(user.username, fmtDate(user.joinedAt))}
+          <Badge tone={USER_STATUS_TONE[user.status]} dot>
+            {text.statuses[user.status]}
+          </Badge>
+          <RoleBadges roles={user.roles} />
+        </span>
+      }
+      actions={buttons}
+    >
+      {panel}
+      {user.status === 'suspended' ? (
+        <p className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
+          {user.suspendedUntil
+            ? d.suspendedUntil(fmt(user.suspendedUntil))
+            : d.suspendedIndefinitely}
+          {user.suspendedReason ? ` · ${d.suspendedReason}: ${user.suspendedReason}` : ''}
         </p>
-        {user.status === 'suspended' ? (
-          <p className="text-sm text-warning">
-            {user.suspendedUntil
-              ? d.suspendedUntil(fmt(user.suspendedUntil))
-              : d.suspendedIndefinitely}
-            {user.suspendedReason ? ` · ${d.suspendedReason}: ${user.suspendedReason}` : ''}
-          </p>
-        ) : null}
-        {user.deletedAt ? <p className="text-sm">{d.deletedAt(fmt(user.deletedAt))}</p> : null}
-      </header>
-
-      <Actions detail={detail} canAssign={canAssign} canSuspend={canSuspend} />
-
-      <section aria-label={d.profile} className="flex flex-col gap-1">
-        <h3 className="font-serif text-xl leading-tight font-medium">{d.profile}</h3>
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-muted-foreground">{d.email}</dt>
-          <dd className="break-all">
-            {user.email ?? text.noEmail}
-            {user.email ? (
-              <>
-                {' · '}
-                {user.emailVerifiedAt ? d.verified(fmt(user.emailVerifiedAt)) : d.notVerified}
-              </>
-            ) : null}
-          </dd>
-          <dt className="text-muted-foreground">{d.bio}</dt>
-          <dd className="whitespace-pre-line break-words">{user.bio ?? d.noBio}</dd>
-          <dt className="text-muted-foreground">{d.joined}</dt>
-          <dd>{fmt(user.joinedAt)}</dd>
-        </dl>
-        {user.status !== 'deleted' ? (
-          <Link to={`/u/${user.username}`} className="text-sm text-link underline">
-            {d.profileLink}
-          </Link>
-        ) : null}
-      </section>
-
-      <section aria-label={d.reviewsHeading} className="flex flex-col gap-1">
-        <h3 className="font-serif text-xl leading-tight font-medium">{d.reviewsHeading}</h3>
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-          {REVIEW_STATUSES.map((status) => (
-            <div key={status} className="contents">
-              <dt className="text-muted-foreground">{d.reviewStatuses[status]}</dt>
-              <dd>{detail.reviews[status] ?? 0}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section aria-label={d.reportsHeading} className="flex flex-col gap-1">
-        <h3 className="font-serif text-xl leading-tight font-medium">{d.reportsHeading}</h3>
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-muted-foreground">{d.reportsFiled}</dt>
-          <dd>{detail.reports.filed}</dd>
-          <dt className="text-muted-foreground">{d.reportsReceived}</dt>
-          <dd>{detail.reports.received}</dd>
-        </dl>
-      </section>
-
-      {admin ? (
-        <>
-          <section aria-label={d.sessionsHeading} className="flex flex-col gap-2">
-            <h3 className="font-serif text-xl leading-tight font-medium">{d.sessionsHeading}</h3>
-            {admin.sessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{d.noSessions}</p>
-            ) : (
-              <ul className="flex flex-col gap-2 text-sm">
-                {admin.sessions.map((session) => (
-                  <li key={session.id} className="rounded-xl border border-border bg-surface p-3">
-                    <p className="font-medium">{session.device}</p>
-                    <p className="text-muted-foreground">
-                      {d.sessionMeta(session.ip, fmt(session.lastSeenAt))}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-          <section aria-label={d.auditHeading} className="flex flex-col gap-2">
-            <h3 className="font-serif text-xl leading-tight font-medium">{d.auditHeading}</h3>
-            {admin.audit.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{d.noAudit}</p>
-            ) : (
-              <ul className="flex flex-col gap-2 text-sm">
-                {admin.audit.map((entry) => (
-                  <li key={entry.id} className="rounded-xl border border-border bg-surface p-3">
-                    <p className="font-medium">{entry.action}</p>
-                    <p className="text-muted-foreground">
-                      {d.auditBy(entry.actor?.username ?? null)} ·{' '}
-                      <time dateTime={entry.createdAt}>{fmt(entry.createdAt)}</time>
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </>
-      ) : (
-        <p className="text-sm text-muted-foreground">{d.limitedNote}</p>
-      )}
-    </section>
+      ) : null}
+      {user.deletedAt ? (
+        <p className="rounded-xl border border-border bg-surface-raised px-4 py-3 text-sm">
+          {d.deletedAt(fmt(user.deletedAt))}
+        </p>
+      ) : null}
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <AdminCard
+            title={d.profile}
+            actions={
+              user.status !== 'deleted' ? (
+                <Link
+                  to={`/u/${user.username}`}
+                  className="text-[15px] font-semibold text-link hover:underline"
+                >
+                  {d.profileLink}
+                </Link>
+              ) : null
+            }
+          >
+            <dl className="grid grid-cols-[minmax(0,120px)_minmax(0,1fr)] gap-x-4 gap-y-3 text-[15px]">
+              <dt className="text-muted-foreground">{d.email}</dt>
+              <dd className="flex flex-wrap items-center gap-2.5 break-all">
+                {user.email ?? text.noEmail}
+                {user.email ? (
+                  user.emailVerifiedAt ? (
+                    <Badge tone="green">{d.verified(fmt(user.emailVerifiedAt))}</Badge>
+                  ) : (
+                    <Badge tone="amber">{d.notVerified}</Badge>
+                  )
+                ) : null}
+              </dd>
+              <dt className="text-muted-foreground">{d.bio}</dt>
+              <dd className="whitespace-pre-line break-words">{user.bio ?? d.noBio}</dd>
+              <dt className="text-muted-foreground">{d.joined}</dt>
+              <dd>{fmt(user.joinedAt)}</dd>
+            </dl>
+          </AdminCard>
+          <AdminCard title={d.reviewsHeading}>
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {REVIEW_STATUSES.map((status) => (
+                <StatTile
+                  key={status}
+                  label={d.reviewStatuses[status]}
+                  value={detail.reviews[status] ?? 0}
+                />
+              ))}
+            </dl>
+          </AdminCard>
+          {admin ? (
+            <AdminCard title={d.auditHeading}>
+              {admin.audit.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{d.noAudit}</p>
+              ) : (
+                <ol className="flex flex-col gap-4">
+                  {admin.audit.map((entry) => (
+                    <li key={entry.id} className="grid grid-cols-[12px_minmax(0,1fr)] gap-3.5">
+                      <span
+                        aria-hidden="true"
+                        className="mt-1.5 size-2.5 rounded-full border-2 border-accent bg-surface"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-[15px] font-medium break-words">{entry.action}</span>
+                        <span className="text-[13px] text-muted-foreground">
+                          {d.auditBy(entry.actor?.username ?? null)} ·{' '}
+                          <time dateTime={entry.createdAt}>{fmt(entry.createdAt)}</time>
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </AdminCard>
+          ) : (
+            <p className="text-sm text-muted-foreground">{d.limitedNote}</p>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-5">
+          <AdminCard title={d.reportsHeading}>
+            <dl className="grid grid-cols-2 gap-3">
+              <StatTile label={d.reportsFiled} value={detail.reports.filed} />
+              <StatTile label={d.reportsReceived} value={detail.reports.received} />
+            </dl>
+          </AdminCard>
+          {admin ? (
+            <AdminCard title={d.sessionsHeading}>
+              {admin.sessions.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{d.noSessions}</p>
+              ) : (
+                <ul className="flex flex-col">
+                  {admin.sessions.map((session) => (
+                    <li
+                      key={session.id}
+                      className="flex flex-col gap-0.5 border-t border-[#ece8e0] py-3 first:border-t-0 first:pt-0"
+                    >
+                      <span className="text-[15px] font-semibold break-words">
+                        {session.device}
+                      </span>
+                      <span className="text-[13px] text-muted-foreground">
+                        {d.sessionMeta(session.ip, fmt(session.lastSeenAt))}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </AdminCard>
+          ) : null}
+        </div>
+      </div>
+    </AdminPage>
   )
 }
