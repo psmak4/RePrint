@@ -1,7 +1,10 @@
 import type { AdminSystem } from '@reprint/shared'
+import { cn } from '@reprint/ui'
 import { useEffect } from 'react'
 import { useRevalidator } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { AdminPage } from './admin-page.js'
+import { AdminCard, Badge, StatTile } from './admin-ui.js'
 
 const text = copy.admin.system
 
@@ -23,15 +26,48 @@ function age(seconds: number | null): string {
   return seconds < 120 ? text.seconds(seconds) : text.minutes(Math.round(seconds / 60))
 }
 
-function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
+const BAR_WIDTHS = [
+  'w-0',
+  'w-[5%]',
+  'w-[10%]',
+  'w-[15%]',
+  'w-[20%]',
+  'w-[25%]',
+  'w-[30%]',
+  'w-[35%]',
+  'w-[40%]',
+  'w-[45%]',
+  'w-[50%]',
+  'w-[55%]',
+  'w-[60%]',
+  'w-[65%]',
+  'w-[70%]',
+  'w-[75%]',
+  'w-[80%]',
+  'w-[85%]',
+  'w-[90%]',
+  'w-[95%]',
+  'w-full',
+] as const
+
+/** A bar width class, to the nearest 5%: inline styles are not allowed (D-185). */
+export function barWidth(percent: number): string {
+  return BAR_WIDTHS[Math.round(Math.min(100, Math.max(0, percent)) / 5)] ?? 'w-0'
+}
+
+function Bar({ percent, label, tone }: { percent: number; label: string; tone: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-2 font-serif text-[40px] leading-none font-medium">{value}</dd>
-      {note ? <dd className="mt-1 text-sm text-muted-foreground">{note}</dd> : null}
-    </div>
+    <span
+      role="img"
+      aria-label={label}
+      className="block h-2 overflow-hidden rounded-full bg-[#ece8e0]"
+    >
+      <span className={cn('block h-full rounded-full', tone, barWidth(percent))} />
+    </span>
   )
 }
+
+const metric = 'flex flex-col gap-3 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] px-4 py-3.5'
 
 /** Source requests per second, search cache hit rate, breaker state, and queue depth (PRD §6). */
 export function SystemDashboard({ system }: { system: AdminSystem }) {
@@ -43,63 +79,80 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
   }, [revalidate])
 
   const { source, searchCache, queue } = system
+  const usage = Math.round((source.requestsPerSecond / source.limitPerSecond) * 100)
+  const hit = searchCache.hitRate === null ? 0 : Math.round(searchCache.hitRate * 100)
   return (
-    <section aria-labelledby="system-heading" className="flex flex-col gap-6">
-      <div>
-        <h2
-          id="system-heading"
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      actions={
+        <Badge dot>{text.updatedBadge(timeFormat.format(new Date(system.generatedAt)))}</Badge>
+      }
+    >
+      <div className="grid gap-5 md:grid-cols-2">
+        <AdminCard
+          title={text.sourceHeading}
+          actions={
+            <Badge dot tone={source.breakerOpen ? 'red' : 'green'}>
+              {source.breakerOpen ? text.breakerOpen : text.breakerClosed}
+            </Badge>
+          }
         >
-          {text.title}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {text.refreshNote} {text.updatedAt(timeFormat.format(new Date(system.generatedAt)))}
-        </p>
-      </div>
-      <section aria-labelledby="source-heading" className="flex flex-col gap-3">
-        <h3 id="source-heading" className="font-serif text-2xl leading-tight font-medium">
-          {text.sourceHeading}
-        </h3>
-        <dl className="grid gap-4 sm:grid-cols-2">
-          <Stat
-            label={text.requestsPerSecond}
-            value={source.requestsPerSecond.toFixed(2)}
-            note={text.limit(source.limitPerSecond)}
-          />
-          <Stat
-            label={text.breaker}
-            value={source.breakerOpen ? text.breakerOpen : text.breakerClosed}
-          />
-        </dl>
-      </section>
-      <section aria-labelledby="cache-heading" className="flex flex-col gap-3">
-        <h3 id="cache-heading" className="font-serif text-2xl leading-tight font-medium">
-          {text.cacheHeading}
-        </h3>
-        <dl className="grid gap-4 sm:grid-cols-2">
-          <Stat
-            label={text.hitRate}
-            value={
-              searchCache.hitRate === null
+          <dl className={metric}>
+            <dt className="text-[13px] text-muted-foreground">{text.requestsPerSecond}</dt>
+            <dd className="flex flex-wrap items-baseline gap-2">
+              <span className="text-[28px] leading-none font-semibold tabular-nums">
+                {source.requestsPerSecond.toFixed(2)}
+              </span>
+              <span className="text-[15px] font-medium text-muted-foreground">
+                {text.ofLimit(source.limitPerSecond)}
+              </span>
+            </dd>
+            <dd>
+              <Bar percent={usage} label={text.usage(usage)} tone="bg-accent" />
+            </dd>
+          </dl>
+        </AdminCard>
+        <AdminCard title={text.cacheHeading}>
+          <dl className={metric}>
+            <dt className="text-[13px] text-muted-foreground">{text.hitRate}</dt>
+            <dd className="text-[28px] leading-none font-semibold tabular-nums">
+              {searchCache.hitRate === null
                 ? text.noLookups
-                : percentFormat.format(searchCache.hitRate)
-            }
-            note={text.lookups(searchCache.hits, searchCache.misses)}
-          />
+                : percentFormat.format(searchCache.hitRate)}
+            </dd>
+            {searchCache.hitRate === null ? null : (
+              <dd>
+                <Bar
+                  percent={hit}
+                  label={percentFormat.format(searchCache.hitRate)}
+                  tone="bg-success"
+                />
+              </dd>
+            )}
+            <dd className="text-[13px] text-muted-foreground">
+              {text.lookups(searchCache.hits, searchCache.misses)}
+            </dd>
+          </dl>
+        </AdminCard>
+      </div>
+      <AdminCard
+        title={text.queueHeading}
+        actions={
+          <p className="text-sm text-muted-foreground">
+            {text.oldestWaiting}:{' '}
+            <span className="font-semibold text-foreground">{age(queue.oldestWaitingSeconds)}</span>
+          </p>
+        }
+      >
+        <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatTile label={text.waiting} value={numberFormat.format(queue.waiting)} />
+          <StatTile label={text.active} value={numberFormat.format(queue.active)} />
+          <StatTile label={text.delayed} value={numberFormat.format(queue.delayed)} />
+          <StatTile label={text.failed} value={numberFormat.format(queue.failed)} />
         </dl>
-      </section>
-      <section aria-labelledby="queue-heading" className="flex flex-col gap-3">
-        <h3 id="queue-heading" className="font-serif text-2xl leading-tight font-medium">
-          {text.queueHeading}
-        </h3>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Stat label={text.waiting} value={numberFormat.format(queue.waiting)} />
-          <Stat label={text.active} value={numberFormat.format(queue.active)} />
-          <Stat label={text.delayed} value={numberFormat.format(queue.delayed)} />
-          <Stat label={text.failed} value={numberFormat.format(queue.failed)} />
-          <Stat label={text.oldestWaiting} value={age(queue.oldestWaitingSeconds)} />
-        </dl>
-      </section>
-    </section>
+      </AdminCard>
+    </AdminPage>
   )
 }
