@@ -4,10 +4,12 @@ import { resetSeriesSync, withSeriesLock } from '../support/accounts.js'
 
 // The stub Source's Middle-earth Series: The Hobbit (1) and The Fellowship of the Ring (2). Each run
 // starts with the Hobbit outside the Series, as if stored before the Series existed, and the
-// Fellowship reached by a Member (an earlier spec's ISBN search for the Hobbit may have imported it
-// as a Series member); viewing the Fellowship queues a Series sync, which the in-process worker runs
-// and which adds the Hobbit (D-199).
-test('viewing a Book in a Series brings in the rest of the Series', async ({ page }) => {
+// Fellowship, when stored, as a Book a Series sync brought in. Clicking the Fellowship in search
+// reaches it (D-200), which queues a Series sync that the in-process worker runs and which adds
+// the Hobbit (D-199).
+test('opening a Book in a Series from search brings in the rest of the Series', async ({
+  page,
+}) => {
   // The three projects share the Series, so their runs take turns.
   test.setTimeout(90_000)
   await withSeriesLock(async () => {

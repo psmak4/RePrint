@@ -1,12 +1,17 @@
-import { resolveBookRequestSchema, resolveBookResponseSchema } from '@reprint/shared'
+import {
+  resolveBookRequestSchema,
+  resolveBookResponseSchema,
+  slugParamsSchema,
+} from '@reprint/shared'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { CandidateRefs } from '../../catalog/candidate-refs.js'
-import { type InteractiveCall, resolveCandidate } from '../../catalog/resolve.js'
+import { type InteractiveCall, markReached, resolveCandidate } from '../../catalog/resolve.js'
 import { queueSeriesSyncs } from '../../catalog/series-sync.js'
 import { type SourceAdapter, SourceError } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
 import { rateLimit } from '../rate-limit/plugin.js'
+import { findBookBySlug } from './read.js'
 
 export interface ResolveRoutesOptions extends AuthRoutesOptions {
   /** Missing only when the spec is generated; the route then answers 503. */
@@ -58,6 +63,28 @@ export const resolveRoutes: FastifyPluginAsyncZod<ResolveRoutesOptions> = async 
         }
         throw error
       }
+    },
+  )
+
+  // The web sends this when a reader clicks a stored Book in search results or suggestions, so a
+  // Book a Series sync brought in counts as reached (D-200). Crawlers follow links but don't click.
+  app.post(
+    '/books/:slug/reached',
+    {
+      preHandler: rateLimit('bookResolve'),
+      schema: { params: slugParamsSchema, response: { 200: resolveBookResponseSchema } },
+    },
+    async (request) => {
+      if (!db) throw new Error('marking a book reached needs a database')
+      const book = await findBookBySlug(db, request.params.slug)
+      if (!book) throw new HttpProblem(404, NOT_FOUND)
+      const due = await markReached(db, book.id)
+      if (jobs && due.length > 0) {
+        await queueSeriesSyncs(jobs, due).catch((error: unknown) =>
+          request.log.warn({ err: error }, 'could not queue Series syncs'),
+        )
+      }
+      return { slug: book.slug }
     },
   )
 }

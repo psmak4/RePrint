@@ -247,6 +247,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
     allowed: [RESOLVE, 'stores the Book with its Editions and Authors'],
     denied: [RESOLVE, 'returns 404 Problem Details for an unknown or expired ref'],
   },
+  'POST /v1/books/{slug}/reached': {
+    allowed: [RESOLVE, 'marks a Book a Series sync brought in as reached'],
+    denied: [RESOLVE, 'returns 404 Problem Details for an unknown Book'],
+  },
   'GET /v1/mod/reviews': {
     allowed: [MOD_QUEUE, 'lists Pending reviews oldest first'],
     denied: [MOD_QUEUE, 'denies Members with 403 and Visitors with 401 on every route'],

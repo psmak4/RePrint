@@ -9,6 +9,7 @@ export default [
   route('resend-verification', 'routes/resend-verification.tsx'),
   route('books/:slug', 'routes/book.tsx'),
   route('books/:slug/shelf', 'routes/book-shelf.tsx'),
+  route('books/:slug/reached', 'routes/book-reached.tsx'),
   route('reviews/:id/helpful', 'routes/review-helpful.tsx'),
   route('reviews/:id/report', 'routes/review-report.tsx'),
   route('authors/:slug', 'routes/author.tsx'),

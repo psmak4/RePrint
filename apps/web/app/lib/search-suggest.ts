@@ -16,7 +16,15 @@ export async function fetchSuggestions(
   return searchSuggestResponseSchema.parse(await response.json())
 }
 
-export type Option = { key: string; href: string; label: string; detail: string; kind: string }
+export type Option = {
+  key: string
+  href: string
+  label: string
+  detail: string
+  kind: string
+  /** Set on a Book suggestion: choosing it reaches the Book (D-200). */
+  bookSlug?: string
+}
 
 export function toOptions({ books, authors }: SearchSuggestResponse): Option[] {
   const c = copy.shell.search
@@ -29,6 +37,7 @@ export function toOptions({ books, authors }: SearchSuggestResponse): Option[] {
       .map((contribution) => contribution.author.name)
       .join(', '),
     kind: c.bookKind,
+    bookSlug: book.slug,
   }))
   const authorOptions = authors.map((author) => ({
     key: `author-${author.id}`,

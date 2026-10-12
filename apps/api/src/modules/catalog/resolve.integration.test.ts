@@ -181,3 +181,52 @@ describe('Series syncs (D-199)', () => {
     expect(enqueue).not.toHaveBeenCalled()
   })
 })
+
+describe('POST /v1/books/:slug/reached (D-200)', () => {
+  const reached = (slug: string) =>
+    app.inject({ method: 'POST', url: `/v1/books/${slug}/reached`, headers: { origin: ORIGIN } })
+
+  async function storeHobbit(seriesImport: boolean) {
+    const hobbit = await stub.getBook('stub-book-hobbit')
+    if (!hobbit) throw new Error('no hobbit')
+    const { bookId } = await ingestBook(stack.db.db, {
+      source: stub,
+      candidate: hobbit,
+      seriesImport,
+    })
+    const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    if (!row) throw new Error('not stored')
+    return row
+  }
+
+  it('marks a Book a Series sync brought in as reached and queues its Series syncs', async () => {
+    const book = await storeHobbit(true)
+    const response = await reached(book.slug)
+    expect(response.statusCode).toBe(200)
+    const [row] = await stack.db.db.select().from(books).where(eq(books.id, book.id))
+    expect(row?.seriesImportOnly).toBe(false)
+    expect(enqueue).toHaveBeenCalledWith(
+      'catalog.series-sync',
+      { seriesId: expect.any(String) },
+      expect.objectContaining({ priority: 10 }),
+    )
+  })
+
+  it('queues nothing for a Book already reached (its page view does that)', async () => {
+    const book = await storeHobbit(false)
+    const response = await reached(book.slug)
+    expect(response.statusCode).toBe(200)
+    expect(enqueue).not.toHaveBeenCalled()
+  })
+
+  it('returns 404 Problem Details for an unknown Book', async () => {
+    const response = await reached('no-such-book')
+    expect(response.statusCode).toBe(404)
+    expect(problemDetailsSchema.safeParse(response.json()).success).toBe(true)
+  })
+
+  it('returns 400 for a malformed slug', async () => {
+    const response = await reached('Not%20A%20Slug')
+    expect(response.statusCode).toBe(400)
+  })
+})

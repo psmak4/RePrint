@@ -152,6 +152,18 @@ describe('SearchResultsPage', () => {
     expect(tracker).toHaveBeenCalledWith('Search Result Click', undefined)
   })
 
+  it('tells the Catalog a clicked stored Book was reached, not an unstored one (D-200)', () => {
+    const sendBeacon = vi.fn(() => true)
+    Object.defineProperty(navigator, 'sendBeacon', { value: sendBeacon, configurable: true })
+    renderPage()
+    fireEvent.click(screen.getByRole('link', { name: 'Dune Messiah' }))
+    expect(sendBeacon).not.toHaveBeenCalled()
+    cleanup()
+    renderPage()
+    fireEvent.click(screen.getByRole('link', { name: 'Dune' }))
+    expect(sendBeacon).toHaveBeenCalledExactlyOnceWith('/books/dune/reached')
+  })
+
   it('notes when the Source was unavailable', () => {
     renderPage({ results: { ...base, sourceUnavailable: true } })
     expect(screen.getByText(copy.search.sourceUnavailable)).toBeTruthy()
