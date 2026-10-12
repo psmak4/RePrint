@@ -192,14 +192,20 @@ export function UsersList({
                             colorKey={user.username}
                             size="sm"
                           />
+                          {/* Each line stops at 200px with an ellipsis (full value in `title`), so a
+                              long name cannot widen the table; the detail page shows it whole. */}
                           <span className="flex min-w-0 flex-col">
                             <Link
                               to={`/admin/users/${user.id}`}
-                              className="font-semibold whitespace-nowrap hover:underline"
+                              title={user.displayName}
+                              className="block max-w-[200px] truncate font-semibold hover:underline"
                             >
                               {user.displayName}
                             </Link>
-                            <span className="text-[13px] whitespace-nowrap text-muted-foreground">
+                            <span
+                              title={`@${user.username}`}
+                              className="block max-w-[200px] truncate text-[13px] text-muted-foreground"
+                            >
                               @{user.username}
                             </span>
                             {canSearchEmail ? (

@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { type Browser, expect, type Page, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
-import { grantAdmin, registerVerifiedMember } from '../support/accounts.js'
+import { grantAdmin, registerVerifiedMember, setProfile } from '../support/accounts.js'
 import { testPassword, useOwnClientIp } from '../support/identity.js'
 
 /** Every admin page and the `h1` its band shows (D-201). */
@@ -18,6 +18,26 @@ const adminPages: [string, string][] = [
   ['/admin/system', 'System'],
 ]
 
+/** Fails naming the innermost elements whose content is wider than they are, so the culprit shows. */
+async function expectNoSidewaysScroll(page: Page, label: string) {
+  // Strings: the e2e package has no DOM types.
+  const overflow = await page.evaluate<number>(
+    'document.documentElement.scrollWidth - window.innerWidth',
+  )
+  if (overflow <= 0) return
+  const culprits = await page.evaluate<string[]>(`
+    [...document.body.querySelectorAll('*')]
+      .filter((el) => el.clientWidth > 1 && el.scrollWidth > el.clientWidth + 1)
+      .filter((el) => ![...el.children].some((c) => c.scrollWidth > c.clientWidth + 1))
+      .slice(0, 5)
+      .map((el) => el.tagName.toLowerCase() + '.' + [...el.classList].join('.') + ' "' + (el.textContent ?? '').slice(0, 40) + '"')
+  `)
+  expect(
+    overflow,
+    `${label} scrolls sideways; widest: ${culprits.join(' | ')}`,
+  ).toBeLessThanOrEqual(0)
+}
+
 // The page sweeps and the role flow are separate tests: together they ran past the 30 s budget on
 // WebKit in CI.
 test('every admin page has no serious accessibility issues', async ({ page }) => {
@@ -30,16 +50,29 @@ test('every admin page has no serious accessibility issues', async ({ page }) =>
   }
 })
 
-test('the Users table fits beside the nav on a desktop', async ({ page }) => {
+/** A Member at every length limit: no value has a space to break at, and W is the widest letter. */
+async function registerLongNamedMember(browser: Browser) {
+  const context = await browser.newContext()
+  // 19 characters, `_`, and ten hex digits: a username at the 30-character limit.
+  const member = await registerVerifiedMember(await context.newPage(), 'longusernamelongnam')
+  expect(member.username).toHaveLength(30)
+  const displayName = 'W'.repeat(50)
+  await setProfile(member.email, { displayName, bio: 'W'.repeat(280) })
+  return { ...member, displayName, close: () => context.close() }
+}
+
+test('the Users table fits beside the nav on a desktop', async ({ browser, page }) => {
   test.skip(test.info().project.name === 'mobile', 'phones get the row list instead')
   await page.setViewportSize({ width: 1440, height: 900 })
+  const member = await registerLongNamedMember(browser)
   const admin = await registerVerifiedMember(page, 'adminwide')
   await grantAdmin(admin.email)
-  await page.goto('/admin/users')
+  await page.goto(`/admin/users?q=${member.username}`)
   const region = page.getByRole('region', { name: 'Users, scrollable table' })
-  await expect(region).toBeVisible()
+  await expect(region.getByRole('link', { name: member.displayName })).toBeVisible()
   const overflow = await region.evaluate((el) => el.scrollWidth - el.clientWidth)
   expect(overflow).toBeLessThanOrEqual(0)
+  await member.close()
 })
 
 test('admin pages never scroll sideways on a phone', async ({ page }) => {
@@ -50,13 +83,35 @@ test('admin pages never scroll sideways on a phone', async ({ page }) => {
   for (const [path, title] of adminPages) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
-    // A string: the e2e package has no DOM types.
-    const overflow = await page.evaluate<number>(
-      'document.documentElement.scrollWidth - window.innerWidth',
-    )
-    expect(overflow, path).toBeLessThanOrEqual(0)
+    await expectNoSidewaysScroll(page, path)
     await expectNoA11yViolations(page)
   }
+})
+
+test('the longest names and reasons stay on screen on a phone', async ({ browser, page }) => {
+  test.setTimeout(60_000)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const member = await registerLongNamedMember(browser)
+  const { displayName } = member
+  const admin = await registerVerifiedMember(page, 'adminlong')
+  await grantAdmin(admin.email)
+
+  await page.goto(`/admin/users?q=${member.username}`)
+  await expect(page.getByRole('main').getByRole('link', { name: displayName })).toBeVisible()
+  await expectNoSidewaysScroll(page, 'users list')
+
+  await page.getByRole('main').getByRole('link', { name: displayName }).click()
+  await expect(page.getByRole('heading', { level: 1, name: displayName })).toBeVisible()
+  await page.getByRole('button', { name: 'Suspend', exact: true }).click()
+  await page.getByLabel(/^Suspension reason/).fill(`Spam: https://example.test/${'w'.repeat(400)}`)
+  await page.getByRole('button', { name: 'Suspend user' }).click()
+  await expect(page.getByText('The user was suspended.')).toBeVisible()
+  await expectNoSidewaysScroll(page, 'user detail')
+
+  await page.goto('/admin/audit')
+  await expect(page.getByRole('heading', { level: 1, name: 'Audit log' })).toBeVisible()
+  await expectNoSidewaysScroll(page, 'audit log')
+  await member.close()
 })
 
 test('an Admin grants Moderator to one Member and suspends another, who cannot log in', async ({
