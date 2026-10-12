@@ -50,8 +50,9 @@ test('admin pages never scroll sideways on a phone', async ({ page }) => {
   for (const [path, title] of adminPages) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth,
+    // A string: the e2e package has no DOM types.
+    const overflow = await page.evaluate<number>(
+      'document.documentElement.scrollWidth - window.innerWidth',
     )
     expect(overflow, path).toBeLessThanOrEqual(0)
     await expectNoA11yViolations(page)
