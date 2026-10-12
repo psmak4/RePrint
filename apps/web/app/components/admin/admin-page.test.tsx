@@ -48,9 +48,9 @@ describe('AdminPage', () => {
     renderPage()
     expect(screen.getByRole('heading', { level: 1, name: 'Users' })).toBeTruthy()
     const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
-    expect(
-      within(crumbs).getByRole('link', { name: 'Administration' }).getAttribute('href'),
-    ).toBe('/admin')
+    expect(within(crumbs).getByRole('link', { name: 'Administration' }).getAttribute('href')).toBe(
+      '/admin',
+    )
     expect(within(crumbs).getByText('Users').getAttribute('aria-current')).toBe('page')
     expect(screen.getByText('Every account.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Export' })).toBeTruthy()

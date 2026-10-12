@@ -117,7 +117,9 @@ describe('admin layout loader', () => {
   it('opens the area for audit.view alone and lists only the audit log', async () => {
     loadSession.mockResolvedValue(viewer(['audit.view']))
     expect(await loader(args)).toEqual({
-      groups: [{ label: 'People', items: [{ to: '/admin/audit', label: 'Audit log', icon: 'audit' }] }],
+      groups: [
+        { label: 'People', items: [{ to: '/admin/audit', label: 'Audit log', icon: 'audit' }] },
+      ],
     })
   })
 

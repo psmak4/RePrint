@@ -56,10 +56,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function AdminIndex({ loaderData }: Route.ComponentProps) {
   return (
-    <ModerationDashboard
-      stats={loaderData.stats}
-      now={loaderData.now}
-      oldest={loaderData.oldest}
-    />
+    <ModerationDashboard stats={loaderData.stats} now={loaderData.now} oldest={loaderData.oldest} />
   )
 }

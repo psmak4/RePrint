@@ -4,6 +4,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useFetcher, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
+import { Kbd } from './admin-ui.js'
+import { AdminIcon } from './icons.js'
 
 const text = copy.admin.reviews
 
@@ -92,30 +94,21 @@ export function DecisionPanel({
 
   if (!enabled) {
     return (
-      <section aria-label={text.actionsLabel} className="text-sm text-muted-foreground">
+      <section
+        aria-label={text.actionsLabel}
+        className="border-t border-border bg-[#fdfcfa] px-5 py-4 text-sm text-muted-foreground md:px-6"
+      >
         <p>{text.readOnly}</p>
       </section>
     )
   }
   return (
-    <section aria-label={text.actionsLabel} className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-3">
-        <Button type="button" disabled={busy} onClick={() => decide('approve')}>
-          {busy && submitting === 'approve' ? text.approving : text.approve}
-        </Button>
-        {rejecting ? null : (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => setRejecting(true)}
-          >
-            {text.reject}
-          </Button>
-        )}
-      </div>
+    <section
+      aria-label={text.actionsLabel}
+      className="sticky bottom-0 flex flex-col gap-3 border-t border-border bg-surface px-5 py-4 md:px-6"
+    >
       {rejecting ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4">
           <div className="flex flex-col gap-1">
             <Label htmlFor={phraseId}>{text.phraseLabel}</Label>
             <Select id={phraseId} value="" onChange={(event) => setReason(event.target.value)}>
@@ -160,6 +153,32 @@ export function DecisionPanel({
           </div>
         </div>
       ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-muted-foreground">
+          {text.shortcutKeys.map(([key, label]) => (
+            <span key={key} className="inline-flex items-center gap-1.5">
+              <Kbd>{key}</Kbd>
+              {label}
+            </span>
+          ))}
+        </p>
+        <div className="flex flex-wrap gap-2.5">
+          {rejecting ? null : (
+            <Button
+              type="button"
+              variant="danger"
+              disabled={busy}
+              onClick={() => setRejecting(true)}
+            >
+              {text.reject}
+            </Button>
+          )}
+          <Button type="button" disabled={busy} onClick={() => decide('approve')}>
+            <AdminIcon name="check" />
+            {busy && submitting === 'approve' ? text.approving : text.approve}
+          </Button>
+        </div>
+      </div>
       {decided ? (
         <p role="status" className="text-sm">
           {text.decided(decided)}
@@ -170,7 +189,6 @@ export function DecisionPanel({
           {failure}
         </p>
       ) : null}
-      <p className="text-sm text-muted-foreground">{text.shortcuts}</p>
     </section>
   )
 }

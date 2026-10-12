@@ -90,9 +90,9 @@ describe('ModerationDashboard', () => {
     })
     expect(screen.getByText('Open reports').nextElementSibling?.textContent).toBe('5')
     expect(screen.getByText('Oldest has waited 2 days')).toBeTruthy()
-    expect(
-      screen.getByRole('link', { name: 'Open the reports queue' }).getAttribute('href'),
-    ).toBe('/admin/reports')
+    expect(screen.getByRole('link', { name: 'Open the reports queue' }).getAttribute('href')).toBe(
+      '/admin/reports',
+    )
   })
 
   it('lists the oldest pending reviews with an Open pill each', () => {

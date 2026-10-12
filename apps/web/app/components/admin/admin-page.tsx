@@ -75,7 +75,10 @@ function Crumbs({ crumbs }: { crumbs: AdminCrumb[] }) {
     <nav aria-label={copy.admin.breadcrumbLabel}>
       <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         {crumbs.map((crumb, index) => (
-          <li key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-2">
+          <li
+            key={`${crumb.to ?? 'here'}:${crumb.label}`}
+            className="flex min-w-0 items-center gap-2"
+          >
             {index > 0 ? <span aria-hidden="true">/</span> : null}
             {crumb.to ? (
               <Link to={crumb.to} className="hover:text-foreground hover:underline">
