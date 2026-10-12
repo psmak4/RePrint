@@ -283,7 +283,6 @@ export const copy = {
       heading: 'In this series',
       position: (position: string, total: number | null) =>
         total ? `Book ${position} of ${total}` : `Book ${position}`,
-      upNext: (title: string) => `Up next: ${title}`,
       seeAll: (count: number) => `See all ${count}`,
       viewSeries: 'View the series',
     },

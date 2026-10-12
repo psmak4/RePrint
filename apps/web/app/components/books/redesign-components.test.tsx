@@ -239,7 +239,9 @@ describe('presentational components', () => {
     expect(current?.textContent).toContain('Dune')
     expect(current?.textContent).not.toContain('Messiah')
     expect(screen.queryByText(/You're here/)).toBeNull()
-    expect(screen.getByRole('link', { name: 'Up next: Dune Messiah' }).getAttribute('href')).toBe(
+    // The Series list is the way on; there is no separate up-next link.
+    expect(screen.queryByText(/Up next/)).toBeNull()
+    expect(screen.getByRole('link', { name: /Dune Messiah/ }).getAttribute('href')).toBe(
       '/books/dune-messiah',
     )
   })
