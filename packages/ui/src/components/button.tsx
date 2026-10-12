@@ -12,6 +12,7 @@ export const buttonVariants = cva(
         secondary: 'bg-surface text-foreground hover:bg-surface-raised',
         outline: 'border border-input-border bg-surface text-foreground hover:bg-surface-raised',
         ghost: 'text-foreground hover:bg-surface-raised',
+        danger: 'border border-[#dc2626] bg-surface text-danger hover:bg-[#fef2f2]',
       },
       size: {
         default: 'h-11 px-5',
