@@ -3,11 +3,13 @@ import {
   type AdminCatalogStats,
   SEARCH_MIN_LENGTH,
 } from '@reprint/shared'
-import { Button, Input, Label } from '@reprint/ui'
+import { Button, cn, Input, Label } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { Cover } from '../books/cover.js'
 import { PagerLinks } from '../books/page-hero.js'
+import { AdminPage } from './admin-page.js'
+import { AdminCard, numClass, StatTile, tableClass, tdClass, thClass } from './admin-ui.js'
 import { ScrollRegion } from './scroll-region.js'
 
 const text = copy.admin.catalog
@@ -37,10 +39,7 @@ const searchHref = (q: string, page: number) =>
 function BookSearch({ search }: { search: CatalogSearch }) {
   const { q, page, results } = search
   return (
-    <section aria-labelledby="book-search-heading" className="flex flex-col gap-4">
-      <h3 id="book-search-heading" className="font-serif text-xl font-medium">
-        {text.searchHeading}
-      </h3>
+    <AdminCard title={text.searchHeading}>
       <Form method="get" className="flex flex-wrap items-end gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-md">
           <Label htmlFor="book-search-q">{text.searchLabel}</Label>
@@ -76,7 +75,7 @@ function BookSearch({ search }: { search: CatalogSearch }) {
               return (
                 <li
                   key={book.id}
-                  className="flex items-center gap-4 border-b border-border py-3 last:border-b-0"
+                  className="flex items-center gap-4 border-b border-[#ece8e0] py-3 last:border-b-0"
                 >
                   <Cover
                     cover={book.cover}
@@ -89,7 +88,7 @@ function BookSearch({ search }: { search: CatalogSearch }) {
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <Link
                       to={`/admin/books/${book.id}`}
-                      className="font-serif text-lg leading-snug font-medium break-words underline underline-offset-2"
+                      className="font-serif text-lg leading-snug font-medium break-words hover:underline"
                     >
                       {book.title}
                     </Link>
@@ -97,9 +96,9 @@ function BookSearch({ search }: { search: CatalogSearch }) {
                       {[authors.join(', '), book.firstPublishedYear].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <Link to={`/books/${book.slug}`} className="shrink-0 text-sm text-link underline">
-                    {text.publicPage}
-                  </Link>
+                  <Button asChild variant="outline" size="sm" className="shrink-0">
+                    <Link to={`/books/${book.slug}`}>{text.publicPage}</Link>
+                  </Button>
                 </li>
               )
             })}
@@ -114,7 +113,7 @@ function BookSearch({ search }: { search: CatalogSearch }) {
           ) : null}
         </>
       )}
-    </section>
+    </AdminCard>
   )
 }
 
@@ -128,15 +127,22 @@ export function CatalogDashboard({
 }) {
   const grew = stats.monthly.some((row) => row.books + row.editions + row.authors > 0)
   return (
-    <section aria-labelledby="catalog-heading" className="flex flex-col gap-6">
-      <h2
-        id="catalog-heading"
-        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-      >
-        {text.title}
-      </h2>
-      <BookSearch search={search} />
-      <dl aria-label={text.totalsLabel} className="grid gap-4 sm:grid-cols-3">
+    <AdminPage
+      title={text.title}
+      lead={text.lead}
+      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      actions={
+        <>
+          <Button asChild variant="outline">
+            <Link to="/admin/catalog/merge">{text.mergeLink}</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/catalog/genres">{text.genresLink}</Link>
+          </Button>
+        </>
+      }
+    >
+      <dl aria-label={text.totalsLabel} className="grid gap-3 sm:grid-cols-3">
         {(
           [
             ['books', text.books],
@@ -144,66 +150,54 @@ export function CatalogDashboard({
             ['authors', text.authors],
           ] as const
         ).map(([key, label]) => (
-          <div key={key} className="rounded-2xl border border-border bg-surface p-5">
-            <dt className="text-sm text-muted-foreground">{label}</dt>
-            <dd className="mt-2 font-serif text-[40px] leading-none font-medium">
-              {numberFormat.format(stats.totals[key])}
-            </dd>
-          </div>
+          <StatTile key={key} label={label} value={numberFormat.format(stats.totals[key])} />
         ))}
       </dl>
-      <section aria-labelledby="growth-heading" className="flex flex-col gap-3">
-        <h3 id="growth-heading" className="font-serif text-2xl leading-tight font-medium">
-          {text.growthHeading}
-        </h3>
+      <BookSearch search={search} />
+      <AdminCard title={text.growthHeading} flush>
         {grew ? (
-          <ScrollRegion label={text.growthHeading}>
-            <table className="w-full text-left text-sm">
-              <caption className="pb-2 text-left text-muted-foreground">
-                {text.growthCaption}
-              </caption>
-              <thead>
-                <tr className="border-b border-border">
-                  <th scope="col" className="py-3 pr-4 font-semibold">
-                    {text.month}
-                  </th>
-                  <th scope="col" className="py-3 pr-4 text-right font-semibold">
-                    {text.books}
-                  </th>
-                  <th scope="col" className="py-3 pr-4 text-right font-semibold">
-                    {text.editions}
-                  </th>
-                  <th scope="col" className="py-2 text-right font-semibold">
-                    {text.authors}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.monthly.map((row) => (
-                  <tr key={row.month} className="border-b border-border">
-                    <th scope="row" className="py-3 pr-4 font-normal">
-                      <time dateTime={row.month}>{monthLabel(row.month)}</time>
+          <div className="border-t border-border">
+            <ScrollRegion label={text.growthHeading} className="rounded-none border-0">
+              <table className={tableClass}>
+                <caption className="sr-only">{text.growthCaption}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className={thClass}>
+                      {text.month}
                     </th>
-                    <td className="py-3 pr-4 text-right">{numberFormat.format(row.books)}</td>
-                    <td className="py-3 pr-4 text-right">{numberFormat.format(row.editions)}</td>
-                    <td className="py-2 text-right">{numberFormat.format(row.authors)}</td>
+                    <th scope="col" className={cn(thClass, 'text-right')}>
+                      {text.books}
+                    </th>
+                    <th scope="col" className={cn(thClass, 'text-right')}>
+                      {text.editions}
+                    </th>
+                    <th scope="col" className={cn(thClass, 'text-right')}>
+                      {text.authors}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </ScrollRegion>
+                </thead>
+                <tbody>
+                  {stats.monthly.map((row) => (
+                    <tr key={row.month}>
+                      <th scope="row" className={cn(tdClass, 'text-left font-normal')}>
+                        <time dateTime={row.month}>{monthLabel(row.month)}</time>
+                      </th>
+                      <td className={cn(tdClass, numClass)}>{numberFormat.format(row.books)}</td>
+                      <td className={cn(tdClass, numClass)}>{numberFormat.format(row.editions)}</td>
+                      <td className={cn(tdClass, numClass)}>{numberFormat.format(row.authors)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollRegion>
+            <p className="border-t border-border bg-[#fdfcfa] px-5 py-3.5 text-sm text-muted-foreground">
+              {text.growthCaption}
+            </p>
+          </div>
         ) : (
-          <p className="text-muted-foreground">{text.noGrowth}</p>
+          <p className="px-5 pb-5 text-muted-foreground">{text.noGrowth}</p>
         )}
-      </section>
-      <p className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <Link to="/admin/catalog/merge" className="underline">
-          {text.mergeLink}
-        </Link>
-        <Link to="/admin/catalog/genres" className="underline">
-          {text.genresLink}
-        </Link>
-      </p>
-    </section>
+      </AdminCard>
+    </AdminPage>
   )
 }
