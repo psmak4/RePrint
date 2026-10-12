@@ -3,6 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { AdminCard, Badge, EmptyState, StatTile, USER_STATUS_TONE } from './admin-ui.js'
 import { AdminIcon } from './icons.js'
+import { ScrollRegion } from './scroll-region.js'
 
 afterEach(cleanup)
 
@@ -48,6 +49,17 @@ describe('admin building blocks', () => {
     const { container } = render(<EmptyState>Nothing waits.</EmptyState>)
     expect(screen.getByText('Nothing waits.')).toBeTruthy()
     expect(container.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+  })
+
+  it('ScrollRegion contains absolutely placed children (sr-only text) so they cannot widen the page', () => {
+    render(
+      <ScrollRegion label="Genres">
+        <span className="sr-only">Actions</span>
+      </ScrollRegion>,
+    )
+    expect(screen.getByRole('region', { name: 'Genres, scrollable table' }).className).toContain(
+      'relative',
+    )
   })
 
   it('AdminIcon is decorative', () => {

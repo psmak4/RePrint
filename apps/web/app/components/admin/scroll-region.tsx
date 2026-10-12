@@ -18,7 +18,12 @@ export function ScrollRegion({
       aria-label={copy.admin.scrollableTable(label)}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be focusable (axe scrollable-region-focusable)
       tabIndex={0}
-      className={cn('overflow-x-auto rounded-[18px] border border-border bg-surface', className)}
+      // `relative` keeps absolutely placed children (sr-only text) inside the scroll box, so they
+      // never widen the page.
+      className={cn(
+        'relative overflow-x-auto rounded-[18px] border border-border bg-surface',
+        className,
+      )}
     >
       {children}
     </section>
