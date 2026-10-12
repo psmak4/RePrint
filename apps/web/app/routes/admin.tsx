@@ -1,7 +1,10 @@
-import { APP_NAME, PERMISSIONS } from '@reprint/shared'
-import { AdminLayout, type AdminNavItem } from '../components/admin/admin-layout.js'
+import { APP_NAME, modStatsSchema, PERMISSIONS } from '@reprint/shared'
+import { AdminLayout } from '../components/admin/admin-layout.js'
+import type { AdminNavGroup, AdminNavItem } from '../components/admin/admin-page.js'
 import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
+import { apiClientFor } from '../lib/api.server.js'
+import { logger } from '../lib/logger.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin'
 
@@ -19,34 +22,70 @@ export function meta(args: Route.MetaArgs) {
   return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.title}`, noindex: true })
 }
 
+/** The two queue counts, or null when the API did not answer; a missing count never fails a page. */
+async function loadCounts(request: Request): Promise<{ reviews: number; reports: number } | null> {
+  try {
+    const response = await apiClientFor(request).get('/v1/mod/stats')
+    if (!response.ok) return null
+    const stats = modStatsSchema.safeParse(await response.json())
+    return stats.success
+      ? { reviews: stats.data.pendingCount, reports: stats.data.openReportCount }
+      : null
+  } catch (error) {
+    logger.warn({ err: error }, 'could not load the admin nav counts')
+    return null
+  }
+}
+
+function navItem(
+  to: string,
+  label: string,
+  icon: AdminNavItem['icon'],
+  count?: number,
+): AdminNavItem {
+  return count === undefined ? { to, label, icon } : { to, label, icon, count }
+}
+
+/** The grouped nav (D-201): only the sections the viewer may open, with queue counts for moderators. */
 export async function loader({ request }: Route.LoaderArgs) {
   const viewer = await requireViewerPermission(request, ADMIN_AREA_PERMISSIONS)
-  const items: AdminNavItem[] = []
-  if (viewer.permissions.includes(PERMISSIONS.reviewsModerate)) {
-    items.push({ to: '/admin', label: copy.admin.dashboardNav })
-    items.push({ to: '/admin/reviews', label: copy.admin.reviewsNav })
+  const can = (permission: string) => viewer.permissions.includes(permission)
+  // `/mod/stats` needs reviews.moderate; anyone else gets no counts rather than a 403.
+  const counts = can(PERMISSIONS.reviewsModerate) ? await loadCounts(request) : null
+
+  const moderation: AdminNavItem[] = []
+  if (can(PERMISSIONS.reviewsModerate)) {
+    moderation.push(navItem('/admin', copy.admin.dashboardNav, 'dashboard'))
+    moderation.push(navItem('/admin/reviews', copy.admin.reviewsNav, 'reviews', counts?.reviews))
   }
-  if (viewer.permissions.includes(PERMISSIONS.reportsResolve)) {
-    items.push({ to: '/admin/reports', label: copy.admin.reportsNav })
+  if (can(PERMISSIONS.reportsResolve)) {
+    moderation.push(navItem('/admin/reports', copy.admin.reportsNav, 'reports', counts?.reports))
   }
-  if (viewer.permissions.includes(PERMISSIONS.usersView)) {
-    items.push({ to: '/admin/users', label: copy.admin.usersNav })
+  const people: AdminNavItem[] = []
+  if (can(PERMISSIONS.usersView)) people.push(navItem('/admin/users', copy.admin.usersNav, 'users'))
+  if (can(PERMISSIONS.auditView)) people.push(navItem('/admin/audit', copy.admin.auditNav, 'audit'))
+  const catalog: AdminNavItem[] = []
+  if (can(PERMISSIONS.catalogManage)) {
+    catalog.push(navItem('/admin/catalog', copy.admin.catalogNav, 'catalog'))
+    catalog.push(navItem('/admin/catalog/merge', copy.admin.mergeNav, 'merge'))
+    catalog.push(navItem('/admin/catalog/genres', copy.admin.genresNav, 'genres'))
   }
-  if (viewer.permissions.includes(PERMISSIONS.auditView)) {
-    items.push({ to: '/admin/audit', label: copy.admin.auditNav })
+  if (can(PERMISSIONS.featuredManage)) {
+    catalog.push(navItem('/admin/featured', copy.admin.featuredNav, 'featured'))
   }
-  if (viewer.permissions.includes(PERMISSIONS.catalogManage)) {
-    items.push({ to: '/admin/catalog', label: copy.admin.catalogNav })
-    items.push({ to: '/admin/catalog/merge', label: copy.admin.mergeNav })
-    items.push({ to: '/admin/catalog/genres', label: copy.admin.genresNav })
-    items.push({ to: '/admin/system', label: copy.admin.systemNav })
+  const operations: AdminNavItem[] = []
+  if (can(PERMISSIONS.catalogManage)) {
+    operations.push(navItem('/admin/system', copy.admin.systemNav, 'system'))
   }
-  if (viewer.permissions.includes(PERMISSIONS.featuredManage)) {
-    items.push({ to: '/admin/featured', label: copy.admin.featuredNav })
-  }
-  return { items }
+  const groups: AdminNavGroup[] = [
+    { label: copy.admin.navGroups.moderation, items: moderation },
+    { label: copy.admin.navGroups.people, items: people },
+    { label: copy.admin.navGroups.catalog, items: catalog },
+    { label: copy.admin.navGroups.operations, items: operations },
+  ].filter((group) => group.items.length > 0)
+  return { groups }
 }
 
 export default function Admin({ loaderData }: Route.ComponentProps) {
-  return <AdminLayout items={loaderData.items} />
+  return <AdminLayout groups={loaderData.groups} />
 }
