@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { GenreManager } from './genre-manager.js'
+import { GenreManager, genresTabFrom, orderGenres } from './genre-manager.js'
 
 afterEach(cleanup)
 
@@ -27,38 +27,94 @@ const rule: AdminSubjectRule = {
   priority: 70,
   genre: { id: id(1), slug: 'genre-1', name: 'Genre 1' },
 }
+// Biography has a child, Memoir; Westerns is archived.
+const family = [
+  genre(1, { name: 'Fantasy', slug: 'fantasy' }),
+  genre(2, { name: 'Westerns', slug: 'westerns', archived: true }),
+  genre(3, { name: 'Biography', slug: 'biography' }),
+  genre(4, { name: 'Memoir', slug: 'memoir', parentId: id(3) }),
+]
 
-function renderManager(
-  action: (body: unknown) => unknown = () => ({ done: 'saved' }),
+function renderManager({
+  action = () => ({ done: 'saved' }),
   genres = [genre(1), genre(2, { archived: true })],
   rules = [rule],
-) {
+  tab = 'genres',
+}: {
+  action?: (body: unknown) => unknown
+  genres?: AdminGenre[]
+  rules?: AdminSubjectRule[]
+  tab?: 'genres' | 'rules'
+} = {}) {
   const Stub = createRoutesStub([
     {
       path: '/admin/catalog/genres',
-      Component: () => <GenreManager genres={genres} rules={rules} />,
+      Component: () => <GenreManager genres={genres} rules={rules} tab={tab} />,
       action: async ({ request }) => action(await request.json()),
     },
   ])
   return render(<Stub initialEntries={['/admin/catalog/genres']} />)
 }
 
+const table = () => screen.getByRole('table', { name: 'Genres' })
+const bodyRows = () => within(table()).getAllByRole('row').slice(1)
+
+function openAddForm() {
+  fireEvent.click(screen.getByRole('button', { name: 'Add a Genre' }))
+  return screen.getByRole('button', { name: 'Add Genre' }).closest('form') as HTMLElement
+}
+
 describe('GenreManager', () => {
-  it('lists Genres with counts and marks archived ones', () => {
+  it('shows the title, the Add a Genre pill, and both tabs with counts', () => {
     renderManager()
-    const list = screen.getByRole('list', { name: 'Genres' })
-    const items = within(list).getAllByRole('listitem')
-    expect(within(items[0] as HTMLElement).getByText(/4 Books · 1 rule/)).toBeTruthy()
-    expect(within(items[1] as HTMLElement).getByText('Archived')).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 1, name: 'Genres and rules' })).toBeTruthy()
+    const tabs = screen.getByRole('navigation', { name: 'Genres and rules sections' })
     expect(
-      within(items[1] as HTMLElement).getByRole('button', { name: 'Restore Genre 2' }),
-    ).toBeTruthy()
+      within(tabs)
+        .getByRole('link', { name: /^Genres/ })
+        .getAttribute('aria-current'),
+    ).toBe('page')
+    expect(
+      within(tabs)
+        .getByRole('link', { name: /^Subject rules/ })
+        .getAttribute('href'),
+    ).toBe('/admin/catalog/genres?tab=rules')
   })
 
-  it('adds a Genre', async () => {
+  it('lists Genres with counts and children indented under their parent', () => {
+    renderManager({ genres: family })
+    expect(bodyRows().map((row) => within(row).getAllByRole('cell')[0]?.textContent)).toEqual([
+      expect.stringContaining('Biography'),
+      expect.stringContaining('Memoir'),
+      expect.stringContaining('Fantasy'),
+    ])
+    const memoir = bodyRows()[1] as HTMLElement
+    expect(within(memoir).getByText('Biography')).toBeTruthy()
+    expect(within(memoir).getAllByText('4').length).toBe(1)
+  })
+
+  it('finds a child Genre whose parent does not match', () => {
+    renderManager({ genres: family })
+    fireEvent.change(screen.getByLabelText('Find a Genre'), { target: { value: 'memo' } })
+    expect(bodyRows()).toHaveLength(1)
+    expect(within(bodyRows()[0] as HTMLElement).getByText('Memoir')).toBeTruthy()
+  })
+
+  it('hides archived Genres until Show archived is checked', () => {
+    renderManager({ genres: family })
+    expect(within(table()).queryByText('Westerns')).toBeNull()
+    fireEvent.click(screen.getByLabelText('Show archived'))
+    const westerns = bodyRows().find((row) => row.textContent?.includes('Westerns')) as HTMLElement
+    expect(within(westerns).getByText('Archived')).toBeTruthy()
+    expect(within(westerns).getByRole('button', { name: 'Restore Westerns' })).toBeTruthy()
+  })
+
+  it('opens the add form as a card from the band button and adds a Genre', async () => {
     const action = vi.fn(() => ({ done: 'created' }))
-    renderManager(action)
-    const add = screen.getByRole('button', { name: 'Add Genre' }).closest('form') as HTMLElement
+    renderManager({ action })
+    expect(screen.queryByRole('region', { name: 'Add a Genre' })).toBeNull()
+    const add = openAddForm()
+    expect(screen.getByRole('region', { name: 'Add a Genre' })).toBeTruthy()
     fireEvent.change(within(add).getByLabelText('Name'), { target: { value: 'Horror' } })
     fireEvent.change(within(add).getByLabelText('Slug'), { target: { value: 'horror' } })
     fireEvent.click(within(add).getByRole('button', { name: 'Add Genre' }))
@@ -68,12 +124,11 @@ describe('GenreManager', () => {
         genre: { name: 'Horror', slug: 'horror', description: null, parentId: null },
       }),
     )
-    expect(await within(add).findByText('The Genre was added.')).toBeTruthy()
   })
 
-  it('sends only the changed fields when editing', async () => {
+  it('opens a row’s edit form in place and sends only the changed fields', async () => {
     const action = vi.fn(() => ({ done: 'saved' }))
-    renderManager(action)
+    renderManager({ action })
     fireEvent.click(screen.getByRole('button', { name: 'Edit Genre 1' }))
     const form = screen.getByRole('button', { name: 'Save Genre' }).closest('form') as HTMLElement
     fireEvent.change(within(form).getByLabelText('Name'), { target: { value: 'Fiction' } })
@@ -89,7 +144,7 @@ describe('GenreManager', () => {
 
   it('archives and restores', async () => {
     const action = vi.fn(() => ({ done: 'archived', genreId: id(1) }))
-    renderManager(action)
+    renderManager({ action })
     fireEvent.click(screen.getByRole('button', { name: 'Archive Genre 1' }))
     await waitFor(() =>
       expect(action).toHaveBeenCalledWith({
@@ -99,6 +154,7 @@ describe('GenreManager', () => {
       }),
     )
     expect(await screen.findByText('The Genre was archived.')).toBeTruthy()
+    fireEvent.click(screen.getByLabelText('Show archived'))
     fireEvent.click(screen.getByRole('button', { name: 'Restore Genre 2' }))
     await waitFor(() =>
       expect(action).toHaveBeenCalledWith({
@@ -110,17 +166,25 @@ describe('GenreManager', () => {
   })
 
   it('shows field errors from the API', async () => {
-    renderManager(() => ({ fieldErrors: { slug: 'That slug is taken.' } }))
-    const add = screen.getByRole('button', { name: 'Add Genre' }).closest('form') as HTMLElement
+    renderManager({ action: () => ({ fieldErrors: { slug: 'That slug is taken.' } }) })
+    const add = openAddForm()
     fireEvent.change(within(add).getByLabelText('Name'), { target: { value: 'Horror' } })
     fireEvent.change(within(add).getByLabelText('Slug'), { target: { value: 'horror' } })
     fireEvent.click(within(add).getByRole('button', { name: 'Add Genre' }))
     expect((await within(add).findByRole('alert')).textContent).toBe('That slug is taken.')
   })
 
+  it('shows the rules table and the add form on the rules tab only', () => {
+    renderManager({ tab: 'rules' })
+    expect(screen.getByRole('table', { name: 'Subject rules' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Add rule' })).toBeTruthy()
+    expect(screen.queryByRole('table', { name: 'Genres' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Add a Genre' })).toBeNull()
+  })
+
   it('adds a rule with its priority, offering only live Genres', async () => {
     const action = vi.fn(() => ({ done: 'ruleAdded' }))
-    renderManager(action)
+    renderManager({ action, tab: 'rules' })
     const form = screen.getByRole('button', { name: 'Add rule' }).closest('form') as HTMLElement
     expect(within(form).queryByRole('option', { name: 'Genre 2' })).toBeNull()
     fireEvent.change(within(form).getByLabelText('Pattern'), { target: { value: 'cyberpunk' } })
@@ -138,7 +202,7 @@ describe('GenreManager', () => {
 
   it('removes a rule', async () => {
     const action = vi.fn(() => ({ done: 'ruleRemoved' }))
-    renderManager(action)
+    renderManager({ action, tab: 'rules' })
     fireEvent.click(screen.getByRole('button', { name: 'Remove rule space opera' }))
     await waitFor(() =>
       expect(action).toHaveBeenCalledWith({ intent: 'removeRule', ruleId: id(8) }),
@@ -146,11 +210,31 @@ describe('GenreManager', () => {
     expect(await screen.findByText('The rule was removed.')).toBeTruthy()
   })
 
-  it('has no serious or critical axe issues', async () => {
-    const { container } = renderManager()
-    const results = await axe.run(container)
-    expect(
-      results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical'),
-    ).toEqual([])
+  it('has no serious or critical axe issues on either tab', async () => {
+    for (const tab of ['genres', 'rules'] as const) {
+      const { container, unmount } = renderManager({ genres: family, tab })
+      const results = await axe.run(container)
+      expect(
+        results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical'),
+      ).toEqual([])
+      unmount()
+    }
+  })
+})
+
+describe('genre helpers', () => {
+  it('reads the tab from the URL, Genres by default', () => {
+    expect(genresTabFrom(new URLSearchParams('tab=rules'))).toBe('rules')
+    expect(genresTabFrom(new URLSearchParams('tab=nope'))).toBe('genres')
+    expect(genresTabFrom(new URLSearchParams())).toBe('genres')
+  })
+
+  it('orders parents by name, each followed by its children', () => {
+    expect(orderGenres(family).map((g) => g.name)).toEqual([
+      'Biography',
+      'Memoir',
+      'Fantasy',
+      'Westerns',
+    ])
   })
 })

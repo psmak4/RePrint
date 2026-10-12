@@ -12,7 +12,7 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { z } from 'zod'
-import { GenreManager } from '../components/admin/genre-manager.js'
+import { GenreManager, genresTabFrom } from '../components/admin/genre-manager.js'
 import { copy } from '../copy/index.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
@@ -56,7 +56,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const rules: AdminSubjectRule[] = adminSubjectRulesResponseSchema.parse(
     await rulesResponse.json(),
   ).items
-  return { genres, rules }
+  return { genres, rules, tab: genresTabFrom(new URL(request.url).searchParams) }
 }
 
 const genreActionSchema = z.discriminatedUnion('intent', [
