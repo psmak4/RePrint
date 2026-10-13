@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { expect, test } from '@playwright/test'
+import { useOwnClientIp } from '../support/identity.js'
 
 // PRD §11 targets for the Book page: LCP 2.5 s or less on a mid-range phone over 4G, INP 200 ms or
 // less, CLS 0.1 or less. docs/performance.md describes the profile and what to do when this fails.
@@ -37,6 +38,7 @@ test('Book page meets the Core Web Vitals targets on a throttled mobile profile'
     'Throttled mobile profile: runs in the mobile (Pixel 7) project only',
   )
 
+  await useOwnClientIp(page)
   // Find the Book page through the ISBN search, without throttling.
   await page.goto('/search?q=9780547928227')
   await expect(page).toHaveURL(/\/books\/[^/?]+$/)

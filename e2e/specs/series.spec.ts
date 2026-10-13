@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
 import { registerVerifiedMember, resetSeriesSync, withSeriesLock } from '../support/accounts.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 // The stub Source's Middle-earth Series: The Hobbit (1) and The Fellowship of the Ring (2). Each run
 // starts with the Hobbit outside the Series, as if stored before the Series existed, and the
@@ -12,6 +13,7 @@ test('opening a Book in a Series from search brings in the rest of the Series', 
 }) => {
   // The three projects share the Series, so their runs take turns.
   test.setTimeout(90_000)
+  await useOwnClientIp(page)
   await withSeriesLock(async () => {
     await resetSeriesSync('Middle-earth', 'The Hobbit', 'The Fellowship of the Ring')
     await page.goto('/search?q=fellowship')

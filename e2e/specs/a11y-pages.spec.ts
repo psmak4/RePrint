@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
 import { grantAdmin, openDunePage, registerVerifiedMember } from '../support/accounts.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 // The page types that other specs do not already check with axe (PRD §11, §12). Discover, search,
 // Book (with reviews), Genre, Series, profile, library, auth, and most admin pages are covered in
@@ -17,6 +18,7 @@ const legalPages = [
 ]
 
 test('legal and static pages have no serious accessibility issues', async ({ page }) => {
+  await useOwnClientIp(page)
   for (const { path, heading } of legalPages) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()

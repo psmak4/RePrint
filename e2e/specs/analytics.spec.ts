@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
+import { useOwnClientIp } from '../support/identity.js'
 
 // The web server runs with VITE_ANALYTICS_DOMAIN set and the script URL pointing at this stub (D-167).
 
 test('analytics loads under the CSP and sets no cookies', async ({ page }) => {
+  await useOwnClientIp(page)
   const violations: string[] = []
   page.on('console', (message) => {
     if (/content security policy/i.test(message.text())) violations.push(message.text())
