@@ -1,0 +1,872 @@
+{
+  "numFound": 260,
+  "start": 100,
+  "numFoundExact": true,
+  "num_found": 260,
+  "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+  "q": "author_key:OL31353A",
+  "offset": null,
+  "docs": [
+    {
+      "author_key": ["OL9131866A", "OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL26163097W",
+      "title": "Ursula K. Le Guin"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL37575372W",
+      "title": "Five Ways to Forgiveness"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15330629W",
+      "title": "City of Illusions/Planet of Exile/Rocannon's World/The Left Hand of Darkness/The Word for World Is Forest"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056553W",
+      "title": "Fish soup"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056558W",
+      "title": "Going out with peacocks and other poems"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056560W",
+      "title": "Gwilans Harp and Intracom (Swc 1556)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056562W",
+      "title": "The Farhest Shore/Tehanu"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056598W",
+      "title": "Tales of the Catwings"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL16618501W",
+      "title": "Finding my elegy"
+    },
+    {
+      "author_key": ["OL31353A", "OL2699677A", "OL3059772A"],
+      "edition_count": 2,
+      "key": "/works/OL21665029W",
+      "title": "Carrier Bag Theory of Fiction"
+    },
+    {
+      "author_key": ["OL31353A", "OL6225802A"],
+      "edition_count": 2,
+      "key": "/works/OL20978026W",
+      "title": "Ursula K. Le Guin : Annals of the Western Shore"
+    },
+    {
+      "author_key": [
+        "OL34221A",
+        "OL31353A",
+        "OL24072A",
+        "OL23364A",
+        "OL458948A",
+        "OL501502A",
+        "OL2628870A",
+        "OL200394A",
+        "OL234664A",
+        "OL33881A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL20653729W",
+      "title": "The Hugo Winners. Volume 3, Book 2"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL44552984W",
+      "title": "Words Are My Matter"
+    },
+    {
+      "author_key": [
+        "OL34221A",
+        "OL1758415A",
+        "OL2901285A",
+        "OL4767073A",
+        "OL6448687A",
+        "OL24708A",
+        "OL775673A",
+        "OL592356A",
+        "OL1040563A",
+        "OL24072A",
+        "OL27951A",
+        "OL1684660A",
+        "OL28188A",
+        "OL7767781A",
+        "OL1188648A",
+        "OL23326A",
+        "OL253641A",
+        "OL27269A",
+        "OL33881A",
+        "OL262325A",
+        "OL23206A",
+        "OL31353A",
+        "OL31209A",
+        "OL456764A",
+        "OL2750485A",
+        "OL552852A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL8281154W",
+      "title": "Witches & Wizards"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL20136898W",
+      "title": "Semley's Necklace"
+    },
+    {
+      "author_key": [
+        "OL6811804A",
+        "OL391079A",
+        "OL19807A",
+        "OL7276210A",
+        "OL6807570A",
+        "OL39102A",
+        "OL32471A",
+        "OL12487081A",
+        "OL20965A",
+        "OL32981A",
+        "OL7109184A",
+        "OL1404857A",
+        "OL3515440A",
+        "OL1425196A",
+        "OL446486A",
+        "OL7620443A",
+        "OL7482542A",
+        "OL1392192A",
+        "OL31353A",
+        "OL19981A",
+        "OL7833499A",
+        "OL7481975A",
+        "OL359235A",
+        "OL234664A",
+        "OL2711187A",
+        "OL2787502A",
+        "OL234532A",
+        "OL2827463A",
+        "OL7437544A",
+        "OL25161A",
+        "OL7500667A",
+        "OL235327A",
+        "OL7589214A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL17400760W",
+      "title": "Other Worlds Than These"
+    },
+    {
+      "author_key": ["OL31353A", "OL2704783A"],
+      "edition_count": 2,
+      "key": "/works/OL16042612W",
+      "title": "Interfaces"
+    },
+    {
+      "author_key": ["OL31353A", "OL10659360A"],
+      "edition_count": 2,
+      "key": "/works/OL42425651W",
+      "title": "Wizard of Earthsea"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL36475445W",
+      "title": "Catwings/Catwings Return/Wonderful Alexander and the Catwings/Jane on Her Own"
+    },
+    {
+      "author_key": [
+        "OL6811804A",
+        "OL395837A",
+        "OL31353A",
+        "OL292141A",
+        "OL7298811A",
+        "OL3831144A",
+        "OL25161A",
+        "OL2830895A",
+        "OL1394865A",
+        "OL394285A",
+        "OL369568A",
+        "OL67834A",
+        "OL6834725A",
+        "OL6575473A",
+        "OL2711187A",
+        "OL2629960A",
+        "OL1516311A",
+        "OL234664A",
+        "OL6791840A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL19960113W",
+      "title": "Epic"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL59808W",
+      "title": "Science Fiction Stories"
+    },
+    {
+      "author_key": [
+        "OL7476937A",
+        "OL53305A",
+        "OL19981A",
+        "OL25161A",
+        "OL1394244A",
+        "OL31353A",
+        "OL7276210A",
+        "OL387505A",
+        "OL23207A",
+        "OL796062A",
+        "OL371862A",
+        "OL2676660A",
+        "OL493100A",
+        "OL1521321A",
+        "OL20965A",
+        "OL1517265A",
+        "OL39102A",
+        "OL1391072A",
+        "OL24838A",
+        "OL221112A",
+        "OL7493826A",
+        "OL235327A",
+        "OL26171A",
+        "OL39887A",
+        "OL226057A",
+        "OL343157A",
+        "OL7553604A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL19271384W",
+      "title": "Alien Contact"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056518W",
+      "title": "The adventure of Cobbler's rune"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL26568891W",
+      "title": "Vaster Than Empires and More Slow"
+    },
+    {
+      "author_key": [
+        "OL2778674A",
+        "OL397197A",
+        "OL835248A",
+        "OL32772A",
+        "OL18319A",
+        "OL28577A",
+        "OL22098A",
+        "OL4326372A",
+        "OL24461A",
+        "OL2893995A",
+        "OL197515A",
+        "OL9865725A",
+        "OL54959A",
+        "OL400812A",
+        "OL159671A",
+        "OL1155711A",
+        "OL591204A",
+        "OL331289A",
+        "OL28127A",
+        "OL58993A",
+        "OL775408A",
+        "OL19677A",
+        "OL160918A",
+        "OL31353A",
+        "OL9865726A",
+        "OL72498A",
+        "OL29097A",
+        "OL66452A",
+        "OL406244A",
+        "OL20510A",
+        "OL33682A",
+        "OL136197A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL8348077W",
+      "title": "The Greatest Cat Stories Ever Told"
+    },
+    {
+      "author_key": [
+        "OL381618A",
+        "OL278850A",
+        "OL1910551A",
+        "OL32981A",
+        "OL273522A",
+        "OL449373A",
+        "OL31353A",
+        "OL7607845A",
+        "OL7634562A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL20871408W",
+      "title": "Choice Words"
+    },
+    {
+      "author_key": [
+        "OL34221A",
+        "OL1758415A",
+        "OL2629271A",
+        "OL253641A",
+        "OL27269A",
+        "OL33881A",
+        "OL262325A",
+        "OL23206A",
+        "OL31353A",
+        "OL31209A",
+        "OL456764A",
+        "OL2750485A",
+        "OL552852A"
+      ],
+      "edition_count": 2,
+      "key": "/works/OL17744150W",
+      "title": "Wizards"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056527W",
+      "title": "Buffalo gals, won't you come out tonight"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 2,
+      "key": "/works/OL15056542W",
+      "title": "Direction of the road"
+    },
+    {
+      "author_key": [
+        "OL6856135A",
+        "OL389360A",
+        "OL6856137A",
+        "OL24708A",
+        "OL6856139A",
+        "OL31353A",
+        "OL6856141A",
+        "OL22182A",
+        "OL6856143A",
+        "OL6856144A",
+        "OL3087197A",
+        "OL474226A",
+        "OL2644956A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL8162863W",
+      "title": "Stopwatch"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL8076357W",
+      "title": "Soloman Leviathan"
+    },
+    {
+      "author_key": ["OL235668A", "OL31353A", "OL7481920A"],
+      "edition_count": 1,
+      "key": "/works/OL28615497W",
+      "title": "Speaking of the Fantastic"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL29424832W",
+      "title": "Terra Oscura"
+    },
+    {
+      "author_key": [
+        "OL24522A",
+        "OL34221A",
+        "OL2657045A",
+        "OL114093A",
+        "OL4585364A",
+        "OL33665A",
+        "OL31353A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL27716036W",
+      "title": "Gulliver's travels with related readings"
+    },
+    {
+      "author_key": ["OL34221A", "OL2628870A", "OL200394A", "OL31353A", "OL234664A", "OL33881A"],
+      "edition_count": 1,
+      "key": "/works/OL27934487W",
+      "title": "The Hugo Winners, Volume Three, Part Three (1974-1975)"
+    },
+    {
+      "author_key": ["OL34221A", "OL31353A", "OL24072A", "OL458948A", "OL23364A", "OL501502A"],
+      "edition_count": 1,
+      "key": "/works/OL27937220W",
+      "title": "The Hugo Winners, Volume Three, Part Two (1973)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467808W",
+      "title": "Good Trip"
+    },
+    {
+      "author_key": [
+        "OL31353A",
+        "OL13280547A",
+        "OL501502A",
+        "OL200394A",
+        "OL1663871A",
+        "OL24562A",
+        "OL13280548A",
+        "OL24856A",
+        "OL28372A",
+        "OL769756A",
+        "OL1281745A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL26437407W",
+      "title": "The Best of Galaxy 2"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL44998151W",
+      "title": "Gatos alados"
+    },
+    {
+      "author_key": ["OL31353A", "OL1055270A", "OL32261A", "OL2705569A", "OL8124191A"],
+      "edition_count": 1,
+      "key": "/works/OL24236679W",
+      "title": "Galaxy Science Fiction, Vol. 35, No. 12"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL24487027W",
+      "title": "The Wind's Twelve Quarters"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL24715772W",
+      "title": "Earthsea & The Left Hand of Darkness"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL24691531W",
+      "title": "The Fliers of Gy"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26276219W",
+      "title": "Women, Dreams, and Dragons"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26157481W",
+      "title": "Words Are My Matter"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26227852W",
+      "title": "Dancing at the Edge of the World"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26213773W",
+      "title": "Steering the Craft"
+    },
+    {
+      "author_key": ["OL31353A", "OL274947A"],
+      "edition_count": 1,
+      "key": "/works/OL23515600W",
+      "title": "The Fisherwoman's Daughter/Señoras"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL24151536W",
+      "title": "Paradises Lost"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL24535451W",
+      "title": "Am Anfang war der Beutel"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26383360W",
+      "title": "The Day Before the Revolution"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL34950216W",
+      "title": "Tehanu/Tales from Earthsea/The Other Wind"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL35148039W",
+      "title": "The Left Hand of Darkness/The Word for World Is Forest/The Dispossessed"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL35725663W",
+      "title": "Space Crone"
+    },
+    {
+      "author_key": ["OL31353A", "OL5594184A", "OL534478A"],
+      "edition_count": 1,
+      "key": "/works/OL38030354W",
+      "title": "Gobshite Quarterly 2023, #41/42"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL37943547W",
+      "title": "Dreams Must Explain Themselves"
+    },
+    {
+      "author_key": ["OL52922A", "OL29961A", "OL771386A", "OL31353A", "OL224519A"],
+      "edition_count": 1,
+      "key": "/works/OL34352201W",
+      "title": "World Split Open"
+    },
+    {
+      "author_key": ["OL31353A", "OL7916983A", "OL7882972A", "OL12425307A", "OL8007965A"],
+      "edition_count": 1,
+      "key": "/works/OL34323224W",
+      "title": "Gigamesh 44"
+    },
+    {
+      "author_key": [
+        "OL7630178A",
+        "OL21093A",
+        "OL11620248A",
+        "OL3155300A",
+        "OL31353A",
+        "OL11463546A",
+        "OL13251613A",
+        "OL6831662A",
+        "OL4113830A",
+        "OL6539433A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL36907378W",
+      "title": "Vor der Revolution"
+    },
+    {
+      "author_key": ["OL31353A", "OL6225802A"],
+      "edition_count": 1,
+      "key": "/works/OL37620207W",
+      "title": "Ursula K. le Guin : Five Novels"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL38978969W",
+      "title": "Jane On Her Own (A Catwings Tale)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15401121W",
+      "title": "The Phoenix/The Water Faucet Vision by Gish Jen"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056519W",
+      "title": "Wonderful Alexander and the Catwings"
+    },
+    {
+      "author_key": ["OL19986A", "OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056524W",
+      "title": "The Blind Geometer/The New Atlantis"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056541W",
+      "title": "Dialogues With Northwest Writers (Northwest Review Book)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056545W",
+      "title": "Earthsea revisioned"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056552W",
+      "title": "Fire and stone"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056554W",
+      "title": "Five complete novels"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056559W",
+      "title": "Gwilans Harp"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056561W",
+      "title": "Hard words, and other poems"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056567W",
+      "title": "In the Red Zone"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056577W",
+      "title": "A Lesson plan book for Catwings (Innovations, experiencing literature in the classroom)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056580W",
+      "title": "More tales of the Catwings"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056594W",
+      "title": "Four ways to forgiveness; The dispossed; The ones who walk away from Omelas; The shobic's story; Dancing to Ganam; Another story of a fisherman of the Inland sea"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056596W",
+      "title": "The Shobies' Story"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056607W",
+      "title": "Ursula K Le Guin"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056612W",
+      "title": "The visionary"
+    },
+    {
+      "author_key": ["OL31353A", "OL21823A"],
+      "edition_count": 1,
+      "key": "/works/OL15056613W",
+      "title": "The Visionary"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056616W",
+      "title": "The water is wide"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056618W",
+      "title": "Wild angels"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056622W",
+      "title": "A woman writing, or The fisherwoman's daughter"
+    },
+    {
+      "author_key": ["OL65313A", "OL548109A", "OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056627W",
+      "title": "The Enchanted Landscape"
+    },
+    {
+      "author_key": [
+        "OL2676654A",
+        "OL34221A",
+        "OL31574A",
+        "OL118066A",
+        "OL227971A",
+        "OL1236245A",
+        "OL3155300A",
+        "OL18097A",
+        "OL31353A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL16477282W",
+      "title": "A reader's companion to The hobbit and the lord of the rings"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL16712981W",
+      "title": "Out here"
+    },
+    {
+      "author_key": ["OL402789A", "OL1793814A", "OL31353A", "OL231796A", "OL3890966A"],
+      "edition_count": 1,
+      "key": "/works/OL16803135W",
+      "title": "Univers 08"
+    },
+    {
+      "author_key": ["OL78952A", "OL539879A", "OL31353A", "OL4810355A", "OL302341A", "OL7169570A"],
+      "edition_count": 1,
+      "key": "/works/OL16803138W",
+      "title": "Univers 04"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL39147550W",
+      "title": "The Other Wind"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL41943270W",
+      "title": "The New Atlantis"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL39143892W",
+      "title": "Tales from Earthsea"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL39131929W",
+      "title": "Steering the Craft"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL38666744W",
+      "title": "Dreams must explain themselves"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL39334411W",
+      "title": "The Tombs of Atuan"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL39279286W",
+      "title": "The Lathe of Heaven"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL42555241W",
+      "title": "Searoad"
+    },
+    {
+      "author_key": ["OL31353A", "OL2833357A", "OL15129126A"],
+      "edition_count": 1,
+      "key": "/works/OL42706841W",
+      "title": "Napa"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL42492221W",
+      "title": "Left hand of darkness/Winter's king/Coming of Age in Karhide"
+    },
+    {
+      "author_key": ["OL7196782A", "OL31353A", "OL1477042A", "OL5199048A"],
+      "edition_count": 1,
+      "key": "/works/OL31811577W",
+      "title": "Emergencias de lo poshumano"
+    },
+    {
+      "author_key": [
+        "OL745375A",
+        "OL3127741A",
+        "OL2937424A",
+        "OL1755216A",
+        "OL27278A",
+        "OL2628836A",
+        "OL10006754A",
+        "OL32261A",
+        "OL1657140A",
+        "OL253641A",
+        "OL31353A",
+        "OL1910048A",
+        "OL3731614A",
+        "OL4392224A",
+        "OL458948A",
+        "OL24072A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL19188918W",
+      "title": "Histoires de la Fin des Temps"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL22308804W",
+      "title": "L'anarchismo"
+    },
+    {
+      "author_key": [
+        "OL1178219A",
+        "OL32548A",
+        "OL79009A",
+        "OL10135084A",
+        "OL31353A",
+        "OL2687961A",
+        "OL19905A",
+        "OL8966337A",
+        "OL318496A",
+        "OL59660A",
+        "OL1354322A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL22138286W",
+      "title": "Goldmann Fantasy Foliant Ⅰ"
+    }
+  ]
+}

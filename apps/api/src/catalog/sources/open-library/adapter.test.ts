@@ -413,3 +413,66 @@ describe('Open Library getSeriesMembers', () => {
     expect(await adapter.getSeriesMembers?.('../x')).toBeNull()
   })
 })
+
+describe('Open Library getAuthorBooks', () => {
+  it('lists the works an Author wrote, most Editions first, across every page', async () => {
+    const works = (await adapter.getAuthorBooks?.('OL31353A')) ?? []
+    expect(works[0]).toEqual({
+      sourceId: 'OL59800W',
+      title: 'The Left Hand of Darkness',
+      editionCount: 91,
+    })
+    expect(works).toHaveLength(201)
+    expect(works.every((work) => work.editionCount >= 1)).toBe(true)
+    const counts = works.map((work) => work.editionCount)
+    expect(counts).toEqual([...counts].sort((a, b) => b - a))
+  })
+
+  it('keeps only works that list the Author first and have an Edition', async () => {
+    const one = createOpenLibraryAdapter({
+      fetch: async () =>
+        Response.json({
+          numFound: 3,
+          docs: [
+            { key: '/works/OL1W', title: 'Hers', author_key: ['OL9A'], edition_count: 2 },
+            {
+              key: '/works/OL2W',
+              title: 'Anthology',
+              author_key: ['OL8A', 'OL9A'],
+              edition_count: 5,
+            },
+            { key: '/works/OL3W', title: 'No Editions', author_key: ['OL9A'], edition_count: 0 },
+            { key: '/works/OL4W', title: 'Count unknown', author_key: ['OL9A'] },
+          ],
+        }),
+    })
+    expect(await one.getAuthorBooks?.('OL9A')).toEqual([
+      { sourceId: 'OL1W', title: 'Hers', editionCount: 2 },
+    ])
+  })
+
+  it('throws rather than return a short list when a later page cannot be read', async () => {
+    const doc = (n: number) => ({
+      key: `/works/OL${n}W`,
+      title: `Book ${n}`,
+      author_key: ['OL9A'],
+      edition_count: 1,
+    })
+    const firstPage = { numFound: 101, docs: Array.from({ length: 100 }, (_, i) => doc(i + 1)) }
+    const broken = createOpenLibraryAdapter({
+      fetch: async (input) =>
+        new URL(String(input)).searchParams.get('page') === '2'
+          ? new Response('gone', { status: 404 })
+          : Response.json(firstPage),
+    })
+    await expect(broken.getAuthorBooks?.('OL9A')).rejects.toBeInstanceOf(SourceError)
+  })
+
+  it('answers [] for an Author the Source has no works for, and for a malformed ID', async () => {
+    const missing = createOpenLibraryAdapter({ fetch: replay('gone', 404) })
+    expect(await missing.getAuthorBooks?.('OL9A')).toEqual([])
+    const empty = createOpenLibraryAdapter({ fetch: replay('{"numFound": 0, "docs": []}') })
+    expect(await empty.getAuthorBooks?.('OL9A')).toEqual([])
+    expect(await adapter.getAuthorBooks?.('../authors/OL1A')).toEqual([])
+  })
+})

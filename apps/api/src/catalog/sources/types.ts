@@ -54,6 +54,13 @@ export interface SeriesMembers {
   members: { sourceId: string; position: number | null; title: string }[]
 }
 
+/** One Book an Author wrote, from the Source's list of their Books (D-203). */
+export interface AuthorBook {
+  sourceId: string
+  title: string
+  editionCount: number
+}
+
 export interface SourceAdapter {
   /** Stable name stored in `source_links.source` and field origins, such as `open_library`. */
   readonly name: string
@@ -70,6 +77,11 @@ export interface SourceAdapter {
   getAuthor(sourceId: string): Promise<AuthorRecord | null>
   /** Every member of a Series in reading order, or `null` when the Source has no such Series. */
   getSeriesMembers?(sourceId: string): Promise<SeriesMembers | null>
+  /**
+   * The Books an Author wrote (listed first) that have at least one Edition, most Editions first,
+   * or `[]` when the Source lists none (D-203). Throws when a page cannot be read.
+   */
+  getAuthorBooks?(sourceId: string): Promise<AuthorBook[]>
   /** Optional and unused in v1: a bulk import if live search outgrows a Source's rate limit. */
   importBulk?(stream: AsyncIterable<Uint8Array>): Promise<{ imported: number }>
 }

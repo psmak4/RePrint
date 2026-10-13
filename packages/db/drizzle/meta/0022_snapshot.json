@@ -1,5 +1,5 @@
 {
-  "id": "e9e474e7-9b45-4f59-87f8-86dbda17e629",
+  "id": "a65525c4-5a56-4e5e-ad32-ddaf0830f750",
   "prevId": "12f4e993-f759-4f77-97ac-05bb52d3301f",
   "version": "7",
   "dialect": "postgresql",
@@ -902,14 +902,14 @@
           "notNull": true,
           "default": "'{}'::jsonb"
         },
-        "works_synced_at": {
-          "name": "works_synced_at",
+        "bibliography_synced_at": {
+          "name": "bibliography_synced_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
-        "source_work_count": {
-          "name": "source_work_count",
+        "source_book_count": {
+          "name": "source_book_count",
           "type": "integer",
           "primaryKey": false,
           "notNull": false

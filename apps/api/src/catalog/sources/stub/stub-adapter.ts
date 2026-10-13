@@ -83,6 +83,23 @@ const EDITIONS: Record<string, BookCandidateEdition[]> = {
       sourceLink: { source: SOURCE, entityType: 'edition', sourceId: 'stub-edition-fellowship-1' },
     },
   ],
+  'stub-book-silmarillion': [
+    {
+      isbn13: '9780618391110',
+      format: 'paperback',
+      language: 'en',
+      title: null,
+      publisherName: 'Houghton Mifflin',
+      publishedDate: '2001-06-01',
+      pageCount: 365,
+      cover: null,
+      sourceLink: {
+        source: SOURCE,
+        entityType: 'edition',
+        sourceId: 'stub-edition-silmarillion-1',
+      },
+    },
+  ],
 }
 
 /** The stub's one Series, so the Series sync can be tested end to end (D-199). */
@@ -144,6 +161,14 @@ const BOOKS: Record<string, BookCandidate> = {
     1,
     [{ name: 'Middle-earth', position: 2, sourceLink: MIDDLE_EARTH }],
   ),
+  // Only Tolkien's bibliography brings it in, so specs can watch a work arrive (D-203).
+  'stub-book-silmarillion': bookCandidate(
+    'stub-book-silmarillion',
+    'The Silmarillion',
+    'stub-author-tolkien',
+    'J. R. R. Tolkien',
+    1,
+  ),
 }
 
 function matches(candidate: BookCandidate, query: string): boolean {
@@ -158,7 +183,7 @@ function matches(candidate: BookCandidate, query: string): boolean {
 }
 
 /**
- * An in-memory Source with three Books (two in one Series), for tests and for `SOURCE_MODE=stub`. It matches a query as a
+ * An in-memory Source with four Books (two in one Series, three by Tolkien), for tests and for `SOURCE_MODE=stub`. It matches a query as a
  * case-insensitive substring of a title, an Author name, or an ISBN-13.
  */
 export function createStubSource(): SourceAdapter {
@@ -193,6 +218,14 @@ export function createStubSource(): SourceAdapter {
           { sourceId: 'stub-book-fellowship', position: 2, title: 'The Fellowship of the Ring' },
         ],
       }
+    },
+    async getAuthorBooks(sourceId) {
+      if (sourceId !== 'stub-author-tolkien') return []
+      return [
+        { sourceId: 'stub-book-hobbit', title: 'The Hobbit', editionCount: 3 },
+        { sourceId: 'stub-book-fellowship', title: 'The Fellowship of the Ring', editionCount: 2 },
+        { sourceId: 'stub-book-silmarillion', title: 'The Silmarillion', editionCount: 1 },
+      ]
     },
   }
 }
