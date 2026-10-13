@@ -116,6 +116,10 @@ export const authors = pgTable(
     deathDate: date('death_date', { mode: 'string' }),
     photoId: uuid('photo_id').references(() => covers.id, { onDelete: 'set null' }),
     fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
+    /** When the Author's works were last read from the Source (D-203); spaces syncs 30 days apart. */
+    worksSyncedAt: timestamptz('works_synced_at'),
+    /** How many works the last read found: written by them (listed first), with an Edition (D-203). */
+    sourceWorkCount: integer('source_work_count'),
     ...timestamps(),
   },
   (t) => [
