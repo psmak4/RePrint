@@ -55,10 +55,10 @@ export interface IngestInput {
   /** The response to keep in `source_records` for 30 days; defaults to the candidate itself. */
   rawRecord?: unknown
   /**
-   * True when a Series sync is storing a member: a Book created this way is marked
-   * `series_import_only` and starts no Series syncs of its own (D-199, one level only).
+   * True when a sync is storing a Book (a Series member, D-199, or an Author's work, D-203): a
+   * Book created this way is marked import-only and starts no syncs of its own (one level only).
    */
-  seriesImport?: boolean
+  importOnly?: boolean
   now?: Date
 }
 
@@ -698,7 +698,7 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
       seriesToSync: await seriesDueSync(
         tx,
         book.id,
-        book.created && input.seriesImport === true,
+        book.created && input.importOnly === true,
         linkedSeries,
         now,
       ),
@@ -719,11 +719,11 @@ async function seriesDueSync(
   now: Date,
 ): Promise<string[]> {
   if (markImported) {
-    await tx.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+    await tx.update(books).set({ importOnly: true }).where(eq(books.id, bookId))
     return []
   }
   const [row] = await tx
-    .select({ importOnly: books.seriesImportOnly })
+    .select({ importOnly: books.importOnly })
     .from(books)
     .where(eq(books.id, bookId))
   if (row?.importOnly || ids.length === 0) return []

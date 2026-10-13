@@ -1,6 +1,7 @@
 import { type BookCandidateEdition, type BookSearchPage, toIsbn13 } from '@reprint/shared'
 import { z } from 'zod'
-import { type SeriesMembers, type SourceAdapter, SourceError } from '../types.js'
+import { type AuthorBook, type SeriesMembers, type SourceAdapter, SourceError } from '../types.js'
+import { AUTHOR_WORKS_PAGE_SIZE, authorWorksPath } from './author-works.js'
 import {
   editionsResponseSchema,
   type SeriesText,
@@ -60,6 +61,13 @@ const memberDocSchema = z.object({
   series_key: z.array(z.string()).optional(),
   series_name: z.array(z.string()).optional(),
   series_position: z.array(z.string()).optional(),
+})
+/** The part of an Author's work search result the adapter reads (D-203). */
+const workDocSchema = z.object({
+  key: z.string().regex(/^\/works\/OL\d+W$/),
+  title: z.string(),
+  author_key: z.array(z.string()).optional(),
+  edition_count: z.number().int().min(0).optional(),
 })
 
 export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAdapter {
@@ -235,6 +243,41 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
           a.title.localeCompare(b.title),
       )
       return { name, members }
+    },
+
+    async getAuthorBooks(sourceId): Promise<AuthorBook[]> {
+      const id = authorIdSchema.safeParse(sourceId)
+      if (!id.success) return []
+      const works: AuthorBook[] = []
+      for (let page = 1; ; page += 1) {
+        const raw = await getJson(authorWorksPath(id.data, page))
+        // No first page means no works; a later page missing or unreadable would cut the list
+        // short, so the whole read fails and the sync tries again (D-203).
+        if (raw === undefined && page === 1) return []
+        const body = searchResponseSchema.safeParse(raw)
+        if (!body.success) {
+          throw new SourceError(
+            `Open Library returned an unreadable page ${page} of an Author's works`,
+          )
+        }
+        for (const item of body.data.docs) {
+          const doc = workDocSchema.safeParse(item)
+          if (!doc.success) continue
+          // Written by them (listed first), with at least one Edition (D-203).
+          const editionCount = doc.data.edition_count ?? 0
+          if (doc.data.author_key?.[0] !== id.data || editionCount < 1) continue
+          works.push({
+            sourceId: doc.data.key.replace('/works/', ''),
+            title: doc.data.title,
+            editionCount,
+          })
+        }
+        const lastPage =
+          body.data.docs.length < AUTHOR_WORKS_PAGE_SIZE ||
+          page * AUTHOR_WORKS_PAGE_SIZE >= body.data.numFound
+        if (lastPage) break
+      }
+      return works
     },
   }
 

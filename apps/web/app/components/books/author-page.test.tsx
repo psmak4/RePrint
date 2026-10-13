@@ -1,5 +1,10 @@
 // @vitest-environment jsdom
-import type { AuthorDetail, BookSummary } from '@reprint/shared'
+import {
+  AUTHOR_MAX_PAGE,
+  AUTHOR_WRITTEN_PAGE_SIZE,
+  type AuthorDetail,
+  type BookSummary,
+} from '@reprint/shared'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -61,6 +66,62 @@ describe('AuthorPage', () => {
       'https://en.wikipedia.org/wiki/Eoin_Colfer',
     )
     expect(bio.textContent).not.toContain('[1]')
+  })
+
+  const written = (count: number) =>
+    Array.from({ length: count }, (_, i) => summary(10 + i, `Book ${i}`, 0))
+
+  it('offers the rest of a long Written list, with how many remain (D-203)', () => {
+    renderPage({
+      works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
+      writtenTotal: 30,
+    })
+    const more = screen.getByRole('link', { name: 'Show more (6 more)' })
+    expect(more.getAttribute('href')).toBe('/?page=2#author-books-author')
+  })
+
+  it('shows no Show more when every Written Book is on the page, at exactly 24', () => {
+    renderPage({
+      works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
+      writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE,
+    })
+    expect(screen.queryByRole('link', { name: /Show more/ })).toBeNull()
+  })
+
+  it('shows 1 more at 25', () => {
+    renderPage({
+      works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
+      writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE + 1,
+    })
+    expect(screen.getByRole('link', { name: 'Show more (1 more)' })).toBeTruthy()
+  })
+
+  it('offers no Show more on the last page the site serves, so the list never shrinks', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => (
+          <AuthorPage
+            author={{
+              ...author,
+              works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
+              writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE * AUTHOR_MAX_PAGE + 5,
+            }}
+            page={AUTHOR_MAX_PAGE}
+          />
+        ),
+      },
+    ])
+    render(<Stub />)
+    expect(screen.queryByRole('link', { name: /Show more/ })).toBeNull()
+  })
+
+  it('says Books are still being added while an import runs (D-203)', () => {
+    renderPage({ adding: true })
+    const section = screen.getByRole('region', { name: 'Written' })
+    expect(within(section).getByRole('status').textContent).toBe(
+      'Still adding Books by this author.',
+    )
   })
 
   it('falls back with no photo, dates, other names, or bio', () => {

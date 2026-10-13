@@ -12,6 +12,7 @@ import {
   series,
 } from '@reprint/db'
 import {
+  AUTHOR_WRITTEN_PAGE_SIZE,
   type AuthorDetail,
   type AuthorSuggestion,
   averageRating,
@@ -24,7 +25,7 @@ import {
   type Edition,
   type RatingSummary,
 } from '@reprint/shared'
-import { asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm'
 
 type CoverRow = typeof covers.$inferSelect
 type EditionRow = typeof editions.$inferSelect
@@ -236,17 +237,60 @@ export async function findAuthorBySlug(db: Database, slug: string) {
   return row ?? null
 }
 
-/** An Author's Books grouped by Role (in `CONTRIBUTION_ROLES` order), most reviewed first (PRD §7.5). */
+/** How long after a sync the Author page says Books are still arriving (as for Series). */
+const AUTHOR_ADDING_FOR_MS = 24 * 60 * 60 * 1000
+
+/** True while a recent bibliography sync found more Books than are stored (D-203). */
+export function isAuthorAdding(
+  author: { sourceBookCount: number | null; bibliographySyncedAt: Date | null },
+  written: number,
+  now: Date = new Date(),
+): boolean {
+  if (author.sourceBookCount === null || author.bibliographySyncedAt === null) return false
+  if (written >= author.sourceBookCount) return false
+  return now.getTime() - author.bibliographySyncedAt.getTime() < AUTHOR_ADDING_FOR_MS
+}
+
+/**
+ * An Author's Books grouped by Role (in `CONTRIBUTION_ROLES` order): most reviewed first, then the
+ * most Editions on the Source (PRD §7.5, D-203). The Written list holds the first `page × 24`.
+ */
 export async function loadAuthorDetail(
   db: Database,
   author: typeof authors.$inferSelect,
+  options: { page?: number; now?: Date } = {},
 ): Promise<AuthorDetail> {
-  const rows = await db
-    .select({ role: contributions.role, book: books })
-    .from(contributions)
-    .innerJoin(books, eq(books.id, contributions.bookId))
-    .where(eq(contributions.authorId, author.id))
-    .orderBy(desc(books.reviewCount), asc(books.title), asc(books.id))
+  const order = [
+    desc(books.reviewCount),
+    sql`${books.sourceEditionCount} desc nulls last`,
+    asc(books.title),
+    asc(books.id),
+  ]
+  const byAuthor = (role: 'written' | 'other') =>
+    and(
+      eq(contributions.authorId, author.id),
+      role === 'written' ? eq(contributions.role, 'author') : ne(contributions.role, 'author'),
+    )
+  // An imported bibliography can run to thousands of Books (D-203), so the Written list is paged and
+  // counted in the database; the other Roles are short and come whole.
+  const [writtenRows, otherRows, [writtenCount]] = await Promise.all([
+    db
+      .select({ role: contributions.role, book: books })
+      .from(contributions)
+      .innerJoin(books, eq(books.id, contributions.bookId))
+      .where(byAuthor('written'))
+      .orderBy(...order)
+      .limit((options.page ?? 1) * AUTHOR_WRITTEN_PAGE_SIZE),
+    db
+      .select({ role: contributions.role, book: books })
+      .from(contributions)
+      .innerJoin(books, eq(books.id, contributions.bookId))
+      .where(byAuthor('other'))
+      .orderBy(...order),
+    db.select({ n: count() }).from(contributions).where(byAuthor('written')),
+  ])
+  const writtenTotal = writtenCount?.n ?? 0
+  const rows = [...writtenRows, ...otherRows]
   const [byline, coverMap, photoMap] = await Promise.all([
     bylines(db, [...new Set(rows.map((row) => row.book.id))]),
     coversById(
@@ -283,5 +327,7 @@ export async function loadAuthorDetail(
       const list = grouped.get(role)
       return list ? [{ role, books: list }] : []
     }),
+    writtenTotal,
+    adding: isAuthorAdding(author, writtenTotal, options.now),
   }
 }

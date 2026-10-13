@@ -52,11 +52,12 @@ export const books = pgTable(
      */
     sourceEditionCount: integer('source_edition_count'),
     /**
-     * True while the Book is in the Catalog only because a Series sync imported it: it starts no
-     * Series syncs of its own until a Member reaches it (opens it from search), which clears this
-     * (D-199, one level only).
+     * True while the Book is in the Catalog only because a sync imported it: a Series sync (D-199)
+     * or an Author's bibliography (D-203). It starts no syncs of its own, and does not make its
+     * Authors due, until a Member reaches it (opens it from search), which clears this. The
+     * column keeps its first name so the previous code version still runs during a deploy.
      */
-    seriesImportOnly: boolean('series_import_only').notNull().default(false),
+    importOnly: boolean('series_import_only').notNull().default(false),
     /** When a Source last refreshed this Book; drives the 30-day stale refresh (PRD §6). */
     refreshedAt: timestamptz('refreshed_at'),
     ...timestamps(),
@@ -115,6 +116,10 @@ export const authors = pgTable(
     deathDate: date('death_date', { mode: 'string' }),
     photoId: uuid('photo_id').references(() => covers.id, { onDelete: 'set null' }),
     fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
+    /** When the Author's Books were last read from the Source (D-203); spaces syncs 30 days apart. */
+    bibliographySyncedAt: timestamptz('bibliography_synced_at'),
+    /** How many Books the last read found: written by them (listed first), with an Edition (D-203). */
+    sourceBookCount: integer('source_book_count'),
     ...timestamps(),
   },
   (t) => [

@@ -1,4 +1,5 @@
 import {
+  authorDetailQuerySchema,
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
@@ -16,6 +17,7 @@ import {
 } from '@reprint/shared'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { Redis } from 'ioredis'
+import { authorDueForSync, queueAuthorSync } from '../../catalog/author-sync.js'
 import type { CandidateRefs } from '../../catalog/candidate-refs.js'
 import { isStale } from '../../catalog/refresh.js'
 import type { InteractiveCall } from '../../catalog/resolve.js'
@@ -170,12 +172,27 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
 
   app.get(
     '/authors/:slug',
-    { schema: { params: slugParamsSchema, response: { 200: authorDetailSchema } } },
+    {
+      schema: {
+        params: slugParamsSchema,
+        querystring: authorDetailQuerySchema,
+        response: { 200: authorDetailSchema },
+      },
+    },
     async (request) => {
       if (!db) throw new Error('catalog routes need a database')
       const author = await findAuthorBySlug(db, request.params.slug)
       if (!author) throw new HttpProblem(404, 'We could not find that author.')
-      return loadAuthorDetail(db, author)
+      if (jobs) {
+        // Viewing an Author someone reached imports the rest of their Books (D-203); it never
+        // fails or slows the page.
+        await authorDueForSync(db, author)
+          .then((due) => (due ? queueAuthorSync(jobs, author.id) : undefined))
+          .catch((error: unknown) =>
+            request.log.warn({ err: error, authorId: author.id }, 'could not queue Author sync'),
+          )
+      }
+      return loadAuthorDetail(db, author, { page: request.query.page })
     },
   )
 

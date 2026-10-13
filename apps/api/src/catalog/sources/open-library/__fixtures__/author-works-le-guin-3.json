@@ -1,0 +1,512 @@
+{
+  "numFound": 260,
+  "start": 200,
+  "numFoundExact": true,
+  "num_found": 260,
+  "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+  "q": "author_key:OL31353A",
+  "offset": null,
+  "docs": [
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL43256665W",
+      "title": "Winterplanet"
+    },
+    {
+      "author_key": ["OL31353A", "OL15360212A"],
+      "edition_count": 1,
+      "key": "/works/OL43170023W",
+      "title": "Das zehnte Jahr"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL43252133W",
+      "title": "The Language of the Night Essays on Fantasy and Science Fiction"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL43154260W",
+      "title": "the compass rose"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL43057387W",
+      "title": "Three Hainish Novels"
+    },
+    {
+      "author_key": ["OL3988888A", "OL31353A", "OL3988887A", "OL656808A", "OL539879A"],
+      "edition_count": 1,
+      "key": "/works/OL44949493W",
+      "title": "Women's Fantastic Adventures"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20111744W",
+      "title": "The Selected Short Fiction of Ursula K. Le Guin Boxed Set"
+    },
+    {
+      "author_key": ["OL31353A", "OL16195367A"],
+      "edition_count": 1,
+      "key": "/works/OL20129277W",
+      "title": "Ursula K. Le Guin"
+    },
+    {
+      "author_key": ["OL8361359A", "OL25532A", "OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20162364W",
+      "title": "Edge of Awe"
+    },
+    {
+      "author_key": [
+        "OL34221A",
+        "OL23121A",
+        "OL4767073A",
+        "OL27278A",
+        "OL575777A",
+        "OL951926A",
+        "OL1770954A",
+        "OL33881A",
+        "OL29390A",
+        "OL28370A",
+        "OL31353A",
+        "OL2701716A",
+        "OL382686A",
+        "OL2623461A",
+        "OL1009783A",
+        "OL457832A",
+        "OL231796A",
+        "OL458948A",
+        "OL235327A",
+        "OL25176A",
+        "OL24562A",
+        "OL1349906A",
+        "OL710167A",
+        "OL200394A",
+        "OL3385331A",
+        "OL1232071A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL19800061W",
+      "title": "Faszination der Science Fiction"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19754096W",
+      "title": "Dreams must explain themselves and other essays, 1972-2004"
+    },
+    {
+      "author_key": [
+        "OL7483467A",
+        "OL1432654A",
+        "OL221112A",
+        "OL7542084A",
+        "OL31353A",
+        "OL234532A",
+        "OL6788801A",
+        "OL2827463A",
+        "OL7276210A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL19756882W",
+      "title": "Aliens"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20091281W",
+      "title": "The Shobies' Story/Dancing to Ganam/A Fisherman of the Inland Sea/Another Story"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20104153W",
+      "title": "Bifrost n° 78"
+    },
+    {
+      "author_key": [
+        "OL3173502A",
+        "OL34221A",
+        "OL1512586A",
+        "OL21823A",
+        "OL31353A",
+        "OL2705526A",
+        "OL10141174A",
+        "OL1281745A",
+        "OL24856A",
+        "OL10141175A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL20104358W",
+      "title": "Isaac Asimovs Science Fiction Magazin 22. Folge"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20242655W",
+      "title": "The Selected Short Fiction of Ursula K. Le Guin Boxed Set"
+    },
+    {
+      "author_key": [
+        "OL7240107A",
+        "OL7414870A",
+        "OL7363840A",
+        "OL7503273A",
+        "OL31353A",
+        "OL454225A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL20321810W",
+      "title": "Clarkesworld Magazine, Issue 90, March 2014"
+    },
+    {
+      "author_key": ["OL227499A", "OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL7524720M",
+      "title": "Rocannon's World / The Kar-Chee Reign (Classic Ace Double G-574)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056525W",
+      "title": "Blue moon over Thurman Street"
+    },
+    {
+      "author_key": ["OL31353A", "OL16048951A"],
+      "edition_count": 1,
+      "key": "/works/OL45156298W",
+      "title": "Telling Is Listening"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL44555573W",
+      "title": "Word for World"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL45588158W",
+      "title": "A Mão Esquerda da Escuridão"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL44952519W",
+      "title": "Very Far Away from Anywhere Else"
+    },
+    {
+      "author_key": [
+        "OL7982045A",
+        "OL1857717A",
+        "OL28760A",
+        "OL33607A",
+        "OL539879A",
+        "OL2628897A",
+        "OL2724725A",
+        "OL230306A",
+        "OL2628870A",
+        "OL231340A",
+        "OL1663871A",
+        "OL31353A",
+        "OL587674A",
+        "OL1072689A",
+        "OL1759062A",
+        "OL12306246A",
+        "OL2991320A",
+        "OL6165836A",
+        "OL419303A",
+        "OL537877A",
+        "OL2644750A",
+        "OL1126548A",
+        "OL20934A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL27041422W",
+      "title": "The Future is Female 2!"
+    },
+    {
+      "author_key": [
+        "OL1476132A",
+        "OL7486186A",
+        "OL3745180A",
+        "OL2704738A",
+        "OL2914489A",
+        "OL1657140A",
+        "OL1123495A",
+        "OL4400968A",
+        "OL27951A",
+        "OL6856459A",
+        "OL248539A",
+        "OL27110A",
+        "OL2074209A",
+        "OL2831960A",
+        "OL2788974A",
+        "OL25926A",
+        "OL1392477A",
+        "OL1857717A",
+        "OL33607A",
+        "OL539879A",
+        "OL12306244A",
+        "OL31353A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL19763776W",
+      "title": "The Future is Female!"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL20038784W",
+      "title": "The complete Orsinia"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19306603W",
+      "title": "Ursula K. Le Guin: Hainish Novels and Stories Vol. 1 (LOA #296): Rocannon's World / Planet of Exile / City of Illusions / The Left Hand of  Darkness / ... of America Ursula K. Le Guin Edition)"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL26566996W",
+      "title": "Rule of Names"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467807W",
+      "title": "Trip to the Head"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19598306W",
+      "title": "The Daughter of Odren"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056556W",
+      "title": "From Elfland to Poughkeepsie"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467797W",
+      "title": "Word of Unbinding"
+    },
+    {
+      "author_key": [
+        "OL34221A",
+        "OL2901285A",
+        "OL1758415A",
+        "OL2663713A",
+        "OL1770954A",
+        "OL2368098A",
+        "OL951926A",
+        "OL456764A",
+        "OL5348223A",
+        "OL262325A",
+        "OL552852A",
+        "OL31353A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL19039393W",
+      "title": "Isaac Asimov's Magical Worlds of Fantasy, Volume 9"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467798W",
+      "title": "April in Paris"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19741345W",
+      "title": "Ursula K. Le Guin"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467801W",
+      "title": "Nine Lives"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19793295W",
+      "title": "Ursula K. Le Guin"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL29267100W",
+      "title": "The Eye of the heron"
+    },
+    {
+      "author_key": [
+        "OL237141A",
+        "OL1394086A",
+        "OL20678A",
+        "OL31353A",
+        "OL2645208A",
+        "OL1425187A",
+        "OL6856172A",
+        "OL412672A",
+        "OL33437A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL16661048W",
+      "title": "Isaac Asimov's utopias"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL16804853W",
+      "title": "Cheek by jowl"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467809W",
+      "title": "Stars Below"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467806W",
+      "title": "Masters"
+    },
+    {
+      "author_key": [
+        "OL7767853A",
+        "OL34221A",
+        "OL2628836A",
+        "OL1860805A",
+        "OL24137A",
+        "OL1814421A",
+        "OL3080171A",
+        "OL266298A",
+        "OL1055270A",
+        "OL2623461A",
+        "OL765755A",
+        "OL29390A",
+        "OL31353A",
+        "OL4767073A",
+        "OL20187A"
+      ],
+      "edition_count": 1,
+      "key": "/works/OL17870011W",
+      "title": "Out of this world"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL34866023W",
+      "title": "The Birthday of the World"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19362552W",
+      "title": "Ursula K. Le Guin"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19624409W",
+      "title": "Winter's King"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467799W",
+      "title": "Darkness Box"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19218549W",
+      "title": "The Wind's Twelve Quarters and The Compass Rose"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL45983196W",
+      "title": "Always Coming Home: Author's Expanded Edition"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL45984609W",
+      "title": "Inny wiatr"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL15056529W",
+      "title": "Cat Dreams"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL19615423W",
+      "title": "The Field of Vision"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL27467800W",
+      "title": "Things"
+    },
+    {
+      "author_key": ["OL31353A", "OL16621707A", "OL16621708A"],
+      "edition_count": 1,
+      "key": "/works/OL46050165W",
+      "title": "Tão longe de sítio nenhum"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 1,
+      "key": "/works/OL46018761W",
+      "title": "Ursula K. Le Guin's Book of Cats"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 0,
+      "key": "/works/OL29311776W",
+      "title": "Hainish"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 0,
+      "key": "/works/OL43424811W",
+      "title": "La falce dei cieli"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 0,
+      "key": "/works/OL17887623W",
+      "title": "A Mão Esquerda da Escuridão"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 0,
+      "key": "/works/OL20141013W",
+      "title": "Nebula Award Stories: v. 11"
+    },
+    {
+      "author_key": ["OL31353A"],
+      "edition_count": 0,
+      "key": "/works/OL17705269W",
+      "title": "Nebula award stories eleven"
+    }
+  ]
+}

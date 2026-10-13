@@ -162,12 +162,12 @@ describe('Series syncs (D-199)', () => {
     const { bookId } = await ingestBook(stack.db.db, {
       source: stub,
       candidate: hobbit,
-      seriesImport: true,
+      importOnly: true,
     })
     const response = await resolve(await issueRef('stub-book-hobbit'))
     expect(response.statusCode).toBe(200)
     const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
-    expect(row?.seriesImportOnly).toBe(false)
+    expect(row?.importOnly).toBe(false)
     expect(enqueue).toHaveBeenCalledWith(
       'catalog.series-sync',
       { seriesId: expect.any(String) },
@@ -186,13 +186,13 @@ describe('POST /v1/books/:slug/reached (D-200)', () => {
   const reached = (slug: string) =>
     app.inject({ method: 'POST', url: `/v1/books/${slug}/reached`, headers: { origin: ORIGIN } })
 
-  async function storeHobbit(seriesImport: boolean) {
+  async function storeHobbit(importOnly: boolean) {
     const hobbit = await stub.getBook('stub-book-hobbit')
     if (!hobbit) throw new Error('no hobbit')
     const { bookId } = await ingestBook(stack.db.db, {
       source: stub,
       candidate: hobbit,
-      seriesImport,
+      importOnly,
     })
     const [row] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
     if (!row) throw new Error('not stored')
@@ -204,7 +204,7 @@ describe('POST /v1/books/:slug/reached (D-200)', () => {
     const response = await reached(book.slug)
     expect(response.statusCode).toBe(200)
     const [row] = await stack.db.db.select().from(books).where(eq(books.id, book.id))
-    expect(row?.seriesImportOnly).toBe(false)
+    expect(row?.importOnly).toBe(false)
     expect(enqueue).toHaveBeenCalledWith(
       'catalog.series-sync',
       { seriesId: expect.any(String) },

@@ -1,4 +1,10 @@
-import { APP_NAME, authorDetailSchema, markdownToText, slugSchema } from '@reprint/shared'
+import {
+  APP_NAME,
+  AUTHOR_MAX_PAGE,
+  authorDetailSchema,
+  markdownToText,
+  slugSchema,
+} from '@reprint/shared'
 import { data } from 'react-router'
 import { AuthorPage } from '../components/books/author-page.js'
 import { JsonLd } from '../components/seo/json-ld.js'
@@ -27,10 +33,15 @@ export function meta(args: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const slug = slugSchema.safeParse(params.slug)
   if (!slug.success) throw data('Not found', { status: 404 })
+  // The Written list's page (D-203); anything outside 1 to 50 shows the first.
+  const asked = Number(new URL(request.url).searchParams.get('page'))
+  const page = Number.isInteger(asked) && asked >= 1 && asked <= AUTHOR_MAX_PAGE ? asked : 1
 
   let response: Response
   try {
-    response = await apiClientFor(request).get(`/v1/authors/${slug.data}`)
+    response = await apiClientFor(request).get(
+      `/v1/authors/${slug.data}${page > 1 ? `?page=${page}` : ''}`,
+    )
   } catch (error) {
     logger.error({ err: error }, 'could not load author')
     throw data(copy.author.loadFailed, { status: 502 })
@@ -53,7 +64,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { origin } = new URL(request.url)
   const jsonLd = [authorJsonLd(origin, author), authorBreadcrumbs(origin, author)]
 
-  return { author, canonicalUrl, metaDescription, jsonLd }
+  return { author, canonicalUrl, metaDescription, jsonLd, page }
 }
 
 export default function Author({ loaderData }: Route.ComponentProps) {
@@ -61,7 +72,7 @@ export default function Author({ loaderData }: Route.ComponentProps) {
     <>
       <JsonLd data={loaderData.jsonLd} />
       {/* A new key per Author, so nothing from the last Author's page (a failed photo) carries over. */}
-      <AuthorPage key={loaderData.author.id} author={loaderData.author} />
+      <AuthorPage key={loaderData.author.id} author={loaderData.author} page={loaderData.page} />
     </>
   )
 }

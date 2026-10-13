@@ -35,6 +35,18 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   { name: 'work-hitchhiker-editions', path: '/works/OL2163649W/editions.json?limit=50' },
   { name: 'edition-hitchhiker-cover', path: '/books/OL17837787M.json' },
   { name: 'series-hitchhiker', path: '/search.json?q=series_key%3AOL326782L&limit=100' },
+  {
+    name: 'author-works-le-guin-1',
+    path: '/search.json?q=author_key%3AOL31353A&fields=key%2Ctitle%2Cauthor_key%2Cedition_count&sort=editions&limit=100',
+  },
+  {
+    name: 'author-works-le-guin-2',
+    path: '/search.json?q=author_key%3AOL31353A&fields=key%2Ctitle%2Cauthor_key%2Cedition_count&sort=editions&limit=100&page=2',
+  },
+  {
+    name: 'author-works-le-guin-3',
+    path: '/search.json?q=author_key%3AOL31353A&fields=key%2Ctitle%2Cauthor_key%2Cedition_count&sort=editions&limit=100&page=3',
+  },
 ]
 
 export interface RecordOptions {

@@ -19,6 +19,17 @@ describe('stub Source', () => {
     expect(beyond.candidates).toEqual([])
   })
 
+  it("lists Tolkien's works, The Silmarillion among them, and nothing for others", async () => {
+    const stub = createStubSource()
+    expect((await stub.getAuthorBooks?.('stub-author-tolkien'))?.map((w) => w.sourceId)).toEqual([
+      'stub-book-hobbit',
+      'stub-book-fellowship',
+      'stub-book-silmarillion',
+    ])
+    expect((await stub.getBook('stub-book-silmarillion'))?.book.title).toBe('The Silmarillion')
+    expect(await stub.getAuthorBooks?.('stub-author-herbert')).toEqual([])
+  })
+
   it('does not match a blank query', async () => {
     expect((await createStubSource().searchBooks('  ', 1)).candidates).toEqual([])
   })
