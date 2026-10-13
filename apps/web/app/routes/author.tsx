@@ -60,7 +60,8 @@ export default function Author({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <JsonLd data={loaderData.jsonLd} />
-      <AuthorPage author={loaderData.author} />
+      {/* A new key per Author, so nothing from the last Author's page (a failed photo) carries over. */}
+      <AuthorPage key={loaderData.author.id} author={loaderData.author} />
     </>
   )
 }

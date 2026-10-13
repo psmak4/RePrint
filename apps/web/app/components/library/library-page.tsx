@@ -66,7 +66,8 @@ function SortForm({ username, view }: { username: string; view: LibraryView }) {
       {view.shelf ? <input type="hidden" name="shelf" value={view.shelf} /> : null}
       <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
         {text.sortLabel}
-        <Select id={sortId} name="sort" defaultValue={view.sort} compact>
+        {/* Keyed by its value, so Back or a new link shows that URL's sort, not the last one. */}
+        <Select key={view.sort} id={sortId} name="sort" defaultValue={view.sort} compact>
           {LIBRARY_SORTS.map((sort) => (
             <option key={sort} value={sort}>
               {text.sorts[sort]}

@@ -145,7 +145,9 @@ function SortForm({ query }: { query: SearchQuery }) {
       <label htmlFor="results-sort" className="text-sm text-muted-foreground">
         {c.sort}
       </label>
-      <Select id="results-sort" name="sort" defaultValue={query.sort} compact>
+      {/* Keyed by its value: the page stays mounted from one search to the next, and `defaultValue`
+          alone would keep showing the last search's choice. The filters below do the same. */}
+      <Select key={query.sort} id="results-sort" name="sort" defaultValue={query.sort} compact>
         {SEARCH_SORTS.map((sort) => (
           <option key={sort} value={sort}>
             {c.sorts[sort]}
@@ -186,6 +188,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
         <Select
           id="filter-genre"
           name="genre"
+          key={String(query.genre ?? '')}
           defaultValue={query.genre ?? ''}
           className="w-full font-medium"
         >
@@ -204,6 +207,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
         <Select
           id="filter-language"
           name="language"
+          key={String(query.language ?? '')}
           defaultValue={query.language ?? ''}
           className="w-full font-medium"
         >
@@ -222,6 +226,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
         <Select
           id="filter-decade"
           name="decade"
+          key={String(query.decade ?? '')}
           defaultValue={query.decade ?? ''}
           className="w-full font-medium"
         >
@@ -240,6 +245,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
         <Select
           id="filter-min-rating"
           name="minRating"
+          key={String(query.minRating ?? '')}
           defaultValue={query.minRating ?? ''}
           className="w-full font-medium"
         >
