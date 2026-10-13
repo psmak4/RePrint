@@ -63,6 +63,14 @@ export const bookSummarySchema = z.object({
 })
 export type BookSummary = z.infer<typeof bookSummarySchema>
 
+/** How many Books the Author page's Written list shows per page (D-203). */
+export const AUTHOR_WRITTEN_PAGE_SIZE = 24
+
+/** `GET /authors/:slug?page=N`: the Written list holds the first `N × 24` Books (D-203). */
+export const authorDetailQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(50).default(1),
+})
+
 /** `GET /authors/:slug`: the Author and their Books grouped by Role, most reviewed first. */
 export const authorDetailSchema = authorSchema.extend({
   works: z.array(
@@ -71,6 +79,10 @@ export const authorDetailSchema = authorSchema.extend({
       books: z.array(bookSummarySchema),
     }),
   ),
+  /** Every stored Book with the Role `author`; `works` holds a page of them (D-203). */
+  writtenTotal: z.number().int().min(0).optional(),
+  /** True while a recent bibliography import is still adding Books (D-203). */
+  adding: z.boolean().optional(),
 })
 export type AuthorDetail = z.infer<typeof authorDetailSchema>
 

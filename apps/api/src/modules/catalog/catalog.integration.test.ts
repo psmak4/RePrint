@@ -1,5 +1,6 @@
 import { authors, books, contributions, editions, series, sourceRecords } from '@reprint/db'
 import {
+  AUTHOR_WRITTEN_PAGE_SIZE,
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
@@ -269,6 +270,102 @@ describe('GET /v1/authors/:slug', () => {
       .from(contributions)
       .where(eq(contributions.authorId, author.id))
     expect(links.length).toBeGreaterThan(0)
+  })
+
+  /** Stores `count` more Books written by the Author, each with `editions(i)` as its Source count. */
+  async function addWrittenBooks(authorId: string, count: number, editions: (i: number) => number) {
+    for (let i = 0; i < count; i += 1) {
+      const [book] = await stack.db.db
+        .insert(books)
+        .values({
+          slug: `written-${i}`,
+          title: `Written ${String(i).padStart(2, '0')}`,
+          sourceEditionCount: editions(i),
+        })
+        .returning({ id: books.id })
+      if (!book) throw new Error('no book')
+      await stack.db.db
+        .insert(contributions)
+        .values({ bookId: book.id, authorId, role: 'author', position: 0 })
+    }
+  }
+
+  it('queues a bibliography sync for an Author with a reached Book, once per 30 days (D-203)', async () => {
+    await ingest('stub-book-hobbit', 'stub-author-tolkien')
+    const [tolkien] = await stack.db.db.select().from(authors)
+    if (!tolkien) throw new Error('no author')
+    await app.inject({ method: 'GET', url: `/v1/authors/${tolkien.slug}` })
+    expect(queued.filter((job) => job.name === 'catalog.author-sync')).toEqual([
+      {
+        name: 'catalog.author-sync',
+        payload: { authorId: tolkien.id },
+        options: { deduplicationId: `catalog.author-sync-${tolkien.id}`, priority: 10 },
+      },
+    ])
+    queued.length = 0
+    await stack.db.db.update(authors).set({ bibliographySyncedAt: new Date() })
+    await app.inject({ method: 'GET', url: `/v1/authors/${tolkien.slug}` })
+    expect(queued.filter((job) => job.name === 'catalog.author-sync')).toEqual([])
+  })
+
+  it('queues nothing for an Author known only through imported Books (one level, D-203)', async () => {
+    const { bookId } = await ingest('stub-book-hobbit', 'stub-author-tolkien')
+    await stack.db.db.update(books).set({ importOnly: true }).where(eq(books.id, bookId))
+    const [tolkien] = await stack.db.db.select().from(authors)
+    await app.inject({ method: 'GET', url: `/v1/authors/${tolkien?.slug}` })
+    expect(queued.filter((job) => job.name === 'catalog.author-sync')).toEqual([])
+  })
+
+  it('orders ties by the Source Edition count and pages the Written list (D-203)', async () => {
+    await ingest('stub-book-dune', 'stub-author-herbert')
+    const [herbert] = await stack.db.db.select().from(authors)
+    if (!herbert) throw new Error('no author')
+    // 29 more, so 30 in all; Written 28 has the most Editions, Dune has none known.
+    await addWrittenBooks(herbert.id, 29, (i) => (i === 28 ? 500 : i))
+    const first = authorDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/authors/${herbert.slug}` })).json(),
+    )
+    const written = first.works.find((work) => work.role === 'author')?.books ?? []
+    expect(first.writtenTotal).toBe(30)
+    expect(written).toHaveLength(AUTHOR_WRITTEN_PAGE_SIZE)
+    expect(written.slice(0, 3).map((book) => book.title)).toEqual([
+      'Written 28',
+      'Written 27',
+      'Written 26',
+    ])
+    const second = authorDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/authors/${herbert.slug}?page=2` })).json(),
+    )
+    const all = second.works.find((work) => work.role === 'author')?.books ?? []
+    expect(all).toHaveLength(30)
+    expect(all.at(-1)?.title).toBe('Dune')
+  })
+
+  it('says it is still adding while a recent sync found more Books than are stored (D-203)', async () => {
+    await ingest('stub-book-hobbit', 'stub-author-tolkien')
+    const [tolkien] = await stack.db.db.select().from(authors)
+    await stack.db.db.update(authors).set({ sourceBookCount: 3, bibliographySyncedAt: new Date() })
+    const adding = authorDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/authors/${tolkien?.slug}` })).json(),
+    )
+    expect(adding.adding).toBe(true)
+    await stack.db.db.update(authors).set({ sourceBookCount: 1 })
+    const done = authorDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/authors/${tolkien?.slug}` })).json(),
+    )
+    expect(done.adding).toBe(false)
+  })
+
+  it('rejects a page outside 1 to 50', async () => {
+    await ingest('stub-book-dune', 'stub-author-herbert')
+    const [herbert] = await stack.db.db.select().from(authors)
+    for (const page of ['0', '51', 'abc']) {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/v1/authors/${herbert?.slug}?page=${page}`,
+      })
+      expect(response.statusCode).toBe(400)
+    }
   })
 
   it('returns 404 Problem Details for an unknown slug', async () => {
