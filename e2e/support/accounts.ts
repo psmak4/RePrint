@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import {
+  authors,
   bookSeries,
   books,
   createDb,
@@ -8,6 +9,7 @@ import {
   reviews,
   roles,
   series,
+  sourceLinks,
   userRoles,
   users,
 } from '@reprint/db'
@@ -67,6 +69,42 @@ export async function resetSeriesSync(name: string, bookTitle: string, seriesOnl
     await db
       .delete(bookSeries)
       .where(and(eq(bookSeries.seriesId, row.id), eq(bookSeries.bookId, book.id)))
+  })
+}
+
+/** Advisory lock key for specs that reset an Author's bibliography; any constant unused elsewhere. */
+const authorLockKey = 203_203
+
+/** Runs `work` while holding the Author lock, so the projects' copies of a spec take turns (D-203). */
+export async function withAuthorLock<T>(work: () => Promise<T>): Promise<T> {
+  const client = createDb(databaseUrl, { max: 1 })
+  try {
+    await client.sql`select pg_advisory_lock(${authorLockKey}::bigint)`
+    try {
+      return await work()
+    } finally {
+      await client.sql`select pg_advisory_unlock(${authorLockKey}::bigint)`
+    }
+  } finally {
+    await client.close()
+  }
+}
+
+/**
+ * Puts an Author back to "never synced" and removes one of their Books, as if their bibliography
+ * had never been imported, so a spec can watch the sync bring it in (D-203). The e2e database is
+ * kept between local runs, so a spec cannot rely on either being new.
+ */
+export async function resetAuthorBooks(authorName: string, bookTitle: string) {
+  await withDb(async (db) => {
+    await db.update(authors).set({ bibliographySyncedAt: null }).where(eq(authors.name, authorName))
+    const [book] = await db.select({ id: books.id }).from(books).where(eq(books.title, bookTitle))
+    if (!book) return
+    // Source links name their entity without a foreign key, so they go first.
+    await db
+      .delete(sourceLinks)
+      .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, book.id)))
+    await db.delete(books).where(eq(books.id, book.id))
   })
 }
 
