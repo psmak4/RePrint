@@ -99,6 +99,11 @@ async function grantRole(email: string, roleName: 'moderator' | 'admin') {
 export const grantModerator = (email: string) => grantRole(email, 'moderator')
 export const grantAdmin = (email: string) => grantRole(email, 'admin')
 
+/** Sets a Member's display name and bio directly, for pages that must cope with long values. */
+export async function setProfile(email: string, profile: { displayName: string; bio: string }) {
+  await withDb((db) => db.update(users).set(profile).where(eq(users.email, email)))
+}
+
 /** Undoes `moveReviewToQueueFront`, so an Approved review is among the newest on its Book page. */
 export async function restoreReviewSubmittedAt(email: string) {
   await withDb(async (db) => {

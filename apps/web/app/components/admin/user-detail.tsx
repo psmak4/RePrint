@@ -261,7 +261,7 @@ export function UserDetail({
     >
       {panel}
       {user.status === 'suspended' ? (
-        <p className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
+        <p className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm break-words text-[#9a3412]">
           {user.suspendedUntil
             ? d.suspendedUntil(fmt(user.suspendedUntil))
             : d.suspendedIndefinitely}
@@ -290,8 +290,9 @@ export function UserDetail({
           >
             <dl className="grid grid-cols-[minmax(0,120px)_minmax(0,1fr)] gap-x-4 gap-y-3 text-[15px]">
               <dt className="text-muted-foreground">{d.email}</dt>
-              <dd className="flex flex-wrap items-center gap-2.5 break-all">
-                {user.email ?? text.noEmail}
+              <dd className="flex min-w-0 flex-wrap items-center gap-2.5">
+                {/* Its own element: bare text in a flex row will not break to fit. */}
+                <span className="min-w-0 break-all">{user.email ?? text.noEmail}</span>
                 {user.email ? (
                   user.emailVerifiedAt ? (
                     <Badge tone="green">{d.verified(fmt(user.emailVerifiedAt))}</Badge>

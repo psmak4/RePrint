@@ -1,4 +1,4 @@
-import { APP_NAME, modStatsSchema, PERMISSIONS } from '@reprint/shared'
+import { APP_NAME, type ModStats, modStatsSchema, PERMISSIONS } from '@reprint/shared'
 import { AdminLayout } from '../components/admin/admin-layout.js'
 import type { AdminNavGroup, AdminNavItem } from '../components/admin/admin-page.js'
 import { copy } from '../copy/index.js'
@@ -22,18 +22,28 @@ export function meta(args: Route.MetaArgs) {
   return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.title}`, noindex: true })
 }
 
-/** The two queue counts, or null when the API did not answer; a missing count never fails a page. */
-async function loadCounts(request: Request): Promise<{ reviews: number; reports: number } | null> {
+/** How long every admin page waits for the queue counts before showing the page without them. */
+export const STATS_TIMEOUT_MS = 2000
+
+/**
+ * The moderation stats (the nav counts and the dashboard's numbers), or null when the API did not
+ * answer in time; a missing count never fails a page.
+ */
+async function loadStats(request: Request): Promise<ModStats | null> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), STATS_TIMEOUT_MS)
   try {
-    const response = await apiClientFor(request).get('/v1/mod/stats')
+    const response = await apiClientFor(request).get('/v1/mod/stats', {
+      signal: controller.signal,
+    })
     if (!response.ok) return null
     const stats = modStatsSchema.safeParse(await response.json())
-    return stats.success
-      ? { reviews: stats.data.pendingCount, reports: stats.data.openReportCount }
-      : null
+    return stats.success ? stats.data : null
   } catch (error) {
-    logger.warn({ err: error }, 'could not load the admin nav counts')
+    logger.warn({ err: error }, 'could not load the moderation stats')
     return null
+  } finally {
+    clearTimeout(timer)
   }
 }
 
@@ -51,7 +61,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const viewer = await requireViewerPermission(request, ADMIN_AREA_PERMISSIONS)
   const can = (permission: string) => viewer.permissions.includes(permission)
   // `/mod/stats` needs reviews.moderate; anyone else gets no counts rather than a 403.
-  const counts = can(PERMISSIONS.reviewsModerate) ? await loadCounts(request) : null
+  const stats = can(PERMISSIONS.reviewsModerate) ? await loadStats(request) : null
+  const counts = stats ? { reviews: stats.pendingCount, reports: stats.openReportCount } : null
 
   const moderation: AdminNavItem[] = []
   if (can(PERMISSIONS.reviewsModerate)) {
@@ -83,7 +94,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     { label: copy.admin.navGroups.catalog, items: catalog },
     { label: copy.admin.navGroups.operations, items: operations },
   ].filter((group) => group.items.length > 0)
-  return { groups }
+  // The dashboard reads `stats` from here rather than asking the API a second time.
+  return { groups, stats }
 }
 
 export default function Admin({ loaderData }: Route.ComponentProps) {

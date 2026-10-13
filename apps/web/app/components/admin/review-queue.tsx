@@ -60,7 +60,8 @@ function QueueList({
 }) {
   if (queue.items.length === 0) return <EmptyState>{text.empty}</EmptyState>
   return (
-    <AdminCard label={text.listLabel} className="gap-1 p-3 md:p-3">
+    // No label of its own: the list inside is already named "Pending reviews".
+    <AdminCard className="gap-1 p-3 md:p-3">
       <ul aria-label={text.listLabel} className="flex flex-col gap-1">
         {queue.items.map((item) => {
           const minutes = (Date.parse(now) - Date.parse(item.submittedAt)) / 60_000

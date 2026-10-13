@@ -152,6 +152,12 @@ describe('ReviewQueue', () => {
     expect(screen.getByLabelText('Saved phrase')).toBeTruthy()
   })
 
+  it('names the pending list once, not its card as well', async () => {
+    renderQueue()
+    await screen.findByRole('list', { name: 'Pending reviews' })
+    expect(screen.queryByRole('region', { name: 'Pending reviews' })).toBeNull()
+  })
+
   it('shows the keyboard shortcuts as keys', async () => {
     renderQueue({
       selected: item(1),

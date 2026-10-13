@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { AdminAuditResponse } from '@reprint/shared'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -93,6 +93,19 @@ describe('AuditLog', () => {
   it('puts the filters in a named card', () => {
     renderLog()
     expect(screen.getByRole('form', { name: 'Filter the audit log' })).toBeTruthy()
+  })
+
+  it('folds the filters behind a button on phones', () => {
+    renderLog()
+    const toggle = screen.getByRole('button', { name: 'Filters' })
+    const form = screen.getByRole('form', { name: 'Filter the audit log' })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(toggle.getAttribute('aria-controls')).toBe(form.id)
+    expect(form.className).toContain('hidden')
+    expect(form.className).toContain('md:flex')
+    fireEvent.click(toggle)
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect(form.className).not.toMatch(/(^|\s)hidden(\s|$)/)
   })
 
   it('says so when nothing matches', () => {

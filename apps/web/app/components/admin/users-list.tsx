@@ -13,6 +13,8 @@ import { AdminPage } from './admin-page.js'
 import {
   Badge,
   EmptyState,
+  FiltersToggle,
+  filtersFormClass,
   numClass,
   tableClass,
   tdClass,
@@ -69,35 +71,37 @@ export function UsersList({
       lead={text.lead}
       crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
     >
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full justify-between md:hidden"
-        aria-expanded={filtersOpen}
-        aria-controls="users-filters"
-        onClick={() => setFiltersOpen(!filtersOpen)}
-      >
-        <span className="inline-flex items-center gap-2.5">
-          <AdminIcon name="filter" />
-          {text.filtersToggle}
-        </span>
-        <AdminIcon name="chevronDown" />
-      </Button>
+      <FiltersToggle
+        open={filtersOpen}
+        onToggle={() => setFiltersOpen(!filtersOpen)}
+        controls="users-filters"
+        label={text.filtersToggle}
+      />
       <Form
         id="users-filters"
         method="get"
         aria-label={text.filtersLabel}
-        className={cn(
-          'flex-col gap-4 rounded-[18px] border border-border bg-surface p-5 md:flex',
-          filtersOpen ? 'flex' : 'hidden',
-        )}
+        className={filtersFormClass(filtersOpen)}
       >
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2.2fr)_repeat(2,minmax(0,1fr))_repeat(2,minmax(0,1.2fr))]">
           <div className={cn(field, 'sm:col-span-2 lg:col-span-1')}>
             <Label htmlFor="users-q">
               {canSearchEmail ? text.searchLabel : text.searchLabelLimited}
             </Label>
-            <Input id="users-q" name="q" type="search" defaultValue={filters.q} maxLength={100} />
+            <span className="relative">
+              <AdminIcon
+                name="search"
+                className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                id="users-q"
+                name="q"
+                type="search"
+                defaultValue={filters.q}
+                maxLength={100}
+                className="pl-10"
+              />
+            </span>
           </div>
           <div className={field}>
             <Label htmlFor="users-role">{text.roleLabel}</Label>
@@ -188,14 +192,20 @@ export function UsersList({
                             colorKey={user.username}
                             size="sm"
                           />
+                          {/* Each line stops at 200px with an ellipsis (full value in `title`), so a
+                              long name cannot widen the table; the detail page shows it whole. */}
                           <span className="flex min-w-0 flex-col">
                             <Link
                               to={`/admin/users/${user.id}`}
-                              className="font-semibold whitespace-nowrap hover:underline"
+                              title={user.displayName}
+                              className="block max-w-[200px] truncate font-semibold hover:underline"
                             >
                               {user.displayName}
                             </Link>
-                            <span className="text-[13px] whitespace-nowrap text-muted-foreground">
+                            <span
+                              title={`@${user.username}`}
+                              className="block max-w-[200px] truncate text-[13px] text-muted-foreground"
+                            >
                               @{user.username}
                             </span>
                             {canSearchEmail ? (

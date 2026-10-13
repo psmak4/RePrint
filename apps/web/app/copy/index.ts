@@ -777,11 +777,8 @@ export const copy = {
       ofLimit: (limit: number) => `of ${limit} per second`,
       usage: (percent: number) => `${percent}% of the limit`,
       loadFailed: 'We could not load the system numbers. Please try again in a moment.',
-      refreshNote: 'These numbers refresh every 30 seconds.',
-      updatedAt: (time: string) => `Updated at ${time} UTC`,
       sourceHeading: 'Source requests',
       requestsPerSecond: 'Requests per second (last minute)',
-      limit: (limit: number) => `Limit: ${limit} per second`,
       breaker: 'Circuit breaker',
       breakerOpen: 'Open: Source calls are paused',
       breakerClosed: 'Closed',
@@ -922,8 +919,6 @@ export const copy = {
       genresHeading: 'Genres',
       listLabel: 'Genres',
       empty: 'There are no Genres yet.',
-      counts: (books: number, rules: number) =>
-        `${books} ${books === 1 ? 'Book' : 'Books'} · ${rules} ${rules === 1 ? 'rule' : 'rules'}`,
       archivedBadge: 'Archived',
       topLevel: 'Top level',
       parentLabel: 'Parent Genre',
@@ -957,7 +952,6 @@ export const copy = {
       ruleAdded: 'The rule was added.',
       removeRule: (pattern: string) => `Remove rule ${pattern}`,
       ruleRemoved: 'The rule was removed.',
-      priority: (n: number) => `Priority ${n}`,
       failed: 'We could not save that. Please try again.',
     },
     book: {
@@ -1040,6 +1034,7 @@ export const copy = {
       title: 'Audit log',
       lead: 'Every Moderator and Admin action, newest first.',
       filtersLabel: 'Filter the audit log',
+      filtersToggle: 'Filters',
       loadFailed: 'We could not load the audit log. Please try again in a moment.',
       actorLabel: 'Actor (username)',
       actionLabel: 'Action',
@@ -1144,8 +1139,6 @@ export const copy = {
       decided: (status: 'approved' | 'rejected') =>
         status === 'approved' ? 'The review was approved.' : 'The review was rejected.',
       decideFailed: 'We could not save that decision. Please try again.',
-      shortcutsHeading: 'Keyboard shortcuts',
-      shortcuts: 'A approves, R rejects, J is the next review, K is the previous one.',
       compareHeading: 'Changes since the last approved version',
       lastApprovedHeading: 'Last approved version',
       submittedHeading: 'Submitted for review',
@@ -1237,7 +1230,6 @@ export const copy = {
         suspended: 'Suspended',
         deleted: 'Deleted',
       },
-      back: 'Back to users',
       noEmail: 'Hidden in the limited view',
       detail: {
         joinedLine: (username: string, date: string) => `@${username} · Joined ${date}`,
@@ -1273,7 +1265,6 @@ export const copy = {
         profileLink: 'Public profile',
       },
       actions: {
-        heading: 'Actions',
         rolesHeading: 'Roles',
         grant: (role: string) => `Make ${role}`,
         revoke: (role: string) => `Remove ${role} role`,

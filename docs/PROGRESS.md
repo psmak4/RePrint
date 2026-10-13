@@ -715,3 +715,8 @@ Entry format:
 - Admin section brought into the redesign (D-201) from approved mockups on the design canvas, built from `docs/superpowers/plans/2026-10-12-admin-redesign.md`. Web only.
 - The new phone sweep (no sideways scroll at 390 px) caught the Genres table's sr-only "Actions" header escaping its scroll box; `ScrollRegion` is now `relative`.
 - The nav count reads "Review queue, 3 waiting" to screen readers: without the comma the label and count ran together.
+
+### 2026-10-12 · M9-T20 follow-up · owner request · fix/admin-deferred-minors
+- The nine minors deferred from #171's review, each test-first. The `/admin` layout now makes the only stats request (2 s timeout) and the dashboard reads it from the layout. Audit filters fold behind a "Filters" button on phones. Users search has its icon. A child Genre whose archived parent is hidden loses its indent. "Add a Genre" sets `aria-expanded` and `aria-controls` and moves focus to Name. The review queue names its list once. A long merge reason wraps. Nine unused copy strings are gone.
+- The new long-value e2e check (a Member at the 30-character username, 50-character display name, and 280-character bio limits, plus a 400-character unbroken suspension reason) found two real overflows: user detail scrolled 2,500 px sideways on a phone (the suspension notice and the email beside its badge could not break), and the desktop Users table ran 550 px past its box (name and username were `nowrap`). Both fixed; the overflow check now names the elements that are too wide.
+- `pnpm check` passes. The gateway integration suite timed out once waiting for its container's ports and passed on rerun. `pnpm test:e2e` on a fresh database: 84 passed, 3 skipped.

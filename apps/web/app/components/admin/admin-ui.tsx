@@ -1,5 +1,5 @@
 import type { AdminUserStatus } from '@reprint/shared'
-import { cn } from '@reprint/ui'
+import { Button, cn } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { AdminIcon } from './icons.js'
 
@@ -17,16 +17,20 @@ const TONES: Record<BadgeTone, string> = {
 export function Badge({
   tone = 'gray',
   dot = false,
+  wrap = false,
   children,
 }: {
   tone?: BadgeTone
   dot?: boolean
+  /** For free text that may be long: it wraps instead of widening its container. */
+  wrap?: boolean
   children: ReactNode
 }) {
   return (
     <span
       className={cn(
-        'inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold',
+        wrap ? 'min-h-6 py-0.5 break-words whitespace-normal' : 'h-6 whitespace-nowrap',
         TONES[tone],
       )}
     >
@@ -45,6 +49,7 @@ export const USER_STATUS_TONE: Record<AdminUserStatus, BadgeTone> = {
 
 /** A white card. With `title` it is a region named by its serif `h2`. `flush` drops the padding (tables). */
 export function AdminCard({
+  id,
   title,
   label,
   actions,
@@ -52,6 +57,8 @@ export function AdminCard({
   className,
   children,
 }: {
+  /** For a button that opens this card (`aria-controls`). */
+  id?: string
   title?: ReactNode
   /** Names the region when there is no visible title. */
   label?: string
@@ -63,6 +70,7 @@ export function AdminCard({
   const titleId = useId()
   return (
     <section
+      id={id}
       aria-labelledby={title ? titleId : undefined}
       aria-label={title ? undefined : label}
       className={cn(
@@ -122,6 +130,46 @@ export function EmptyState({ children, action }: { children: ReactNode; action?:
     </div>
   )
 }
+
+/**
+ * The full-width button that shows or hides a filter form on phones; from `md` the form is always
+ * shown. Pair it with `filtersFormClass` on the form it `controls`.
+ */
+export function FiltersToggle({
+  open,
+  onToggle,
+  controls,
+  label,
+}: {
+  open: boolean
+  onToggle: () => void
+  controls: string
+  label: string
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full justify-between md:hidden"
+      aria-expanded={open}
+      aria-controls={controls}
+      onClick={onToggle}
+    >
+      <span className="inline-flex items-center gap-2.5">
+        <AdminIcon name="filter" />
+        {label}
+      </span>
+      <AdminIcon name="chevronDown" />
+    </Button>
+  )
+}
+
+/** A filter form's card: hidden on phones until its `FiltersToggle` opens it. */
+export const filtersFormClass = (open: boolean) =>
+  cn(
+    'flex-col gap-4 rounded-[18px] border border-border bg-surface p-5 md:flex',
+    open ? 'flex' : 'hidden',
+  )
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (

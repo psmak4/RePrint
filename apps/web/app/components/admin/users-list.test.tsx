@@ -63,6 +63,12 @@ describe('UsersList', () => {
     expect(screen.getByRole('form', { name: 'Filter users' })).toBeTruthy()
   })
 
+  it('marks the search field with a search icon', () => {
+    renderList()
+    const field = screen.getByLabelText('Search by username or email')
+    expect(field.parentElement?.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+  })
+
   it('shows a plain Member as text and the email under the name, on one line', () => {
     renderList()
     const table = screen.getByRole('table', { name: 'Users' })
