@@ -1,5 +1,6 @@
 import type { AuthorDetail, BookSummary, ContributionRole } from '@reprint/shared'
 import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
@@ -47,8 +48,12 @@ export function lifeDates(birthDate: string | null, deathDate: string | null): s
   return null
 }
 
-export function AuthorPage({ author }: { author: AuthorDetail }) {
+export function AuthorPage({ author, page = 1 }: { author: AuthorDetail; page?: number }) {
   const groups = groupWorks(author.works)
+  const { pathname } = useLocation()
+  // Paging counts the API's `author` list only; co-written Books are short and come whole (D-203).
+  const writtenShown = author.works.find((work) => work.role === 'author')?.books.length ?? 0
+  const writtenRemaining = (author.writtenTotal ?? writtenShown) - writtenShown
   const dates = lifeDates(author.birthDate, author.deathDate)
   return (
     <article className="flex flex-col gap-10 md:gap-14">
@@ -92,6 +97,11 @@ export function AuthorPage({ author }: { author: AuthorDetail }) {
                 <h2 id={`author-books-${group}`} className={SECTION_HEADING}>
                   {text.roleHeadings[group]}
                 </h2>
+                {group === 'author' && author.adding ? (
+                  <p role="status" className="text-sm text-muted-foreground">
+                    {text.adding}
+                  </p>
+                ) : null}
                 <BookGrid
                   narrow
                   items={books.map((book) => ({
@@ -108,6 +118,14 @@ export function AuthorPage({ author }: { author: AuthorDetail }) {
                     },
                   }))}
                 />
+                {group === 'author' && writtenRemaining > 0 ? (
+                  <Link
+                    to={`${pathname}?page=${page + 1}#author-books-author`}
+                    className="self-start rounded-full border border-input-border bg-surface px-5 py-2.5 text-[15px] font-semibold hover:bg-surface-raised"
+                  >
+                    {text.showMore(writtenRemaining)}
+                  </Link>
+                ) : null}
               </section>
             ))
           )}

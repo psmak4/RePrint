@@ -15,10 +15,10 @@ const author = {
   works: [],
 }
 
-function load(handler: (url: URL) => Response, slug = 'frank-herbert') {
+function load(handler: (url: URL) => Response, slug = 'frank-herbert', search = '') {
   vi.stubGlobal('fetch', async (url: URL) => handler(new URL(String(url))))
   return loader({
-    request: new Request(`https://reprint.test/authors/${slug}`),
+    request: new Request(`https://reprint.test/authors/${slug}${search}`),
     params: { slug },
   } as never)
 }
@@ -57,6 +57,20 @@ describe('author loader', () => {
       },
       { '@type': 'BreadcrumbList' },
     ])
+  })
+
+  it('asks the API for the requested page of the Written list, and ignores a bad one (D-203)', async () => {
+    const asked: string[] = []
+    const record = (url: URL) => {
+      asked.push(url.search)
+      return respond(url)
+    }
+    expect((await load(record, 'frank-herbert', '?page=2')).page).toBe(2)
+    expect(asked.at(-1)).toBe('?page=2')
+    for (const bad of ['?page=0', '?page=51', '?page=abc', '?page=1.5', '']) {
+      expect((await load(record, 'frank-herbert', bad)).page).toBe(1)
+      expect(asked.at(-1)).toBe('')
+    }
   })
 
   it('builds a description when there is no bio and trims a long one', async () => {

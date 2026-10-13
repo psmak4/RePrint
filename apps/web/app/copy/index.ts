@@ -498,6 +498,8 @@ export const copy = {
     },
     metaDescription: (name: string) => `Books by ${name}, with ratings and reviews on RePrint.`,
     loadFailed: "We couldn't load this author right now. Please try again in a moment.",
+    showMore: (remaining: number) => `Show more (${remaining} more)`,
+    adding: 'Still adding Books by this author.',
   },
   genres: {
     indexTitle: 'Genres',
