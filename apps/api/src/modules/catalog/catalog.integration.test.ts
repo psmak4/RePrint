@@ -173,7 +173,7 @@ describe('GET /v1/books/:slug', () => {
 
     it('queues nothing when viewing a Book only a Series sync brought in (one level, D-199)', async () => {
       const { slug, bookId } = await ingest('stub-book-hobbit', 'stub-author-tolkien')
-      await stack.db.db.update(books).set({ seriesImportOnly: true }).where(eq(books.id, bookId))
+      await stack.db.db.update(books).set({ importOnly: true }).where(eq(books.id, bookId))
       await app.inject({ method: 'GET', url: `/v1/books/${slug}` })
       expect(queued).toEqual([])
     })

@@ -150,7 +150,7 @@ describe('importSeriesMember', () => {
       .select()
       .from(books)
       .where(eq(books.title, 'The Fellowship of the Ring'))
-    expect(book?.seriesImportOnly).toBe(true)
+    expect(book?.importOnly).toBe(true)
     const [member] = await db
       .select({ position: bookSeries.position })
       .from(bookSeries)

@@ -1,17 +1,13 @@
 import { bookSeries, books, type Database, series, sourceLinks } from '@reprint/db'
-import type { AuthorRecord } from '@reprint/shared'
-import { and, eq, exists, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, exists, isNull, lt, or, sql } from 'drizzle-orm'
 import type { JobQueue } from '../jobs/queue.js'
+import { type Call, direct, importBookFromSource, storedBooks } from './import-book.js'
 import { isLocked } from './ingest/fields.js'
-import { ingestBook } from './ingest/ingest.js'
 import type { SourceAdapter } from './sources/types.js'
 import { STALE_AFTER_MS } from './staleness.js'
 
 /** Series imports wait behind interactive work and Admin refreshes (PRD §6). */
 export const SERIES_SYNC_PRIORITY = 10
-
-/** How many Source IDs one lookup of stored Books checks at a time. */
-const LOOKUP_CHUNK = 500
 
 /** One member a sync found missing, for a `catalog.series-member` job. */
 export interface SeriesMemberImport {
@@ -23,32 +19,6 @@ export interface SeriesMemberImport {
 export type SeriesSyncOutcome =
   | { outcome: 'synced'; toImport: SeriesMemberImport[] }
   | { outcome: 'not_linked' | 'not_found' | 'unsupported' }
-
-type Call = <T>(fn: () => Promise<T>) => Promise<T>
-const direct: Call = (fn) => fn()
-
-/** The stored Books for these Source IDs, by Source ID. */
-async function storedBooks(
-  db: Database,
-  source: string,
-  sourceIds: string[],
-): Promise<Map<string, string>> {
-  const found = new Map<string, string>()
-  for (let start = 0; start < sourceIds.length; start += LOOKUP_CHUNK) {
-    const rows = await db
-      .select({ sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
-      .from(sourceLinks)
-      .where(
-        and(
-          eq(sourceLinks.entityType, 'book'),
-          eq(sourceLinks.source, source),
-          inArray(sourceLinks.sourceId, sourceIds.slice(start, start + LOOKUP_CHUNK)),
-        ),
-      )
-    for (const row of rows) found.set(row.sourceId, row.bookId)
-  }
-  return found
-}
 
 /**
  * Reads a Series' member list from its Source (D-199). It records the Source's count at once, adds
@@ -133,23 +103,15 @@ export async function importSeriesMember(options: {
     await addMembership(db, stored, seriesId, position)
     return 'linked'
   }
-  const candidate = await call(() => source.getBook(sourceId))
-  if (!candidate) return 'not_found'
-  const authorRecords = new Map<string, AuthorRecord>()
-  for (const contribution of candidate.book.contributions) {
-    const authorLink = contribution.sourceLink
-    if (!authorLink || authorRecords.has(authorLink.sourceId)) continue
-    const record = await call(() => source.getAuthor(authorLink.sourceId))
-    if (record) authorRecords.set(authorLink.sourceId, record)
-  }
-  const ingested = await ingestBook(db, {
+  const bookId = await importBookFromSource({
+    db,
     source,
-    candidate,
-    authorRecords,
-    seriesImport: true,
+    sourceId,
+    call,
     ...(options.now ? { now: options.now } : {}),
   })
-  await addMembership(db, ingested.bookId, seriesId, position)
+  if (!bookId) return 'not_found'
+  await addMembership(db, bookId, seriesId, position)
   return 'imported'
 }
 
@@ -188,7 +150,7 @@ export async function seriesDueForBook(
       and(
         eq(bookSeries.bookId, bookId),
         // A Book only a Series sync brought in starts no syncs of its own (one level only).
-        eq(books.seriesImportOnly, false),
+        eq(books.importOnly, false),
         or(isNull(series.membersSyncedAt), lt(series.membersSyncedAt, syncedBefore)),
         exists(
           db

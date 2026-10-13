@@ -209,16 +209,16 @@ describe('ingestBook', () => {
 
   it('marks a Book a Series sync creates, and reports no syncs for it (one level only)', async () => {
     const hobbit = await stubCandidate('stub-book-hobbit')
-    const imported = await ingestBook(db, { source: stub, candidate: hobbit, seriesImport: true })
+    const imported = await ingestBook(db, { source: stub, candidate: hobbit, importOnly: true })
     expect(imported.seriesToSync).toEqual([])
     const [row] = await db.select().from(books).where(eq(books.id, imported.bookId))
-    expect(row?.seriesImportOnly).toBe(true)
+    expect(row?.importOnly).toBe(true)
     // A Book a Member already reached keeps its standing when a sync meets it again.
     const dune = await stubCandidate('stub-book-dune')
     const reached = await ingestBook(db, { source: stub, candidate: dune })
-    await ingestBook(db, { source: stub, candidate: dune, seriesImport: true })
+    await ingestBook(db, { source: stub, candidate: dune, importOnly: true })
     const [kept] = await db.select().from(books).where(eq(books.id, reached.bookId))
-    expect(kept?.seriesImportOnly).toBe(false)
+    expect(kept?.importOnly).toBe(false)
   })
 
   it('keeps two Source Series with the same name apart', async () => {

@@ -19,8 +19,8 @@ export type ResolveResult = { slug: string; seriesToSync: string[] } | { notFoun
 export async function markReached(db: Database, bookId: string): Promise<string[]> {
   const marked = await db
     .update(books)
-    .set({ seriesImportOnly: false })
-    .where(and(eq(books.id, bookId), eq(books.seriesImportOnly, true)))
+    .set({ importOnly: false })
+    .where(and(eq(books.id, bookId), eq(books.importOnly, true)))
     .returning({ id: books.id })
   return marked.length > 0 ? seriesDueForBook(db, bookId) : []
 }

@@ -58,7 +58,7 @@ export async function withSeriesLock<T>(work: () => Promise<T>): Promise<T> {
  */
 export async function resetSeriesSync(name: string, bookTitle: string, seriesOnlyTitle: string) {
   await withDb(async (db) => {
-    await db.update(books).set({ seriesImportOnly: true }).where(eq(books.title, seriesOnlyTitle))
+    await db.update(books).set({ importOnly: true }).where(eq(books.title, seriesOnlyTitle))
     const [row] = await db.select({ id: series.id }).from(series).where(eq(series.name, name))
     if (!row) return
     await db.update(series).set({ membersSyncedAt: null }).where(eq(series.id, row.id))
