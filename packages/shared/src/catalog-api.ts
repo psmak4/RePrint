@@ -66,9 +66,12 @@ export type BookSummary = z.infer<typeof bookSummarySchema>
 /** How many Books the Author page's Written list shows per page (D-203). */
 export const AUTHOR_WRITTEN_PAGE_SIZE = 24
 
+/** The deepest Written page served: past it, the page offers no "Show more" (D-203). */
+export const AUTHOR_MAX_PAGE = 50
+
 /** `GET /authors/:slug?page=N`: the Written list holds the first `N × 24` Books (D-203). */
 export const authorDetailQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).max(50).default(1),
+  page: z.coerce.number().int().min(1).max(AUTHOR_MAX_PAGE).default(1),
 })
 
 /** `GET /authors/:slug`: the Author and their Books grouped by Role, most reviewed first. */

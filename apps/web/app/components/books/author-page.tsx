@@ -1,4 +1,9 @@
-import type { AuthorDetail, BookSummary, ContributionRole } from '@reprint/shared'
+import {
+  AUTHOR_MAX_PAGE,
+  type AuthorDetail,
+  type BookSummary,
+  type ContributionRole,
+} from '@reprint/shared'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -118,7 +123,7 @@ export function AuthorPage({ author, page = 1 }: { author: AuthorDetail; page?: 
                     },
                   }))}
                 />
-                {group === 'author' && writtenRemaining > 0 ? (
+                {group === 'author' && writtenRemaining > 0 && page < AUTHOR_MAX_PAGE ? (
                   <Link
                     to={`${pathname}?page=${page + 1}#author-books-author`}
                     className="self-start rounded-full border border-input-border bg-surface px-5 py-2.5 text-[15px] font-semibold hover:bg-surface-raised"

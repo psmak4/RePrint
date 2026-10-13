@@ -1,4 +1,10 @@
-import { APP_NAME, authorDetailSchema, markdownToText, slugSchema } from '@reprint/shared'
+import {
+  APP_NAME,
+  AUTHOR_MAX_PAGE,
+  authorDetailSchema,
+  markdownToText,
+  slugSchema,
+} from '@reprint/shared'
 import { data } from 'react-router'
 import { AuthorPage } from '../components/books/author-page.js'
 import { JsonLd } from '../components/seo/json-ld.js'
@@ -29,7 +35,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!slug.success) throw data('Not found', { status: 404 })
   // The Written list's page (D-203); anything outside 1 to 50 shows the first.
   const asked = Number(new URL(request.url).searchParams.get('page'))
-  const page = Number.isInteger(asked) && asked >= 1 && asked <= 50 ? asked : 1
+  const page = Number.isInteger(asked) && asked >= 1 && asked <= AUTHOR_MAX_PAGE ? asked : 1
 
   let response: Response
   try {

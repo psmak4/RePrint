@@ -1,5 +1,10 @@
 // @vitest-environment jsdom
-import { AUTHOR_WRITTEN_PAGE_SIZE, type AuthorDetail, type BookSummary } from '@reprint/shared'
+import {
+  AUTHOR_MAX_PAGE,
+  AUTHOR_WRITTEN_PAGE_SIZE,
+  type AuthorDetail,
+  type BookSummary,
+} from '@reprint/shared'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -89,6 +94,26 @@ describe('AuthorPage', () => {
       writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE + 1,
     })
     expect(screen.getByRole('link', { name: 'Show more (1 more)' })).toBeTruthy()
+  })
+
+  it('offers no Show more on the last page the site serves, so the list never shrinks', () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/',
+        Component: () => (
+          <AuthorPage
+            author={{
+              ...author,
+              works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
+              writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE * AUTHOR_MAX_PAGE + 5,
+            }}
+            page={AUTHOR_MAX_PAGE}
+          />
+        ),
+      },
+    ])
+    render(<Stub />)
+    expect(screen.queryByRole('link', { name: /Show more/ })).toBeNull()
   })
 
   it('says Books are still being added while an import runs (D-203)', () => {
