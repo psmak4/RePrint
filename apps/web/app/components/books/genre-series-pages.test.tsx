@@ -173,6 +173,23 @@ describe('SeriesPage', () => {
     expect(seriousViolations(await axe.run(container))).toEqual([])
   })
 
+  it('renders the Markdown of a Series description inside the lead (D-202)', () => {
+    const { container } = renderInRouter(
+      <SeriesPage
+        detail={{
+          ...series,
+          series: {
+            ...series.series,
+            description: 'Six *epic* novels by [Herbert](https://example.org).',
+          },
+        }}
+      />,
+    )
+    expect(screen.getByText('epic').tagName).toBe('EM')
+    expect(screen.getByRole('link', { name: 'Herbert' })).toBeTruthy()
+    expect(container.querySelector('p p, p div')).toBeNull()
+  })
+
   it('says so when the Series has no Books', () => {
     renderInRouter(<SeriesPage detail={{ ...series, items: [] }} />)
     expect(screen.getByText('No books in this series yet')).toBeTruthy()

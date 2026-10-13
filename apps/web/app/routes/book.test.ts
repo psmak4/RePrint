@@ -221,6 +221,19 @@ describe('book loader', () => {
     expect(long.metaDescription.endsWith('…')).toBe(true)
   })
 
+  it('gives the meta description and JSON-LD the text of a Markdown description (D-202)', async () => {
+    const result = await load((url) =>
+      url.pathname === '/v1/books/dune-abc123'
+        ? Response.json({
+            ...book,
+            description: 'A *desert* planet ([source][1]).\n\n[1]: https://example.org/dune',
+          })
+        : respond(url),
+    )
+    expect(result.metaDescription).toBe('A desert planet (source).')
+    expect(result.jsonLd[0]).toMatchObject({ description: 'A desert planet (source).' })
+  })
+
   it('still renders the Book when Editions and the author fail', async () => {
     const result = await load((url) =>
       url.pathname === '/v1/books/dune-abc123'

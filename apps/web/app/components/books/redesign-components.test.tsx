@@ -315,6 +315,20 @@ describe('presentational components', () => {
     expect(screen.queryByRole('link', { name: /See all/ })).toBeNull()
   })
 
+  it('AuthorCard shows the plain text of a Markdown bio, since it is cut short (D-202)', () => {
+    renderInRouter(
+      <AuthorCard
+        name="Eoin Colfer"
+        href="/authors/eoin-colfer"
+        bio={
+          'An *Irish* author.\n\n([source][1])\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer'
+        }
+        bookCount={1}
+      />,
+    )
+    expect(screen.getByText(/An Irish author\./).textContent).toBe('An Irish author.\n\n(source)')
+  })
+
   it('AuthorCard and AuthorMatchCard link to the Author', () => {
     renderInRouter(
       <AuthorCard

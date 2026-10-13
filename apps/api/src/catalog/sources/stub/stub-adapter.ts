@@ -34,7 +34,8 @@ const AUTHORS: Record<string, AuthorRecord> = {
   'stub-author-tolkien': {
     name: 'J. R. R. Tolkien',
     alternateNames: [],
-    bio: null,
+    // Markdown with a reference link, as Open Library writes bios (D-202).
+    bio: 'English writer and philologist, best known for *The Hobbit*.\n\n([source][1])\n\n[1]: https://en.wikipedia.org/wiki/J._R._R._Tolkien',
     birthDate: '1892-01-03',
     deathDate: '1973-09-02',
     photo: null,

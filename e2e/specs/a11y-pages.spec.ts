@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
 import { grantAdmin, openDunePage, registerVerifiedMember } from '../support/accounts.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 // The page types that other specs do not already check with axe (PRD §11, §12). Discover, search,
 // Book (with reviews), Genre, Series, profile, library, auth, and most admin pages are covered in
@@ -31,6 +32,35 @@ test('Author page and a Book page have no serious accessibility issues', async (
   await page.getByRole('main').locator('a[href^="/authors/"]').first().click()
   await expect(page).toHaveURL(/\/authors\/[^/?]+$/)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expectNoA11yViolations(page)
+})
+
+// The stub Source writes Tolkien's bio in Markdown with a reference link, as Open Library does.
+test('an Author bio renders its Markdown, with an outside link (D-202)', async ({ page }) => {
+  // Its own client IP, so its searches do not count against the per-IP search limit that the other
+  // anonymous specs share.
+  await useOwnClientIp(page)
+  await page.goto('/search?q=hobbit')
+  await page
+    .getByRole('main')
+    .getByRole('link', { name: /The Hobbit/ })
+    .first()
+    .click()
+  await expect(page.getByRole('heading', { level: 1, name: 'The Hobbit' })).toBeVisible()
+  await page.getByRole('main').getByRole('link', { name: 'J. R. R. Tolkien' }).first().click()
+  await expect(page.getByRole('heading', { level: 1, name: 'J. R. R. Tolkien' })).toBeVisible()
+
+  const bio = page.getByRole('region', { name: 'About the author' })
+  const source = bio.getByRole('link', { name: 'source' })
+  await expect(source).toHaveAttribute('href', 'https://en.wikipedia.org/wiki/J._R._R._Tolkien')
+  await expect(source).toHaveAttribute('rel', 'nofollow ugc noopener noreferrer')
+  await expect(bio.locator('em')).toHaveText('The Hobbit')
+  await expect(bio).not.toContainText('[1]')
+  // Search engines get the plain text.
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'English writer and philologist, best known for The Hobbit. (source)',
+  )
   await expectNoA11yViolations(page)
 })
 

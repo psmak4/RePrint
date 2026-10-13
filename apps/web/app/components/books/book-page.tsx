@@ -5,6 +5,7 @@ import {
   type Cover as CoverData,
   type Edition,
   type MyReview,
+  markdownToText,
   PERMISSIONS,
   type Viewer,
 } from '@reprint/shared'
@@ -16,6 +17,7 @@ import { coverUrl } from '../../lib/cover-url.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
 import { MyReviewSection } from '../reviews/my-review-section.js'
 import { ReviewsList } from '../reviews/reviews-list.js'
+import { RichText } from '../rich-text.js'
 import { AuthorCard } from './author-card.js'
 import { BookRail } from './book-rail.js'
 import { Cover } from './cover.js'
@@ -577,7 +579,9 @@ function BookDetails({ book }: { book: BookDetail }) {
 function Description({ text: description }: { text: string | null }) {
   const [expanded, setExpanded] = useState(false)
   const body = description?.trim() ?? ''
-  const collapsible = body.length > COLLAPSE_AFTER_CHARACTERS || body.split('\n').length > 6
+  // Measured on the text a reader sees, not the Markdown (D-202).
+  const shown = markdownToText(body)
+  const collapsible = shown.length > COLLAPSE_AFTER_CHARACTERS || shown.split('\n').length > 6
   return (
     <section
       id="overview"
@@ -592,12 +596,11 @@ function Description({ text: description }: { text: string | null }) {
       </h2>
       {body ? (
         <>
-          <p
+          <RichText
             id="book-description-text"
-            className={`font-serif text-lg leading-[1.6] whitespace-pre-line text-[#1e293b] md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
-          >
-            {body}
-          </p>
+            text={body}
+            className={`font-serif text-lg leading-[1.6] text-[#1e293b] md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
+          />
           {collapsible ? (
             <button
               type="button"

@@ -72,6 +72,12 @@ Write down these values as you go (the names below are used in later steps):
 
 Free-tier limits to expect: the API sleeps after ~15 minutes idle (the keep-warm workflow pings it every 10), uploads such as avatars disappear on each redeploy, the Redis instance is small and not persisted, email only reaches your own address, and there are no per-PR preview environments (M1-T21 and M1-T22 stay skipped).
 
+## One-time data steps
+
+Run each once per environment after the deploy that adds it, on your machine with `DATABASE_URL` set to that environment's direct URL for that one command only. Each is safe to run again.
+
+- **Source Markdown (D-202).** `pnpm --filter api catalog:clean-markup` re-reads stored Book descriptions and Author bios with the current Source rules (Open Library page links become text, its footers go). Admin-set and locked text is left alone. It prints how many rows changed.
+
 ## Rollback
 
 Redeploy the previous commit: run the workflow manually from an earlier commit's ref, or use Render's and Netlify's "redeploy" for the earlier build. Migrations follow expand then contract (PRD §12), so old code runs against the new schema and the database is not rolled back.
