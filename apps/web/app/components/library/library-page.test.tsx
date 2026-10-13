@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import type { LibraryResponse } from '@reprint/shared'
+import type { LibraryResponse, LibrarySort } from '@reprint/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import axe from 'axe-core'
-import { createRoutesStub } from 'react-router'
+import { createRoutesStub, Link, useLocation } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import { libraryHref } from '../../lib/library-links.js'
 import { LibraryPage, PrivateLibrary } from './library-page.js'
@@ -128,6 +128,39 @@ describe('PrivateLibrary', () => {
   it('explains the Library is private', async () => {
     renderPage(<PrivateLibrary />)
     expect(await screen.findByRole('heading', { name: 'This library is private' })).toBeTruthy()
+  })
+})
+
+describe('LibraryPage sort after the URL changes', () => {
+  it('shows the sort in the new URL, as after going Back', async () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/u/:username/library',
+        Component: () => {
+          // The page stays mounted when only the query changes, as in the app.
+          const sort = new URLSearchParams(useLocation().search).get('sort') ?? 'added_desc'
+          return (
+            <>
+              <Link to="/u/ada/library">Back to the default order</Link>
+              <LibraryPage
+                username="ada"
+                library={library}
+                view={{ sort: sort as LibrarySort, page: 1 }}
+              />
+            </>
+          )
+        },
+      },
+    ])
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Stub initialEntries={['/u/ada/library?sort=title']} />
+      </QueryClientProvider>,
+    )
+    const sort = () => container.querySelector('select[name="sort"]') as HTMLSelectElement
+    expect(sort().value).toBe('title')
+    fireEvent.click(screen.getByRole('link', { name: 'Back to the default order' }))
+    await waitFor(() => expect(sort().value).toBe('added_desc'))
   })
 })
 

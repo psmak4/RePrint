@@ -131,7 +131,8 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
       >
         <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
           {text.sortLabel}
-          <Select id={sortId} name="sort" defaultValue={query.sort} compact>
+          {/* Keyed by its value, so Back or a new link shows that URL's sort, not the last one. */}
+          <Select key={query.sort} id={sortId} name="sort" defaultValue={query.sort} compact>
             {REVIEW_SORTS.map((sort) => (
               <option key={sort} value={sort}>
                 {text.sorts[sort]}

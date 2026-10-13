@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import type { SearchQuery, SearchResponse } from '@reprint/shared'
+import { type SearchQuery, type SearchResponse, searchQuerySchema } from '@reprint/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { createRoutesStub } from 'react-router'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { createRoutesStub, Link, useLocation } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { copy } from '../../copy/index.js'
 import { SearchResultsPage } from './search-results-page.js'
@@ -233,5 +233,37 @@ describe('SearchResultsPage', () => {
     cleanup()
     renderPage({ results: null, failed: true })
     expect(screen.getByRole('alert').textContent).toBe(copy.search.loadFailed)
+  })
+})
+
+describe('SearchResultsPage after a new search', () => {
+  it('shows the new search’s sort and filters, not the last one’s', async () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/search',
+        Component: () => {
+          // The page stays mounted from one search to the next, as in the app.
+          const params = new URLSearchParams(useLocation().search)
+          const current = searchQuerySchema.parse(Object.fromEntries(params))
+          return (
+            <>
+              <Link to="/search?q=tolkien">Search for tolkien</Link>
+              <SearchResultsPage query={current} results={base} failed={false} />
+            </>
+          )
+        },
+      },
+    ])
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Stub initialEntries={['/search?q=dune&sort=newest&decade=1960']} />
+      </QueryClientProvider>,
+    )
+    const field = (selector: string) => container.querySelector(selector) as HTMLSelectElement
+    expect(field('#results-sort').value).toBe('newest')
+    expect(field('#filter-decade').value).toBe('1960')
+    fireEvent.click(screen.getByRole('link', { name: 'Search for tolkien' }))
+    await waitFor(() => expect(field('#results-sort').value).toBe('relevance'))
+    expect(field('#filter-decade').value).toBe('')
   })
 })

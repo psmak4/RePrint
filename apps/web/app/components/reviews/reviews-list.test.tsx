@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import type { BookReviewsResponse, PublicReview } from '@reprint/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import axe from 'axe-core'
-import { createRoutesStub } from 'react-router'
+import { createRoutesStub, Link, useLocation } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { ReviewListQuery } from '../../lib/review-links.js'
 import { RatingSummary } from './rating-summary.js'
@@ -171,5 +171,35 @@ describe('ReviewsList', () => {
     )
     const results = await axe.run(container)
     expect(results.violations).toEqual([])
+  })
+})
+
+describe('ReviewsList sort after the URL changes', () => {
+  it('shows the sort in the new URL, as after going Back', async () => {
+    const Stub = createRoutesStub([
+      {
+        path: '/books/:slug',
+        Component: () => {
+          // The page stays mounted when only the query changes, as in the app.
+          const sort = new URLSearchParams(useLocation().search).get('sort') ?? 'most_helpful'
+          return (
+            <QueryClientProvider client={new QueryClient()}>
+              <Link to="/books/dune">Back to the default order</Link>
+              <ReviewsList
+                slug="dune"
+                reviews={page([review()])}
+                query={{ ...base, sort: sort as ReviewListQuery['sort'] }}
+                hasAnyReviews
+              />
+            </QueryClientProvider>
+          )
+        },
+      },
+    ])
+    const { container } = render(<Stub initialEntries={['/books/dune?sort=newest']} />)
+    const sort = () => container.querySelector('select[name="sort"]') as HTMLSelectElement
+    expect(sort().value).toBe('newest')
+    fireEvent.click(screen.getByRole('link', { name: 'Back to the default order' }))
+    await waitFor(() => expect(sort().value).toBe('most_helpful'))
   })
 })

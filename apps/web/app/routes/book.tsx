@@ -300,6 +300,9 @@ export default function Book({ loaderData }: Route.ComponentProps) {
     <>
       <JsonLd data={loaderData.jsonLd} />
       <BookPage
+        // Moving to another Book keeps this route mounted; a new key starts the page afresh, so no
+        // state from the last Book (its Shelf, a review being edited, filters) carries over.
+        key={loaderData.book.id}
         book={loaderData.book}
         editions={loaderData.editions}
         moreByAuthor={loaderData.moreByAuthor}
