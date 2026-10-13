@@ -1,5 +1,15 @@
+import { toSourceMarkdown } from './open-library/record.js'
+import { SOURCE_NAME as OPEN_LIBRARY } from './open-library/source-name.js'
 import { createStubSource } from './stub/stub-adapter.js'
 import type { SourceAdapter } from './types.js'
+
+/**
+ * How each Source's long text (a Book description, an Author bio) is read on import, by the Source
+ * name its field origins carry, so text stored under older rules can be read again (D-202).
+ */
+export const sourceTextCleaners: Readonly<Record<string, (raw: string) => string | null>> = {
+  [OPEN_LIBRARY]: toSourceMarkdown,
+}
 
 export const SOURCE_MODES = ['fixtures', 'live', 'stub'] as const
 export type SourceMode = (typeof SOURCE_MODES)[number]
