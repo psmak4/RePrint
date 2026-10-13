@@ -12,7 +12,7 @@ import {
   users,
 } from '@reprint/db'
 import { and, eq, lt } from 'drizzle-orm'
-import { newIdentity, testPassword, useOwnClientIp } from './identity.js'
+import { ensureOwnClientIp, newIdentity, testPassword, useOwnClientIp } from './identity.js'
 import { linkInEmail, waitForEmail } from './mailpit.js'
 
 const databaseUrl = process.env.DATABASE_URL ?? 'postgres://reprint:reprint@localhost:5432/reprint'
@@ -204,6 +204,7 @@ export async function moveReviewToQueueFront(email: string) {
 
 /** Opens the Dune Book page, bringing it into the Catalog first when no other spec has. */
 export async function openDunePage(page: Page) {
+  await ensureOwnClientIp(page)
   await page.goto('/search?q=Dune')
   await page.getByRole('main').getByRole('link', { name: /Dune/ }).first().click()
   await expect(page).toHaveURL(/\/books\/[^/?]+$/)

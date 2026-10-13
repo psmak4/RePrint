@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 test('home page renders and has no serious accessibility issues', async ({ page }) => {
+  await useOwnClientIp(page)
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(page.getByRole('main')).toBeVisible()
@@ -9,6 +11,7 @@ test('home page renders and has no serious accessibility issues', async ({ page 
 })
 
 test('sends a nonce-based CSP and still hydrates', async ({ page }) => {
+  await useOwnClientIp(page)
   const violations: string[] = []
   page.on('console', (message) => {
     if (/content security policy/i.test(message.text())) violations.push(message.text())

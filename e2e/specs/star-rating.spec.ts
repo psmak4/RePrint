@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { useOwnClientIp } from '../support/identity.js'
 
 // jsdom has no layout, so the phone-width regression (M9-T09, D-186) is checked in a real browser.
 // The markup reuses the classes `StarRating` and `RatingBreakdown` emit, placed on a page that
@@ -13,6 +14,7 @@ for (const [average, share] of [
   test(`a ${average.toFixed(1)} average fills ${share * 100}% of the stars at phone width`, async ({
     page,
   }) => {
+    await useOwnClientIp(page)
     await page.goto('/about')
     const fillClass = `w-[${Math.round(share * 100)}%]`
     const stars = '★★★★★'

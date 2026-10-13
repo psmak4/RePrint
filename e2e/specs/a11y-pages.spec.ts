@@ -18,6 +18,7 @@ const legalPages = [
 ]
 
 test('legal and static pages have no serious accessibility issues', async ({ page }) => {
+  await useOwnClientIp(page)
   for (const { path, heading } of legalPages) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()

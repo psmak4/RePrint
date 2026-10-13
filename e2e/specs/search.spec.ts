@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { expectNoA11yViolations } from '../support/a11y.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 // The stub Source (SOURCE_MODE=stub) offers Dune and The Hobbit. The three projects share one
 // database and run in parallel, so each step works whether or not another project has already
@@ -8,6 +9,7 @@ import { expectNoA11yViolations } from '../support/a11y.js'
 test('searches, opens a not-yet-stored result, and finds the Book in the Catalog afterwards', async ({
   page,
 }) => {
+  await useOwnClientIp(page)
   await page.goto('/')
   const search = page.getByRole('combobox', { name: 'Search books and authors' })
   await search.fill('Dune')
@@ -36,6 +38,7 @@ test('searches, opens a not-yet-stored result, and finds the Book in the Catalog
 })
 
 test('an ISBN search lands directly on the Book page', async ({ page }) => {
+  await useOwnClientIp(page)
   await page.goto('/search?q=9780547928227')
   await expect(page).toHaveURL(/\/books\/[^/?]+$/)
   await expect(page.getByRole('heading', { level: 1, name: 'The Hobbit' })).toBeVisible()

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createDb, series } from '@reprint/db'
 import { expectNoA11yViolations } from '../support/a11y.js'
+import { useOwnClientIp } from '../support/identity.js'
 
 // Genres are reference data, so they exist on a fresh and on a seeded database. Discover rows
 // appear only once the seed and a rebuild have run, so the home page is checked either way.
@@ -10,12 +11,14 @@ const databaseUrl = process.env.DATABASE_URL ?? 'postgres://reprint:reprint@loca
 test('Discover home page links to all Genres and has no serious accessibility issues', async ({
   page,
 }) => {
+  await useOwnClientIp(page)
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expectNoA11yViolations(page)
 })
 
 test('browses from the Genres index to a Genre page and sorts it', async ({ page }) => {
+  await useOwnClientIp(page)
   await page.goto('/genres')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expectNoA11yViolations(page)
@@ -31,6 +34,7 @@ test('browses from the Genres index to a Genre page and sorts it', async ({ page
 })
 
 test('a Series page renders and has no serious accessibility issues', async ({ page }) => {
+  await useOwnClientIp(page)
   const slug = `e2e-series-${Date.now()}-${Math.floor(Math.random() * 1e6)}`
   const client = createDb(databaseUrl, { max: 1 })
   try {

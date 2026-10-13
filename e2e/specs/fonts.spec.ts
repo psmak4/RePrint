@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
+import { useOwnClientIp } from '../support/identity.js'
 
 // D-180: the web fonts are self-hosted, so no request leaves RePrint's origin for a font or stylesheet,
 // and the CSP keeps `font-src 'self'` and `style-src 'self'`.
 test('fonts load from our own origin and no Google domain is requested', async ({ page }) => {
+  await useOwnClientIp(page)
   const requested: string[] = []
   page.on('request', (request) => requested.push(request.url()))
   const response = await page.goto('/')
