@@ -5,7 +5,7 @@ import type {
   PublicReview,
   SeriesDetailResponse,
 } from '@reprint/shared'
-import { APP_NAME } from '@reprint/shared'
+import { APP_NAME, markdownToText } from '@reprint/shared'
 import { copy } from '../copy/index.js'
 import { coverUrl } from './cover-url.js'
 
@@ -76,7 +76,8 @@ export function bookJsonLd(origin: string, book: BookDetail, reviews: PublicRevi
     name: book.title,
   }
   if (book.subtitle) node.alternativeHeadline = book.subtitle
-  if (book.description) node.description = book.description
+  // Descriptions and bios are Markdown (D-202); structured data takes their plain text.
+  if (book.description) node.description = markdownToText(book.description)
   if (image) node.image = image
   if (authors.length > 0) node.author = authors
   if (book.genres.length > 0) node.genre = book.genres.map((genre) => genre.name)
@@ -124,7 +125,7 @@ export function authorJsonLd(origin: string, author: AuthorDetail): JsonLdNode {
     name: author.name,
   }
   if (author.alternateNames.length > 0) node.alternateName = author.alternateNames
-  if (author.bio) node.description = author.bio
+  if (author.bio) node.description = markdownToText(author.bio)
   if (author.birthDate) node.birthDate = author.birthDate
   if (author.deathDate) node.deathDate = author.deathDate
   if (image) node.image = image

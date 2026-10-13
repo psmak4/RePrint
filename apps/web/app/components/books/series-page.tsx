@@ -1,5 +1,6 @@
 import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
 import { copy } from '../../copy/index.js'
+import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
 import { summaryCard } from './genre-pages.js'
 import { PageHero } from './page-hero.js'
@@ -27,7 +28,13 @@ export function SeriesPage({
           </p>
         }
         title={series.name}
-        lead={series.description ?? text.bookCount(series.memberCount ?? items.length)}
+        lead={
+          series.description ? (
+            <RichText inline text={series.description} />
+          ) : (
+            text.bookCount(series.memberCount ?? items.length)
+          )
+        }
       />
       <section aria-labelledby="series-books" className="flex flex-col gap-5 md:gap-6">
         <h2

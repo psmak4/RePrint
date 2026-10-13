@@ -52,6 +52,8 @@ Two typefaces (D-180), self-hosted from the Google Fonts files via Fontsource, L
 
 One `h1` per page; do not skip heading levels. Body text never goes below 14 px; only eyebrow labels and badge counts use 12 or 13 px.
 
+Source text (Book descriptions, Author bios, Series descriptions) is Markdown and renders through `RichText` (D-202): paragraphs 16 px apart, italic and bold, lists indented with markers, and outside links in `text-link`, underlined, same tab. It keeps the surrounding type (serif for a description, sans for a bio); headings or images in the text become plain text so the page's own outline stays intact. Excerpts (the Author card's three lines, meta descriptions) use its plain text.
+
 ## Spacing scale
 
 Tailwind's 4 px scale, using only: 1 (4), 2 (8), 3 (12), 4 (16), 6 (24), 8 (32), 12 (48), 16 (64). Inside a component use 2 to 4; between components 6 or 8; between page sections 12. Touch targets are at least 44 × 44 px on mobile (`h-11`), 24 × 24 px at minimum anywhere (WCAG 2.5.8).

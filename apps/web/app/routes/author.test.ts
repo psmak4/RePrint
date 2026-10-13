@@ -69,6 +69,17 @@ describe('author loader', () => {
     expect(long.metaDescription.endsWith('…')).toBe(true)
   })
 
+  it('gives the meta description and JSON-LD the text of a Markdown bio (D-202)', async () => {
+    const result = await load(() =>
+      Response.json({
+        ...author,
+        bio: 'An Irish author.\n\n([source][1])\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer',
+      }),
+    )
+    expect(result.metaDescription).toBe('An Irish author. (source)')
+    expect(result.jsonLd[0]).toMatchObject({ description: 'An Irish author.\n\n(source)' })
+  })
+
   it('answers 404 for an unknown or malformed slug', async () => {
     const missing = await load(respond, 'nope-123').catch((thrown) => thrown)
     expect(missing.init.status).toBe(404)

@@ -1,3 +1,4 @@
+import { markdownToText } from '@reprint/shared'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { InitialsAvatar } from './avatar.js'
@@ -57,7 +58,10 @@ export function AuthorCard({
         </div>
       </div>
       {bio ? (
-        <p className="line-clamp-3 text-[15px] leading-relaxed text-[#334155]">{bio}</p>
+        // Plain text: a three-line excerpt with its own link to the Author has no use for links (D-202).
+        <p className="line-clamp-3 text-[15px] leading-relaxed whitespace-pre-line text-[#334155]">
+          {markdownToText(bio)}
+        </p>
       ) : null}
       {bookCount !== undefined ? (
         <p className="text-sm text-muted-foreground">{text.bookCount(bookCount)}</p>

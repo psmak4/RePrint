@@ -1,4 +1,4 @@
-import { APP_NAME, authorDetailSchema, slugSchema } from '@reprint/shared'
+import { APP_NAME, authorDetailSchema, markdownToText, slugSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { AuthorPage } from '../components/books/author-page.js'
 import { JsonLd } from '../components/seo/json-ld.js'
@@ -42,7 +42,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
   const author = authorDetailSchema.parse(await response.json())
 
-  const bio = author.bio?.trim().replace(/\s+/g, ' ')
+  const bio = markdownToText(author.bio ?? '').replace(/\s+/g, ' ')
   const metaDescription = bio
     ? bio.length > META_DESCRIPTION_LIMIT
       ? `${bio.slice(0, META_DESCRIPTION_LIMIT - 1)}…`

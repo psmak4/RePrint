@@ -183,6 +183,18 @@ describe('description', () => {
       'true',
     )
   })
+
+  it('renders the Markdown of a description, with its outside links (D-202)', () => {
+    renderPage({
+      description: 'A *desert* planet.\n\nSee [the film][1].\n\n[1]: https://example.org/dune',
+    })
+    const text = document.getElementById('book-description-text') as HTMLElement
+    expect(within(text).getByText('desert').tagName).toBe('EM')
+    expect(within(text).getByRole('link', { name: 'the film' }).getAttribute('href')).toBe(
+      'https://example.org/dune',
+    )
+    expect(text.textContent).not.toContain('[1]')
+  })
 })
 
 describe('side lists', () => {

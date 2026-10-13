@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { copy } from '../../copy/index.js'
 import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
+import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
 import { PageHero } from './page-hero.js'
 
@@ -174,7 +175,7 @@ function Bio({ bio }: { bio: string | null }) {
         {text.aboutHeading}
       </h2>
       {body ? (
-        <p className="text-[15px] leading-relaxed whitespace-pre-line text-[#334155]">{body}</p>
+        <RichText text={body} className="text-[15px] leading-relaxed text-[#334155]" />
       ) : (
         <p className="text-[15px] text-muted-foreground">{text.noBio}</p>
       )}
