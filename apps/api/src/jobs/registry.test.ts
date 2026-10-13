@@ -35,6 +35,21 @@ describe('job registry', () => {
     )
   })
 
+  it('knows the Author bibliography jobs and checks their payloads (D-203)', () => {
+    expect(isJobName('catalog.author-sync')).toBe(true)
+    expect(isJobName('catalog.author-book')).toBe(true)
+    const id = '0192a3b4-0000-7000-8000-000000000001'
+    expect(jobs['catalog.author-sync'].payload.safeParse({ authorId: 'x' }).success).toBe(false)
+    expect(jobs['catalog.author-sync'].payload.safeParse({ authorId: id }).success).toBe(true)
+    expect(
+      jobs['catalog.author-book'].payload.safeParse({ authorId: id, sourceId: '' }).success,
+    ).toBe(false)
+    expect(
+      jobs['catalog.author-book'].payload.safeParse({ authorId: id, sourceId: 'source-book-1' })
+        .success,
+    ).toBe(true)
+  })
+
   it('rejects an invalid payload', () => {
     expect(jobs['system.heartbeat'].payload.safeParse({ note: 5 }).success).toBe(false)
   })

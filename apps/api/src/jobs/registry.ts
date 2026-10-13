@@ -17,6 +17,11 @@ import type { Queue } from 'bullmq'
 import type { Redis } from 'ioredis'
 import type { Logger } from 'pino'
 import { z } from 'zod'
+import {
+  importAuthorBook,
+  queueAuthorBookImports,
+  syncAuthorBooks,
+} from '../catalog/author-sync.js'
 import { purgeSourceRecords, refreshBook } from '../catalog/refresh.js'
 import {
   importSeriesMember,
@@ -272,6 +277,40 @@ export const jobs = {
       return { outcome }
     },
     // Up to about half an hour of backoff, so a short Source outage does not lose a member.
+    retry: { attempts: 5, backoffMs: 120_000 },
+  }),
+  'catalog.author-sync': defineJob({
+    // Reads an Author's Books and queues one import per missing Book, behind interactive
+    // requests (D-203). Short, so a prolific Author never holds a worker.
+    payload: z.object({ authorId: z.uuid() }),
+    handler: async ({ authorId }, { db, log, catalog, enqueue }) => {
+      const result = await syncAuthorBooks({
+        db,
+        source: catalog.source,
+        authorId,
+        call: catalog.background,
+      })
+      if (result.outcome === 'synced') await queueAuthorBookImports({ enqueue }, result.toImport)
+      const queued = result.outcome === 'synced' ? result.toImport.length : 0
+      log.info({ authorId, outcome: result.outcome, queued }, 'author books synced')
+      return { outcome: result.outcome, queued }
+    },
+    retry: { attempts: 3, backoffMs: 60_000 },
+  }),
+  'catalog.author-book': defineJob({
+    // Imports one of an Author's Books as an import-only Book; retried on its own (D-203).
+    payload: z.object({ authorId: z.uuid(), sourceId: z.string().min(1).max(200) }),
+    handler: async ({ authorId, sourceId }, { db, log, catalog }) => {
+      const outcome = await importAuthorBook({
+        db,
+        source: catalog.source,
+        sourceId,
+        call: catalog.background,
+      })
+      log.info({ authorId, sourceId, outcome }, 'author book imported')
+      return { outcome }
+    },
+    // Up to about half an hour of backoff, so a short Source outage does not lose a Book.
     retry: { attempts: 5, backoffMs: 120_000 },
   }),
   'catalog.purgeSourceRecords': defineJob({
