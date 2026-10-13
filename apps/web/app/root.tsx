@@ -24,6 +24,7 @@ import { SearchBox } from './components/shell/search-box.js'
 import { analyticsConfig } from './lib/analytics.js'
 import { loadSession } from './lib/auth.server.js'
 import { logger } from './lib/logger.server.js'
+import { clientNonce } from './lib/nonce.js'
 import { loadNotifications } from './lib/notifications.server.js'
 import { createRequestLogMiddleware } from './lib/request-log.server.js'
 import './app.css'
@@ -65,7 +66,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
-        <Links />
+        <Links nonce={clientNonce()} />
       </head>
       <body>
         <AppShell
