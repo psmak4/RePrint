@@ -52,6 +52,17 @@ describe('AuthorPage', () => {
     expect(screen.getByText('An American science fiction writer.')).toBeTruthy()
   })
 
+  it('renders the Markdown of a bio, with its reference link (D-202)', () => {
+    renderPage({
+      bio: 'Eoin Colfer (pronounced "Owen") is an Irish author.\n\n([source][1])\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer',
+    })
+    const bio = screen.getByRole('region', { name: 'About the author' })
+    expect(within(bio).getByRole('link', { name: 'source' }).getAttribute('href')).toBe(
+      'https://en.wikipedia.org/wiki/Eoin_Colfer',
+    )
+    expect(bio.textContent).not.toContain('[1]')
+  })
+
   it('falls back with no photo, dates, other names, or bio', () => {
     renderPage({ photo: null, birthDate: null, deathDate: null, alternateNames: [], bio: null })
     expect(screen.getByRole('img', { name: 'Photo of Frank Herbert' })).toBeTruthy()

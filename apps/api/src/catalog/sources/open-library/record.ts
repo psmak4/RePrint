@@ -225,22 +225,62 @@ export function toSubjects(labels: string[] | undefined): { label: string }[] {
 
 /** A line of only dashes: Open Library's divider before footers such as "Also contained in:". */
 const DIVIDER = /\r?\n[ \t]*-{3,}[ \t]*(?=\r?\n|$)/
-/** A Markdown link, `[text](url)`. */
-const MARKDOWN_LINK = /\[([^\]\n]+)\]\(\s*[^()\s]+\s*\)/g
+/** An inline Markdown link, `[text](url)` or `[text](url "title")`. */
+const INLINE_LINK = /\[([^\]\n]+)\]\(\s*<?([^()\s>]+)>?(?:\s+"[^"\n]*")?\s*\)/g
+/** A reference link, `[text][label]`, or `[text][]` when the text is the label. */
+const REFERENCE_LINK = /\[([^\]\n]+)\]\[([^\]\n]*)\]/g
+/** A reference definition line, `[label]: url "optional title"`. */
+const DEFINITION =
+  /^[ \t]{0,3}\[([^\]\n]+)\]:[ \t]*<?([^\s>]+)>?(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?[ \t]*$/gm
 
 /**
- * A work description as reader-facing text (D-197). Open Library writes Markdown and ends some
- * descriptions with a divider and lists of its own pages, so the text stops at the first divider,
- * links keep only their text, and line endings become `\n`.
+ * Whether a link may stay a link for readers: an absolute web address outside Open Library. Its
+ * own pages, and relative paths into them, would put Source IDs in front of readers (PRD §5).
  */
-export function toDescription(raw: string | undefined): string | null {
+function keepsLink(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return (
+      (parsed.protocol === 'https:' || parsed.protocol === 'http:') &&
+      !/(^|\.)openlibrary\.org$/i.test(parsed.hostname)
+    )
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Source Markdown as RePrint stores it (D-197, D-202): line endings become `\n`, the text stops at
+ * Open Library's first divider (before footers that list its own pages), and links to Open Library,
+ * inline or by reference, keep only their text. Other Markdown, outside links included, is kept for
+ * the web app to render.
+ */
+export function toSourceMarkdown(raw: string | undefined): string | null {
   if (!raw) return null
   const text = raw.replace(/\r\n?/g, '\n')
   const [head = ''] = text.split(DIVIDER)
-  // A description that opens with a divider keeps its text rather than becoming empty.
+  // A text that opens with a divider keeps its text rather than becoming empty.
   const body = head.trim() ? head : text
-  return body.replace(MARKDOWN_LINK, '$1').trim() || null
+  const kept = new Set<string>()
+  const withoutDefinitions = body.replace(DEFINITION, (line, label: string, url: string) => {
+    if (!keepsLink(url)) return ''
+    kept.add(label.toLowerCase())
+    return line
+  })
+  return (
+    withoutDefinitions
+      .replace(INLINE_LINK, (link, label: string, url: string) => (keepsLink(url) ? link : label))
+      .replace(REFERENCE_LINK, (link, label: string, ref: string) =>
+        kept.has((ref || label).toLowerCase()) ? link : label,
+      )
+      // Removed definitions leave blank lines behind.
+      .replace(/\n{3,}/g, '\n\n')
+      .trim() || null
+  )
 }
+
+/** A work description (D-197, D-202). */
+export const toDescription = toSourceMarkdown
 
 /**
  * Builds the full Book candidate from a work record, the search result that names its byline, and its
@@ -300,7 +340,7 @@ export function toAuthorRecord(raw: unknown): AuthorRecord | { error: string } {
   return {
     name,
     alternateNames,
-    bio: doc.bio?.trim() || null,
+    bio: toSourceMarkdown(doc.bio),
     birthDate: toIsoDate(doc.birth_date),
     deathDate: toIsoDate(doc.death_date),
     photo: photoId ? toCover(photoId) : null,

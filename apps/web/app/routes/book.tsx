@@ -7,6 +7,7 @@ import {
   bookReviewsResponseSchema,
   deleteMyReviewResponseSchema,
   genreDetailResponseSchema,
+  markdownToText,
   myHelpfulVotesResponseSchema,
   myReviewSchema,
   reviewInputSchema,
@@ -107,7 +108,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     .find((group) => group.role === 'author')
     ?.people.map((person) => person.name)
     .join(', ')
-  const description = book.description?.trim().replace(/\s+/g, ' ')
+  const description = markdownToText(book.description ?? '').replace(/\s+/g, ' ')
   const metaDescription = description
     ? description.length > 160
       ? `${description.slice(0, 157)}…`

@@ -151,13 +151,42 @@ describe('toAuthorRecord', () => {
     })
     expect(author).toMatchObject({ bio: 'Hello', birthDate: null, photo: null })
   })
+
+  it('reads a bio as Markdown the way a description is read (D-202)', () => {
+    const author = toAuthorRecord({
+      key: '/authors/OL1A',
+      name: 'Eoin Colfer',
+      bio: 'An Irish author.\r\n\r\n([source][1])\r\n\r\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer\r\n\r\nSee [his page](https://openlibrary.org/authors/OL1A).',
+    })
+    expect(author).toMatchObject({
+      bio: 'An Irish author.\n\n([source][1])\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer\n\nSee his page.',
+    })
+  })
 })
 
 describe('toDescription', () => {
-  it('drops the divider and the Open Library lists after it, and unlinks Markdown links', () => {
+  it('drops the divider and the Open Library lists after it, and keeps outside links (D-202)', () => {
     const raw =
       'The first of six books.\r\n\r\nSee [the radio series](https://example.org/radio).\r\n\r\n---\r\n\r\nAlso contained in:\r\n\r\n- [A Trilogy in Four Parts](https://openlibrary.org/works/OL2163692W)'
-    expect(toDescription(raw)).toBe('The first of six books.\n\nSee the radio series.')
+    expect(toDescription(raw)).toBe(
+      'The first of six books.\n\nSee [the radio series](https://example.org/radio).',
+    )
+  })
+
+  it('unlinks links to Open Library and relative links, which would show its IDs', () => {
+    expect(
+      toDescription(
+        'Read [the sequel](https://openlibrary.org/works/OL1W) or [this one](/works/OL2W), or [a list](http://www.openlibrary.org/x).',
+      ),
+    ).toBe('Read the sequel or this one, or a list.')
+  })
+
+  it('keeps reference links to outside pages and unlinks those to Open Library', () => {
+    const raw =
+      'An Irish author ([source][1]).\n\nSee [the work][ol] and [more][].\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer\n[ol]: https://openlibrary.org/works/OL3W\n[more]: https://openlibrary.org/authors/OL4A "Title"'
+    expect(toDescription(raw)).toBe(
+      'An Irish author ([source][1]).\n\nSee the work and more.\n\n[1]: https://en.wikipedia.org/wiki/Eoin_Colfer',
+    )
   })
 
   it('accepts a longer divider and keeps text with no divider as it is', () => {
