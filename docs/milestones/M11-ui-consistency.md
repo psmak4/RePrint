@@ -38,7 +38,7 @@ Make every element look and behave the same on every page. A UI review on 2026-1
 
 ## Acceptance criteria
 
-1. Each element in the baseline table has one look and one behavior on every page where it appears, measured again at 1280 and 375 px by a script anyone can rerun.
+1. Each element in the baseline table has one look and one behavior on every page where it appears, measured again on every page type by `e2e/specs/ui-consistency.spec.ts` (Chromium, WebKit, and a phone), which runs in CI.
 2. The style guard fails on a raw hex colour or a hand-built pill or chip outside `@reprint/ui` and the documented exceptions.
 3. Menus close on navigation, Escape, a click outside, and when another menu opens, with focus handled as `DESIGN.md` describes; component tests cover each case.
 4. Changing a sort keeps focus on the control and the scroll position, and works without JavaScript through an Apply button.

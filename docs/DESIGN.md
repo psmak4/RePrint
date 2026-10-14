@@ -144,7 +144,7 @@ Components come from shadcn/ui, copied into `packages/ui/src/components/`, resty
 | Reviews | `StarRatingInput`, `SpoilerToggle`, `RatingSummary`, `ReviewCard` | M4 |
 | Admin | `AdminPage` (band, grouped nav), `AdminCard`, `Badge`, `StatTile`, `EmptyState`, `Kbd`, table classes, `ScrollRegion`, `AdminIcon`, in `apps/web/app/components/admin/`; `Button` gains a `danger` variant | Built (M9-T20, D-201) |
 
-Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
+Two checks keep the pages on these components (D-214): `apps/web/app/style-guard.test.ts` fails on hand-built pills, chips, dashed boxes, sort dropdowns, pagers, raw colours, off-scale headings, and card corners in the code, and `e2e/specs/ui-consistency.spec.ts` measures every page type as drawn (`Button` and `Chip` carry `ui-button` / `ui-chip` so it can find them). Rules: use the shadcn component before writing your own; new dependencies need a `docs/DECISIONS.md` entry; components never contain user-facing strings (props or `copy`).
 
 ## App shell
 

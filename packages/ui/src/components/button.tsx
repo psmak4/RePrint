@@ -7,9 +7,10 @@ import { cn } from '../lib/utils.js'
  * The one pill for every action (D-188, D-214). Each height has one text size: `sm` 40 / 14 px,
  * `default` 44 / 15 px, `lg` 48 / 16 px; `icon` and `icon-sm` are round 44 and 36 px buttons.
  * `overlay` is the translucent white button that sits on a cover. Links take the look with `asChild`.
+ * `ui-button` marks it for the UI consistency spec (e2e/specs/ui-consistency.spec.ts).
  */
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50',
+  'ui-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
