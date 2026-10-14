@@ -793,6 +793,7 @@ Entry format:
 - A merged Book's old slug still redirects (301, query kept) before any rail is asked for; what was already asked under the old slug is dropped with the request.
 - Tests: the request order (six slug-only requests out before the Book answers, rails only after; fails with the old loader), no review requests without a cookie, a stale cookie, and the redirect. The Member tests now send the session cookie, as a Member's browser does. `pnpm check` passes. Local e2e not run (the owner's dev servers hold ports 5173 and 3000); CI's e2e job covers the Book page specs.
 
+
 ### 2026-10-14 · M10-T06 · Book page rails from light queries, with no Author sync · loop/m10-t06-book-page-rails
 - New `GET /v1/books/:slug/related` returns the Book page's Author card and other Books, Series window, and Genre's top-rated Books from the slug alone (D-209). The Book loader asks for it beside the Book, so every request the page makes now goes out in one round, and the page no longer reads a full Author page (with its bibliography import check: a Book page view never queues `catalog.author-sync`, D-205), a 24-Book Genre page, or the Series endpoint. `groupContributors` moved to `@reprint/shared` so both sides pick the same first Author.
 - The Author card now counts every Book the Author is credited on; since D-203 paged the Written list it had counted only the first 24 plus other Roles.
