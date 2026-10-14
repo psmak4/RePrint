@@ -1,18 +1,18 @@
 import { NavLink, Outlet } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 import { PageHero } from '../books/page-hero.js'
 
 const tabs = [
-  { to: '/settings/profile', label: copy.settings.profileTab },
-  { to: '/settings/security', label: copy.settings.securityTab },
+  { to: '/settings/profile', label: settingsCopy.profileTab },
+  { to: '/settings/security', label: settingsCopy.securityTab },
 ]
 
 /** Shared frame for the settings pages: the hero band with the title and section tabs. */
 export function SettingsLayout() {
   return (
     <div className="flex flex-col gap-8 md:gap-10">
-      <PageHero title={copy.settings.title}>
-        <nav aria-label={copy.settings.navLabel} className="-mb-9 flex gap-7 md:-mb-14">
+      <PageHero title={settingsCopy.title}>
+        <nav aria-label={settingsCopy.navLabel} className="-mb-9 flex gap-7 md:-mb-14">
           {tabs.map((tab) => (
             <NavLink
               key={tab.to}

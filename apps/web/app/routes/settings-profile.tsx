@@ -1,14 +1,14 @@
 import { APP_NAME, updateMeRequestSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { ProfileSettingsPage } from '../components/settings/profile-settings-page.js'
-import { copy } from '../copy/index.js'
+import { settingsCopy } from '../copy/settings.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { loadMe } from '../lib/me.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/settings-profile'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.settings.profile.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${settingsCopy.profile.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -17,13 +17,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const parsed = updateMeRequestSchema.safeParse(await request.json())
-  if (!parsed.success) return data({ formError: copy.settings.profile.failed }, { status: 400 })
+  if (!parsed.success) return data({ formError: settingsCopy.profile.failed }, { status: 400 })
   const result = await sendToApi(
     request,
     'PATCH',
     '/v1/me',
     parsed.data,
-    copy.settings.profile.failed,
+    settingsCopy.profile.failed,
   )
   if (!result.ok) return failed(result)
   return { saved: true }

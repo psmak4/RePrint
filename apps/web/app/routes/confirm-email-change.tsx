@@ -1,6 +1,7 @@
 import { APP_NAME, confirmEmailChangeRequestSchema } from '@reprint/shared'
 import { ConfirmEmailChangePage } from '../components/settings/confirm-email-change-page.js'
 import { copy } from '../copy/index.js'
+import { settingsCopy } from '../copy/settings.js'
 import { postToApi } from '../lib/auth.server.js'
 import { pageMeta } from '../lib/seo.js'
 import { viewerSession } from '../lib/session.server.js'
@@ -8,7 +9,7 @@ import type { Route } from './+types/confirm-email-change'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, {
-    title: `${APP_NAME}: ${copy.settings.confirmEmail.successTitle}`,
+    title: `${APP_NAME}: ${settingsCopy.confirmEmail.successTitle}`,
     noindex: true,
   })
 }

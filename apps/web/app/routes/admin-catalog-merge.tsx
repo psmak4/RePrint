@@ -9,7 +9,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { MergeQueue } from '../components/admin/merge-queue.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -20,7 +20,7 @@ import type { Route } from './+types/admin-catalog-merge'
 const QUEUE_PAGE_SIZE = 20
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.merge.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.merge.title}`, noindex: true })
 }
 
 /** Open merge candidates, oldest first (PRD §7.11). */
@@ -34,14 +34,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get(`/v1/admin/books/merge-candidates?${query}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load the merge queue')
-    throw data(copy.admin.merge.loadFailed, { status: 502 })
+    throw data(adminCopy.merge.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'merge queue request failed')
-    throw data(copy.admin.merge.loadFailed, { status: 502 })
+    throw data(adminCopy.merge.loadFailed, { status: 502 })
   }
   const queue: AdminMergeCandidatesResponse = adminMergeCandidatesResponseSchema.parse(
     await response.json(),
@@ -61,7 +61,7 @@ const mergeActionSchema = z.discriminatedUnion('intent', [
 /** Merge a pair (one Book into the other) or dismiss it. Each is an audited API call. */
 export async function action({ request, context }: Route.ActionArgs) {
   await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
-  const fallback = copy.admin.merge.failed
+  const fallback = adminCopy.merge.failed
   const parsed = mergeActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })
   const input = parsed.data

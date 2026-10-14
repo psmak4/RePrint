@@ -2,11 +2,11 @@ import type { AdminSystem } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { useEffect } from 'react'
 import { useRevalidator } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge, StatTile } from './admin-ui.js'
 
-const text = copy.admin.system
+const text = adminCopy.system
 
 /** How often the numbers are read again (PRD §6). */
 export const REFRESH_MS = 30_000
@@ -85,7 +85,7 @@ export function SystemDashboard({ system }: { system: AdminSystem }) {
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
       actions={
         <Badge dot>{text.updatedBadge(timeFormat.format(new Date(system.generatedAt)))}</Badge>
       }

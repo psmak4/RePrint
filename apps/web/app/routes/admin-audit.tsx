@@ -8,7 +8,7 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { AuditLog } from '../components/admin/audit-log.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
@@ -21,7 +21,7 @@ const FILTERS = Object.keys(
 ) as (keyof typeof adminAuditFiltersSchema.shape)[]
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.audit.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.audit.title}`, noindex: true })
 }
 
 /** The audit log, newest first, filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */
@@ -46,14 +46,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get(`/v1/admin/audit?${query}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load the audit log')
-    throw data(copy.admin.audit.loadFailed, { status: 502 })
+    throw data(adminCopy.audit.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'audit log request failed')
-    throw data(copy.admin.audit.loadFailed, { status: 502 })
+    throw data(adminCopy.audit.loadFailed, { status: 502 })
   }
   const entries: AdminAuditResponse = adminAuditResponseSchema.parse(await response.json())
   const filters = Object.fromEntries(FILTERS.map((key) => [key, parsed[key] ?? ''])) as Record<

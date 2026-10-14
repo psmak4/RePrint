@@ -1,6 +1,6 @@
 import { cn } from '@reprint/ui'
 import type { ReactNode } from 'react'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 
 /** A horizontally scrolling wrapper for a wide table that keyboard users can focus and scroll. */
 export function ScrollRegion({
@@ -15,7 +15,7 @@ export function ScrollRegion({
 }) {
   return (
     <section
-      aria-label={copy.admin.scrollableTable(label)}
+      aria-label={adminCopy.scrollableTable(label)}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be focusable (axe scrollable-region-focusable)
       tabIndex={0}
       // `relative` keeps absolutely placed children (sr-only text) inside the scroll box, so they

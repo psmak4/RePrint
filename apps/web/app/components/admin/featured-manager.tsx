@@ -7,11 +7,11 @@ import {
 import { Button, Label, Select } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge } from './admin-ui.js'
 
-const text = copy.admin.featured
+const text = adminCopy.featured
 
 type ActionResult =
   | { done: 'genresSaved' | 'reviewSaved' | 'reviewCleared' }
@@ -262,7 +262,7 @@ export function FeaturedManager({
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
     >
       <GenrePicker
         initial={featured.genres}

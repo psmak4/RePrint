@@ -6,14 +6,14 @@ import {
 import { Button, Input, Label, Textarea } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { AdminPage } from './admin-page.js'
 import { Badge, EmptyState } from './admin-ui.js'
 import { ageText } from './review-queue.js'
 
-const text = copy.admin.reports
+const text = adminCopy.reports
 
 type ActionResult =
   | { done: 'dismissed' | 'unpublished' | 'suspended'; reviewId: string }
@@ -305,7 +305,7 @@ export function ReportsQueue({
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
     >
       {queue.items.length === 0 ? (
         <EmptyState>{text.empty}</EmptyState>
