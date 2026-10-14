@@ -718,3 +718,44 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every acceptance criterion in `docs/milestones/M10-performance.md` is checked off in the PR body with the command that proved it, with each baseline measure taken again on the same data
   - Accept: `docs/performance.md` explains how to repeat the measurements and records the results
   - Accept: `pnpm check` and `pnpm test:e2e` pass, and the web vitals check still meets PRD §11
+
+## M11 · UI consistency
+
+- [ ] M11-T01 · Clear the lint warnings and the audit advisory · deps: M10-T13 · PRD: §12
+  - Accept: `pnpm lint` reports no warnings (the unused import in `series-api.ts` and the optional chain in the reviews routes)
+  - Accept: `pnpm audit` reports no advisory that a release within the pinned majors fixes; one with no such fix is recorded in `docs/BLOCKERS.md` with its severity and path; `pnpm check` passes
+- [ ] M11-T02 · Theme colours for every repeated value, and a style guard · deps: M10-T13 · PRD: §8, §11
+  - Accept: `theme.css` gains a named colour for each role the raw values played (stronger text, chip border, dashed border, tinted ground, rating track, and each status tint and edge); `DESIGN.md` lists them, and `theme.test.ts` checks every text colour on all four grounds
+  - Accept: no class in `apps/web` uses a raw hex colour except the generated-cover and initials-avatar palettes, each kept in one module; a style guard unit test fails on any other `-[#…]` class
+  - Accept: where two raw values played one role they merge into one token, each merge listed in the `docs/DECISIONS.md` entry; `pnpm check` passes
+- [ ] M11-T03 · One Button for every action · deps: M11-T02 · PRD: §8, §11
+  - Accept: `Button` pairs each height with one text size (sm 40 px / 14 px, default 44 / 15, lg 48 / 16, semibold), and every pill-shaped action or action link uses it (`asChild` for links): account forms and the auth card, the Book page actions, the Library empty Shelf, Discover's sign-up, the Author match card, Author "Show more", the export link, and the search filter disclosure
+  - Accept: the Discover hero search field and the header search box are the only hand-built pills, named in `DESIGN.md`; the style guard fails on any other (`rounded-full` with `border-input-border` or `bg-accent`)
+  - Accept: component tests are updated; `pnpm check` passes
+- [ ] M11-T04 · One Chip · deps: M11-T02 · PRD: §7.2 to §7.5, §8
+  - Accept: a `Chip` in `@reprint/ui` (34 px, 14 px medium, chip border, accent fill when selected; a link, button, or label through `asChild`) is used for Genre chips, the Discover "Try" chips, child Genres on the Genres index, the Series pill, the review star filters, and the Editions format filter
+  - Accept: the style guard fails on a hand-built chip; component tests are updated; `pnpm check` passes
+- [ ] M11-T05 · Page titles, section headings, and card corners from one scale · deps: M11-T02 · PRD: §11
+  - Accept: every page title outside Discover's hero, the Book header, and the auth card is 32 → 44 px (`PageHero`, `AdminPage`, search); every section heading is 26 → 32 px, Discover's included; card and panel titles are 22 px; pages take these from shared heading classes, not their own sizes
+  - Accept: surface cards and panels have 16 px corners (the auth card keeps 24 px as a page frame); `DESIGN.md`'s type scale and page sections agree
+  - Accept: `pnpm check` passes
+- [ ] M11-T06 · One header band, with breadcrumbs and tabs · deps: M11-T05 · PRD: §7.3, §7.5, §7.7, §7.8, §7.11, §11
+  - Accept: search opens with `PageHero` like the other browse pages; every `PageHero` page and the admin band start with a breadcrumb trail from Discover, ending with the current page (trails in the `docs/DECISIONS.md` entry); the Library eyebrow and the Genre page's lone "All genres" link become trail items
+  - Accept: one `TabNav` (underlined, 52 px, 16 px medium, optional count chip) sits at the band's bottom edge on Settings, admin Genres, Library, profile, and search; the Book page's section nav uses the same tab style
+  - Accept: the Breadcrumb and Library e2e specs pass; `pnpm check` passes
+- [ ] M11-T07 · Sort, filters, and pages work the same everywhere · deps: M11-T03, M11-T06 · PRD: §7.3 to §7.5, §7.7, §7.11
+  - Accept: one `SortControl` ("Sort by" and a compact `Select`) applies a choice on change through React Router, keeps focus on the select and the scroll position, and shows Apply only without JavaScript; search, Library, Book reviews, and the Genre page use it (the Genre page's sort pills go)
+  - Accept: search's sort and filter forms navigate in the app; every filter panel (search, admin Users, audit log) submits with one primary "Apply filters" button
+  - Accept: one `Pager` (Previous, "Page N of M", Next as outline pills) on Library, profile, Genre, search, and Book reviews; lists that grow in place (Author, admin) use one centred "Show more" button
+  - Accept: component and route tests cover the sort control with and without JavaScript; `pnpm check` and the e2e specs pass
+- [ ] M11-T08 · Menus that close, and an account menu with the Member's pages · deps: M11-T03 · PRD: §7.1, §7.11, §7.12, §11
+  - Accept: one `Menu` disclosure (a native `<details>`, so it opens without JavaScript) closes when the page changes, on Escape (focus returns to its button), on a click or tap outside, and when another menu opens; the phone menu, account menu, and notifications use it, and component tests cover each way of closing
+  - Accept: the account menu lists Your profile, Your library, Settings, Admin (only for holders of an admin-area permission), and Log out; the e2e specs that use it pass
+  - Accept: `pnpm check` passes
+- [ ] M11-T09 · One empty state, and titled error pages · deps: M11-T05 · PRD: §11
+  - Accept: one `EmptyState` (dashed border, 16 px corners, one sentence, optional icon and action) replaces the Library, Genre, search, Discover, and admin versions
+  - Accept: error pages (404, 500, and the resolve page's errors) set a `<title>`; a route test checks it; `pnpm check` passes
+- [ ] M11-T10 · M11 verification: measure again · deps: M11-T01, M11-T04, M11-T07, M11-T08, M11-T09 · PRD: §11, §12
+  - Accept: a script in `apps/web/scripts/ui/` measures page titles, section headings, pills, chips, selects, tabs, and card corners on every Visitor page at 1280 and 375 px; the PR shows the baseline table from `docs/milestones/M11-ui-consistency.md` beside the new values, each element down to one look
+  - Accept: every acceptance criterion in the milestone brief is checked off in the PR body with the command that proved it; `DESIGN.md` matches the code
+  - Accept: `pnpm check` and `pnpm test:e2e` (with axe) pass
