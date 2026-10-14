@@ -1,5 +1,6 @@
 import type { SourceRating } from '@reprint/shared'
 import { z } from 'zod'
+import { SEARCH_FIELDS } from './search.js'
 
 const RATING_FIELDS = [
   'ratings_average',
@@ -12,26 +13,10 @@ const RATING_FIELDS = [
 ]
 
 /**
- * The fields the byline search asks for: what the adapter reads from it, plus the ratings, which
- * Open Library leaves out by default (D-204).
+ * The fields the byline search asks for: what the adapter reads from a search result, plus the
+ * ratings, which Open Library leaves out by default (D-204).
  */
-export const BYLINE_FIELDS = [
-  'key',
-  'title',
-  'subtitle',
-  'author_key',
-  'author_name',
-  'cover_i',
-  'cover_width',
-  'cover_height',
-  'cover_edition_key',
-  'first_publish_year',
-  'language',
-  'series_key',
-  'series_name',
-  'series_position',
-  ...RATING_FIELDS,
-].join(',')
+export const BYLINE_FIELDS = [...SEARCH_FIELDS, ...RATING_FIELDS].join(',')
 
 /** How many Books one ratings search asks for. */
 export const RATINGS_BATCH_SIZE = 100

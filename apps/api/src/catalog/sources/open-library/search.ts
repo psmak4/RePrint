@@ -38,6 +38,12 @@ const searchDocSchema = z.object({
 })
 export type SearchDoc = z.infer<typeof searchDocSchema>
 
+/**
+ * The fields a search asks for: exactly what `searchDocSchema` reads. Without a list, Open Library also
+ * sends lending and scan fields the adapter ignores, which can make a page ten times larger.
+ */
+export const SEARCH_FIELDS: readonly string[] = Object.keys(searchDocSchema.shape)
+
 export function toCover(coverId: number, width?: number, height?: number): Cover {
   return {
     origin: 'open_library',

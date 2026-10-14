@@ -1,7 +1,8 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { bylinePath } from './adapter.js'
+import { bylinePath, searchPath } from './adapter.js'
+import { seriesMembersPath } from './series.js'
 
 const BASE_URL = 'https://openlibrary.org'
 export const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__')
@@ -17,12 +18,12 @@ export interface FixtureRequest {
 
 /** The raw responses the adapter's unit and contract tests replay. Add a request here, then re-run the recorder. */
 export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
-  { name: 'search-title', path: '/search.json?q=the+left+hand+of+darkness&limit=10' },
-  { name: 'search-author', path: '/search.json?q=ursula+le+guin&limit=10' },
-  { name: 'search-isbn', path: '/search.json?q=isbn%3A9780441478125&limit=10' },
+  { name: 'search-title', path: searchPath('the left hand of darkness', 1) },
+  { name: 'search-author', path: searchPath('ursula le guin', 1) },
+  { name: 'search-isbn', path: searchPath('9780441478125', 1) },
   // Old, obscure results: several have no cover, and a few have no Author.
-  { name: 'search-no-cover', path: '/search.json?q=dune+frank+herbert&limit=10&sort=old' },
-  { name: 'search-empty', path: '/search.json?q=zzz+little+known+pamphlet+1890&limit=10' },
+  { name: 'search-no-cover', path: `${searchPath('dune frank herbert', 1)}&sort=old` },
+  { name: 'search-empty', path: searchPath('zzz little known pamphlet 1890', 1) },
   // One Book end to end: its record, its byline (a `key:` search), its Editions, and its Author.
   { name: 'work-left-hand', path: '/works/OL59800W.json' },
   { name: 'work-left-hand-byline', path: bylinePath('OL59800W') },
@@ -35,7 +36,7 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   { name: 'work-hitchhiker-byline', path: bylinePath('OL2163649W') },
   { name: 'work-hitchhiker-editions', path: '/works/OL2163649W/editions.json?limit=50' },
   { name: 'edition-hitchhiker-cover', path: '/books/OL17837787M.json' },
-  { name: 'series-hitchhiker', path: '/search.json?q=series_key%3AOL326782L&limit=100' },
+  { name: 'series-hitchhiker', path: seriesMembersPath('OL326782L', 1) },
   {
     name: 'author-works-le-guin-1',
     path: '/search.json?q=author_key%3AOL31353A&fields=key%2Ctitle%2Cauthor_key%2Cedition_count&sort=editions&limit=100',

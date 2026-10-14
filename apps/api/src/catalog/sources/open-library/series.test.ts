@@ -42,12 +42,13 @@ describe('seriesOfDoc', () => {
 })
 
 describe('seriesMembersPath', () => {
-  it('searches by Series key, 100 a page', () => {
+  it('searches by Series key, 100 a page, for only the fields read from a member', () => {
+    const fields = 'fields=key%2Ctitle%2Cseries_key%2Cseries_name%2Cseries_position'
     expect(seriesMembersPath('OL326782L', 1)).toBe(
-      '/search.json?q=series_key%3AOL326782L&limit=100',
+      `/search.json?q=series_key%3AOL326782L&${fields}&limit=100`,
     )
     expect(seriesMembersPath('OL326782L', 2)).toBe(
-      '/search.json?q=series_key%3AOL326782L&limit=100&page=2',
+      `/search.json?q=series_key%3AOL326782L&${fields}&limit=100&page=2`,
     )
   })
 })

@@ -25,16 +25,25 @@ const replay =
     new Response(body, { status })
 
 describe('searchPath', () => {
+  const fields = encodeURIComponent(
+    'key,title,subtitle,author_key,author_name,cover_i,cover_width,cover_height,cover_edition_key,' +
+      'first_publish_year,language,series_key,series_name,series_position',
+  )
+
+  it('asks only for the fields the adapter reads', () => {
+    expect(searchPath('dune', 1)).toContain(`&fields=${fields}&`)
+  })
+
   it('searches an ISBN as ISBN-13, whether it is given as ISBN-10, hyphenated, or ISBN-13', () => {
-    const path = '/search.json?q=isbn%3A9780441478125&limit=10'
+    const path = `/search.json?q=isbn%3A9780441478125&fields=${fields}&limit=10`
     expect(searchPath('9780441478125', 1)).toBe(path)
     expect(searchPath('978-0-441-47812-5', 1)).toBe(path)
     expect(searchPath('0441478123', 1)).toBe(path)
   })
 
   it('adds the page from the second page on', () => {
-    expect(searchPath('dune', 1)).toBe('/search.json?q=dune&limit=10')
-    expect(searchPath('dune', 3)).toBe('/search.json?q=dune&limit=10&page=3')
+    expect(searchPath('dune', 1)).toBe(`/search.json?q=dune&fields=${fields}&limit=10`)
+    expect(searchPath('dune', 3)).toBe(`/search.json?q=dune&fields=${fields}&limit=10&page=3`)
   })
 })
 
