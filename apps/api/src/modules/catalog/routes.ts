@@ -3,6 +3,7 @@ import {
   authorDetailSchema,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  bookRelatedResponseSchema,
   GENRE_PAGE_SIZE,
   genreBooksQuerySchema,
   genreDetailResponseSchema,
@@ -40,6 +41,7 @@ import {
   loadBookSummaries,
   loadEditions,
 } from './read.js'
+import { loadBookRelated } from './related.js'
 import { findSeriesBySlug, isAdding, loadSeriesEntries } from './series.js'
 
 /** Refresh jobs run behind everything else. */
@@ -161,6 +163,19 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
       const [detail] = await Promise.all([loadBookDetail(db, book), queueRefresh(), queueSeries()])
       await addViewerShelves(db, request, [detail])
       return detail
+    },
+  )
+
+  // Everything the Book page shows around a Book, from the slug alone, so the page asks for it
+  // beside the Book. It never queues an Author's bibliography import (D-205, M10-T06).
+  app.get(
+    '/books/:slug/related',
+    { schema: { params: slugParamsSchema, response: { 200: bookRelatedResponseSchema } } },
+    async (request) => {
+      if (!db) throw new Error('catalog routes need a database')
+      const book = await findBookBySlug(db, request.params.slug)
+      if (!book) throw new HttpProblem(404, 'We could not find that book.')
+      return loadBookRelated(db, book, () => cachedSiteMean(db, redis))
     },
   )
 

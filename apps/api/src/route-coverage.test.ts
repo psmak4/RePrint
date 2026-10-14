@@ -24,6 +24,7 @@ const GENRES = 'modules/catalog/genres.integration.test.ts'
 const SERIES = 'modules/catalog/series.integration.test.ts'
 const DISCOVER = 'modules/discover/discover.integration.test.ts'
 const RESOLVE = 'modules/catalog/resolve.integration.test.ts'
+const RELATED = 'modules/catalog/related.integration.test.ts'
 const MY_REVIEW = 'modules/reviews/my-review.integration.test.ts'
 const HELPFUL = 'modules/reviews/helpful.integration.test.ts'
 const REPORTS = 'modules/reviews/reports.integration.test.ts'
@@ -199,6 +200,10 @@ const COVERAGE: Record<string, { allowed: Proof; denied: Proof }> = {
   'GET /v1/books/{slug}': {
     allowed: [CATALOG, 'returns the Book with its Primary Edition'],
     denied: [CATALOG, 'returns 404 Problem Details for an unknown slug'],
+  },
+  'GET /v1/books/{slug}/related': {
+    allowed: [RELATED, 'gives the Book page’s rails the same Books'],
+    denied: [RELATED, 'returns 404 Problem Details for an unknown Book'],
   },
   'GET /v1/books/{slug}/editions': {
     allowed: [CATALOG, 'lists every Edition of the Book'],

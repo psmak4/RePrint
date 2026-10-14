@@ -1,17 +1,16 @@
 import {
   APP_NAME,
-  authorDetailSchema,
+  type BookRelatedResponse,
   bookDetailSchema,
   bookEditionsResponseSchema,
+  bookRelatedResponseSchema,
   bookReviewsQuerySchema,
   bookReviewsResponseSchema,
   deleteMyReviewResponseSchema,
-  genreDetailResponseSchema,
   markdownToText,
   myHelpfulVotesResponseSchema,
   myReviewSchema,
   reviewInputSchema,
-  seriesDetailResponseSchema,
   slugSchema,
 } from '@reprint/shared'
 import { data, redirect } from 'react-router'
@@ -36,8 +35,6 @@ import { pageMeta } from '../lib/seo.js'
 import { hasSessionCookie, viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/book'
 
-const MORE_BY_AUTHOR_LIMIT = 6
-
 export function meta(args: Route.MetaArgs) {
   if (!args.loaderData) return [{ title: APP_NAME }]
   const { book, canonicalUrl, metaDescription } = args.loaderData
@@ -55,8 +52,8 @@ export function meta(args: Route.MetaArgs) {
 
 /**
  * The Book, its Editions, and up to 6 more Books by its first Author, all loaded on the server
- * (PRD §7.4). Everything that needs only the slug is asked for at once; only the Author, Series,
- * and Genre rails wait for the Book (M10-T03).
+ * (PRD §7.4). Everything needs only the slug, so it is all asked for at once (M10-T03), the rails
+ * included (M10-T06).
  */
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const slug = slugSchema.safeParse(params.slug)
@@ -81,6 +78,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     loadReviews(api, slug.data, reviewQuery),
     signedIn ? loadMyReview(api, slug.data) : null,
     signedIn ? loadVotedReviewIds(api, slug.data) : [],
+    loadRelated(api, slug.data),
   ])
   const book = await loadBook(api, slug.data)
   // An old slug of a merged Book answers with the remaining Book; send the visitor to its address.
@@ -89,18 +87,8 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     throw redirect(`/books/${book.slug}${url.search}`, 301)
   }
 
-  const byline = groupContributors(book.contributions)[0]?.people[0]
-  const firstSeries = book.series[0]?.series
-  const firstGenre = book.genres[0]
-  const [[editions, session, reviews, myReview, votedReviewIds], authorData, series, moreInGenre] =
-    await Promise.all([
-      pending,
-      byline ? loadAuthor(api, byline.slug, book.id) : null,
-      firstSeries ? loadSeries(api, firstSeries.slug, book.slug) : null,
-      firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
-    ])
-  const moreByAuthor = authorData?.moreByAuthor ?? null
-  const authorCard = authorData?.card ?? null
+  const [editions, session, reviews, myReview, votedReviewIds, related] = await pending
+  const { moreByAuthor, authorCard, series, moreInGenre } = railsOf(related)
   const viewer = session.viewer
 
   const authors = groupContributors(book.contributions)
@@ -230,85 +218,65 @@ async function loadEditions(api: ReturnType<typeof apiClientFor>, slug: string) 
   }
 }
 
-async function loadAuthor(
+/** The Book page's rails, from the one request that gathers them (M10-T06); none when it fails. */
+async function loadRelated(
   api: ReturnType<typeof apiClientFor>,
-  authorSlug: string,
-  bookId: string,
-): Promise<{ moreByAuthor: MoreByAuthor | null; card: AuthorSummary } | null> {
+  slug: string,
+): Promise<BookRelatedResponse | null> {
   try {
-    const response = await api.get(`/v1/authors/${authorSlug}`)
+    const response = await api.get(`/v1/books/${slug}/related`)
     if (!response.ok) return null
-    const author = authorDetailSchema.parse(await response.json())
-    const seen = new Set<string>()
-    const all = author.works
-      .flatMap((work) => work.books)
-      .filter((other) => !seen.has(other.id) && seen.add(other.id))
-    const books = all.filter((other) => other.id !== bookId).slice(0, MORE_BY_AUTHOR_LIMIT)
-    return {
-      moreByAuthor:
-        books.length > 0 ? { authorName: author.name, authorSlug: author.slug, books } : null,
-      card: {
-        name: author.name,
-        slug: author.slug,
-        photo: author.photo,
-        born: author.birthDate,
-        died: author.deathDate,
-        bio: author.bio,
-        bookCount: all.length,
-      },
-    }
+    return bookRelatedResponseSchema.parse(await response.json())
   } catch (error) {
-    logger.warn({ err: error }, 'could not load author')
+    logger.warn({ err: error }, 'could not load the rails')
     return null
   }
 }
 
-/** The Series card's data: only the Books around this one, however long the Series is (D-199). */
-async function loadSeries(
-  api: ReturnType<typeof apiClientFor>,
-  seriesSlug: string,
-  bookSlug: string,
-): Promise<SeriesSummary | null> {
-  try {
-    const query = new URLSearchParams({ around: bookSlug })
-    const response = await api.get(`/v1/series/${seriesSlug}?${query}`)
-    if (!response.ok) return null
-    const detail = seriesDetailResponseSchema.parse(await response.json())
-    if (detail.items.length === 0) return null
-    return {
-      name: detail.series.name,
-      slug: detail.series.slug,
-      // The Source's count, not the stored Books: "Book 1 of 1" was wrong while the rest were missing.
-      total: detail.series.memberCount,
-      stored: detail.total,
-      books: detail.items.map((item) => ({
-        slug: item.book.slug,
-        title: item.book.title,
-        cover: item.book.cover,
-        position: item.position === null ? null : String(item.position),
-        rating: item.book.rating,
-      })),
-    }
-  } catch (error) {
-    logger.warn({ err: error }, 'could not load series')
-    return null
-  }
-}
-
-async function loadMoreInGenre(
-  api: ReturnType<typeof apiClientFor>,
-  genre: { slug: string; name: string },
-  bookId: string,
-): Promise<MoreInGenre | null> {
-  try {
-    const response = await api.get(`/v1/genres/${genre.slug}?sort=top_rated`)
-    if (!response.ok) return null
-    const detail = genreDetailResponseSchema.parse(await response.json())
-    const books = detail.items.filter((other) => other.id !== bookId).slice(0, MORE_BY_AUTHOR_LIMIT)
-    return books.length > 0 ? { genreName: genre.name, genreSlug: genre.slug, books } : null
-  } catch (error) {
-    logger.warn({ err: error }, 'could not load more in genre')
-    return null
+function railsOf(related: BookRelatedResponse | null): {
+  moreByAuthor: MoreByAuthor | null
+  authorCard: AuthorSummary | null
+  series: SeriesSummary | null
+  moreInGenre: MoreInGenre | null
+} {
+  const author = related?.author ?? null
+  const series = related?.series ?? null
+  const genre = related?.genre ?? null
+  return {
+    moreByAuthor:
+      author && author.books.length > 0
+        ? { authorName: author.name, authorSlug: author.slug, books: author.books }
+        : null,
+    authorCard: author
+      ? {
+          name: author.name,
+          slug: author.slug,
+          photo: author.photo,
+          born: author.birthDate,
+          died: author.deathDate,
+          bio: author.bio,
+          bookCount: author.bookCount,
+        }
+      : null,
+    series: series
+      ? {
+          name: series.name,
+          slug: series.slug,
+          // The Source's count, not the stored Books: "Book 1 of 1" was wrong while the rest were missing.
+          total: series.memberCount,
+          stored: series.total,
+          books: series.items.map((item) => ({
+            slug: item.book.slug,
+            title: item.book.title,
+            cover: item.book.cover,
+            position: item.position === null ? null : String(item.position),
+            rating: item.book.rating,
+          })),
+        }
+      : null,
+    moreInGenre: genre
+      ? { genreName: genre.name, genreSlug: genre.slug, books: genre.books }
+      : null,
   }
 }
 
