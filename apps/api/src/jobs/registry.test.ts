@@ -15,6 +15,7 @@ const unusedServices = {
   catalog: {} as JobContext['catalog'],
   queue: {} as Queue,
   enqueue: async () => 'unused',
+  enqueueMany: async () => [],
   sourceRps: 2,
   alert: () => {},
 }
