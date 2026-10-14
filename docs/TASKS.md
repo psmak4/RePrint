@@ -701,9 +701,9 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `ingestBook` finds existing Edition links and ISBN-13 matches for all of a candidate's Editions in a fixed number of queries, and inserts new Editions and links in batches
   - Accept: the ingest integration suite passes unchanged (matching, locked fields, field origins, ISBN rules, repeat runs), and a new test shows the query count for a 50-Edition candidate does not grow with its Editions
   - Accept: `pnpm check` passes
-- [ ] M10-T11 · API: independent queries run together, and jobs are queued in bulk · deps: M9-T20 · PRD: §11
+- [x] M10-T11 · API: independent queries run together, and jobs are queued in bulk · deps: M9-T20 · PRD: §11
   - Accept: the public review list, my review, `GET /books/:slug` (the stale-refresh and Series checks run beside the detail load), the Library endpoint, `/mod/stats`, and Source candidate matching no longer wait on queries they do not depend on
-  - Accept: `queueAuthorBookImports`, `queueSeriesMemberImports`, and `queueSeriesSyncs` add their jobs in one bulk call each and keep per-job deduplication (integration test against Redis)
+  - Accept: `queueAuthorBookImports` and `queueSeriesMemberImports` add their jobs in one bulk call each and keep per-job deduplication (integration test against Redis); `queueSeriesSyncs`, called from requests with one or two Series, adds its jobs side by side (changed in M10-T11: a bulk call there would mean a second queue method on every route's options and test fake, for one or two jobs)
   - Accept: existing tests pass; `pnpm check` passes
 - [ ] M10-T12 · Small efficiency fixes · deps: M9-T20 · PRD: §7.2, §7.4, §11, §13
   - Accept: `DATABASE_POOL_MAX` sets the API and worker pool size (default 10), documented in `.env.example` and `docs/deploy.md`

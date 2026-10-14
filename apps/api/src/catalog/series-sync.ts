@@ -171,24 +171,34 @@ export async function queueSeriesSyncs(
   jobs: Pick<JobQueue, 'enqueue'>,
   seriesIds: readonly string[],
 ): Promise<void> {
-  for (const seriesId of seriesIds) {
-    await jobs.enqueue(
-      'catalog.series-sync',
-      { seriesId },
-      { deduplicationId: `catalog.series-sync-${seriesId}`, priority: SERIES_SYNC_PRIORITY },
-    )
-  }
+  // A Book is in one or two Series, and this runs inside requests, so the adds go out together.
+  await Promise.all(
+    seriesIds.map((seriesId) =>
+      jobs.enqueue(
+        'catalog.series-sync',
+        { seriesId },
+        { deduplicationId: `catalog.series-sync-${seriesId}`, priority: SERIES_SYNC_PRIORITY },
+      ),
+    ),
+  )
 }
 
-/** Queues one background import per missing member, each retried on its own (D-199). */
+/**
+ * Queues one background import per missing member, each retried on its own (D-199), in one bulk
+ * call (M10-T11).
+ */
 export async function queueSeriesMemberImports(
-  jobs: Pick<JobQueue, 'enqueue'>,
+  jobs: Pick<JobQueue, 'enqueueMany'>,
   members: readonly SeriesMemberImport[],
 ): Promise<void> {
-  for (const member of members) {
-    await jobs.enqueue('catalog.series-member', member, {
-      deduplicationId: `catalog.series-member-${member.seriesId}-${member.sourceId}`,
-      priority: SERIES_SYNC_PRIORITY,
-    })
-  }
+  await jobs.enqueueMany(
+    'catalog.series-member',
+    members.map((member) => ({
+      payload: member,
+      options: {
+        deduplicationId: `catalog.series-member-${member.seriesId}-${member.sourceId}`,
+        priority: SERIES_SYNC_PRIORITY,
+      },
+    })),
+  )
 }
