@@ -84,7 +84,10 @@ export function toCover(row: CoverRow | null | undefined): Cover | null {
   }
 }
 
-async function coversById(db: Database, ids: (string | null)[]): Promise<Map<string, CoverRow>> {
+export async function coversById(
+  db: Database,
+  ids: (string | null)[],
+): Promise<Map<string, CoverRow>> {
   const wanted = [...new Set(ids.filter((id): id is string => id !== null))]
   if (wanted.length === 0) return new Map()
   const rows = await db.select().from(covers).where(inArray(covers.id, wanted))
@@ -118,7 +121,10 @@ function toEdition(row: EditionRow, coverMap: Map<string, CoverRow>): Edition {
   }
 }
 
-async function bylines(db: Database, bookIds: string[]): Promise<Map<string, Contribution[]>> {
+export async function bylines(
+  db: Database,
+  bookIds: string[],
+): Promise<Map<string, Contribution[]>> {
   const result = new Map<string, Contribution[]>()
   if (bookIds.length === 0) return result
   const rows = await db

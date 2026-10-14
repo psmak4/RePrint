@@ -41,16 +41,21 @@ function respond(url: URL) {
   if (url.pathname === '/v1/books/dune-abc123/editions') return Response.json({ items: [] })
   if (url.pathname === '/v1/books/dune-abc123/reviews')
     return Response.json({ items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } })
-  if (url.pathname === '/v1/authors/frank-herbert') {
-    const others = [2, 3, 4, 5, 6, 7, 8].map((n) => summary(n, `other-${n}`))
+  if (url.pathname === '/v1/books/dune-abc123/related') {
+    // The API leaves this Book out and sends at most 6 (M10-T06).
     return Response.json({
-      ...herbert,
-      alternateNames: [],
-      bio: null,
-      birthDate: null,
-      deathDate: null,
-      photo: null,
-      works: [{ role: 'author', books: [summary(1, 'dune-abc123'), ...others] }],
+      author: {
+        slug: herbert.slug,
+        name: herbert.name,
+        bio: null,
+        birthDate: null,
+        deathDate: null,
+        photo: null,
+        bookCount: 8,
+        books: [2, 3, 4, 5, 6, 7].map((n) => summary(n, `other-${n}`)),
+      },
+      series: null,
+      genre: null,
     })
   }
   return new Response(null, { status: 404 })
@@ -103,67 +108,95 @@ describe('book loader reviews', () => {
 })
 
 describe('book loader side data', () => {
-  const withShelves = {
-    ...book,
-    series: [{ series: { slug: 'dune-saga', name: 'Dune Saga' }, position: 1 }],
-    genres: [{ slug: 'science-fiction', name: 'Science fiction' }],
-  }
-  const seriesQueries: string[] = []
   const side = (url: URL) => {
-    if (url.pathname === '/v1/books/dune-abc123') return Response.json(withShelves)
-    if (url.pathname === '/v1/series/dune-saga') {
-      seriesQueries.push(url.search)
+    if (url.pathname === '/v1/books/dune-abc123/related')
       return Response.json({
+        author: {
+          slug: herbert.slug,
+          name: herbert.name,
+          bio: 'Wrote Dune.',
+          birthDate: '1920-10-08',
+          deathDate: '1986-02-11',
+          photo: null,
+          bookCount: 8,
+          books: [summary(4, 'children')],
+        },
         series: {
           slug: 'dune-saga',
           name: 'Dune Saga',
-          description: null,
           memberCount: 6,
-          adding: false,
+          total: 2,
+          items: [
+            { position: 1, book: summary(1, 'dune-abc123') },
+            { position: 2.5, book: summary(2, 'messiah') },
+          ],
         },
-        items: [
-          { position: 1, book: summary(1, 'dune-abc123') },
-          { position: 2.5, book: summary(2, 'messiah') },
-        ],
-        total: 2,
-      })
-    }
-    if (url.pathname === '/v1/genres/science-fiction')
-      return Response.json({
-        genre: { slug: 'science-fiction', name: 'Science fiction', description: null },
-        parent: null,
-        children: [],
-        items: [summary(1, 'dune-abc123'), summary(3, 'neuromancer')],
-        page: 1,
-        pageSize: 20,
-        hasMore: false,
+        genre: {
+          slug: 'science-fiction',
+          name: 'Science fiction',
+          books: [summary(3, 'neuromancer')],
+        },
       })
     return respond(url)
   }
 
-  it('loads the Series, More in Genre, and Author card data', async () => {
+  it('loads the Series, More in Genre, and Author card data from the one rails request', async () => {
     const result = await load(side)
-    // Only the Books around this one, and "of 6" from the Source while 2 are stored (D-199).
-    expect(seriesQueries).toEqual(['?around=dune-abc123'])
+    // "of 6" from the Source while 2 are stored (D-199).
     expect(result.series).toMatchObject({ name: 'Dune Saga', total: 6, stored: 2 })
     expect(result.series?.books.map((b) => b.position)).toEqual(['1', '2.5'])
+    expect(result.moreInGenre).toMatchObject({
+      genreName: 'Science fiction',
+      genreSlug: 'science-fiction',
+    })
     expect(result.moreInGenre?.books.map((b) => b.slug)).toEqual(['neuromancer'])
-    expect(result.authorCard).toMatchObject({ name: 'Frank Herbert', bookCount: 8 })
+    expect(result.authorCard).toEqual({
+      name: 'Frank Herbert',
+      slug: 'frank-herbert',
+      photo: null,
+      born: '1920-10-08',
+      died: '1986-02-11',
+      bio: 'Wrote Dune.',
+      bookCount: 8,
+    })
+    expect(result.moreByAuthor).toMatchObject({
+      authorName: 'Frank Herbert',
+      authorSlug: 'frank-herbert',
+    })
   })
 
-  it('still renders the Book when the Series, Genre, and Author requests fail', async () => {
+  it('still renders the Book when the rails request fails', async () => {
     const failing = (url: URL) =>
-      url.pathname.startsWith('/v1/series') ||
-      url.pathname.startsWith('/v1/genres') ||
-      url.pathname.startsWith('/v1/authors')
-        ? new Response(null, { status: 500 })
-        : side(url)
+      url.pathname.endsWith('/related') ? new Response(null, { status: 500 }) : side(url)
     const result = await load(failing)
     expect(result.book.title).toBe('Dune')
     expect(result.series).toBeNull()
     expect(result.moreInGenre).toBeNull()
     expect(result.authorCard).toBeNull()
     expect(result.moreByAuthor).toBeNull()
+  })
+
+  it('shows no More by rail when the Author has no other Books, but keeps their card', async () => {
+    const alone = (url: URL) =>
+      url.pathname.endsWith('/related')
+        ? Response.json({
+            author: {
+              slug: herbert.slug,
+              name: herbert.name,
+              bio: null,
+              birthDate: null,
+              deathDate: null,
+              photo: null,
+              bookCount: 1,
+              books: [],
+            },
+            series: null,
+            genre: null,
+          })
+        : respond(url)
+    const result = await load(alone)
+    expect(result.moreByAuthor).toBeNull()
+    expect(result.authorCard?.bookCount).toBe(1)
   })
 })
 
@@ -331,24 +364,17 @@ describe('book loader for Members', () => {
 
 describe('book loader request rounds (M10-T03)', () => {
   const viewer = { id: id(5), username: 'ada', displayName: 'Ada', verified: true, permissions: [] }
-  const RAILS = ['/v1/authors/frank-herbert', '/v1/series/', '/v1/genres/']
-  const isRail = (path: string) => RAILS.some((rail) => path.startsWith(rail))
 
-  it('asks for everything that needs only the slug before the Book answers', async () => {
+  it('asks for everything, the rails included, before the Book answers (M10-T06)', async () => {
     const seen: string[] = []
     let answerBook: () => void = () => {}
     const bookAnswered = new Promise<void>((resolve) => (answerBook = resolve))
-    const withRails = {
-      ...book,
-      series: [{ series: { slug: 'dune-saga', name: 'Dune' }, position: 1 }],
-      genres: [{ slug: 'science-fiction', name: 'Science fiction' }],
-    }
     const pending = load(
       async (url) => {
         seen.push(url.pathname)
         if (url.pathname === '/v1/books/dune-abc123') {
           await bookAnswered
-          return Response.json(withRails)
+          return Response.json(book)
         }
         if (url.pathname === '/v1/auth/session')
           return Response.json({ signupsOpen: false, viewer })
@@ -357,7 +383,7 @@ describe('book loader request rounds (M10-T03)', () => {
       'dune-abc123',
       MEMBER_COOKIE,
     )
-    await vi.waitFor(() => expect(seen).toHaveLength(6))
+    await vi.waitFor(() => expect(seen).toHaveLength(7))
     expect(new Set(seen)).toEqual(
       new Set([
         '/v1/books/dune-abc123',
@@ -366,17 +392,15 @@ describe('book loader request rounds (M10-T03)', () => {
         '/v1/auth/session',
         '/v1/books/dune-abc123/my-review',
         '/v1/books/dune-abc123/helpful-votes',
+        '/v1/books/dune-abc123/related',
       ]),
     )
-    expect(seen.some(isRail)).toBe(false)
     answerBook()
     const result = await pending
-    expect(seen.filter(isRail).sort()).toEqual([
-      '/v1/authors/frank-herbert',
-      '/v1/genres/science-fiction',
-      '/v1/series/dune-saga',
-    ])
+    // Nothing waited for the Book: no request went out after it answered.
+    expect(seen).toHaveLength(7)
     expect(result.viewer?.username).toBe('ada')
+    expect(result.moreByAuthor?.books).toHaveLength(6)
   })
 
   it('asks nothing about the viewer’s review without a session cookie', async () => {
@@ -407,7 +431,7 @@ describe('book loader request rounds (M10-T03)', () => {
     expect(result.votedReviewIds).toEqual([])
   })
 
-  it('redirects a merged Book’s old slug before asking for any rail', async () => {
+  it('redirects a merged Book’s old slug, dropping what was asked under it', async () => {
     const seen: string[] = []
     const merged = (url: URL) => {
       seen.push(url.pathname)
@@ -420,7 +444,11 @@ describe('book loader request rounds (M10-T03)', () => {
     } as never).catch((error: unknown) => error)
     expect((thrown as Response).status).toBe(301)
     expect((thrown as Response).headers.get('Location')).toBe('/books/dune-abc123?sort=newest')
-    expect(seen.some(isRail)).toBe(false)
+    expect(
+      seen.every(
+        (path) => path.startsWith('/v1/books/old-dune-000000') || path === '/v1/auth/session',
+      ),
+    ).toBe(true)
   })
 })
 
