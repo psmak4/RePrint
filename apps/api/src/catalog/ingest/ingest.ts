@@ -581,7 +581,7 @@ async function queueMergeCandidates(
     .where(
       and(
         ne(books.id, input.bookId),
-        sql`lower(unaccent(${books.title})) = lower(unaccent(${input.title}))`,
+        sql`search_fold(${books.title}) = search_fold(${input.title})`,
         inArray(sql`lower(${authors.name})`, lowerNames),
       ),
     )

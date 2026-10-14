@@ -115,19 +115,31 @@ describe('catalog schema (part 1)', () => {
     expect([e?.n, c?.n]).toEqual([0, 0])
   })
 
-  it('has a GIN index on search_vector and trigram indexes on title and Author name', async () => {
+  it('has a GIN index on search_vector and trigram indexes on folded titles and names', async () => {
     const rows = await database.sql<{ indexname: string; indexdef: string }[]>`
       select indexname, indexdef from pg_indexes where schemaname = 'public'`
     const def = (name: string) => rows.find((r) => r.indexname === name)?.indexdef ?? ''
     expect(def('books_search_vector_idx')).toMatch(/USING gin \(search_vector\)/)
-    expect(def('books_title_trgm_idx')).toMatch(/USING gin \(title gin_trgm_ops\)/)
-    expect(def('authors_name_trgm_idx')).toMatch(/USING gin \(name gin_trgm_ops\)/)
+    expect(def('books_title_search_idx')).toMatch(/USING gin \(search_fold\(title\) gin_trgm_ops\)/)
+    expect(def('authors_name_search_idx')).toMatch(/USING gin \(search_fold\(name\) gin_trgm_ops\)/)
+    expect(def('authors_alternate_names_search_idx')).toMatch(
+      /USING gin \(search_fold_names\(alternate_names\) gin_trgm_ops\)/,
+    )
+    expect(def('series_name_search_idx')).toMatch(/USING gin \(search_fold\(name\) gin_trgm_ops\)/)
+  })
+
+  it('folds case and accents in search_fold and search_fold_names (D-206)', async () => {
+    const [row] = await database.sql<{ one: string; names: string; none: string | null }[]>`
+      select search_fold('Les MISÉRABLES') as one,
+        search_fold_names(array['Éric Blair', 'George ORWELL']) as names,
+        search_fold(null) as none`
+    expect(row).toEqual({ one: 'les miserables', names: 'eric blair george orwell', none: null })
   })
 
   it('finds a Book by a misspelled title through the trigram operator', async () => {
     await insertBook('the-left-hand-of-darkness-0192a3', 'The Left Hand of Darkness')
     const rows = await database.sql`
-      select id from books where title % 'left hand of darknes'`
+      select id from books where search_fold(title) % 'left hand of darknes'`
     expect(rows).toHaveLength(1)
   })
 })

@@ -64,7 +64,8 @@ export const books = pgTable(
   },
   (t) => [
     index('books_search_vector_idx').using('gin', t.searchVector),
-    index('books_title_trgm_idx').using('gin', sql`${t.title} gin_trgm_ops`),
+    // Search compares folded text (lowercased, unaccented), so the trigram index is on that (M10-T01).
+    index('books_title_search_idx').using('gin', sql`search_fold(${t.title}) gin_trgm_ops`),
     index('books_primary_edition_id_idx').on(t.primaryEditionId),
     index('books_cover_id_idx').on(t.coverId),
     check('books_rating_counts_check', sql`array_length(${t.ratingCounts}, 1) = 5`),
@@ -123,7 +124,11 @@ export const authors = pgTable(
     ...timestamps(),
   },
   (t) => [
-    index('authors_name_trgm_idx').using('gin', sql`${t.name} gin_trgm_ops`),
+    index('authors_name_search_idx').using('gin', sql`search_fold(${t.name}) gin_trgm_ops`),
+    index('authors_alternate_names_search_idx').using(
+      'gin',
+      sql`search_fold_names(${t.alternateNames}) gin_trgm_ops`,
+    ),
     index('authors_photo_id_idx').on(t.photoId),
   ],
 )
@@ -219,18 +224,22 @@ export const sourceRecords = pgTable(
 )
 
 /** A named, ordered set of Books (PRD §5.1, §9). */
-export const series = pgTable('series', {
-  id: uuidv7Pk(),
-  slug: text('slug').notNull().unique(),
-  name: text('name').notNull(),
-  description: text('description'),
-  fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
-  /** How many members the Source lists for this Series (D-199); `null` when unknown. */
-  sourceMemberCount: integer('source_member_count'),
-  /** When the Source's member list was last imported (D-199). */
-  membersSyncedAt: timestamptz('members_synced_at'),
-  ...timestamps(),
-})
+export const series = pgTable(
+  'series',
+  {
+    id: uuidv7Pk(),
+    slug: text('slug').notNull().unique(),
+    name: text('name').notNull(),
+    description: text('description'),
+    fieldOrigins: jsonb('field_origins').notNull().default(sql`'{}'::jsonb`),
+    /** How many members the Source lists for this Series (D-199); `null` when unknown. */
+    sourceMemberCount: integer('source_member_count'),
+    /** When the Source's member list was last imported (D-199). */
+    membersSyncedAt: timestamptz('members_synced_at'),
+    ...timestamps(),
+  },
+  (t) => [index('series_name_search_idx').using('gin', sql`search_fold(${t.name}) gin_trgm_ops`)],
+)
 
 /** A Book's place in a Series. `position` may be decimal (2.5) or empty (PRD §5.1). */
 export const bookSeries = pgTable(
