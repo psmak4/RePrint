@@ -64,8 +64,8 @@ async function searchBooks(
  * Catalog size and monthly growth from `GET /v1/admin/catalog/stats`, and a search that finds a
  * Book to edit through `GET /v1/admin/books` (PRD §6, §7.11).
  */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const url = new URL(request.url)
   const query = adminBookSearchQuerySchema.safeParse({
     q: url.searchParams.get('q') ?? undefined,

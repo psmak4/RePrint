@@ -31,8 +31,8 @@ async function loadOldest(request: Request): Promise<ModQueueItem[] | null> {
  * The three oldest pending reviews. The queue counts come from the `/admin` layout, which already
  * asked `GET /v1/mod/stats` for the nav (D-201).
  */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.reviewsModerate)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.reviewsModerate)
   return { now: new Date().toISOString(), oldest: await loadOldest(request) }
 }
 

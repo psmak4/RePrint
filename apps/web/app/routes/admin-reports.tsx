@@ -26,8 +26,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** The Reports queue (reviews with open reports, oldest first) and what the viewer may do (PRD §7.10). */
-export async function loader({ request }: Route.LoaderArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.reportsResolve)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.reportsResolve)
   const cursor = new URL(request.url).searchParams.get('cursor') || null
   const query = new URLSearchParams({ limit: String(QUEUE_PAGE_SIZE) })
   if (cursor) query.set('cursor', cursor)
@@ -73,8 +73,8 @@ const reportActionSchema = z.discriminatedUnion('intent', [
 ])
 
 /** Dismiss, unpublish, or suspend the author. Each is a permission-checked, audited API call. */
-export async function action({ request }: Route.ActionArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.reportsResolve)
+export async function action({ request, context }: Route.ActionArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.reportsResolve)
   const parsed = reportActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return data({ formError: copy.admin.reports.actionFailed }, { status: 400 })

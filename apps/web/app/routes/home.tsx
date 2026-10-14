@@ -9,9 +9,9 @@ import { useRouteLoaderData } from 'react-router'
 import { DiscoverPage, type YourReading } from '../components/books/discover-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
-import { loadSession } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
 import { pageMeta } from '../lib/seo.js'
+import { viewerSession } from '../lib/session.server.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/home'
 
@@ -44,9 +44,12 @@ async function loadShelf(request: Request, username: string, shelf: Shelf, pageS
 }
 
 /** The viewer's Reading and Want to Read entries; a failure hides the strip. */
-async function loadYourReading(request: Request): Promise<YourReading | null> {
+async function loadYourReading({
+  request,
+  context,
+}: Pick<Route.LoaderArgs, 'request' | 'context'>): Promise<YourReading | null> {
   try {
-    const { viewer } = await loadSession(request)
+    const { viewer } = await viewerSession({ request, context })
     if (!viewer) return null
     const [reading, wantToRead] = await Promise.all([
       loadShelf(request, viewer.username, 'reading', READING_ENTRIES),
@@ -71,8 +74,11 @@ async function loadDiscover(request: Request): Promise<DiscoverResponse> {
 }
 
 /** The Discover rows from the API's cache (PRD §7.2). If they can't load, the page still renders without rows. */
-export async function loader({ request }: Route.LoaderArgs) {
-  const [discover, reading] = await Promise.all([loadDiscover(request), loadYourReading(request)])
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const [discover, reading] = await Promise.all([
+    loadDiscover(request),
+    loadYourReading({ request, context }),
+  ])
   return { discover, reading }
 }
 

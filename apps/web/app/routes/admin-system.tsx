@@ -13,8 +13,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** Source usage, search cache, and queue health from `GET /v1/admin/system` (PRD §6). */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   let response: Response
   try {
     response = await apiClientFor(request).get('/v1/admin/system')

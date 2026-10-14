@@ -4,8 +4,8 @@ import { apiClientFor } from '../lib/api.server.js'
 import type { Route } from './+types/admin-audit-csv'
 
 /** Resource route: streams the API's filtered audit CSV to the browser with its download headers. */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.auditView)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.auditView)
   const params = new URL(request.url).searchParams
   const query = new URLSearchParams()
   for (const key of Object.keys(adminAuditFiltersSchema.shape)) {

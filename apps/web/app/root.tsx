@@ -22,11 +22,11 @@ import { MainNav } from './components/shell/main-nav.js'
 import { NotificationBell } from './components/shell/notification-bell.js'
 import { SearchBox } from './components/shell/search-box.js'
 import { analyticsConfig } from './lib/analytics.js'
-import { loadSession } from './lib/auth.server.js'
 import { logger } from './lib/logger.server.js'
 import { clientNonce } from './lib/nonce.js'
 import { loadNotifications } from './lib/notifications.server.js'
 import { createRequestLogMiddleware } from './lib/request-log.server.js'
+import { hasSessionCookie, sessionMiddleware, viewerSession } from './lib/session.server.js'
 import './app.css'
 
 // Preload the two above-the-fold font files (D-180); the browser needs `crossOrigin` for font fetches.
@@ -39,15 +39,18 @@ export const links: Route.LinksFunction = () =>
     crossOrigin: 'anonymous',
   }))
 
-export const middleware = [createRequestLogMiddleware(logger)]
+export const middleware = [createRequestLogMiddleware(logger), sessionMiddleware]
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await loadSession(request)
-  const notifications = session.viewer ? await loadNotifications(request) : null
+export async function loader({ request, context }: Route.LoaderArgs) {
+  // With a session cookie, the bell's list is asked for beside the session, not after it.
+  const [session, notifications] = await Promise.all([
+    viewerSession({ request, context }),
+    hasSessionCookie(request) ? loadNotifications(request) : null,
+  ])
   // The public origin, for canonical URLs (see `pageMeta`).
   return {
     ...session,
-    notifications,
+    notifications: session.viewer ? notifications : null,
     origin: new URL(request.url).origin,
     // Null (no script, no cookies) unless VITE_ANALYTICS_DOMAIN is set (D-049).
     analytics: analyticsConfig(),
