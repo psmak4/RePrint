@@ -84,7 +84,7 @@ describe('ReportsQueue', () => {
     renderQueue()
     expect(screen.getByRole('heading', { level: 1, name: 'Reports queue' })).toBeTruthy()
     const card = screen.getAllByRole('article')[0] as HTMLElement
-    expect(card.className).toContain('rounded-[18px]')
+    expect(card.className).toContain('rounded-2xl')
     expect(within(card).getByRole('heading', { level: 2, name: 'Book 1' })).toBeTruthy()
     expect(within(card).getByText('2 open reports').className).toContain('rounded-full')
   })

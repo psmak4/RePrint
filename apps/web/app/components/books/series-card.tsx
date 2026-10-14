@@ -1,5 +1,5 @@
 import { type Cover as CoverData, SERIES_WINDOW } from '@reprint/shared'
-import { cn } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { Cover } from './cover.js'
@@ -49,10 +49,10 @@ export function SeriesCard({
       className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-[22px]"
     >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+        <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>
           {copy.redesign.bookPage.seriesEyebrow}
         </p>
-        <h2 id="series-card-heading" className="font-serif text-[22px] leading-tight font-medium">
+        <h2 id="series-card-heading" className={textStyles.cardTitle}>
           <Link to={href} className="hover:underline">
             {name}
           </Link>
@@ -72,7 +72,7 @@ export function SeriesCard({
                 className="w-full"
               />
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+                <span className={cn(textStyles.eyebrow, 'text-muted-foreground')}>
                   {book.position ? text.position(book.position, total ?? null) : null}
                 </span>
                 <span className="font-serif text-[17px] leading-tight">{book.title}</span>

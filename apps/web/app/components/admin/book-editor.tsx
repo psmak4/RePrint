@@ -16,6 +16,7 @@ import {
   Label,
   Select,
   Textarea,
+  textStyles,
 } from '@reprint/ui'
 import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
@@ -27,7 +28,7 @@ import { AdminPage } from './admin-page.js'
 const text = adminCopy.book
 const formats = copy.books.page.formats
 const CARD = 'flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 md:p-6'
-const CARD_HEADING = 'font-serif text-xl leading-tight font-medium'
+const CARD_HEADING = textStyles.cardTitle
 /** The edit form's fetcher outlives the form, which remounts after a save with the stored Book. */
 const EDIT_FETCHER = 'admin-book-edit'
 

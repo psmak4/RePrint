@@ -8,7 +8,7 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, buttonVariants, cn, Label, Select } from '@reprint/ui'
+import { Button, buttonVariants, cn, Label, Select, textStyles } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -401,9 +401,7 @@ export function SearchResultsPage({
   return (
     <section className="flex flex-col gap-7 pt-2 pb-16 md:pt-2">
       <div className="flex flex-col gap-5">
-        <h1 className="font-serif text-[32px] leading-[1.1] font-medium tracking-[-0.01em] md:text-[44px]">
-          {query.q ? c.headingFor(query.q) : c.heading}
-        </h1>
+        <h1 className={textStyles.pageTitle}>{query.q ? c.headingFor(query.q) : c.heading}</h1>
         <Tabs query={query} />
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
@@ -426,7 +424,10 @@ export function SearchResultsPage({
           ) : (
             <>
               {results.sourceUnavailable ? (
-                <p role="status" className="rounded-xl border border-border bg-surface p-4 text-sm">
+                <p
+                  role="status"
+                  className="rounded-2xl border border-border bg-surface p-4 text-sm"
+                >
                   {c.sourceUnavailable}
                 </p>
               ) : null}
@@ -453,7 +454,7 @@ export function SearchResultsPage({
               )}
               <Pagination query={query} hasMore={results.hasMore} />
               {query.type === 'books' ? (
-                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[14px] border border-dashed border-dashed-border px-6 py-5">
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-dashed border-dashed-border px-6 py-5">
                   <span className="font-semibold">{c.isbnHint}</span>
                   <span className="text-[15px] text-muted-foreground">{c.isbnHintNote}</span>
                 </p>

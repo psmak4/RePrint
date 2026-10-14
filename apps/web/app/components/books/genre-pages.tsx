@@ -138,7 +138,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
         ))}
       </nav>
       {items.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-dashed-border px-6 py-5 text-muted-foreground">
+        <p className="rounded-2xl border border-dashed border-dashed-border px-6 py-5 text-muted-foreground">
           {text.noBooks}
         </p>
       ) : (

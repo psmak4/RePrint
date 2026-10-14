@@ -21,7 +21,7 @@ export function ScrollRegion({
       // `relative` keeps absolutely placed children (sr-only text) inside the scroll box, so they
       // never widen the page; the focus ring sits inside, where a clipping card cannot hide it.
       className={cn(
-        'relative overflow-x-auto rounded-[18px] border border-border bg-surface focus-visible:outline-offset-[-2px]',
+        'relative overflow-x-auto rounded-2xl border border-border bg-surface focus-visible:outline-offset-[-2px]',
         className,
       )}
     >

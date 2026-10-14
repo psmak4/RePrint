@@ -1,5 +1,5 @@
 import type { AdminUserStatus } from '@reprint/shared'
-import { Button, cn } from '@reprint/ui'
+import { Button, cn, textStyles } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { AdminIcon } from './icons.js'
 
@@ -74,7 +74,7 @@ export function AdminCard({
       aria-labelledby={title ? titleId : undefined}
       aria-label={title ? undefined : label}
       className={cn(
-        'flex min-w-0 flex-col gap-4 rounded-[18px] border border-border bg-surface',
+        'flex min-w-0 flex-col gap-4 rounded-2xl border border-border bg-surface',
         flush ? 'gap-0 overflow-hidden' : 'p-5 md:p-6',
         className,
       )}
@@ -86,7 +86,7 @@ export function AdminCard({
             flush && 'px-5 pt-5 pb-4',
           )}
         >
-          <h2 id={titleId} className="font-serif text-[22px] leading-tight font-medium">
+          <h2 id={titleId} className={textStyles.cardTitle}>
             {title}
           </h2>
           {actions}
@@ -121,7 +121,7 @@ export function StatTile({
 /** A dashed box with a green check and one sentence, and optionally one action. */
 export function EmptyState({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-[18px] border border-dashed border-chip-border bg-surface-tint p-5 sm:flex-row sm:items-center">
+    <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-chip-border bg-surface-tint p-5 sm:flex-row sm:items-center">
       <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-success-tint text-success">
         <AdminIcon name="check" />
       </span>
@@ -167,7 +167,7 @@ export function FiltersToggle({
 /** A filter form's card: hidden on phones until its `FiltersToggle` opens it. */
 export const filtersFormClass = (open: boolean) =>
   cn(
-    'flex-col gap-4 rounded-[18px] border border-border bg-surface p-5 md:flex',
+    'flex-col gap-4 rounded-2xl border border-border bg-surface p-5 md:flex',
     open ? 'flex' : 'hidden',
   )
 

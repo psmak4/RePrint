@@ -61,10 +61,10 @@ describe('FeaturedManager', () => {
     renderManager()
     expect(screen.getByRole('heading', { level: 1, name: 'Featured content' })).toBeTruthy()
     expect(screen.getByRole('region', { name: 'Featured Genres' }).className).toContain(
-      'rounded-[18px]',
+      'rounded-2xl',
     )
     expect(screen.getByRole('region', { name: 'Featured review' }).className).toContain(
-      'rounded-[18px]',
+      'rounded-2xl',
     )
     expect(screen.getByText('Featured now').className).toContain('rounded-full')
     expect(screen.getByRole('button', { name: 'Remove Genre 1' }).className).toContain(

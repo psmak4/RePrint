@@ -1,3 +1,4 @@
+import { textStyles } from '@reprint/ui'
 import { PageHero } from '../books/page-hero.js'
 
 export interface StaticPageSection {
@@ -25,9 +26,7 @@ export function StaticPage({
       <div className="flex w-full max-w-[680px] flex-col gap-10">
         {content.sections.map((section) => (
           <section key={section.heading} className="flex flex-col gap-3">
-            <h2 className="font-serif text-2xl leading-tight font-medium md:text-[26px]">
-              {section.heading}
-            </h2>
+            <h2 className={textStyles.sectionTitle}>{section.heading}</h2>
             {section.paragraphs?.map((paragraph) => (
               <p key={paragraph} className="text-[17px] leading-[1.7] text-foreground">
                 {paragraph}

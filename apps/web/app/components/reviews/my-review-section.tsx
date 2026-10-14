@@ -1,5 +1,5 @@
 import type { Edition, MyReview, Viewer } from '@reprint/shared'
-import { Button } from '@reprint/ui'
+import { Button, cn, textStyles } from '@reprint/ui'
 import { lazy, type ReactNode, Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -69,12 +69,9 @@ function Shell({ heading, children }: { heading: string; children: React.ReactNo
   return (
     <section
       aria-labelledby="my-review-heading"
-      className="flex h-full flex-col gap-3 rounded-[14px] border border-border bg-background p-5"
+      className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-background p-5"
     >
-      <h2
-        id="my-review-heading"
-        className="text-xs font-semibold tracking-[0.12em] text-link uppercase"
-      >
+      <h2 id="my-review-heading" className={cn(textStyles.eyebrow, 'text-link')}>
         {heading}
       </h2>
       <div className="flex flex-col gap-3 text-[15px] leading-normal">{children}</div>

@@ -242,7 +242,7 @@ export function UsersList({
           </div>
           <ul
             aria-label={text.listLabel}
-            className="overflow-hidden rounded-[18px] border border-border bg-surface md:hidden"
+            className="overflow-hidden rounded-2xl border border-border bg-surface md:hidden"
           >
             {users.items.map((user) => (
               <li key={user.id} className="border-t border-border first:border-t-0">

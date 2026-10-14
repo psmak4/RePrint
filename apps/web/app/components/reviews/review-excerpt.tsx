@@ -35,7 +35,7 @@ export function ReviewExcerpt({
 }) {
   const text = copy.redesign.reviewExcerpt
   return (
-    <figure className="grid grid-cols-[56px_minmax(0,1fr)] gap-4 rounded-[14px] border border-border bg-surface p-4 md:grid-cols-[72px_minmax(0,1fr)] md:gap-5 md:p-[22px]">
+    <figure className="grid grid-cols-[56px_minmax(0,1fr)] gap-4 rounded-2xl border border-border bg-surface p-4 md:grid-cols-[72px_minmax(0,1fr)] md:gap-5 md:p-[22px]">
       {book ? (
         <Link to={href} tabIndex={-1} aria-hidden="true" className="self-start">
           <Cover

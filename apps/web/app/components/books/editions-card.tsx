@@ -1,4 +1,4 @@
-import { chipVariants } from '@reprint/ui'
+import { chipVariants, textStyles } from '@reprint/ui'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -74,7 +74,7 @@ export function EditionsCard({
       className="flex flex-col gap-3.5 rounded-2xl border border-border bg-surface p-[22px]"
     >
       <div className="flex items-baseline justify-between gap-3">
-        <h2 id="editions-card-heading" className="font-serif text-[22px] font-medium">
+        <h2 id="editions-card-heading" className={textStyles.cardTitle}>
           {copy.redesign.bookPage.editionsHeading}
         </h2>
         <span className="text-sm text-muted-foreground">

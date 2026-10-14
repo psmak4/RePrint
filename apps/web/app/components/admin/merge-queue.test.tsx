@@ -62,7 +62,7 @@ describe('MergeQueue', () => {
       '/admin/catalog',
     )
     const card = screen.getAllByRole('article')[0] as HTMLElement
-    expect(card.className).toContain('rounded-[18px]')
+    expect(card.className).toContain('rounded-2xl')
     expect(within(card).getByRole('link', { name: 'Edit Dune' }).className).toContain(
       'rounded-full',
     )

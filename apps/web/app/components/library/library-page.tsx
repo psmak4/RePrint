@@ -1,5 +1,5 @@
 import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@reprint/shared'
-import { buttonVariants, Select } from '@reprint/ui'
+import { buttonVariants, cn, Select, textStyles } from '@reprint/ui'
 import { useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -132,11 +132,7 @@ export function LibraryPage({
   return (
     <div className="flex flex-col gap-8 md:gap-10">
       <PageHero
-        eyebrow={
-          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:text-[13px]">
-            {text.eyebrow}
-          </p>
-        }
+        eyebrow={<p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.eyebrow}</p>}
         leading={
           <InitialsAvatar
             name={username}
@@ -153,7 +149,7 @@ export function LibraryPage({
           <SortForm username={username} view={view} />
         </div>
         {library.items.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-dashed-border px-6 py-5">
+          <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-dashed-border px-6 py-5">
             <p className="text-muted-foreground">{text.empty}</p>
             <Link to="/" className={buttonVariants()}>
               {text.discoverPrompt}
