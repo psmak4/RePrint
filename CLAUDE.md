@@ -59,7 +59,7 @@ docs/            TASKS, PROGRESS, BLOCKERS, DECISIONS, DESIGN, milestones/
 | DB: drop, migrate, seed sample data | `pnpm db:reset` |
 | DB: seed sample data only | `pnpm db:seed` |
 | First Admin (server, one-time; password read from stdin) | `pnpm --filter api seed:admin -- --email … --username …` |
-| **Everything CI runs except e2e** | **`pnpm check`** (lint, typecheck, db:check, test:unit, test:integration, build, openapi drift, audit) |
+| **Everything CI runs except e2e** | **`pnpm check`** (lint, typecheck, db:check, test:unit, test:integration, build, openapi drift, bundle check, audit) |
 
 ## Coding conventions
 

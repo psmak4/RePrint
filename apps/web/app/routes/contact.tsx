@@ -1,23 +1,23 @@
 import { APP_NAME } from '@reprint/shared'
 import { StaticPage } from '../components/legal/static-page.js'
-import { copy } from '../copy/index.js'
+import { legalCopy } from '../copy/legal.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/contact'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, {
-    title: `${copy.legal.contact.title} | ${APP_NAME}`,
-    description: copy.legal.contact.description,
+    title: `${legalCopy.contact.title} | ${APP_NAME}`,
+    description: legalCopy.contact.description,
   })
 }
 
 export default function Contact() {
   return (
-    <StaticPage content={copy.legal.contact}>
+    <StaticPage content={legalCopy.contact}>
       <p className="mt-6">
-        <strong>{copy.legal.contact.emailLabel}:</strong>{' '}
-        <a className="underline" href={`mailto:${copy.legal.contactEmail}`}>
-          {copy.legal.contactEmail}
+        <strong>{legalCopy.contact.emailLabel}:</strong>{' '}
+        <a className="underline" href={`mailto:${legalCopy.contactEmail}`}>
+          {legalCopy.contactEmail}
         </a>
       </p>
     </StaticPage>

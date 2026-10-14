@@ -9,11 +9,12 @@ import {
 import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
 import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
+import { adminCopy } from '../../copy/admin.js'
 import { copy } from '../../copy/index.js'
 import { Cover } from '../books/cover.js'
 import { AdminPage } from './admin-page.js'
 
-const text = copy.admin.book
+const text = adminCopy.book
 const formats = copy.books.page.formats
 const CARD = 'flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 md:p-6'
 const CARD_HEADING = 'font-serif text-xl leading-tight font-medium'
@@ -726,8 +727,8 @@ export function BookEditor({ book, genres }: { book: AdminBookDetail; genres: Ad
   return (
     <AdminPage
       crumbs={[
-        { label: copy.admin.title, to: '/admin' },
-        { label: copy.admin.catalogNav, to: '/admin/catalog' },
+        { label: adminCopy.title, to: '/admin' },
+        { label: adminCopy.catalogNav, to: '/admin/catalog' },
         { label: text.title },
       ]}
       leading={

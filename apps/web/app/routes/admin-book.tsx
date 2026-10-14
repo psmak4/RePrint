@@ -11,7 +11,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { BookEditor } from '../components/admin/book-editor.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -20,7 +20,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-book'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.book.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.book.title}`, noindex: true })
 }
 
 /** One Book as an Admin edits it, with the Genres to choose from (PRD §7.11). */
@@ -36,7 +36,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     ])
   } catch (error) {
     logger.error({ err: error }, 'could not load the admin Book')
-    throw data(copy.admin.book.loadFailed, { status: 502 })
+    throw data(adminCopy.book.loadFailed, { status: 502 })
   }
   for (const response of [bookResponse, genresResponse]) {
     if (response.status === 401 || response.status === 403) {
@@ -51,7 +51,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       { book: bookResponse.status, genres: genresResponse.status },
       'admin Book request failed',
     )
-    throw data(copy.admin.book.loadFailed, { status: 502 })
+    throw data(adminCopy.book.loadFailed, { status: 502 })
   }
   const book: AdminBookDetail = adminBookDetailSchema.parse(await bookResponse.json())
   const genres: AdminGenre[] = adminGenresResponseSchema
@@ -69,12 +69,12 @@ const bookActionSchema = z.discriminatedUnion('intent', [
 export async function action({ request, params, context }: Route.ActionArgs) {
   await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const base = `/v1/admin/books/${encodeURIComponent(params.id)}`
-  const fallback = copy.admin.book.failed
+  const fallback = adminCopy.book.failed
 
   if (request.headers.get('content-type')?.startsWith('multipart/form-data')) {
     const file = (await request.formData().catch(() => null))?.get('file')
     if (!(file instanceof File) || file.size === 0) {
-      return data({ formError: copy.admin.book.coverChoose }, { status: 400 })
+      return data({ formError: adminCopy.book.coverChoose }, { status: 400 })
     }
     const upload = new FormData()
     upload.set('file', file, file.name)

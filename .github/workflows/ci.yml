@@ -80,6 +80,7 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm build
       - run: pnpm openapi:check
+      - run: pnpm bundle:check
 
   gitleaks:
     name: gitleaks

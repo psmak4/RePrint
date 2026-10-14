@@ -7,7 +7,7 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { UsersList } from '../components/admin/users-list.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
@@ -18,7 +18,7 @@ const PAGE_SIZE = 25
 const FILTERS = ['q', 'role', 'status', 'joinedFrom', 'joinedTo'] as const
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.users.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.users.title}`, noindex: true })
 }
 
 /** Users, newest first, searched and filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */
@@ -45,14 +45,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get(`/v1/admin/users?${query}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load admin users')
-    throw data(copy.admin.users.loadFailed, { status: 502 })
+    throw data(adminCopy.users.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'admin users request failed')
-    throw data(copy.admin.users.loadFailed, { status: 502 })
+    throw data(adminCopy.users.loadFailed, { status: 502 })
   }
   const users: AdminUsersResponse = adminUsersResponseSchema.parse(await response.json())
   const filterValues = Object.fromEntries(FILTERS.map((key) => [key, parsed[key] ?? ''])) as Record<

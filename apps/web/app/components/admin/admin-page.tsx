@@ -1,7 +1,7 @@
 import { cn } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link, NavLink, useOutletContext } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { AdminIcon, type AdminIconName } from './icons.js'
 
 export type AdminNavItem = { to: string; label: string; icon: AdminIconName; count?: number }
@@ -39,7 +39,7 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
                   {item.count ? (
                     <span className="ml-auto inline-flex h-[22px] min-w-6 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-accent-foreground">
                       <span aria-hidden="true">{item.count}</span>
-                      <span className="sr-only">{`, ${copy.admin.navCount(item.count)}`}</span>
+                      <span className="sr-only">{`, ${adminCopy.navCount(item.count)}`}</span>
                     </span>
                   ) : null}
                 </NavLink>
@@ -55,10 +55,10 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
 /** The left nav from `lg`; a disclosure above the page below it. */
 function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
   return (
-    <nav aria-label={copy.admin.navLabel} className="lg:w-56 lg:shrink-0">
+    <nav aria-label={adminCopy.navLabel} className="lg:w-56 lg:shrink-0">
       <details className="rounded-xl border border-border bg-surface lg:hidden">
         <summary className="flex h-12 cursor-pointer items-center justify-between gap-2 px-4 text-[15px] font-semibold">
-          {copy.admin.navToggle}
+          {adminCopy.navToggle}
           <AdminIcon name="chevronDown" />
         </summary>
         <div className="p-2 pt-0">
@@ -74,7 +74,7 @@ function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
 
 function Crumbs({ crumbs }: { crumbs: AdminCrumb[] }) {
   return (
-    <nav aria-label={copy.admin.breadcrumbLabel}>
+    <nav aria-label={adminCopy.breadcrumbLabel}>
       <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         {crumbs.map((crumb, index) => (
           <li

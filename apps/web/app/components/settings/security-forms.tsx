@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 import { type FieldValues, type Resolver, useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
 import type { z } from 'zod'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 import { TextField } from './text-field.js'
 
 type Result = {
@@ -55,7 +55,7 @@ function FormError({ message }: { message?: string }) {
 
 /** Asks for the current password and a new address; the change waits for the emailed link. */
 export function ChangeEmailForm({ me }: { me: Me }) {
-  const c = copy.settings.security
+  const c = settingsCopy.security
   const { fetcher, form, submit, busy } = useSecurityForm(changeEmailRequestSchema, 'change-email')
   const { register, formState } = form
   const pending = fetcher.data?.pendingEmail
@@ -106,7 +106,7 @@ export function ChangeEmailForm({ me }: { me: Me }) {
 }
 
 export function ChangePasswordForm() {
-  const c = copy.settings.security
+  const c = settingsCopy.security
   const { fetcher, form, submit, busy } = useSecurityForm(
     changePasswordRequestSchema,
     'change-password',
@@ -157,7 +157,7 @@ export function ChangePasswordForm() {
 
 /** Asks for the password again and spells out the 30-day erase before anything is sent. */
 export function DeleteAccountForm() {
-  const c = copy.settings.security.delete
+  const c = settingsCopy.security.delete
   const { fetcher, form, submit, busy } = useSecurityForm(
     deleteAccountRequestSchema,
     'delete-account',

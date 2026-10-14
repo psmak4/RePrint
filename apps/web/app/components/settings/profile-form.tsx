@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
 import type { z } from 'zod'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 
 type FormInput = z.input<typeof updateMeRequestSchema>
 type FormOutput = z.output<typeof updateMeRequestSchema>
@@ -13,7 +13,7 @@ type Result = { saved?: boolean; formError?: string; fieldErrors?: Record<string
 
 /** Display name, bio, library privacy, and review-decision emails, validated with the shared schema. */
 export function ProfileForm({ me }: { me: Me }) {
-  const c = copy.settings.profile
+  const c = settingsCopy.profile
   const fetcher = useFetcher<Result>()
   const {
     register,
