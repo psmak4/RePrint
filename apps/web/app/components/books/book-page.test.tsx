@@ -5,9 +5,14 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import type { ComponentProps } from 'react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
+import { toRichTree } from '../../lib/rich-text.server.js'
 import { BookPage, type MoreByAuthor } from './book-page.js'
 
 afterEach(cleanup)
+
+/** A description as the loader parses it (M10-T08). */
+const treeOf = (description: string | null) =>
+  description?.trim() ? toRichTree(description.trim()) : null
 
 const id = '0192a3b4-0000-7000-8000-000000000001'
 const author = (slug: string, name: string) => ({ id, slug, name })
@@ -58,6 +63,7 @@ function renderPage(
       Component: () => (
         <BookPage
           book={{ ...book, ...overrides }}
+          descriptionTree={treeOf({ ...book, ...overrides }.description)}
           editions={editions}
           moreByAuthor={moreByAuthor}
           {...extra}
@@ -336,6 +342,7 @@ describe('rating breakdown', () => {
         Component: () => (
           <BookPage
             book={{ ...book, rating: { average: 4, count: 3, distribution: [0, 0, 1, 1, 1] } }}
+            descriptionTree={treeOf(book.description)}
             editions={[]}
             moreByAuthor={null}
           />

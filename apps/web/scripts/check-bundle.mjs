@@ -1,6 +1,7 @@
 // Checks the built client bundle (M10-T07): the JavaScript every page loads (the client entry and
 // the root route) must not contain Zod or the copy of the admin, legal, or settings pages, which
-// only their own routes need. Prints the gzip size each main page loads. Run after `pnpm build`.
+// only their own routes need, and the Book, Author, and Series pages must not contain a Markdown
+// parser (M10-T08). Prints the gzip size each main page loads. Run after `pnpm build`.
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -65,6 +66,19 @@ for (const file of everyPage) {
   }
 }
 
+// Markdown is parsed on the server and drawn from a tree (M10-T08): no page that shows a
+// description or bio may ship the parser.
+const markdownParser = {
+  what: 'a Markdown parser',
+  markers: ['allowDangerousHtml', 'processSync', 'micromark'],
+}
+for (const id of ['routes/book', 'routes/author', 'routes/series']) {
+  for (const file of filesFor(id)) {
+    const hit = markdownParser.markers.find((marker) => read(file).includes(marker))
+    if (hit) problems.push(`${id} loads ${file}, which contains ${markdownParser.what} ("${hit}")`)
+  }
+}
+
 const pages = {
   Discover: 'routes/home',
   Book: 'routes/book',
@@ -85,5 +99,5 @@ if (problems.length > 0) {
   process.exit(1)
 }
 console.log(
-  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads',
+  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads, and no Markdown parser on the Book, Author, or Series page',
 )

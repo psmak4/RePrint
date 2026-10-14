@@ -689,7 +689,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the header search box no longer brings schemas into the root chunk (the suggestion response is checked by code loaded when first needed)
   - Accept: a check in `pnpm check` fails if the built root route's JS contains Zod or admin copy; the PR lists gzip JS per route (Discover, Book, search, log in) before and after
   - Accept: `pnpm check` and `pnpm test:e2e` pass
-- [ ] M10-T08 · Web: render Markdown without shipping a Markdown parser · deps: M10-T07 · PRD: §7.4, §7.5, §11
+- [x] M10-T08 · Web: render Markdown without shipping a Markdown parser · deps: M10-T07 · PRD: §7.4, §7.5, §11
   - Accept: descriptions, bios, and Series descriptions are parsed on the server and drawn on the client from a small tree, with D-202's output and link rules (raw HTML skipped; only absolute http(s) links outside Open Library are links) and no `dangerouslySetInnerHTML`
   - Accept: the Book, Author, and Series pages' client JS holds no Markdown parser; the existing `RichText` tests and the D-202 e2e test pass
   - Accept: a `docs/DECISIONS.md` entry amends D-202's library choice; `pnpm check` passes

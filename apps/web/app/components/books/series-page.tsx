@@ -1,5 +1,6 @@
 import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
 import { copy } from '../../copy/index.js'
+import type { RichTree } from '../../lib/rich-tree.js'
 import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
 import { summaryCard } from './genre-pages.js'
@@ -11,9 +12,12 @@ const text = copy.series
 /** `/series/:slug`: Books in reading order, each with its position and rating (PRD §7.5). */
 export function SeriesPage({
   detail,
+  descriptionTree,
   viewer = null,
 }: {
   detail: SeriesDetailResponse
+  /** `detail.series.description` parsed on the server, inline (M10-T08); `null` when there is none. */
+  descriptionTree: RichTree | null
   viewer?: Viewer | null
 }) {
   const { series, items } = detail
@@ -29,8 +33,8 @@ export function SeriesPage({
         }
         title={series.name}
         lead={
-          series.description ? (
-            <RichText inline text={series.description} />
+          series.description && descriptionTree ? (
+            <RichText inline tree={descriptionTree} />
           ) : (
             text.bookCount(series.memberCount ?? items.length)
           )

@@ -9,6 +9,7 @@ import { Link, useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
+import type { RichTree } from '../../lib/rich-tree.js'
 import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
 import { PageHero } from './page-hero.js'
@@ -53,7 +54,16 @@ export function lifeDates(birthDate: string | null, deathDate: string | null): s
   return null
 }
 
-export function AuthorPage({ author, page = 1 }: { author: AuthorDetail; page?: number }) {
+export function AuthorPage({
+  author,
+  bioTree,
+  page = 1,
+}: {
+  author: AuthorDetail
+  /** `author.bio` parsed on the server (`toRichTree`, M10-T08); `null` when there is none. */
+  bioTree: RichTree | null
+  page?: number
+}) {
   const groups = groupWorks(author.works)
   const { pathname } = useLocation()
   // Paging counts the API's `author` list only; co-written Books are short and come whole (D-203).
@@ -136,7 +146,7 @@ export function AuthorPage({ author, page = 1 }: { author: AuthorDetail; page?: 
           )}
         </div>
         <aside className="min-w-0">
-          <Bio bio={author.bio} />
+          <Bio bio={author.bio} tree={bioTree} />
         </aside>
       </div>
     </article>
@@ -184,7 +194,7 @@ function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: stri
   )
 }
 
-function Bio({ bio }: { bio: string | null }) {
+function Bio({ bio, tree }: { bio: string | null; tree: RichTree | null }) {
   const body = bio?.trim()
   return (
     <section
@@ -197,8 +207,8 @@ function Bio({ bio }: { bio: string | null }) {
       >
         {text.aboutHeading}
       </h2>
-      {body ? (
-        <RichText text={body} className="text-[15px] leading-relaxed text-[#334155]" />
+      {body && tree ? (
+        <RichText tree={tree} className="text-[15px] leading-relaxed text-[#334155]" />
       ) : (
         <p className="text-[15px] text-muted-foreground">{text.noBio}</p>
       )}

@@ -15,6 +15,7 @@ import { copy } from '../../copy/index.js'
 import { groupContributors } from '../../lib/contributors.js'
 import { coverUrl } from '../../lib/cover-url.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
+import type { RichTree } from '../../lib/rich-tree.js'
 import { MyReviewSection } from '../reviews/my-review-section.js'
 import { ReviewsList } from '../reviews/reviews-list.js'
 import { RichText } from '../rich-text.js'
@@ -64,6 +65,7 @@ const languageName = (code: string) =>
 
 export function BookPage({
   book,
+  descriptionTree,
   editions,
   moreByAuthor,
   author = null,
@@ -76,6 +78,8 @@ export function BookPage({
   votedReviewIds = [],
 }: {
   book: BookDetail
+  /** `book.description` parsed on the server (`toRichTree`, M10-T08); `null` when there is none. */
+  descriptionTree: RichTree | null
   editions: Edition[]
   moreByAuthor: MoreByAuthor | null
   author?: AuthorSummary | null
@@ -124,7 +128,7 @@ export function BookPage({
       <SectionNav items={navItems} />
       <div className="grid gap-12 pt-9 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-14 lg:pt-12">
         <div className="flex min-w-0 flex-col gap-12 lg:gap-16">
-          <Description text={book.description} />
+          <Description text={book.description} tree={descriptionTree} />
           <BookDetails book={book} />
           <ReviewsList
             slug={book.slug}
@@ -583,7 +587,7 @@ function BookDetails({ book }: { book: BookDetail }) {
   )
 }
 
-function Description({ text: description }: { text: string | null }) {
+function Description({ text: description, tree }: { text: string | null; tree: RichTree | null }) {
   const [expanded, setExpanded] = useState(false)
   const body = description?.trim() ?? ''
   // Measured on the text a reader sees, not the Markdown (D-202).
@@ -601,11 +605,11 @@ function Description({ text: description }: { text: string | null }) {
       >
         {text.descriptionHeading}
       </h2>
-      {body ? (
+      {body && tree ? (
         <>
           <RichText
             id="book-description-text"
-            text={body}
+            tree={tree}
             className={`font-serif text-lg leading-[1.6] text-[#1e293b] md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
           />
           {collapsible ? (
