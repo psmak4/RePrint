@@ -680,7 +680,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M10-T05 · API: Genre "Top rated" reuses the cached site mean · deps: M9-T20 · PRD: §7.2, §7.5
   - Accept: `loadGenreBooks` with `sort=top_rated` takes the site mean from the Discover cache (`discover:v3:site-mean`) and computes it from `books` only when the cache is empty or Redis is down
   - Accept: integration tests give the same order with a warm cache, a cold cache, and Redis unavailable; `pnpm check` passes
-- [ ] M10-T06 · Book page rails from light queries, with no Author sync · deps: M10-T03, M10-T05 · PRD: §7.4, §7.5
+- [x] M10-T06 · Book page rails from light queries, with no Author sync · deps: M10-T03, M10-T05 · PRD: §7.4, §7.5
   - Accept: the Book page gets the Author card plus up to 6 other Books by its first Author, and up to 6 top-rated Books in its first Genre, without loading the full Author or Genre page data; the API shape is recorded in `docs/DECISIONS.md` and the OpenAPI spec regenerated
   - Accept: a Book page view never queues `catalog.author-sync` (D-205), and an Author page view still does when due (D-203); integration tests prove both
   - Accept: the rails show the same Books in the same order as before (route and integration tests); `pnpm check` and the Book page e2e specs pass
