@@ -424,7 +424,7 @@ async function lockVotableReview(tx: Tx, id: string) {
     .where(eq(reviews.id, id))
     .for('update', { of: reviews })
   // A review that is not public looks the same as one that does not exist.
-  if (!review || review.status !== 'approved' || review.authorStatus === 'deleted') {
+  if (review?.status !== 'approved' || review.authorStatus === 'deleted') {
     throw new HttpProblem(404, 'Review not found.')
   }
   return review

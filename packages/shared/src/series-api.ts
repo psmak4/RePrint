@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { slugSchema } from './catalog.js'
 import { bookSummarySchema } from './catalog-api.js'
-import { SERIES_WINDOW } from './ui-constants.js'
 
 /** Response shape for a Series page (PRD §7.5, §10). */
 

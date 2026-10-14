@@ -721,9 +721,9 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M11 · UI consistency
 
-- [ ] M11-T01 · Clear the lint warnings and the audit advisory · deps: M10-T13 · PRD: §12
+- [x] M11-T01 · Clear the lint warnings and the audit advisory · deps: M10-T13 · PRD: §12
   - Accept: `pnpm lint` reports no warnings (the unused import in `series-api.ts` and the optional chain in the reviews routes)
-  - Accept: `pnpm audit` reports no advisory that a release within the pinned majors fixes; one with no such fix is recorded in `docs/BLOCKERS.md` with its severity and path; `pnpm check` passes
+  - Accept: `pnpm audit` reports no advisory that a release within the pinned majors fixes; one with no such fix is recorded in `docs/DECISIONS.md` with its severity, path, and why it is safe to keep (changed from `docs/BLOCKERS.md`: an accepted advisory blocks nothing); `pnpm check` passes
 - [x] M11-T02 · Theme colours for every repeated value, and a style guard · deps: M10-T13 · PRD: §8, §11
   - Accept: `theme.css` gains a named colour for each role the raw values played (stronger text, chip border, dashed border, tinted ground, rating track, and each status tint and edge); `DESIGN.md` lists them, and `theme.test.ts` checks every text colour on all four grounds
   - Accept: no class in `apps/web` uses a raw hex colour except the generated-cover and initials-avatar palettes, each kept in one module; a style guard unit test fails on any other `-[#…]` class

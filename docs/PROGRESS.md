@@ -851,3 +851,7 @@ Entry format:
 ### 2026-10-14 · M11-T02 · Theme colours for every repeated value, and a style guard · loop/m11-t02-colour-tokens
 - `theme.css` gains 15 tokens for the roles pages filled with raw colours (`strong`, `chip-border`, `dashed-border`, `surface-tint`, `track`, `star-empty`, `cover-ink`, and a tint and an edge for accent, success, warning, and danger), listed in `DESIGN.md`. About 220 raw hex classes across 50 files now name tokens; values that played one role merged (D-215 lists each). Only the generated-cover and initials-avatar palettes keep raw values.
 - `apps/web/app/style-guard.test.ts` fails on any other raw hex class in the web app or `@reprint/ui` (checked by planting one); `theme.test.ts` checks `strong` on the four grounds, each status colour on its tint, and the text colours on every tint (68 tests). Web unit tests (763) and `pnpm check` pass.
+
+### 2026-10-14 · M11-T01 · Clear the lint warnings and the audit advisory · loop/m11-t01-lint-audit
+- `pnpm lint` now reports no warnings: the unused `SERIES_WINDOW` import in `packages/shared/src/series-api.ts` is gone, and the reviews routes' "not public" check uses an optional chain (`review?.status !== 'approved' || …`), which TypeScript narrows the same way.
+- The one `pnpm audit` advisory (moderate, esbuild's dev server, under `drizzle-kit`) has no fix in any `drizzle-kit` release and cannot be reached the way the project uses it; D-216 records why it stays. `pnpm check` passes.
