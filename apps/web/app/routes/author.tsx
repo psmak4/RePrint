@@ -13,6 +13,7 @@ import { apiClientFor } from '../lib/api.server.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { authorBreadcrumbs, authorJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
+import { toRichTree } from '../lib/rich-text.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/author'
 
@@ -64,7 +65,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { origin } = new URL(request.url)
   const jsonLd = [authorJsonLd(origin, author), authorBreadcrumbs(origin, author)]
 
-  return { author, canonicalUrl, metaDescription, jsonLd, page }
+  // Parsed here, so the page draws it without a Markdown parser (M10-T08).
+  const bioTree = author.bio?.trim() ? toRichTree(author.bio.trim()) : null
+  return { author, bioTree, canonicalUrl, metaDescription, jsonLd, page }
 }
 
 export default function Author({ loaderData }: Route.ComponentProps) {
@@ -72,7 +75,12 @@ export default function Author({ loaderData }: Route.ComponentProps) {
     <>
       <JsonLd data={loaderData.jsonLd} />
       {/* A new key per Author, so nothing from the last Author's page (a failed photo) carries over. */}
-      <AuthorPage key={loaderData.author.id} author={loaderData.author} page={loaderData.page} />
+      <AuthorPage
+        key={loaderData.author.id}
+        author={loaderData.author}
+        bioTree={loaderData.bioTree}
+        page={loaderData.page}
+      />
     </>
   )
 }

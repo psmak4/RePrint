@@ -6,6 +6,7 @@ import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { seriesBreadcrumbs } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
+import { toRichTree } from '../lib/rich-text.server.js'
 import { pageMeta } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/series'
@@ -38,7 +39,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(copy.series.loadFailed, { status: 502 })
   }
   const detail = seriesDetailResponseSchema.parse(await response.json())
-  return { ...detail, jsonLd: seriesBreadcrumbs(new URL(request.url).origin, detail) }
+  return {
+    ...detail,
+    // Parsed here, so the page draws it without a Markdown parser (M10-T08).
+    descriptionTree: detail.series.description
+      ? toRichTree(detail.series.description, { inline: true })
+      : null,
+    jsonLd: seriesBreadcrumbs(new URL(request.url).origin, detail),
+  }
 }
 
 export default function Series({ loaderData }: Route.ComponentProps) {
@@ -46,7 +54,11 @@ export default function Series({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <JsonLd data={loaderData.jsonLd} />
-      <SeriesPage detail={loaderData} viewer={session?.viewer ?? null} />
+      <SeriesPage
+        detail={loaderData}
+        descriptionTree={loaderData.descriptionTree}
+        viewer={session?.viewer ?? null}
+      />
     </>
   )
 }
