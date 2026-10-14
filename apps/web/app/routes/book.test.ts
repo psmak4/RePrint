@@ -56,10 +56,17 @@ function respond(url: URL) {
   return new Response(null, { status: 404 })
 }
 
-function load(handler: (url: URL) => Response | Promise<Response>, slug = 'dune-abc123') {
+/** A Member's browser sends the session cookie; a Visitor's sends none. */
+const MEMBER_COOKIE = { cookie: 'rp_session=abc' }
+
+function load(
+  handler: (url: URL) => Response | Promise<Response>,
+  slug = 'dune-abc123',
+  headers: Record<string, string> = {},
+) {
   vi.stubGlobal('fetch', async (url: URL) => handler(new URL(String(url))))
   return loader({
-    request: new Request(`https://reprint.test/books/${slug}`),
+    request: new Request(`https://reprint.test/books/${slug}`, { headers }),
     params: { slug },
   } as never)
 }
@@ -275,37 +282,145 @@ describe('book loader for Members', () => {
   }
 
   it('loads the viewer and their review', async () => {
-    const result = await load((url) => {
-      if (url.pathname === '/v1/auth/session') return Response.json({ signupsOpen: false, viewer })
-      if (url.pathname === '/v1/books/dune-abc123/my-review') return Response.json(mine)
-      return respond(url)
-    })
+    const result = await load(
+      (url) => {
+        if (url.pathname === '/v1/auth/session')
+          return Response.json({ signupsOpen: false, viewer })
+        if (url.pathname === '/v1/books/dune-abc123/my-review') return Response.json(mine)
+        return respond(url)
+      },
+      'dune-abc123',
+      MEMBER_COOKIE,
+    )
     expect(result.viewer?.username).toBe('ada')
     expect(result.myReview?.status).toBe('pending')
   })
 
   it('loads the review IDs the Member marked helpful, and none for a Visitor', async () => {
-    const member = await load((url) => {
-      if (url.pathname === '/v1/auth/session') return Response.json({ signupsOpen: false, viewer })
-      if (url.pathname === '/v1/books/dune-abc123/helpful-votes')
-        return Response.json({ reviewIds: [id(7)] })
-      return respond(url)
-    })
+    const member = await load(
+      (url) => {
+        if (url.pathname === '/v1/auth/session')
+          return Response.json({ signupsOpen: false, viewer })
+        if (url.pathname === '/v1/books/dune-abc123/helpful-votes')
+          return Response.json({ reviewIds: [id(7)] })
+        return respond(url)
+      },
+      'dune-abc123',
+      MEMBER_COOKIE,
+    )
     expect(member.votedReviewIds).toEqual([id(7)])
     expect((await load(respond)).votedReviewIds).toEqual([])
   })
 
   it('has no review for a Member who has not written one, or for a Visitor', async () => {
-    const member = await load((url) =>
-      url.pathname === '/v1/auth/session'
-        ? Response.json({ signupsOpen: false, viewer })
-        : respond(url),
+    const member = await load(
+      (url) =>
+        url.pathname === '/v1/auth/session'
+          ? Response.json({ signupsOpen: false, viewer })
+          : respond(url),
+      'dune-abc123',
+      MEMBER_COOKIE,
     )
     expect(member.viewer).not.toBeNull()
     expect(member.myReview).toBeNull()
     const visitor = await load(respond)
     expect(visitor.viewer).toBeNull()
     expect(visitor.myReview).toBeNull()
+  })
+})
+
+describe('book loader request rounds (M10-T03)', () => {
+  const viewer = { id: id(5), username: 'ada', displayName: 'Ada', verified: true, permissions: [] }
+  const RAILS = ['/v1/authors/frank-herbert', '/v1/series/', '/v1/genres/']
+  const isRail = (path: string) => RAILS.some((rail) => path.startsWith(rail))
+
+  it('asks for everything that needs only the slug before the Book answers', async () => {
+    const seen: string[] = []
+    let answerBook: () => void = () => {}
+    const bookAnswered = new Promise<void>((resolve) => (answerBook = resolve))
+    const withRails = {
+      ...book,
+      series: [{ series: { slug: 'dune-saga', name: 'Dune' }, position: 1 }],
+      genres: [{ slug: 'science-fiction', name: 'Science fiction' }],
+    }
+    const pending = load(
+      async (url) => {
+        seen.push(url.pathname)
+        if (url.pathname === '/v1/books/dune-abc123') {
+          await bookAnswered
+          return Response.json(withRails)
+        }
+        if (url.pathname === '/v1/auth/session')
+          return Response.json({ signupsOpen: false, viewer })
+        return respond(url)
+      },
+      'dune-abc123',
+      MEMBER_COOKIE,
+    )
+    await vi.waitFor(() => expect(seen).toHaveLength(6))
+    expect(new Set(seen)).toEqual(
+      new Set([
+        '/v1/books/dune-abc123',
+        '/v1/books/dune-abc123/editions',
+        '/v1/books/dune-abc123/reviews',
+        '/v1/auth/session',
+        '/v1/books/dune-abc123/my-review',
+        '/v1/books/dune-abc123/helpful-votes',
+      ]),
+    )
+    expect(seen.some(isRail)).toBe(false)
+    answerBook()
+    const result = await pending
+    expect(seen.filter(isRail).sort()).toEqual([
+      '/v1/authors/frank-herbert',
+      '/v1/genres/science-fiction',
+      '/v1/series/dune-saga',
+    ])
+    expect(result.viewer?.username).toBe('ada')
+  })
+
+  it('asks nothing about the viewer’s review without a session cookie', async () => {
+    const seen: string[] = []
+    const result = await load((url) => {
+      seen.push(url.pathname)
+      return respond(url)
+    })
+    expect(seen).not.toContain('/v1/books/dune-abc123/my-review')
+    expect(seen).not.toContain('/v1/books/dune-abc123/helpful-votes')
+    expect(result.viewer).toBeNull()
+  })
+
+  it('shows no review parts when the cookie no longer signs anyone in', async () => {
+    const result = await load(
+      (url) => {
+        if (url.pathname === '/v1/books/dune-abc123/my-review')
+          return Response.json({ id: id(6) }, { status: 401 })
+        if (url.pathname === '/v1/books/dune-abc123/helpful-votes')
+          return Response.json({ reviewIds: [id(7)] })
+        return respond(url)
+      },
+      'dune-abc123',
+      MEMBER_COOKIE,
+    )
+    expect(result.viewer).toBeNull()
+    expect(result.myReview).toBeNull()
+    expect(result.votedReviewIds).toEqual([])
+  })
+
+  it('redirects a merged Book’s old slug before asking for any rail', async () => {
+    const seen: string[] = []
+    const merged = (url: URL) => {
+      seen.push(url.pathname)
+      return url.pathname === '/v1/books/old-dune-000000' ? Response.json(book) : respond(url)
+    }
+    vi.stubGlobal('fetch', async (url: URL) => merged(new URL(String(url))))
+    const thrown = await loader({
+      request: new Request('https://reprint.test/books/old-dune-000000?sort=newest'),
+      params: { slug: 'old-dune-000000' },
+    } as never).catch((error: unknown) => error)
+    expect((thrown as Response).status).toBe(301)
+    expect((thrown as Response).headers.get('Location')).toBe('/books/dune-abc123?sort=newest')
+    expect(seen.some(isRail)).toBe(false)
   })
 })
 
