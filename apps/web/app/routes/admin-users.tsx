@@ -22,8 +22,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** Users, newest first, searched and filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */
-export async function loader({ request }: Route.LoaderArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.usersView)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.usersView)
   const params = new URL(request.url).searchParams
   const raw: Record<string, string> = {}
   for (const key of [...FILTERS, 'cursor']) {

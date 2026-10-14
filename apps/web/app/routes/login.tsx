@@ -2,16 +2,17 @@ import { APP_NAME, loginRequestSchema } from '@reprint/shared'
 import { redirect } from 'react-router'
 import { LoginPage } from '../components/auth/login-page.js'
 import { copy } from '../copy/index.js'
-import { failed, forwardCookies, loadSession, postToApi } from '../lib/auth.server.js'
+import { failed, forwardCookies, postToApi } from '../lib/auth.server.js'
 import { pageMeta } from '../lib/seo.js'
+import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/login'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.login.title}`, noindex: true })
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  if ((await loadSession(request)).viewer) throw redirect('/')
+export async function loader({ request, context }: Route.LoaderArgs) {
+  if ((await viewerSession({ request, context })).viewer) throw redirect('/')
   return null
 }
 

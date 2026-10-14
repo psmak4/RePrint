@@ -769,6 +769,12 @@ Entry format:
 - `pnpm check` passes. Local e2e not run (the owner's dev servers hold ports 5173 and 3000); CI's e2e job covers it.
 - The owner's local database needs `pnpm db:migrate` after this merges (migrations 0024 and 0025).
 
+### 2026-10-14 · M10-T02 · Web: one session lookup per request · loop/m10-t02-one-session-lookup
+- The root route now runs `sessionMiddleware`, which puts a lazy, memoized session lookup in the router context; the root loader, `requireViewerPermission`, and every loader that read the session use `viewerSession({ request, context })` (D-207). The root loader asks for the bell's notifications beside the session when the request has the `rp_session` cookie, and for none without it.
+- Proof on a production build (`react-router-serve` from this branch, its API calls counted by a proxy in front of the dev API): a Book page, an admin page, settings, and a Book `.data` navigation each asked `GET /v1/auth/session` exactly once (the Book page asked twice before, an admin page three times); a Visitor page asked for no notifications.
+- Tests: `session.server.test.ts` (one lookup shared in a request, none when unused, one per request, direct load without the middleware, Visitor on API failure, cookie detection) and `session-per-request.test.ts` (the real root, Book, admin, and settings loaders under the middleware make one lookup; with the Book loader bypassing the shared lookup the test fails; root loader notifications with and without a cookie, a stale cookie, and a failing notifications API). `pnpm check` passes.
+- Local e2e not run (the owner's dev servers hold ports 5173 and 3000); CI's e2e job covers it.
+
 ### 2026-10-14 · M10-T09 · API: Book cards and details read only the columns they show · loop/m10-t09-narrow-book-reads
 - Book cards (`loadBookSummaries`, used by Discover, search, Genres, Series, Library, and the rails) and the Author page's lists read whole `books` rows, including `search_vector`, `field_origins`, `locked_fields`, and `description`, which on the owner's data are most of each row. They now select one shared `bookSummaryColumns` set; `findBookBySlug` selects the detail set (the card plus description, original language, Primary Edition, Source Edition count, and refresh time).
 - `loadBookDetail` read every Edition of the Book (up to 50) to count them and find the Primary one, then looked up the Covers in a second round. It now counts Editions, reads the Primary Edition with its Cover in one join, and reads the Book's own Cover, all in its one parallel round.

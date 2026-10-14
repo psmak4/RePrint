@@ -24,8 +24,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** One Book as an Admin edits it, with the Genres to choose from (PRD §7.11). */
-export async function loader({ request, params }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function loader({ request, params, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const client = apiClientFor(request)
   let bookResponse: Response
   let genresResponse: Response
@@ -66,8 +66,8 @@ const bookActionSchema = z.discriminatedUnion('intent', [
 ])
 
 /** Each action is one permission-checked, audited API call. The Cover goes up as multipart. */
-export async function action({ request, params }: Route.ActionArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function action({ request, params, context }: Route.ActionArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const base = `/v1/admin/books/${encodeURIComponent(params.id)}`
   const fallback = copy.admin.book.failed
 

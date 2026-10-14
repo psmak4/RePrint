@@ -26,13 +26,14 @@ import {
 import { JsonLd } from '../components/seo/json-ld.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
-import { failed, loadSession, sendToApi } from '../lib/auth.server.js'
+import { failed, sendToApi } from '../lib/auth.server.js'
 import { groupContributors } from '../lib/contributors.js'
 import { coverUrl } from '../lib/cover-url.js'
 import { bookBreadcrumbs, bookJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
 import { pageMeta } from '../lib/seo.js'
+import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/book'
 
 const MORE_BY_AUTHOR_LIMIT = 6
@@ -53,7 +54,7 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** The Book, its Editions, and up to 6 more Books by its first Author, all loaded on the server (PRD §7.4). */
-export async function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params, context }: Route.LoaderArgs) {
   const slug = slugSchema.safeParse(params.slug)
   if (!slug.success) throw data('Not found', { status: 404 })
   const api = apiClientFor(request)
@@ -94,7 +95,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     byline ? loadAuthor(api, byline.slug, book.id) : null,
     firstSeries ? loadSeries(api, firstSeries.slug, book.slug) : null,
     firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
-    loadSession(request),
+    viewerSession({ request, context }),
     loadReviews(api, book.slug, reviewQuery),
   ])
   const moreByAuthor = authorData?.moreByAuthor ?? null

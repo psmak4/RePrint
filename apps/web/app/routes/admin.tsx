@@ -57,8 +57,8 @@ function navItem(
 }
 
 /** The grouped nav (D-201): only the sections the viewer may open, with queue counts for moderators. */
-export async function loader({ request }: Route.LoaderArgs) {
-  const viewer = await requireViewerPermission(request, ADMIN_AREA_PERMISSIONS)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const viewer = await requireViewerPermission({ request, context }, ADMIN_AREA_PERMISSIONS)
   const can = (permission: string) => viewer.permissions.includes(permission)
   // `/mod/stats` needs reviews.moderate; anyone else gets no counts rather than a 403.
   const stats = can(PERMISSIONS.reviewsModerate) ? await loadStats(request) : null
