@@ -64,6 +64,20 @@ async function readCached(redis: Redis): Promise<DiscoverResponse | null> {
 }
 
 /**
+ * The site mean `m` (D-133) the `discover.rebuild` job caches, for any weighted ranking. It is
+ * computed from `books` only when the cache is empty or Redis is down, and then cached again
+ * when Redis allows (M10-T05).
+ */
+export async function cachedSiteMean(db: Database, redis: Redis | undefined): Promise<number> {
+  const raw = redis ? await redis.get(SITE_MEAN_KEY).catch(() => null) : null
+  const cached = raw === null ? Number.NaN : Number(raw)
+  if (Number.isFinite(cached)) return cached
+  const mean = await computeSiteMean(db)
+  await redis?.set(SITE_MEAN_KEY, String(mean), 'EX', DISCOVER_CACHE_TTL_SECONDS).catch(() => {})
+  return mean
+}
+
+/**
  * `GET /discover` serves the cache the `discover.rebuild` job fills. When it is empty (a fresh
  * Redis, or the worker has been down for an hour) the first request builds it. Redis trouble never
  * fails the page: it is built from the Catalog and served uncached.

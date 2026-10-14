@@ -677,7 +677,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [ ] M10-T04 · API: one query reads a session and its permissions · deps: M9-T20 · PRD: §4, §11
   - Accept: the session hook reads the session, the Member, and their permission names in one query; renewal still writes only when the session was last seen over a day ago (D-027)
   - Accept: integration tests show expired, too-old, suspended, and deleted sessions still read as Visitor and permissions are unchanged; `pnpm check` passes
-- [ ] M10-T05 · API: Genre "Top rated" reuses the cached site mean · deps: M9-T20 · PRD: §7.2, §7.5
+- [x] M10-T05 · API: Genre "Top rated" reuses the cached site mean · deps: M9-T20 · PRD: §7.2, §7.5
   - Accept: `loadGenreBooks` with `sort=top_rated` takes the site mean from the Discover cache (`discover:v3:site-mean`) and computes it from `books` only when the cache is empty or Redis is down
   - Accept: integration tests give the same order with a warm cache, a cold cache, and Redis unavailable; `pnpm check` passes
 - [ ] M10-T06 · Book page rails from light queries, with no Author sync · deps: M10-T03, M10-T05 · PRD: §7.4, §7.5
