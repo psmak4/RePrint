@@ -99,17 +99,6 @@ export const libraryRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (ap
       reply.header('Cache-Control', PRIVATE_CACHE_CONTROL).header('Vary', 'Cookie')
 
       const { shelf, sort, page, pageSize } = request.query
-      const countRows = await db
-        .select({ shelf: shelfEntries.shelf, total: count() })
-        .from(shelfEntries)
-        .where(eq(shelfEntries.userId, owner.id))
-        .groupBy(shelfEntries.shelf)
-      const counts = { all: 0, want_to_read: 0, reading: 0, read: 0 }
-      for (const row of countRows) {
-        counts[row.shelf] = row.total
-        counts.all += row.total
-      }
-
       // First credited Author's name, for sorting by author; Books with none sort last.
       const firstAuthor = sql<string | null>`(
         select ${authors.name} from ${contributions}
@@ -122,20 +111,36 @@ export const libraryRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (ap
         title: [asc(books.title)],
         author: [sql`${firstAuthor} asc nulls last`, asc(books.title)],
       }[sort]
-      const rows = await db
-        .select({
-          bookId: shelfEntries.bookId,
-          shelf: shelfEntries.shelf,
-          addedAt: shelfEntries.addedAt,
-        })
-        .from(shelfEntries)
-        .innerJoin(books, eq(books.id, shelfEntries.bookId))
-        .where(
-          and(eq(shelfEntries.userId, owner.id), shelf ? eq(shelfEntries.shelf, shelf) : undefined),
-        )
-        .orderBy(...orderBy, asc(shelfEntries.id))
-        .limit(pageSize)
-        .offset((page - 1) * pageSize)
+      // The Shelf counts and the page do not depend on each other (M10-T11).
+      const [countRows, rows] = await Promise.all([
+        db
+          .select({ shelf: shelfEntries.shelf, total: count() })
+          .from(shelfEntries)
+          .where(eq(shelfEntries.userId, owner.id))
+          .groupBy(shelfEntries.shelf),
+        db
+          .select({
+            bookId: shelfEntries.bookId,
+            shelf: shelfEntries.shelf,
+            addedAt: shelfEntries.addedAt,
+          })
+          .from(shelfEntries)
+          .innerJoin(books, eq(books.id, shelfEntries.bookId))
+          .where(
+            and(
+              eq(shelfEntries.userId, owner.id),
+              shelf ? eq(shelfEntries.shelf, shelf) : undefined,
+            ),
+          )
+          .orderBy(...orderBy, asc(shelfEntries.id))
+          .limit(pageSize)
+          .offset((page - 1) * pageSize),
+      ])
+      const counts = { all: 0, want_to_read: 0, reading: 0, read: 0 }
+      for (const row of countRows) {
+        counts[row.shelf] = row.total
+        counts.all += row.total
+      }
       const summaries = await loadBookSummaries(
         db,
         rows.map((row) => row.bookId),

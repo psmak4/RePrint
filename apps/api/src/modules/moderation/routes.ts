@@ -485,14 +485,16 @@ export const moderationRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async 
     { preHandler: [moderate], schema: { response: { 200: modStatsSchema } } },
     async (): Promise<ModStats> => {
       if (!db) throw new Error('moderation routes need a database')
-      const [pending] = await db
-        .select({ total: count(), oldest: min(reviews.submittedAt) })
-        .from(reviews)
-        .where(eq(reviews.status, 'pending'))
-      const [reported] = await db
-        .select({ total: count(), oldest: min(reviewReports.createdAt) })
-        .from(reviewReports)
-        .where(eq(reviewReports.status, 'open'))
+      const [[pending], [reported]] = await Promise.all([
+        db
+          .select({ total: count(), oldest: min(reviews.submittedAt) })
+          .from(reviews)
+          .where(eq(reviews.status, 'pending')),
+        db
+          .select({ total: count(), oldest: min(reviewReports.createdAt) })
+          .from(reviewReports)
+          .where(eq(reviewReports.status, 'open')),
+      ])
       const age = (at: Date | null) =>
         at ? Math.max(0, Math.floor((Date.now() - at.getTime()) / 1000)) : null
       const oldestPending = pending?.oldest ? new Date(pending.oldest) : null

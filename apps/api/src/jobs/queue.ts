@@ -26,6 +26,14 @@ export interface JobQueue {
     payload: JobPayload<Name>,
     options?: EnqueueOptions,
   ) => Promise<string>
+  /**
+   * Adds many jobs of one kind in one round trip to Redis, each validated first and deduplicated
+   * as `enqueue` would (M10-T11). Returns the job IDs in order.
+   */
+  enqueueMany: <Name extends JobName>(
+    name: Name,
+    items: readonly { payload: JobPayload<Name>; options?: EnqueueOptions }[],
+  ) => Promise<string[]>
   /** Creates or updates the repeatable schedule of every job that declares one. */
   syncSchedules: () => Promise<void>
   close: () => Promise<void>
@@ -34,6 +42,20 @@ export interface JobQueue {
 /** Workers block on Redis, so BullMQ needs `maxRetriesPerRequest: null` on their connection. */
 export function workerConnection(redisUrl: string): Redis {
   return new Redis(redisUrl, { maxRetriesPerRequest: null })
+}
+
+/** BullMQ options for one job: its ID or deduplication, its priority, and its retry policy. */
+function jobOptions(definition: JobDefinition, options: EnqueueOptions | undefined) {
+  const retry = definition.retry
+  return {
+    ...(options?.jobId && { jobId: options.jobId }),
+    ...(options?.deduplicationId && { deduplication: { id: options.deduplicationId } }),
+    ...(options?.priority && { priority: options.priority }),
+    ...(retry && {
+      attempts: retry.attempts,
+      backoff: { type: 'exponential', delay: retry.backoffMs },
+    }),
+  }
 }
 
 export function createJobQueue(redisUrl: string): JobQueue {
@@ -49,17 +71,24 @@ export function createJobQueue(redisUrl: string): JobQueue {
     queue,
     enqueue: async (name, payload, options) => {
       const definition: JobDefinition = jobs[name]
-      const retry = definition.retry
-      const job = await queue.add(name, definition.payload.parse(payload), {
-        ...(options?.jobId && { jobId: options.jobId }),
-        ...(options?.deduplicationId && { deduplication: { id: options.deduplicationId } }),
-        ...(options?.priority && { priority: options.priority }),
-        ...(retry && {
-          attempts: retry.attempts,
-          backoff: { type: 'exponential', delay: retry.backoffMs },
-        }),
-      })
+      const job = await queue.add(
+        name,
+        definition.payload.parse(payload),
+        jobOptions(definition, options),
+      )
       return String(job.id)
+    },
+    enqueueMany: async (name, items) => {
+      if (items.length === 0) return []
+      const definition: JobDefinition = jobs[name]
+      // Every payload is checked before any job is added, so a bad one adds none.
+      const bulk = items.map(({ payload, options }) => ({
+        name,
+        data: definition.payload.parse(payload),
+        opts: jobOptions(definition, options),
+      }))
+      const added = await queue.addBulk(bulk)
+      return added.map((job) => String(job.id))
     },
     syncSchedules: async () => {
       for (const [name, definition] of Object.entries(jobs)) {
