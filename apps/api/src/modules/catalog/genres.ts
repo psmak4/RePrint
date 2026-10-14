@@ -92,27 +92,49 @@ function orderBy(sort: GenreSort, siteMean: number) {
 }
 
 /**
- * One page of Books in the Genre or any Genre below it. `siteMean` is asked for only by the
- * `top_rated` sort, so the other sorts never read it (M10-T05).
+ * The IDs of Books in the Genre or any Genre below it, in the sort's order. `siteMean` is asked
+ * for only by the `top_rated` sort, so the other sorts never read it (M10-T05).
  */
-export async function loadGenreBooks(
+export async function genreBookIds(
   db: Database,
-  genre: GenreRow,
-  { sort, page, siteMean }: { sort: GenreSort; page: number; siteMean: () => Promise<number> },
-): Promise<{ items: BookSummary[]; hasMore: boolean }> {
-  const mean = sort === 'top_rated' ? await siteMean() : 0
+  genreId: string,
+  options: {
+    sort: GenreSort
+    limit: number
+    offset?: number
+    siteMean: () => Promise<number>
+    /** Leaves this Book out, as the Book page's Genre rail does (M10-T06). */
+    excludeBookId?: string
+  },
+): Promise<string[]> {
+  const mean = options.sort === 'top_rated' ? await options.siteMean() : 0
   const rows = await db.execute<{ id: string }>(sql`
     with recursive tree as (
-      select id from genres where id = ${genre.id}
+      select id from genres where id = ${genreId}
       union
       select g.id from genres g join tree t on g.parent_id = t.id
     )
     select b.id from books b
     where exists (select 1 from book_genres bg where bg.book_id = b.id
                   and bg.genre_id in (select id from tree))
-    order by ${orderBy(sort, mean)}
-    limit ${GENRE_PAGE_SIZE + 1} offset ${(page - 1) * GENRE_PAGE_SIZE}`)
-  const ids = rows.map((row) => row.id)
+      ${options.excludeBookId ? sql`and b.id <> ${options.excludeBookId}` : sql``}
+    order by ${orderBy(options.sort, mean)}
+    limit ${options.limit} offset ${options.offset ?? 0}`)
+  return rows.map((row) => row.id)
+}
+
+/** One page of Books in the Genre or any Genre below it. */
+export async function loadGenreBooks(
+  db: Database,
+  genre: GenreRow,
+  { sort, page, siteMean }: { sort: GenreSort; page: number; siteMean: () => Promise<number> },
+): Promise<{ items: BookSummary[]; hasMore: boolean }> {
+  const ids = await genreBookIds(db, genre.id, {
+    sort,
+    siteMean,
+    limit: GENRE_PAGE_SIZE + 1,
+    offset: (page - 1) * GENRE_PAGE_SIZE,
+  })
   return {
     items: await loadBookSummaries(db, ids.slice(0, GENRE_PAGE_SIZE)),
     hasMore: ids.length > GENRE_PAGE_SIZE,
