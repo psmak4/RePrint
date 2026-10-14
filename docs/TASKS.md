@@ -674,7 +674,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the Book loader starts the requests that need only the slug at once (the Book, Editions, reviews, and with a session cookie, my review and helpful votes); only the Author, Series, and Genre rails wait for the Book
   - Accept: a merged Book's old slug still redirects (301) with its query, and nothing fetched under the old slug reaches the page
   - Accept: route tests check which requests wait for the Book, plus the Visitor, Member, and failing-API cases; `pnpm check` and the Book page e2e specs pass
-- [ ] M10-T04 · API: one query reads a session and its permissions · deps: M9-T20 · PRD: §4, §11
+- [x] M10-T04 · API: one query reads a session and its permissions · deps: M9-T20 · PRD: §4, §11
   - Accept: the session hook reads the session, the Member, and their permission names in one query; renewal still writes only when the session was last seen over a day ago (D-027)
   - Accept: integration tests show expired, too-old, suspended, and deleted sessions still read as Visitor and permissions are unchanged; `pnpm check` passes
 - [ ] M10-T05 · API: Genre "Top rated" reuses the cached site mean · deps: M9-T20 · PRD: §7.2, §7.5
