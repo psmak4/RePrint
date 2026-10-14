@@ -62,6 +62,7 @@ describe('backfillSourceRatings (D-204)', () => {
       saved: 1,
       removed: 1,
       failedBatches: 0,
+      stopped: false,
     })
     expect(await ratingsByTitle()).toEqual([['The Hobbit', 500]])
   })
@@ -73,6 +74,7 @@ describe('backfillSourceRatings (D-204)', () => {
       saved: 0,
       removed: 0,
       failedBatches: 0,
+      stopped: false,
     })
     await backfillSourceRatings({ db, source: stub })
     expect(await backfillSourceRatings({ db, source: stub })).toMatchObject({ failedBatches: 0 })
@@ -95,8 +97,36 @@ describe('backfillSourceRatings (D-204)', () => {
       batchSize: 1,
       log: (message) => logged.push(message),
     })
-    expect(result).toEqual({ saved: 1, removed: 0, failedBatches: 1 })
+    expect(result).toEqual({ saved: 1, removed: 0, failedBatches: 1, stopped: false })
     expect(logged).toHaveLength(1)
     expect(await ratingsByTitle()).toEqual([['The Hobbit', 500]])
+  })
+
+  it('stops after three failed batches in a row instead of burning through the rest', async () => {
+    for (const id of [
+      'stub-book-dune',
+      'stub-book-hobbit',
+      'stub-book-fellowship',
+      'stub-book-silmarillion',
+    ]) {
+      const candidate = await stub.getBook(id)
+      if (!candidate) throw new Error(`no ${id}`)
+      await ingestBook(db, { source: stub, candidate })
+    }
+    let calls = 0
+    const down = {
+      ...stub,
+      getBookRatings: async () => {
+        calls += 1
+        throw new SourceError('The Source circuit breaker is open')
+      },
+    }
+    expect(await backfillSourceRatings({ db, source: down, batchSize: 1 })).toEqual({
+      saved: 0,
+      removed: 0,
+      failedBatches: 3,
+      stopped: true,
+    })
+    expect(calls).toBe(3)
   })
 })
