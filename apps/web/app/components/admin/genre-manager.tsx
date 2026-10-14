@@ -2,13 +2,13 @@ import type { AdminGenre, AdminSubjectRule } from '@reprint/shared'
 import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge, EmptyState, numClass, tableClass, tdClass, thClass } from './admin-ui.js'
 import { AdminIcon } from './icons.js'
 import { ScrollRegion } from './scroll-region.js'
 
-const text = copy.admin.genres
+const text = adminCopy.genres
 
 type ActionResult =
   | {
@@ -488,8 +488,8 @@ export function GenreManager({
       title={text.title}
       lead={text.lead}
       crumbs={[
-        { label: copy.admin.title, to: '/admin' },
-        { label: copy.admin.catalogNav, to: '/admin/catalog' },
+        { label: adminCopy.title, to: '/admin' },
+        { label: adminCopy.catalogNav, to: '/admin/catalog' },
         { label: text.title },
       ]}
       actions={

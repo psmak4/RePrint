@@ -2,7 +2,7 @@ import type { ModQueueItem, ModQueueResponse } from '@reprint/shared'
 import { Button, cn } from '@reprint/ui'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import type { ClaimState } from '../../routes/admin-reviews.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { Cover } from '../books/cover.js'
@@ -12,7 +12,7 @@ import { AdminCard, Badge, EmptyState } from './admin-ui.js'
 import { AdminIcon } from './icons.js'
 import { DecisionPanel, isTypingTarget, VersionComparison } from './review-decision.js'
 
-const text = copy.admin.reviews
+const text = adminCopy.reviews
 
 const timeFormat = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
@@ -270,7 +270,7 @@ export function ReviewQueue({
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
     >
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)]">
         <QueueList queue={queue} selectedId={selected?.id ?? null} cursor={cursor} now={now} />

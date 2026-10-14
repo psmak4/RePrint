@@ -1,7 +1,7 @@
 import { APP_NAME, type ModStats, modStatsSchema, PERMISSIONS } from '@reprint/shared'
 import { AdminLayout } from '../components/admin/admin-layout.js'
 import type { AdminNavGroup, AdminNavItem } from '../components/admin/admin-page.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
@@ -19,7 +19,7 @@ const ADMIN_AREA_PERMISSIONS = [
 ]
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.title}`, noindex: true })
 }
 
 /** How long every admin page waits for the queue counts before showing the page without them. */
@@ -66,33 +66,33 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   const moderation: AdminNavItem[] = []
   if (can(PERMISSIONS.reviewsModerate)) {
-    moderation.push(navItem('/admin', copy.admin.dashboardNav, 'dashboard'))
-    moderation.push(navItem('/admin/reviews', copy.admin.reviewsNav, 'reviews', counts?.reviews))
+    moderation.push(navItem('/admin', adminCopy.dashboardNav, 'dashboard'))
+    moderation.push(navItem('/admin/reviews', adminCopy.reviewsNav, 'reviews', counts?.reviews))
   }
   if (can(PERMISSIONS.reportsResolve)) {
-    moderation.push(navItem('/admin/reports', copy.admin.reportsNav, 'reports', counts?.reports))
+    moderation.push(navItem('/admin/reports', adminCopy.reportsNav, 'reports', counts?.reports))
   }
   const people: AdminNavItem[] = []
-  if (can(PERMISSIONS.usersView)) people.push(navItem('/admin/users', copy.admin.usersNav, 'users'))
-  if (can(PERMISSIONS.auditView)) people.push(navItem('/admin/audit', copy.admin.auditNav, 'audit'))
+  if (can(PERMISSIONS.usersView)) people.push(navItem('/admin/users', adminCopy.usersNav, 'users'))
+  if (can(PERMISSIONS.auditView)) people.push(navItem('/admin/audit', adminCopy.auditNav, 'audit'))
   const catalog: AdminNavItem[] = []
   if (can(PERMISSIONS.catalogManage)) {
-    catalog.push(navItem('/admin/catalog', copy.admin.catalogNav, 'catalog'))
-    catalog.push(navItem('/admin/catalog/merge', copy.admin.mergeNav, 'merge'))
-    catalog.push(navItem('/admin/catalog/genres', copy.admin.genresNav, 'genres'))
+    catalog.push(navItem('/admin/catalog', adminCopy.catalogNav, 'catalog'))
+    catalog.push(navItem('/admin/catalog/merge', adminCopy.mergeNav, 'merge'))
+    catalog.push(navItem('/admin/catalog/genres', adminCopy.genresNav, 'genres'))
   }
   if (can(PERMISSIONS.featuredManage)) {
-    catalog.push(navItem('/admin/featured', copy.admin.featuredNav, 'featured'))
+    catalog.push(navItem('/admin/featured', adminCopy.featuredNav, 'featured'))
   }
   const operations: AdminNavItem[] = []
   if (can(PERMISSIONS.catalogManage)) {
-    operations.push(navItem('/admin/system', copy.admin.systemNav, 'system'))
+    operations.push(navItem('/admin/system', adminCopy.systemNav, 'system'))
   }
   const groups: AdminNavGroup[] = [
-    { label: copy.admin.navGroups.moderation, items: moderation },
-    { label: copy.admin.navGroups.people, items: people },
-    { label: copy.admin.navGroups.catalog, items: catalog },
-    { label: copy.admin.navGroups.operations, items: operations },
+    { label: adminCopy.navGroups.moderation, items: moderation },
+    { label: adminCopy.navGroups.people, items: people },
+    { label: adminCopy.navGroups.catalog, items: catalog },
+    { label: adminCopy.navGroups.operations, items: operations },
   ].filter((group) => group.items.length > 0)
   // The dashboard reads `stats` from here rather than asking the API a second time.
   return { groups, stats }

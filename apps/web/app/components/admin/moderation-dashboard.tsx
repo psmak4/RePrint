@@ -1,15 +1,15 @@
 import type { ModQueueItem, ModStats } from '@reprint/shared'
 import { Button } from '@reprint/ui'
 import { Link } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge } from './admin-ui.js'
 import { AdminIcon, type AdminIconName } from './icons.js'
 import { ageText } from './review-queue.js'
 
-const text = copy.admin.dashboard
-const reviewsText = copy.admin.reviews
+const text = adminCopy.dashboard
+const reviewsText = adminCopy.reviews
 
 function QueueCard({
   icon,
@@ -75,7 +75,7 @@ export function ModerationDashboard({
   oldest: ModQueueItem[] | null
 }) {
   return (
-    <AdminPage eyebrow={copy.admin.title} title={copy.admin.dashboardNav} lead={text.lead}>
+    <AdminPage eyebrow={adminCopy.title} title={adminCopy.dashboardNav} lead={text.lead}>
       <dl className="grid gap-5 md:grid-cols-2">
         <QueueCard
           icon="reviews"

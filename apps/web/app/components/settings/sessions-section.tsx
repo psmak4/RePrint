@@ -1,7 +1,7 @@
 import type { SessionInfo } from '@reprint/shared'
 import { Button } from '@reprint/ui'
 import { useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
@@ -10,7 +10,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
 })
 
 function SessionRow({ session }: { session: SessionInfo }) {
-  const c = copy.settings.security.sessions
+  const c = settingsCopy.security.sessions
   const fetcher = useFetcher<{ formError?: string }>()
   const busy = fetcher.state !== 'idle'
   return (
@@ -54,7 +54,7 @@ function SessionRow({ session }: { session: SessionInfo }) {
 
 /** The Member's signed-in devices, each endable, plus "Log out everywhere". */
 export function SessionsSection({ sessions }: { sessions: SessionInfo[] }) {
-  const c = copy.settings.security.sessions
+  const c = settingsCopy.security.sessions
   const logoutAll = useFetcher<{ formError?: string }>()
   const busy = logoutAll.state !== 'idle'
   return (

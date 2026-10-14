@@ -13,7 +13,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { GenreManager, genresTabFrom } from '../components/admin/genre-manager.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -22,7 +22,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog-genres'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.genres.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.genres.title}`, noindex: true })
 }
 
 /** Every Genre (archived too) and every Subject rule (PRD §5.4, §7.11). */
@@ -38,7 +38,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     ])
   } catch (error) {
     logger.error({ err: error }, 'could not load Genres and rules')
-    throw data(copy.admin.genres.loadFailed, { status: 502 })
+    throw data(adminCopy.genres.loadFailed, { status: 502 })
   }
   for (const response of [genresResponse, rulesResponse]) {
     if (response.status === 401 || response.status === 403) {
@@ -50,7 +50,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       { genres: genresResponse.status, rules: rulesResponse.status },
       'Genre admin request failed',
     )
-    throw data(copy.admin.genres.loadFailed, { status: 502 })
+    throw data(adminCopy.genres.loadFailed, { status: 502 })
   }
   const genres: AdminGenre[] = adminGenresResponseSchema.parse(await genresResponse.json()).items
   const rules: AdminSubjectRule[] = adminSubjectRulesResponseSchema.parse(
@@ -73,7 +73,7 @@ const genreActionSchema = z.discriminatedUnion('intent', [
 /** Each action is one permission-checked, audited API call. */
 export async function action({ request, context }: Route.ActionArgs) {
   await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
-  const fallback = copy.admin.genres.failed
+  const fallback = adminCopy.genres.failed
   const parsed = genreActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })
   const input = parsed.data

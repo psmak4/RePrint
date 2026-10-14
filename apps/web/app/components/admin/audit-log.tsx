@@ -2,7 +2,7 @@ import { type AdminAuditResponse, AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from '@rep
 import { Button, cn, Input, Label, Select } from '@reprint/ui'
 import { useState } from 'react'
 import { Form, Link } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { AdminPage } from './admin-page.js'
 import {
   EmptyState,
@@ -16,7 +16,7 @@ import { ScrollRegion } from './scroll-region.js'
 
 const field = 'flex min-w-0 flex-col gap-1.5'
 
-const text = copy.admin.audit
+const text = adminCopy.audit
 
 type Filters = {
   actor: string
@@ -63,7 +63,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
       actions={
         <Button asChild variant="outline">
           {/* A plain anchor: the response is a file download, not a page. */}
