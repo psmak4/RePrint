@@ -1,17 +1,11 @@
-import {
-  resolveBookResponseSchema,
-  type SetShelfInput,
-  SHELVES,
-  type Shelf,
-  type ShelfResponse,
-  shelfResponseSchema,
-} from '@reprint/shared'
+import { type SetShelfInput, SHELVES, type Shelf, type ShelfResponse } from '@reprint/shared'
 import { cn } from '@reprint/ui'
 import { useMutation } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
+import { lazySchemas } from '../../lib/lazy-schemas.js'
 
 const text = copy.shelves
 
@@ -66,23 +60,27 @@ const PILL = {
 export type ShelfTarget = { kind: 'book'; slug: string } | { kind: 'candidate'; ref: string }
 
 async function resolveSlug(ref: string): Promise<string> {
+  const schemas = lazySchemas()
   const response = await fetch('/resolve', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ ref }),
   })
   if (!response.ok) throw new Error(`resolve failed with ${response.status}`)
+  const { resolveBookResponseSchema } = await schemas
   return resolveBookResponseSchema.parse(await response.json()).slug
 }
 
 async function sendShelf(slug: string, shelf: Shelf | null): Promise<ShelfResponse> {
   const body: SetShelfInput | undefined = shelf ? { shelf } : undefined
+  const schemas = lazySchemas()
   const response = await fetch(`/books/${slug}/shelf`, {
     method: shelf ? 'PUT' : 'DELETE',
     headers: body ? { 'content-type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   })
   if (!response.ok) throw new Error(`shelf failed with ${response.status}`)
+  const { shelfResponseSchema } = await schemas
   return shelfResponseSchema.parse(await response.json())
 }
 

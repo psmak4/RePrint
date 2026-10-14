@@ -1,12 +1,36 @@
 import type { Edition, MyReview, Viewer } from '@reprint/shared'
 import { Button } from '@reprint/ui'
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, type ReactNode, Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
-import { type ReviewActionResult, ReviewForm } from './review-form.js'
+import type { ReviewActionResult } from './review-form.js'
 import { SpoilerToggle } from './spoiler-toggle.js'
 
 const c = copy.reviews.mine
+
+/**
+ * The form, with its validation schema and Zod, loads when a Member opens the editor, so no page
+ * carries it for Visitors (M10-T14). Pointing at or focusing the button starts the load early.
+ */
+const loadReviewForm = () => import('./review-form.js')
+const preloadReviewForm = () => {
+  loadReviewForm().catch(() => {})
+}
+const ReviewForm = lazy(() => loadReviewForm().then((module) => ({ default: module.ReviewForm })))
+
+function Editor({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <p role="status" className="text-sm text-muted-foreground">
+          {c.opening}
+        </p>
+      }
+    >
+      {children}
+    </Suspense>
+  )
+}
 
 /** The viewer's own controls on the Book page: write a review, or see, edit, and delete theirs (PRD §7.4, §7.6). */
 export function MyReviewSection({
@@ -83,14 +107,21 @@ function Viewing({
           </p>
         ) : null}
         {editing ? (
-          <ReviewForm
-            existing={null}
-            editions={editions}
-            onSaved={stopEditing}
-            onCancel={() => setEditing(false)}
-          />
+          <Editor>
+            <ReviewForm
+              existing={null}
+              editions={editions}
+              onSaved={stopEditing}
+              onCancel={() => setEditing(false)}
+            />
+          </Editor>
         ) : (
-          <Button type="button" onClick={() => setEditing(true)}>
+          <Button
+            type="button"
+            onClick={() => setEditing(true)}
+            onPointerEnter={preloadReviewForm}
+            onFocus={preloadReviewForm}
+          >
             {c.write}
           </Button>
         )}
@@ -102,12 +133,14 @@ function Viewing({
     return (
       <Shell heading={c.editHeading}>
         <p className="text-sm text-muted-foreground">{c.editWarning}</p>
-        <ReviewForm
-          existing={myReview}
-          editions={editions}
-          onSaved={stopEditing}
-          onCancel={() => setEditing(false)}
-        />
+        <Editor>
+          <ReviewForm
+            existing={myReview}
+            editions={editions}
+            onSaved={stopEditing}
+            onCancel={() => setEditing(false)}
+          />
+        </Editor>
       </Shell>
     )
   }
@@ -213,7 +246,12 @@ function OwnReview({
       ) : (
         <div className="mt-4 flex gap-3">
           {canEdit ? (
-            <Button type="button" onClick={onEdit}>
+            <Button
+              type="button"
+              onClick={onEdit}
+              onPointerEnter={preloadReviewForm}
+              onFocus={preloadReviewForm}
+            >
               {c.edit}
             </Button>
           ) : null}

@@ -1,14 +1,17 @@
-import { type HelpfulVoteResponse, helpfulVoteResponseSchema } from '@reprint/shared'
+import type { HelpfulVoteResponse } from '@reprint/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { copy } from '../../copy/index.js'
+import { lazySchemas } from '../../lib/lazy-schemas.js'
 
 const text = copy.reviews.list
 
 async function sendVote(reviewId: string, helpful: boolean): Promise<HelpfulVoteResponse> {
+  const schemas = lazySchemas()
   const response = await fetch(`/reviews/${reviewId}/helpful`, {
     method: helpful ? 'POST' : 'DELETE',
   })
   if (!response.ok) throw new Error(`vote failed with ${response.status}`)
+  const { helpfulVoteResponseSchema } = await schemas
   return helpfulVoteResponseSchema.parse(await response.json())
 }
 

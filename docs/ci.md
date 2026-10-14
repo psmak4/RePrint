@@ -13,7 +13,7 @@ These job names are stable. `scripts/ralph/merge-pr.sh` reads this table and ref
 | `db-check` | Migration drift check: the Drizzle schema must match the committed migrations (`drizzle-kit check` plus a scratch `generate`) | `pnpm db:check` |
 | `unit` | Vitest unit tests in every workspace package via Turbo | `pnpm test:unit` |
 | `integration` | Vitest + Testcontainers tests (Postgres 18 and Redis 7) via Turbo; needs Docker | `pnpm test:integration` |
-| `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) or if the JavaScript every page loads holds Zod or admin, legal, or settings copy (`bundle:check`, which also prints each main page's gzip size) | `pnpm build && pnpm openapi:check && pnpm bundle:check` |
+| `build` | Builds every workspace package via Turbo, then fails if `apps/api/openapi.json` is stale (`openapi:check`) or if the JavaScript every page loads holds Zod or admin, legal, or settings copy, or Discover, Book, or search holds Zod (`bundle:check`, which also prints each main page's gzip size) | `pnpm build && pnpm openapi:check && pnpm bundle:check` |
 | `gitleaks` | Gitleaks secret scan of the full git history | `pnpm secrets:scan` |
 | `audit` | `pnpm audit --audit-level high` (fails on high and critical) | `pnpm audit:deps` |
 | `restore-drill` | Backs up the migrated and seeded database with `scripts/backup.sh`, restores it into a scratch database with `scripts/restore.sh`, and fails unless every table has the same row count (`scripts/restore-drill.sh`) | `pnpm backup:drill` |
