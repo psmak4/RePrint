@@ -27,6 +27,7 @@ import { queueSeriesSyncs, seriesDueForBook } from '../../catalog/series-sync.js
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { HttpProblem } from '../../errors.js'
 import type { AuthRoutesOptions } from '../auth/register.js'
+import { cachedSiteMean } from '../discover/cache.js'
 import { addViewerShelves } from '../library/viewer-shelf.js'
 import { findGenreBySlug, loadGenreBooks, loadGenreLinks, loadGenreTree } from './genres.js'
 import { publicCacheHook } from './public-cache.js'
@@ -217,7 +218,7 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
       const { sort, page } = request.query
       const [links, books] = await Promise.all([
         loadGenreLinks(db, genre),
-        loadGenreBooks(db, genre, { sort, page }),
+        loadGenreBooks(db, genre, { sort, page, siteMean: () => cachedSiteMean(db, redis) }),
       ])
       return {
         genre: { slug: genre.slug, name: genre.name, description: genre.description },

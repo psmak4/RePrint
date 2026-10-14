@@ -78,7 +78,7 @@ export async function loadGenreLinks(
  * `top_rated` is the weighted average `(C × m + Σ ratings) / (C + n)` (PRD §7.6) with `m` the
  * site-wide mean over every Book (D-133); `newest_review` is the latest Approved review decision.
  */
-function orderBy(sort: GenreSort) {
+function orderBy(sort: GenreSort, siteMean: number) {
   switch (sort) {
     case 'most_reviewed':
       return sql`b.review_count desc, b.id`
@@ -86,30 +86,31 @@ function orderBy(sort: GenreSort) {
       return sql`(select max(r.decided_at) from reviews r
         where r.book_id = b.id and r.status = 'approved' and r.hidden_at is null) desc nulls last, b.review_count desc, b.id`
     default:
-      return sql`((${WEIGHTED_RATING_C}::float8 * site.mean + b.rating_sum) / (${WEIGHTED_RATING_C} + b.review_count)) desc,
+      return sql`((${WEIGHTED_RATING_C}::float8 * ${siteMean}::float8 + b.rating_sum) / (${WEIGHTED_RATING_C} + b.review_count)) desc,
         b.review_count desc, b.id`
   }
 }
 
-/** One page of Books in the Genre or any Genre below it. */
+/**
+ * One page of Books in the Genre or any Genre below it. `siteMean` is asked for only by the
+ * `top_rated` sort, so the other sorts never read it (M10-T05).
+ */
 export async function loadGenreBooks(
   db: Database,
   genre: GenreRow,
-  { sort, page }: { sort: GenreSort; page: number },
+  { sort, page, siteMean }: { sort: GenreSort; page: number; siteMean: () => Promise<number> },
 ): Promise<{ items: BookSummary[]; hasMore: boolean }> {
+  const mean = sort === 'top_rated' ? await siteMean() : 0
   const rows = await db.execute<{ id: string }>(sql`
     with recursive tree as (
       select id from genres where id = ${genre.id}
       union
       select g.id from genres g join tree t on g.parent_id = t.id
-    ),
-    site as (
-      select coalesce(sum(rating_sum)::float8 / nullif(sum(review_count), 0), 0) as mean from books
     )
-    select b.id from books b, site
+    select b.id from books b
     where exists (select 1 from book_genres bg where bg.book_id = b.id
                   and bg.genre_id in (select id from tree))
-    order by ${orderBy(sort)}
+    order by ${orderBy(sort, mean)}
     limit ${GENRE_PAGE_SIZE + 1} offset ${(page - 1) * GENRE_PAGE_SIZE}`)
   const ids = rows.map((row) => row.id)
   return {
