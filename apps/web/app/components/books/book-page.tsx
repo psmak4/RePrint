@@ -25,6 +25,7 @@ import { DetailsList } from './details-list.js'
 import { EditionsCard } from './editions-card.js'
 import { FactsRow } from './facts-row.js'
 import { summaryCard } from './genre-pages.js'
+import { OutsideRatings } from './outside-ratings.js'
 import { RatingBreakdown } from './rating-breakdown.js'
 import { SectionNav, type SectionNavItem } from './section-nav.js'
 import { SeriesCard, type SeriesCardBook } from './series-card.js'
@@ -133,30 +134,36 @@ export function BookPage({
             viewer={viewer}
             votedReviewIds={votedReviewIds}
             summary={
-              // While the review form is open, the panel takes the card's full width (`:has`).
-              <div
-                className={`grid items-center gap-6 rounded-2xl border border-border bg-surface p-[18px] md:p-7 ${rated ? 'xl:grid-cols-[minmax(0,1fr)_240px] xl:gap-7 xl:has-[form]:grid-cols-1' : ''}`}
-              >
-                {rated && rating.average !== null ? (
-                  <RatingBreakdown
-                    average={rating.average}
-                    count={rating.count}
-                    distribution={rating.distribution}
-                    selected={reviewQuery.rating ?? null}
-                    onSelect={(stars) =>
-                      navigate(
-                        reviewsHref(book.slug, reviewQuery, {
-                          rating: stars ?? undefined,
-                          page: 1,
-                        }),
-                      )
-                    }
-                  />
-                ) : null}
-                <div id="write-review" className="scroll-mt-20">
-                  <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
+              <>
+                {/* While the review form is open, the panel takes the card's full width (`:has`). */}
+                <div
+                  className={`grid items-center gap-6 rounded-2xl border border-border bg-surface p-[18px] md:p-7 ${rated ? 'xl:grid-cols-[minmax(0,1fr)_240px] xl:gap-7 xl:has-[form]:grid-cols-1' : ''}`}
+                >
+                  {rated && rating.average !== null ? (
+                    <RatingBreakdown
+                      average={rating.average}
+                      count={rating.count}
+                      distribution={rating.distribution}
+                      selected={reviewQuery.rating ?? null}
+                      onSelect={(stars) =>
+                        navigate(
+                          reviewsHref(book.slug, reviewQuery, {
+                            rating: stars ?? undefined,
+                            page: 1,
+                          }),
+                        )
+                      }
+                    />
+                  ) : null}
+                  <div id="write-review" className="scroll-mt-20">
+                    <MyReviewSection viewer={viewer} myReview={myReview} editions={editions} />
+                  </div>
                 </div>
-              </div>
+                {/* Other Sources' reader ratings, apart from RePrint's (D-204). */}
+                {book.outsideRatings && book.outsideRatings.length > 0 ? (
+                  <OutsideRatings ratings={book.outsideRatings} />
+                ) : null}
+              </>
             }
           />
         </div>
