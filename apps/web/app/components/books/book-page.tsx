@@ -9,6 +9,7 @@ import {
   PERMISSIONS,
   type Viewer,
 } from '@reprint/shared'
+import { buttonVariants } from '@reprint/ui'
 import { type ReactNode, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -297,7 +298,7 @@ function CopyLinkButton() {
     <button
       type="button"
       aria-label={copied ? labels.linkCopied : labels.copyLink}
-      className="inline-flex size-11 items-center justify-center rounded-full border border-input-border bg-surface text-foreground hover:bg-surface-raised"
+      className={buttonVariants({ variant: 'outline', size: 'icon' })}
       onClick={() => {
         void navigator.clipboard
           ?.writeText(window.location.href.split('#')[0] ?? window.location.href)
@@ -487,10 +488,7 @@ function BookHeader({
           </div>
           <div className="grid w-full grid-cols-2 gap-2.5 md:flex md:w-auto md:flex-wrap md:items-center md:gap-3">
             <BookShelfSelector book={book} signedIn={signedIn} variant="primary" />
-            <a
-              href="#write-review"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-input-border bg-surface px-5 text-[15px] font-semibold whitespace-nowrap hover:bg-surface-raised"
-            >
+            <a href="#write-review" className={buttonVariants({ variant: 'outline' })}>
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"

@@ -728,7 +728,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `theme.css` gains a named colour for each role the raw values played (stronger text, chip border, dashed border, tinted ground, rating track, and each status tint and edge); `DESIGN.md` lists them, and `theme.test.ts` checks every text colour on all four grounds
   - Accept: no class in `apps/web` uses a raw hex colour except the generated-cover and initials-avatar palettes, each kept in one module; a style guard unit test fails on any other `-[#…]` class
   - Accept: where two raw values played one role they merge into one token, each merge listed in the `docs/DECISIONS.md` entry; `pnpm check` passes
-- [ ] M11-T03 · One Button for every action · deps: M11-T02 · PRD: §8, §11
+- [x] M11-T03 · One Button for every action · deps: M11-T02 · PRD: §8, §11
   - Accept: `Button` pairs each height with one text size (sm 40 px / 14 px, default 44 / 15, lg 48 / 16, semibold), and every pill-shaped action or action link uses it (`asChild` for links): account forms and the auth card, the Book page actions, the Library empty Shelf, Discover's sign-up, the Author match card, Author "Show more", the export link, and the search filter disclosure
   - Accept: the Discover hero search field and the header search box are the only hand-built pills, named in `DESIGN.md`; the style guard fails on any other (`rounded-full` with `border-input-border` or `bg-accent`)
   - Accept: component tests are updated; `pnpm check` passes

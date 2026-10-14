@@ -6,7 +6,7 @@ import {
   CONTRIBUTION_ROLES,
   type ContributionRole,
 } from '@reprint/shared'
-import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
+import { Button, buttonVariants, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
 import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -112,7 +112,7 @@ function RemoveButton({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-input-border bg-surface text-strong hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-50"
+      className={buttonVariants({ variant: 'outline', size: 'icon' })}
     >
       <svg
         aria-hidden="true"

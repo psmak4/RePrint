@@ -4,6 +4,7 @@ import {
   type BookSummary,
   type ContributionRole,
 } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -136,7 +137,7 @@ export function AuthorPage({
                 {group === 'author' && writtenRemaining > 0 && page < AUTHOR_MAX_PAGE ? (
                   <Link
                     to={`${pathname}?page=${page + 1}#author-books-author`}
-                    className="self-start rounded-full border border-input-border bg-surface px-5 py-2.5 text-[15px] font-semibold hover:bg-surface-raised"
+                    className={cn(buttonVariants({ variant: 'outline' }), 'self-start')}
                   >
                     {text.showMore(writtenRemaining)}
                   </Link>

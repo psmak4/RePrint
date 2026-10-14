@@ -1,7 +1,7 @@
 import { type SetShelfInput, SHELVES, type Shelf, type ShelfResponse } from '@reprint/shared'
-import { cn } from '@reprint/ui'
+import { buttonVariants, cn, Select } from '@reprint/ui'
 import { useMutation } from '@tanstack/react-query'
-import { useId, useState } from 'react'
+import { type ChangeEvent, useId, useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
@@ -51,10 +51,8 @@ function ChevronIcon() {
   )
 }
 
-const PILL = {
-  outline: 'border border-input-border bg-surface text-foreground hover:bg-surface-raised',
-  primary: 'bg-accent text-accent-foreground hover:bg-accent-hover',
-} as const
+/** The drawn button's look: the shared `Button` styles (D-214). */
+const PILL = { outline: 'outline', primary: 'default' } as const
 
 /** Which Book the control is for: one RePrint stores, or a search result it has not stored yet (PRD §6). */
 export type ShelfTarget = { kind: 'book'; slug: string } | { kind: 'candidate'; ref: string }
@@ -125,7 +123,7 @@ export function ShelfSelector({
         <Link
           to="/login"
           aria-label={text.signInFor(title)}
-          className="inline-flex size-9 items-center justify-center rounded-full bg-[rgba(255,255,255,0.92)] text-foreground shadow-[0_2px_6px_rgba(15,23,42,0.2)] hover:bg-surface"
+          className={buttonVariants({ variant: 'overlay', size: 'icon-sm' })}
         >
           <BookmarkIcon filled={false} />
         </Link>
@@ -133,13 +131,7 @@ export function ShelfSelector({
     }
     if (variant === 'outline' || variant === 'primary') {
       return (
-        <Link
-          to="/login"
-          className={cn(
-            'inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-semibold whitespace-nowrap',
-            PILL[variant],
-          )}
-        >
+        <Link to="/login" className={buttonVariants({ variant: PILL[variant] })}>
           <BookmarkIcon filled={false} />
           {text.none}
         </Link>
@@ -152,24 +144,18 @@ export function ShelfSelector({
     )
   }
 
-  const select = (
-    <select
-      id={id}
-      value={shelf ?? ''}
-      disabled={mutation.isPending}
-      onChange={(event) => {
-        const value = event.target.value
-        if (value === 'remove') mutation.mutate(null)
-        else if ((SHELVES as readonly string[]).includes(value)) mutation.mutate(value as Shelf)
-      }}
-      className={
-        variant === 'link'
-          ? 'ui-select ui-select-menu h-9 w-fit rounded-full border border-input-border bg-surface pr-9 pl-3 text-sm text-foreground'
-          : // Invisible but on top: the drawn button shows the state, the select takes the input.
-            // It keeps the system menu: a page-drawn list (D-198) does not open from a hidden select.
-            'absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-wait'
-      }
-    >
+  const selectProps = {
+    id,
+    value: shelf ?? '',
+    disabled: mutation.isPending,
+    onChange: (event: ChangeEvent<HTMLSelectElement>) => {
+      const value = event.target.value
+      if (value === 'remove') mutation.mutate(null)
+      else if ((SHELVES as readonly string[]).includes(value)) mutation.mutate(value as Shelf)
+    },
+  }
+  const options = (
+    <>
       {shelf === null ? <option value="">{text.none}</option> : null}
       {SHELVES.map((name) => (
         <option key={name} value={name}>
@@ -177,8 +163,24 @@ export function ShelfSelector({
         </option>
       ))}
       {shelf !== null ? <option value="remove">{text.remove}</option> : null}
-    </select>
+    </>
   )
+  const select =
+    variant === 'link' ? (
+      // The shared compact dropdown (D-198, D-214).
+      <Select compact className="w-fit" {...selectProps}>
+        {options}
+      </Select>
+    ) : (
+      // Invisible but on top: the drawn button shows the state, the select takes the input.
+      // It keeps the system menu: a page-drawn list (D-198) does not open from a hidden select.
+      <select
+        className="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0 disabled:cursor-wait"
+        {...selectProps}
+      >
+        {options}
+      </select>
+    )
   const label = (
     <label htmlFor={id} className="sr-only">
       {text.label(title)}
@@ -193,7 +195,12 @@ export function ShelfSelector({
   if (variant === 'icon') {
     return (
       <div className="flex flex-col items-end gap-1">
-        <div className="relative inline-flex size-9 items-center justify-center rounded-full bg-[rgba(255,255,255,0.92)] text-foreground shadow-[0_2px_6px_rgba(15,23,42,0.2)] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring hover:bg-surface">
+        <div
+          className={cn(
+            buttonVariants({ variant: 'overlay', size: 'icon-sm' }),
+            'relative focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring',
+          )}
+        >
           <BookmarkIcon filled={shelf !== null} className={shelf ? 'text-accent' : ''} />
           {label}
           {select}
@@ -208,8 +215,8 @@ export function ShelfSelector({
       <div className="flex flex-col gap-1">
         <div
           className={cn(
-            'relative inline-flex h-11 w-fit items-center gap-2 rounded-full pr-4 pl-[18px] text-[15px] font-semibold whitespace-nowrap focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring',
-            PILL[variant],
+            buttonVariants({ variant: PILL[variant] }),
+            'relative w-fit pr-4 pl-[18px] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring',
           )}
         >
           <BookmarkIcon filled={shelf !== null} />

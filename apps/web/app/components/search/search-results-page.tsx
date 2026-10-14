@@ -8,7 +8,7 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, Label, Select } from '@reprint/ui'
+import { Button, buttonVariants, cn, Label, Select } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -154,10 +154,7 @@ function SortForm({ query }: { query: SearchQuery }) {
           </option>
         ))}
       </Select>
-      <button
-        type="submit"
-        className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
-      >
+      <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
         {c.applySort}
       </button>
     </form>
@@ -286,7 +283,9 @@ function FilterPanel({ children }: { children: React.ReactNode }) {
   }, [])
   return (
     <details ref={ref} className="group lg:[&::details-content]:[content-visibility:visible]">
-      <summary className="flex h-11 cursor-pointer items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold lg:hidden">
+      <summary
+        className={cn(buttonVariants({ variant: 'outline' }), 'cursor-pointer list-none lg:hidden')}
+      >
         {copy.search.filtersToggle}
       </summary>
       <div className="mt-2 lg:mt-0">{children}</div>
@@ -303,7 +302,7 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
         <Link
           rel="prev"
           to={searchHref(query, { page: query.page - 1 })}
-          className="inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold hover:bg-surface-raised"
+          className={buttonVariants({ variant: 'outline' })}
         >
           {c.previous}
         </Link>
@@ -315,7 +314,7 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
         <Link
           rel="next"
           to={searchHref(query, { page: query.page + 1 })}
-          className="inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold hover:bg-surface-raised"
+          className={buttonVariants({ variant: 'outline' })}
         >
           {c.next}
         </Link>

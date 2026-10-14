@@ -1,3 +1,4 @@
+import { buttonVariants, cn } from '@reprint/ui'
 import { settingsCopy } from '../../copy/settings.js'
 
 /** A plain link to the download route, so the browser saves the file the API sends. */
@@ -15,7 +16,7 @@ export function ExportSection() {
       <a
         href="/settings/export"
         download
-        className="mt-5 inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-[15px] font-semibold hover:bg-surface-raised"
+        className={cn(buttonVariants({ variant: 'outline' }), 'mt-5')}
       >
         {c.download}
       </a>

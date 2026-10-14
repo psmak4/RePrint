@@ -112,7 +112,7 @@ export function AuthForm<T extends FieldValues>({
           </div>
         )
       })}
-      <Button type="submit" size="lg" className="mt-1 w-full" disabled={busy}>
+      <Button type="submit" className="mt-1 w-full" disabled={busy}>
         {busy ? copy.auth.submitting : submitLabel}
       </Button>
     </form>

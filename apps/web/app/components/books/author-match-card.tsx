@@ -1,3 +1,4 @@
+import { buttonVariants, cn } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { InitialsAvatar } from './avatar.js'
@@ -38,7 +39,7 @@ export function AuthorMatchCard({
         <span className="font-serif text-2xl leading-tight font-medium md:text-[28px]">{name}</span>
         {meta ? <span className="text-[15px] text-muted-foreground">{meta}</span> : null}
       </span>
-      <span className="col-span-2 inline-flex h-11 items-center justify-center rounded-full border border-input-border bg-surface px-5 text-[15px] font-semibold md:col-span-1">
+      <span className={cn(buttonVariants({ variant: 'outline' }), 'col-span-2 md:col-span-1')}>
         {copy.search.viewAuthor}
       </span>
     </Link>
