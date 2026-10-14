@@ -6,7 +6,17 @@ import {
   CONTRIBUTION_ROLES,
   type ContributionRole,
 } from '@reprint/shared'
-import { Button, buttonVariants, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
+import {
+  Button,
+  buttonVariants,
+  Checkbox,
+  chipVariants,
+  cn,
+  Input,
+  Label,
+  Select,
+  Textarea,
+} from '@reprint/ui'
 import { type ReactNode, useId, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -280,7 +290,7 @@ function EditForm({
           <ul aria-label={text.chosenGenresLabel} className="flex flex-wrap gap-2">
             {chosenGenres.map((genre) => (
               <li key={genre.id}>
-                <span className="inline-flex h-[34px] items-center gap-1 rounded-full border border-accent bg-accent/10 pr-1 pl-3.5 text-sm font-medium text-foreground">
+                <span className={cn(chipVariants({ interactive: false }), 'gap-1 pr-1')}>
                   {genre.name}
                   <button
                     type="button"

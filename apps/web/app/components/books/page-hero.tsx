@@ -41,14 +41,6 @@ export function PageHero({
   )
 }
 
-/** A pill link used for sort and filter choices on browse pages. */
-export const choiceClass = (active: boolean) =>
-  `inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${
-    active
-      ? 'border-accent bg-accent text-accent-foreground'
-      : 'border-chip-border bg-surface text-foreground hover:border-input-border'
-  }`
-
 /** Previous and next as pills, with the page number between. */
 export function PagerLinks({
   label,

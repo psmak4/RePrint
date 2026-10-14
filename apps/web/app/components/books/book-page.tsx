@@ -9,7 +9,7 @@ import {
   PERMISSIONS,
   type Viewer,
 } from '@reprint/shared'
-import { buttonVariants } from '@reprint/ui'
+import { buttonVariants, chipVariants } from '@reprint/ui'
 import { type ReactNode, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -428,10 +428,7 @@ function BookHeader({
         />
         <div className="flex w-full min-w-0 flex-col items-center gap-[18px] md:items-start md:gap-[22px] md:pt-2">
           {membership ? (
-            <Link
-              to={`/series/${membership.series.slug}`}
-              className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-chip-border bg-surface px-3 text-[13px] text-foreground hover:border-input-border"
-            >
+            <Link to={`/series/${membership.series.slug}`} className={chipVariants()}>
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -515,10 +512,7 @@ function BookHeader({
             >
               {book.genres.map((genre) => (
                 <li key={genre.slug}>
-                  <Link
-                    to={`/genres/${genre.slug}`}
-                    className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm text-foreground hover:border-input-border"
-                  >
+                  <Link to={`/genres/${genre.slug}`} className={chipVariants()}>
                     {genre.name}
                   </Link>
                 </li>

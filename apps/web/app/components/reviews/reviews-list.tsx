@@ -4,7 +4,7 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
-import { buttonVariants, Select } from '@reprint/ui'
+import { buttonVariants, chipVariants, Select } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -113,7 +113,7 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
                   to={reviewsHref(slug, query, { rating: stars, page: 1 })}
                   aria-current={active ? 'true' : undefined}
                   aria-label={stars ? text.starsOnly(stars) : undefined}
-                  className={`inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-chip-border bg-surface text-foreground hover:border-input-border'}`}
+                  className={chipVariants({ selected: active })}
                 >
                   {stars
                     ? copy.redesign.bookPage.starChip(stars)

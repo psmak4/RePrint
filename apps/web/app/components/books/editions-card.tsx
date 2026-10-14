@@ -1,4 +1,4 @@
-import { cn } from '@reprint/ui'
+import { chipVariants } from '@reprint/ui'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -95,12 +95,7 @@ export function EditionsCard({
               type="button"
               aria-pressed={format === f}
               onClick={() => setFormat(f)}
-              className={cn(
-                'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm font-medium',
-                format === f
-                  ? 'border-accent bg-accent text-accent-foreground'
-                  : 'border-chip-border bg-surface text-foreground hover:border-input-border',
-              )}
+              className={chipVariants({ selected: format === f })}
             >
               {f ? copy.books.page.formats[f] : text.allFormats}
               {f ? (

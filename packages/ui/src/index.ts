@@ -1,5 +1,6 @@
 export { Button, type ButtonProps, buttonVariants } from './components/button.js'
 export { Checkbox } from './components/checkbox.js'
+export { Chip, type ChipProps, chipVariants } from './components/chip.js'
 export { Input } from './components/input.js'
 export { Label } from './components/label.js'
 export { Select } from './components/select.js'

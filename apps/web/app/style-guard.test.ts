@@ -73,4 +73,18 @@ describe('style guard', () => {
       .map(({ where }) => where)
     expect(handBuilt).toEqual([])
   })
+
+  it('draws chips only through Chip or chipVariants (D-214)', () => {
+    // A hand-built chip: fully rounded with the chip edge, or a chip-sized rounded box with a border.
+    const chipHeight = /^h-(\[(2[8-9]|3[0-6])px\]|7|8|9)$/
+    const handBuilt = classLists(files.filter(({ file }) => !file.startsWith('packages/ui/')))
+      .filter(
+        ({ classes }) =>
+          classes.includes('rounded-full') &&
+          (classes.includes('border-chip-border') ||
+            (classes.includes('border') && classes.some((name) => chipHeight.test(name)))),
+      )
+      .map(({ where }) => where)
+    expect(handBuilt).toEqual([])
+  })
 })
