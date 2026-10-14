@@ -141,7 +141,9 @@ describe('GenrePage', () => {
         sort="top_rated"
       />,
     )
-    expect(screen.getByRole('link', { name: 'All genres' }).getAttribute('href')).toBe('/genres')
+    const trail = screen.getByRole('navigation', { name: 'Breadcrumb' })
+    expect(within(trail).getByRole('link', { name: 'Genres' }).getAttribute('href')).toBe('/genres')
+    expect(within(trail).getByText('Science Fiction').getAttribute('aria-current')).toBe('page')
     expect(screen.getByText('No books in this genre yet')).toBeTruthy()
     expect(screen.queryByRole('navigation', { name: 'Pages' })).toBeNull()
   })
@@ -172,7 +174,10 @@ describe('SeriesPage', () => {
   it('lists Books in order with positions and ratings, and has no axe violations', async () => {
     const { container } = renderInRouter(seriesPage(series))
     expect(screen.getByRole('heading', { level: 1, name: 'Dune Chronicles' })).toBeTruthy()
-    const entries = within(screen.getByRole('list')).getAllByRole('listitem')
+    // The Books list, not the breadcrumb's.
+    const [books] = screen.getAllByRole('list').filter((element) => element.closest('nav') === null)
+    if (!books) throw new Error('no list')
+    const entries = within(books).getAllByRole('listitem')
     expect(entries.map((li) => li.querySelector('h3')?.textContent)).toEqual([
       'Dune',
       'Interlude',

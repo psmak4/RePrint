@@ -42,7 +42,7 @@ export default function AdminIndex({ loaderData }: Route.ComponentProps) {
   if (!stats) {
     return (
       <AdminPage
-        eyebrow={adminCopy.title}
+        crumbs={[{ label: adminCopy.title }]}
         title={adminCopy.dashboardNav}
         lead={adminCopy.dashboard.lead}
       >

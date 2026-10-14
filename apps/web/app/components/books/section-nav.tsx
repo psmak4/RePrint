@@ -1,6 +1,7 @@
 import { cn } from '@reprint/ui'
 import { useEffect, useState } from 'react'
 import { copy } from '../../copy/index.js'
+import { TabCount, tabClass, tabStateClass } from '../common/tab-nav.js'
 
 export type SectionNavItem = { id: string; label: string; count?: number }
 
@@ -49,20 +50,17 @@ export function SectionNav({ items }: { items: SectionNavItem[] }) {
               <a
                 href={`#${item.id}`}
                 aria-current={active ? 'location' : undefined}
+                aria-label={
+                  item.count === undefined
+                    ? undefined
+                    : copy.shell.tabWithCount(item.label, item.count)
+                }
                 onClick={() => setCurrent(item.id)}
-                className={cn(
-                  'inline-flex h-[52px] items-center gap-1.5 border-b-2 px-1 text-[15px] font-medium whitespace-nowrap md:h-14',
-                  active
-                    ? 'border-accent text-foreground'
-                    : 'border-transparent text-strong hover:text-foreground',
-                )}
+                // The same tab style as the bands' tabs (D-214).
+                className={cn(tabClass, tabStateClass(active))}
               >
                 {item.label}
-                {item.count !== undefined ? (
-                  <span className="rounded-full bg-track px-[7px] py-0.5 text-xs font-semibold text-strong">
-                    {item.count}
-                  </span>
-                ) : null}
+                {item.count !== undefined ? <TabCount count={item.count} /> : null}
               </a>
             </li>
           )

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
+import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import { copy } from '../copy/index.js'
 import { legalCopy } from '../copy/legal.js'
@@ -13,6 +14,12 @@ import Terms from './terms.js'
 
 afterEach(cleanup)
 
+/** The pages' band starts with a breadcrumb, whose links need a router. */
+function renderPage(Page: () => React.ReactNode) {
+  const Stub = createRoutesStub([{ path: '/', Component: Page }])
+  return render(<Stub initialEntries={['/']} />)
+}
+
 const pages = [
   ['Terms', Terms],
   ['Privacy', Privacy],
@@ -23,13 +30,13 @@ const pages = [
 
 describe('legal and static pages', () => {
   it.each(pages)('%s has a title and no draft marker (owner-approved copy)', (_name, Page) => {
-    render(<Page />)
+    renderPage(Page)
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy()
     expect(document.body.textContent).not.toContain('DRAFT')
   })
 
   it.each(pages)('%s has no axe violations', async (_name, Page) => {
-    const { container } = render(<Page />)
+    const { container } = renderPage(Page)
     expect((await axe.run(container)).violations).toEqual([])
   })
 
@@ -42,7 +49,7 @@ describe('legal and static pages', () => {
   })
 
   it('Privacy covers GDPR, CCPA, 90-day IP retention, JSON export, and cookieless analytics', () => {
-    render(<Privacy />)
+    renderPage(Privacy)
     const text = document.body.textContent ?? ''
     for (const phrase of ['GDPR', 'CCPA', '90 days', 'JSON export', 'cookieless']) {
       expect(text, phrase).toContain(phrase)
@@ -50,8 +57,10 @@ describe('legal and static pages', () => {
   })
 
   it('Community Guidelines list every rejection reason', () => {
-    render(<CommunityGuidelines />)
-    const list = screen.getByRole('list')
+    renderPage(CommunityGuidelines)
+    // The content's list, not the breadcrumb's.
+    const [list] = screen.getAllByRole('list').filter((element) => element.closest('nav') === null)
+    if (!list) throw new Error('no list')
     expect(within(list).getAllByRole('listitem')).toHaveLength(5)
     const text = list.textContent ?? ''
     for (const phrase of ['spoiler', 'hateful', 'Spam', 'off-topic']) {
@@ -60,7 +69,7 @@ describe('legal and static pages', () => {
   })
 
   it('Contact shows the owner email as a mailto link', () => {
-    render(<Contact />)
+    renderPage(Contact)
     const link = screen.getByRole('link', { name: legalCopy.contactEmail })
     expect(link.getAttribute('href')).toBe(`mailto:${legalCopy.contactEmail}`)
     expect(document.body.textContent).not.toContain('owner to supply')

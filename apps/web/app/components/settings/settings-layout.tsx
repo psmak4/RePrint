@@ -1,29 +1,28 @@
-import { NavLink, Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { settingsCopy } from '../../copy/settings.js'
 import { PageHero } from '../books/page-hero.js'
+import { TabNav } from '../common/tab-nav.js'
 
 const tabs = [
   { to: '/settings/profile', label: settingsCopy.profileTab },
   { to: '/settings/security', label: settingsCopy.securityTab },
 ]
 
-/** Shared frame for the settings pages: the hero band with the title and section tabs. */
+/** Shared frame for the settings pages: the band with the title and section tabs (D-214). */
 export function SettingsLayout() {
+  const { pathname } = useLocation()
   return (
     <div className="flex flex-col gap-8 md:gap-10">
-      <PageHero title={settingsCopy.title}>
-        <nav aria-label={settingsCopy.navLabel} className="-mb-9 flex gap-7 md:-mb-14">
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className="inline-flex h-[52px] items-center border-b-2 border-transparent text-base font-medium text-strong hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:text-foreground"
-            >
-              {tab.label}
-            </NavLink>
-          ))}
-        </nav>
-      </PageHero>
+      <PageHero
+        trail={[{ label: settingsCopy.title }]}
+        title={settingsCopy.title}
+        tabs={
+          <TabNav
+            label={settingsCopy.navLabel}
+            tabs={tabs.map((tab) => ({ ...tab, current: pathname.startsWith(tab.to) }))}
+          />
+        }
+      />
       <div className="mx-auto w-full max-w-3xl">
         <Outlet />
       </div>

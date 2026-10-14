@@ -74,7 +74,8 @@ export function AuthorPage({
   return (
     <article className="flex flex-col gap-10 md:gap-14">
       <PageHero
-        eyebrow={<p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.eyebrow}</p>}
+        trail={[{ label: author.name }]}
+        label={text.eyebrow}
         leading={<AuthorPhoto photo={author.photo} name={author.name} />}
         title={author.name}
         lead={

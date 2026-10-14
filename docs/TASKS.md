@@ -739,7 +739,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every page title outside Discover's hero, the Book header, and the auth card is 32 → 44 px (`PageHero`, `AdminPage`, search); every section heading is 26 → 32 px, Discover's included; card and panel titles are 22 px; pages take these from shared heading classes, not their own sizes
   - Accept: surface cards and panels have 16 px corners (the auth card keeps 24 px as a page frame); `DESIGN.md`'s type scale and page sections agree
   - Accept: `pnpm check` passes
-- [ ] M11-T06 · One header band, with breadcrumbs and tabs · deps: M11-T05 · PRD: §7.3, §7.5, §7.7, §7.8, §7.11, §11
+- [x] M11-T06 · One header band, with breadcrumbs and tabs · deps: M11-T05 · PRD: §7.3, §7.5, §7.7, §7.8, §7.11, §11
   - Accept: search opens with `PageHero` like the other browse pages; every `PageHero` page and the admin band start with a breadcrumb trail from Discover, ending with the current page (trails in the `docs/DECISIONS.md` entry); the Library eyebrow and the Genre page's lone "All genres" link become trail items
   - Accept: one `TabNav` (underlined, 52 px, 16 px medium, optional count chip) sits at the band's bottom edge on Settings, admin Genres, Library, profile, and search; the Book page's section nav uses the same tab style
   - Accept: the Breadcrumb and Library e2e specs pass; `pnpm check` passes

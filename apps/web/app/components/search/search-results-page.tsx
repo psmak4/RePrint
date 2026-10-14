@@ -8,7 +8,7 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, buttonVariants, cn, Label, Select, textStyles } from '@reprint/ui'
+import { Button, buttonVariants, cn, Label, Select } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -17,7 +17,9 @@ import { sendReached } from '../../lib/reached.js'
 import { resolveHref, searchHref } from '../../lib/search-links.js'
 import { AuthorMatchCard } from '../books/author-match-card.js'
 import { InitialsAvatar } from '../books/avatar.js'
+import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
+import { TabNav } from '../common/tab-nav.js'
 import { SearchResultCard, type SearchResultData } from './search-result-card.js'
 
 const LANGUAGES = [
@@ -82,33 +84,25 @@ function Tabs({ query }: { query: SearchQuery }) {
     { type: 'authors' as const, label: c.authorsTab },
   ]
   return (
-    <nav aria-label={c.tabsLabel} className="flex gap-7 border-b border-border">
-      {tabs.map((tab) => (
-        <Link
-          key={tab.type}
-          // Filters and sort belong to Books, so a tab switch keeps only the query.
-          to={searchHref(
-            {
-              ...query,
-              genre: undefined,
-              language: undefined,
-              decade: undefined,
-              minRating: undefined,
-              sort: 'relevance',
-            },
-            { type: tab.type, page: 1 },
-          )}
-          aria-current={query.type === tab.type ? 'page' : undefined}
-          className={`-mb-px inline-flex h-[52px] items-center border-b-2 text-base font-medium ${
-            query.type === tab.type
-              ? 'border-accent text-foreground'
-              : 'border-transparent text-strong hover:text-foreground'
-          }`}
-        >
-          {tab.label}
-        </Link>
-      ))}
-    </nav>
+    <TabNav
+      label={c.tabsLabel}
+      tabs={tabs.map((tab) => ({
+        label: tab.label,
+        // Filters and sort belong to Books, so a tab switch keeps only the query.
+        to: searchHref(
+          {
+            ...query,
+            genre: undefined,
+            language: undefined,
+            decade: undefined,
+            minRating: undefined,
+            sort: 'relevance',
+          },
+          { type: tab.type, page: 1 },
+        ),
+        current: query.type === tab.type,
+      }))}
+    />
   )
 }
 
@@ -399,11 +393,12 @@ export function SearchResultsPage({
 }) {
   const c = copy.search
   return (
-    <section className="flex flex-col gap-7 pt-2 pb-16 md:pt-2">
-      <div className="flex flex-col gap-5">
-        <h1 className={textStyles.pageTitle}>{query.q ? c.headingFor(query.q) : c.heading}</h1>
-        <Tabs query={query} />
-      </div>
+    <section className="flex flex-col gap-7 pb-16">
+      <PageHero
+        trail={[{ label: c.heading }]}
+        title={query.q ? c.headingFor(query.q) : c.heading}
+        tabs={<Tabs query={query} />}
+      />
       <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
         {query.type === 'books' ? (
           <aside aria-label={c.filtersLabel}>

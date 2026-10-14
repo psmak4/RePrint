@@ -8,6 +8,9 @@ export const copy = {
     mainNavLabel: 'Main',
     menuLabel: 'Open menu',
     nav: { discover: 'Discover', genres: 'Genres', library: 'My library' },
+    // The trail that opens every page band (D-214); it always starts at Discover.
+    breadcrumbLabel: 'Breadcrumb',
+    tabWithCount: (label: string, count: number) => `${label} (${count})`,
     skipToContent: 'Skip to main content',
     homeLinkLabel: 'RePrint home',
     searchLabel: 'Search',
@@ -306,8 +309,6 @@ export const copy = {
       match: 'Author',
     },
     bookPage: {
-      breadcrumbLabel: 'Breadcrumb',
-      discover: 'Discover',
       editInAdmin: 'Edit in admin',
       seriesPill: (name: string, position: string | null, total: number | null) =>
         position ? `${name} · Book ${position}${total ? ` of ${total}` : ''}` : name,
@@ -517,13 +518,9 @@ export const copy = {
     indexTitle: 'Genres',
     indexIntro: 'Every shelf in the catalog. Pick one to see its top-rated books.',
     includes: 'Includes',
-    breadcrumbLabel: 'Breadcrumb',
-    discover: 'Discover',
     indexEmpty: 'No genres yet',
     indexMetaDescription: 'Browse books by genre, with ratings and reviews on RePrint.',
-    parentLabel: 'Parent genre',
     childrenHeading: 'Genres within this one',
-    allGenres: 'All genres',
     sortLabel: 'Sort by',
     sorts: {
       top_rated: 'Top rated',
@@ -577,7 +574,6 @@ export const copy = {
     metaDescription: (username: string) => `Books ${username} has shelved on RePrint.`,
     tabsLabel: 'Shelves',
     tabs: { all: 'All', reading: 'Reading', want_to_read: 'Want to Read', read: 'Read' },
-    tabLabel: (name: string, count: number) => `${name} (${count})`,
     eyebrow: 'Library',
     shelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on their shelves`,
     ownShelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on your shelves`,

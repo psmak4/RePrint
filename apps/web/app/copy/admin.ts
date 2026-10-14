@@ -3,7 +3,6 @@ export const adminCopy = {
   title: 'Administration',
   navLabel: 'Administration sections',
   navToggle: 'Admin menu',
-  breadcrumbLabel: 'Breadcrumb',
   navGroups: {
     moderation: 'Moderation',
     people: 'People',

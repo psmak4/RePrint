@@ -1,8 +1,9 @@
 import type { AdminGenre, AdminSubjectRule } from '@reprint/shared'
 import { Button, Checkbox, cn, Input, Label, Select, Textarea } from '@reprint/ui'
 import { useEffect, useId, useRef, useState } from 'react'
-import { Link, useFetcher } from 'react-router'
+import { useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
+import { TabNav } from '../common/tab-nav.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge, EmptyState, numClass, tableClass, tdClass, thClass } from './admin-ui.js'
 import { AdminIcon } from './icons.js'
@@ -446,17 +447,6 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
   )
 }
 
-const tabClass =
-  'inline-flex h-12 items-center gap-2 border-b-[3px] border-transparent text-[15px] font-medium text-strong hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:font-semibold aria-[current=page]:text-foreground'
-
-function TabCount({ n }: { n: number }) {
-  return (
-    <span className="inline-flex h-[22px] min-w-[26px] items-center justify-center rounded-full border border-border bg-surface px-2 text-xs font-semibold">
-      {n}
-    </span>
-  )
-}
-
 /** `/admin/catalog/genres`: Genres and Subject rules as two tabs (D-201). */
 export function GenreManager({
   genres,
@@ -506,24 +496,23 @@ export function GenreManager({
         ) : null
       }
       below={
-        <nav aria-label={text.tabsLabel} className="flex gap-7">
-          <Link
-            to="/admin/catalog/genres"
-            aria-current={tab === 'genres' ? 'page' : undefined}
-            className={tabClass}
-          >
-            {text.genresHeading}
-            <TabCount n={genres.length} />
-          </Link>
-          <Link
-            to="/admin/catalog/genres?tab=rules"
-            aria-current={tab === 'rules' ? 'page' : undefined}
-            className={tabClass}
-          >
-            {text.rulesHeading}
-            <TabCount n={rules.length} />
-          </Link>
-        </nav>
+        <TabNav
+          label={text.tabsLabel}
+          tabs={[
+            {
+              label: text.genresHeading,
+              to: '/admin/catalog/genres',
+              current: tab === 'genres',
+              count: genres.length,
+            },
+            {
+              label: text.rulesHeading,
+              to: '/admin/catalog/genres?tab=rules',
+              current: tab === 'rules',
+              count: rules.length,
+            },
+          ]}
+        />
       }
     >
       {tab === 'rules' ? (

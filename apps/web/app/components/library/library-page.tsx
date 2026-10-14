@@ -1,5 +1,5 @@
 import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@reprint/shared'
-import { buttonVariants, cn, Select, textStyles } from '@reprint/ui'
+import { buttonVariants, Select } from '@reprint/ui'
 import { useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -9,6 +9,7 @@ import { BookGrid } from '../books/book-tile.js'
 import { summaryCard } from '../books/genre-pages.js'
 import { PageHero, PagerLinks } from '../books/page-hero.js'
 import { BookShelfSelector } from '../books/shelf-selector.js'
+import { TabNav } from '../common/tab-nav.js'
 
 const text = copy.library
 
@@ -29,32 +30,15 @@ function Tabs({
   counts: LibraryResponse['counts']
 }) {
   return (
-    <nav
-      aria-label={text.tabsLabel}
-      className="flex gap-6 overflow-x-auto border-b border-border [scrollbar-width:none] md:gap-7"
-    >
-      {TABS.map((tab) => {
-        const current = view.shelf === tab.shelf
-        return (
-          <Link
-            key={tab.key}
-            to={libraryHref(username, view, { shelf: tab.shelf, page: 1 })}
-            aria-current={current ? 'page' : undefined}
-            aria-label={text.tabLabel(text.tabs[tab.key], counts[tab.key])}
-            className={`-mb-px inline-flex h-[52px] shrink-0 items-center gap-2 border-b-2 text-base font-medium whitespace-nowrap ${
-              current
-                ? 'border-accent text-foreground'
-                : 'border-transparent text-strong hover:text-foreground'
-            }`}
-          >
-            {text.tabs[tab.key]}
-            <span className="rounded-full bg-track px-2 py-0.5 text-xs font-semibold text-strong">
-              {counts[tab.key]}
-            </span>
-          </Link>
-        )
-      })}
-    </nav>
+    <TabNav
+      label={text.tabsLabel}
+      tabs={TABS.map((tab) => ({
+        label: text.tabs[tab.key],
+        to: libraryHref(username, view, { shelf: tab.shelf, page: 1 }),
+        current: view.shelf === tab.shelf,
+        count: counts[tab.key],
+      }))}
+    />
   )
 }
 
@@ -112,7 +96,13 @@ function Pagination({
 
 /** Shown to everyone but the owner when the Library is private (or the account does not exist; D-141). */
 export function PrivateLibrary() {
-  return <PageHero title={text.privateHeading} lead={text.privateBody} />
+  return (
+    <PageHero
+      trail={[{ label: text.eyebrow }]}
+      title={text.privateHeading}
+      lead={text.privateBody}
+    />
+  )
 }
 
 /** `/u/:username/library`: Shelf tabs with counts, sort, and pages in the URL (PRD §7.7). */
@@ -132,7 +122,8 @@ export function LibraryPage({
   return (
     <div className="flex flex-col gap-8 md:gap-10">
       <PageHero
-        eyebrow={<p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.eyebrow}</p>}
+        trail={[{ label: username, to: `/u/${username}` }, { label: text.eyebrow }]}
+        tabs={<Tabs username={username} view={view} counts={library.counts} />}
         leading={
           <InitialsAvatar
             name={username}
@@ -144,8 +135,7 @@ export function LibraryPage({
         lead={isOwner ? text.ownShelfCount(total) : text.shelfCount(total)}
       />
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
-          <Tabs username={username} view={view} counts={library.counts} />
+        <div className="flex justify-end">
           <SortForm username={username} view={view} />
         </div>
         {library.items.length === 0 ? (

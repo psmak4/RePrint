@@ -17,6 +17,7 @@ import { groupContributors } from '../../lib/contributors.js'
 import { coverUrl } from '../../lib/cover-url.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
 import type { RichTree } from '../../lib/rich-tree.js'
+import { Breadcrumb } from '../common/breadcrumb.js'
 import { MyReviewSection } from '../reviews/my-review-section.js'
 import { ReviewsList } from '../reviews/reviews-list.js'
 import { RichText } from '../rich-text.js'
@@ -367,29 +368,12 @@ function BookHeader({
   return (
     <header className="flex flex-col gap-6 md:gap-8">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <nav aria-label={labels.breadcrumbLabel} className="text-sm text-muted-foreground">
-          <ol className="flex flex-wrap items-center gap-x-2">
-            <li>
-              <Link to="/" className="text-strong hover:underline">
-                {labels.discover}
-              </Link>
-            </li>
-            {firstGenre ? (
-              <li className="flex gap-2">
-                <span aria-hidden="true">/</span>
-                <Link to={`/genres/${firstGenre.slug}`} className="text-strong hover:underline">
-                  {firstGenre.name}
-                </Link>
-              </li>
-            ) : null}
-            <li className="flex gap-2">
-              <span aria-hidden="true">/</span>
-              <span aria-current="page" className="text-foreground">
-                {book.title}
-              </span>
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumb
+          trail={[
+            ...(firstGenre ? [{ to: `/genres/${firstGenre.slug}`, label: firstGenre.name }] : []),
+            { label: book.title },
+          ]}
+        />
         {canEdit ? (
           <Link
             to={`/admin/books/${book.id}`}
