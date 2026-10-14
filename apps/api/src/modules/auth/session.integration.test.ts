@@ -1,6 +1,14 @@
-import { permissions, rolePermissions, roles, sessions, userRoles } from '@reprint/db'
+import {
+  type Database,
+  permissions,
+  rolePermissions,
+  roles,
+  sessions,
+  userRoles,
+} from '@reprint/db'
 import { PERMISSIONS, problemDetailsSchema } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
@@ -145,6 +153,52 @@ describe('session lookup', () => {
     expect(body.permissions).toContain('reviews.moderate')
     expect(body.permissions).toContain('reviews.write')
     expect(body.permissions).not.toContain('roles.assign')
+  })
+
+  it('reads the session, the Member, and their permissions in one query (M10-T04)', async () => {
+    const queries: string[] = []
+    // The same database, through a client that records each statement it sends.
+    const counting = drizzle(stack.db.sql, {
+      logger: { logQuery: (query) => queries.push(query) },
+    }) as unknown as Database
+    const countingApp = await buildApp(envFor(), { database: counting })
+    addTestRoutes(countingApp)
+    await countingApp.ready()
+    try {
+      const user = await createTestUser(stack.db.db, { roles: ['moderator'] })
+      const { token } = await signIn(user.id)
+      queries.length = 0
+      const body = (
+        await countingApp.inject({ method: 'GET', url: '/test/whoami', headers: withCookie(token) })
+      ).json()
+      expect(body.userId).toBe(user.id)
+      expect(body.permissions).toContain('reviews.moderate')
+      expect(queries).toHaveLength(1)
+    } finally {
+      await countingApp.close()
+    }
+  })
+
+  it('gives a Member with no roles no permissions, and overlapping roles each permission once', async () => {
+    const roleless = await createTestUser(stack.db.db, { roles: [] })
+    const none = await app.inject({
+      method: 'GET',
+      url: '/test/whoami',
+      headers: withCookie((await signIn(roleless.id)).token),
+    })
+    expect(none.json()).toEqual({ userId: roleless.id, permissions: [] })
+
+    const both = await createTestUser(stack.db.db, { roles: ['member', 'moderator'] })
+    const body = (
+      await app.inject({
+        method: 'GET',
+        url: '/test/whoami',
+        headers: withCookie((await signIn(both.id)).token),
+      })
+    ).json()
+    expect(body.permissions).toContain('reviews.write')
+    expect(body.permissions).toContain('reviews.moderate')
+    expect(new Set(body.permissions).size).toBe(body.permissions.length)
   })
 
   it('treats a missing or unknown cookie as a Visitor', async () => {
