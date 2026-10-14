@@ -33,7 +33,7 @@ import { bookBreadcrumbs, bookJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
 import { pageMeta } from '../lib/seo.js'
-import { viewerSession } from '../lib/session.server.js'
+import { hasSessionCookie, viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/book'
 
 const MORE_BY_AUTHOR_LIMIT = 6
@@ -53,31 +53,15 @@ export function meta(args: Route.MetaArgs) {
   })
 }
 
-/** The Book, its Editions, and up to 6 more Books by its first Author, all loaded on the server (PRD §7.4). */
+/**
+ * The Book, its Editions, and up to 6 more Books by its first Author, all loaded on the server
+ * (PRD §7.4). Everything that needs only the slug is asked for at once; only the Author, Series,
+ * and Genre rails wait for the Book (M10-T03).
+ */
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const slug = slugSchema.safeParse(params.slug)
   if (!slug.success) throw data('Not found', { status: 404 })
   const api = apiClientFor(request)
-
-  let response: Response
-  try {
-    response = await api.get(`/v1/books/${slug.data}`)
-  } catch (error) {
-    logger.error({ err: error }, 'could not load book')
-    throw data(copy.books.page.loadFailed, { status: 502 })
-  }
-  if (response.status === 404) throw data('Not found', { status: 404 })
-  if (!response.ok) {
-    logger.error({ status: response.status }, 'book request failed')
-    throw data(copy.books.page.loadFailed, { status: 502 })
-  }
-  const book = bookDetailSchema.parse(await response.json())
-  // An old slug of a merged Book answers with the remaining Book; send the visitor to its address.
-  if (book.slug !== slug.data) {
-    throw redirect(`/books/${book.slug}${new URL(request.url).search}`, 301)
-  }
-
-  const byline = groupContributors(book.contributions)[0]?.people[0]
   const url = new URL(request.url)
   const parsedQuery = bookReviewsQuerySchema.safeParse({
     sort: url.searchParams.get('sort') || undefined,
@@ -88,22 +72,36 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     ? { sort: parsedQuery.data.sort, rating: parsedQuery.data.rating, page: parsedQuery.data.page }
     : { sort: 'most_helpful', page: 1 }
 
+  // Each of these settles on its own (a failure becomes an empty part), so none can reject while
+  // the Book is awaited. A Visitor has no cookie, so nothing is asked about their review.
+  const signedIn = hasSessionCookie(request)
+  const pending = Promise.all([
+    loadEditions(api, slug.data),
+    viewerSession({ request, context }),
+    loadReviews(api, slug.data, reviewQuery),
+    signedIn ? loadMyReview(api, slug.data) : null,
+    signedIn ? loadVotedReviewIds(api, slug.data) : [],
+  ])
+  const book = await loadBook(api, slug.data)
+  // An old slug of a merged Book answers with the remaining Book; send the visitor to its address.
+  // What was asked for under the old slug is dropped with this request.
+  if (book.slug !== slug.data) {
+    throw redirect(`/books/${book.slug}${url.search}`, 301)
+  }
+
+  const byline = groupContributors(book.contributions)[0]?.people[0]
   const firstSeries = book.series[0]?.series
   const firstGenre = book.genres[0]
-  const [editions, authorData, series, moreInGenre, session, reviews] = await Promise.all([
-    loadEditions(api, book.slug),
-    byline ? loadAuthor(api, byline.slug, book.id) : null,
-    firstSeries ? loadSeries(api, firstSeries.slug, book.slug) : null,
-    firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
-    viewerSession({ request, context }),
-    loadReviews(api, book.slug, reviewQuery),
-  ])
+  const [[editions, session, reviews, myReview, votedReviewIds], authorData, series, moreInGenre] =
+    await Promise.all([
+      pending,
+      byline ? loadAuthor(api, byline.slug, book.id) : null,
+      firstSeries ? loadSeries(api, firstSeries.slug, book.slug) : null,
+      firstGenre ? loadMoreInGenre(api, firstGenre, book.id) : null,
+    ])
   const moreByAuthor = authorData?.moreByAuthor ?? null
   const authorCard = authorData?.card ?? null
   const viewer = session.viewer
-  const [myReview, votedReviewIds] = viewer
-    ? await Promise.all([loadMyReview(api, book.slug), loadVotedReviewIds(api, book.slug)])
-    : [null, []]
 
   const authors = groupContributors(book.contributions)
     .find((group) => group.role === 'author')
@@ -127,14 +125,31 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     series,
     moreInGenre,
     viewer,
-    myReview,
+    myReview: viewer ? myReview : null,
     reviews,
-    votedReviewIds,
+    votedReviewIds: viewer ? votedReviewIds : [],
     reviewQuery,
     canonicalUrl,
     metaDescription,
     jsonLd,
   }
+}
+
+/** The Book itself: a 404 when there is none, a 502 when the API fails. */
+async function loadBook(api: ReturnType<typeof apiClientFor>, slug: string) {
+  let response: Response
+  try {
+    response = await api.get(`/v1/books/${slug}`)
+  } catch (error) {
+    logger.error({ err: error }, 'could not load book')
+    throw data(copy.books.page.loadFailed, { status: 502 })
+  }
+  if (response.status === 404) throw data('Not found', { status: 404 })
+  if (!response.ok) {
+    logger.error({ status: response.status }, 'book request failed')
+    throw data(copy.books.page.loadFailed, { status: 502 })
+  }
+  return bookDetailSchema.parse(await response.json())
 }
 
 // The list is an extra: if it fails, the rest of the page still renders with a short notice.

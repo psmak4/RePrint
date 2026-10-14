@@ -670,7 +670,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: a root middleware puts a memoized session loader in the router context, and the root loader, `requireViewerPermission`, and every loader or action that called `loadSession` read it; route tests show one `GET /v1/auth/session` per request for the Book page, an admin page, and settings
   - Accept: the root loader asks for the session and the bell's notifications at the same time when the request carries the session cookie, and asks for no notifications without it; Visitor pages and a failing API render as before
   - Accept: `pnpm check` passes
-- [ ] M10-T03 · Web: the Book page loads in two rounds · deps: M10-T02 · PRD: §7.4, §11
+- [x] M10-T03 · Web: the Book page loads in two rounds · deps: M10-T02 · PRD: §7.4, §11
   - Accept: the Book loader starts the requests that need only the slug at once (the Book, Editions, reviews, and with a session cookie, my review and helpful votes); only the Author, Series, and Genre rails wait for the Book
   - Accept: a merged Book's old slug still redirects (301) with its query, and nothing fetched under the old slug reaches the page
   - Accept: route tests check which requests wait for the Book, plus the Visitor, Member, and failing-API cases; `pnpm check` and the Book page e2e specs pass
