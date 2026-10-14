@@ -31,6 +31,7 @@ import { coverUrl } from '../lib/cover-url.js'
 import { bookBreadcrumbs, bookJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
+import { toRichTree } from '../lib/rich-text.server.js'
 import { pageMeta } from '../lib/seo.js'
 import { hasSessionCookie, viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/book'
@@ -107,6 +108,8 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
 
   return {
     book,
+    // Parsed here, so the page draws it without a Markdown parser (M10-T08).
+    descriptionTree: book.description?.trim() ? toRichTree(book.description.trim()) : null,
     editions,
     moreByAuthor,
     authorCard,
@@ -289,6 +292,7 @@ export default function Book({ loaderData }: Route.ComponentProps) {
         // state from the last Book (its Shelf, a review being edited, filters) carries over.
         key={loaderData.book.id}
         book={loaderData.book}
+        descriptionTree={loaderData.descriptionTree}
         editions={loaderData.editions}
         moreByAuthor={loaderData.moreByAuthor}
         author={loaderData.authorCard}

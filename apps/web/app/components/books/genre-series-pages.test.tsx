@@ -5,6 +5,7 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
+import { toRichTree } from '../../lib/rich-text.server.js'
 import { GenrePage, GenresIndexPage, genreHref } from './genre-pages.js'
 import { SeriesPage } from './series-page.js'
 
@@ -45,6 +46,17 @@ const detail: GenreDetailResponse = {
   page: 2,
   pageSize: 20,
   hasMore: true,
+}
+
+/** The Series page as the route renders it, with the description parsed as the loader does (M10-T08). */
+function seriesPage(detail: SeriesDetailResponse) {
+  const description = detail.series.description
+  return (
+    <SeriesPage
+      detail={detail}
+      descriptionTree={description ? toRichTree(description, { inline: true }) : null}
+    />
+  )
 }
 
 describe('GenresIndexPage', () => {
@@ -158,7 +170,7 @@ describe('SeriesPage', () => {
   }
 
   it('lists Books in order with positions and ratings, and has no axe violations', async () => {
-    const { container } = renderInRouter(<SeriesPage detail={series} />)
+    const { container } = renderInRouter(seriesPage(series))
     expect(screen.getByRole('heading', { level: 1, name: 'Dune Chronicles' })).toBeTruthy()
     const entries = within(screen.getByRole('list')).getAllByRole('listitem')
     expect(entries.map((li) => li.querySelector('h3')?.textContent)).toEqual([
@@ -175,15 +187,13 @@ describe('SeriesPage', () => {
 
   it('renders the Markdown of a Series description inside the lead (D-202)', () => {
     const { container } = renderInRouter(
-      <SeriesPage
-        detail={{
-          ...series,
-          series: {
-            ...series.series,
-            description: 'Six *epic* novels by [Herbert](https://example.org).',
-          },
-        }}
-      />,
+      seriesPage({
+        ...series,
+        series: {
+          ...series.series,
+          description: 'Six *epic* novels by [Herbert](https://example.org).',
+        },
+      }),
     )
     expect(screen.getByText('epic').tagName).toBe('EM')
     expect(screen.getByRole('link', { name: 'Herbert' })).toBeTruthy()
@@ -191,7 +201,7 @@ describe('SeriesPage', () => {
   })
 
   it('says so when the Series has no Books', () => {
-    renderInRouter(<SeriesPage detail={{ ...series, items: [] }} />)
+    renderInRouter(seriesPage({ ...series, items: [] }))
     expect(screen.getByText('No books in this series yet')).toBeTruthy()
   })
 
@@ -200,11 +210,11 @@ describe('SeriesPage', () => {
       ...series,
       series: { ...series.series, memberCount: 6, adding },
     })
-    renderInRouter(<SeriesPage detail={withAdding(true)} />)
+    renderInRouter(seriesPage(withAdding(true)))
     expect(screen.getByText('Still adding books from this series.')).toBeTruthy()
     cleanup()
     // Fewer stored than listed, but no sync is adding them: some may never arrive.
-    renderInRouter(<SeriesPage detail={withAdding(false)} />)
+    renderInRouter(seriesPage(withAdding(false)))
     expect(screen.queryByText('Still adding books from this series.')).toBeNull()
   })
 })

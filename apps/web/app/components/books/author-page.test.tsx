@@ -8,6 +8,7 @@ import {
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { createRoutesStub } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
+import { toRichTree } from '../../lib/rich-text.server.js'
 import { AuthorPage, groupWorks, lifeDates } from './author-page.js'
 
 afterEach(cleanup)
@@ -41,9 +42,20 @@ const author: AuthorDetail = {
   ],
 }
 
+/** The bio as the loader parses it (M10-T08). */
+function treeOf(overrides: Partial<AuthorDetail>) {
+  const bio = ('bio' in overrides ? overrides.bio : author.bio)?.trim()
+  return bio ? toRichTree(bio) : null
+}
+
 function renderPage(overrides: Partial<AuthorDetail> = {}) {
   const Stub = createRoutesStub([
-    { path: '/', Component: () => <AuthorPage author={{ ...author, ...overrides }} /> },
+    {
+      path: '/',
+      Component: () => (
+        <AuthorPage author={{ ...author, ...overrides }} bioTree={treeOf(overrides)} />
+      ),
+    },
   ])
   return render(<Stub />)
 }
@@ -107,6 +119,7 @@ describe('AuthorPage', () => {
               works: [{ role: 'author', books: written(AUTHOR_WRITTEN_PAGE_SIZE) }],
               writtenTotal: AUTHOR_WRITTEN_PAGE_SIZE * AUTHOR_MAX_PAGE + 5,
             }}
+            bioTree={treeOf({})}
             page={AUTHOR_MAX_PAGE}
           />
         ),

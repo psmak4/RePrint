@@ -1,89 +1,87 @@
 import { cn } from '@reprint/ui'
-import Markdown, { type Components } from 'react-markdown'
+import { Fragment, type ReactNode } from 'react'
+import { linkHref, type RichTree } from '../lib/rich-tree.js'
 
-/** What Source Markdown may render as (D-202); everything else is reduced to its text. */
-const BLOCK_ELEMENTS = ['p', 'br', 'em', 'strong', 'ul', 'ol', 'li', 'a']
-/** Inside a paragraph only phrasing content may appear, so lists become plain lines there. */
-const INLINE_ELEMENTS = ['p', 'br', 'em', 'strong', 'a']
+function draw(nodes: RichTree, inline: boolean): ReactNode[] {
+  return nodes.map((node, index) => {
+    if (typeof node === 'string') return node
+    // Nodes never move, so their place is a stable key.
+    const key = index
+    if (node.tag === 'br') return <br key={key} />
+    const children = draw(node.children, inline)
+    switch (node.tag) {
+      case 'a': {
+        // Checked again here, so a tree from anywhere still links only outside web addresses.
+        const href = linkHref(node.href)
+        if (!href) return <Fragment key={key}>{children}</Fragment>
+        return (
+          <a
+            key={key}
+            href={href}
+            rel="nofollow ugc noopener noreferrer"
+            className="text-link underline underline-offset-[3px] hover:no-underline"
+          >
+            {children}
+          </a>
+        )
+      }
+      // Single line breaks inside a paragraph stay breaks, as they did when this was plain text.
+      case 'p':
+        return inline ? (
+          <span key={key} className="block whitespace-pre-line">
+            {children}
+          </span>
+        ) : (
+          <p key={key} className="whitespace-pre-line">
+            {children}
+          </p>
+        )
+      case 'ul':
+        return (
+          <ul key={key} className="list-disc pl-6">
+            {children}
+          </ul>
+        )
+      case 'ol':
+        return (
+          <ol key={key} className="list-decimal pl-6">
+            {children}
+          </ol>
+        )
+      case 'li':
+        return <li key={key}>{children}</li>
+      case 'em':
+        return <em key={key}>{children}</em>
+      default:
+        return <strong key={key}>{children}</strong>
+    }
+  })
+}
 
 /**
- * Hosts never linked: a Source's own pages would put its IDs in front of readers (PRD §5). The
- * Catalog already unlinks them on import (D-202); this also covers text stored before that.
- */
-const UNLINKED_HOSTS = /(^|\.)openlibrary\.org$/i
-
-/** The address a link may point to, or `null` to show only its text: absolute web addresses only. */
-export function linkHref(url: string | undefined): string | null {
-  if (!url) return null
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
-    return UNLINKED_HOSTS.test(parsed.hostname) ? null : parsed.href
-  } catch {
-    return null
-  }
-}
-
-const link: Components['a'] = ({ href, children }) => {
-  const target = linkHref(href)
-  if (!target) return <>{children}</>
-  return (
-    <a
-      href={target}
-      rel="nofollow ugc noopener noreferrer"
-      className="text-link underline underline-offset-[3px] hover:no-underline"
-    >
-      {children}
-    </a>
-  )
-}
-
-const blockComponents: Components = {
-  a: link,
-  // Single line breaks inside a paragraph stay breaks, as they did when this was plain text.
-  p: ({ children }) => <p className="whitespace-pre-line">{children}</p>,
-  ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
-  ol: ({ children }) => <ol className="list-decimal pl-6">{children}</ol>,
-}
-
-const inlineComponents: Components = {
-  a: link,
-  p: ({ children }) => <span className="block whitespace-pre-line">{children}</span>,
-}
-
-/**
- * Markdown from a Source, or typed by an admin, rendered safely (D-202): paragraphs, line breaks,
- * emphasis, lists, and outside links. Raw HTML is skipped and no `innerHTML` is used. `inline`
- * renders spans only, for use inside a paragraph.
+ * Markdown from a Source, or typed by an admin, drawn safely (D-202) from the tree the server
+ * parsed (`toRichTree`, M10-T08): paragraphs, line breaks, emphasis, lists, and outside links. No
+ * `innerHTML` is used. `inline` renders spans only, for use inside a paragraph.
  */
 export function RichText({
-  text,
+  tree,
   inline = false,
   id,
   className,
 }: {
-  text: string
+  tree: RichTree
   inline?: boolean
   id?: string
   className?: string
 }) {
-  const markdown = (
-    <Markdown
-      allowedElements={inline ? INLINE_ELEMENTS : BLOCK_ELEMENTS}
-      unwrapDisallowed
-      skipHtml
-      components={inline ? inlineComponents : blockComponents}
-    >
-      {text}
-    </Markdown>
-  )
+  const content = draw(tree, inline)
   return inline ? (
     <span id={id} className={cn('flex flex-col gap-2', className)}>
-      {markdown}
+      {content}
     </span>
   ) : (
     <div id={id} className={cn('[&>*+*]:mt-4', className)}>
-      {markdown}
+      {content}
     </div>
   )
 }
