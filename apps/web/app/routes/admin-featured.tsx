@@ -19,8 +19,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** The current picks and what can be picked (PRD §7.2, §7.11). */
-export async function loader({ request }: Route.LoaderArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.featuredManage)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.featuredManage)
   let response: Response
   try {
     response = await apiClientFor(request).get('/v1/admin/featured')
@@ -42,8 +42,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 /** Each action is one permission-checked, audited API call; the API rebuilds Discover. */
-export async function action({ request }: Route.ActionArgs) {
-  await requireViewerPermission(request, PERMISSIONS.featuredManage)
+export async function action({ request, context }: Route.ActionArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.featuredManage)
   const fallback = copy.admin.featured.failed
   const parsed = adminFeaturedUpdateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })

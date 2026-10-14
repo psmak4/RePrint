@@ -25,8 +25,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** The audit log, newest first, filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.auditView)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.auditView)
   const params = new URL(request.url).searchParams
   const raw: Record<string, string> = {}
   for (const key of [...FILTERS, 'cursor']) {

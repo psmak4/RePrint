@@ -35,8 +35,8 @@ export type ClaimState =
  * The Pending queue (oldest first) and, when `?review=<id>` names an item in it, that item with a
  * claim taken for the viewer (PRD §7.10). Opening a review is what claims it (D-126).
  */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.reviewsModerate)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.reviewsModerate)
   const url = new URL(request.url)
   const cursor = url.searchParams.get('cursor') || null
   const reviewId = reviewIdParamsSchema.safeParse({ id: url.searchParams.get('review') })
@@ -82,8 +82,8 @@ const decisionActionSchema = z.object({
 })
 
 /** Approve or reject the opened review. The API checks the claim and writes the audit row (D-122). */
-export async function action({ request }: Route.ActionArgs) {
-  await requireViewerPermission(request, PERMISSIONS.reviewsModerate)
+export async function action({ request, context }: Route.ActionArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.reviewsModerate)
   const parsed = decisionActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return data({ formError: copy.admin.reviews.decideFailed }, { status: 400 })

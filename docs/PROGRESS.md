@@ -769,6 +769,12 @@ Entry format:
 - `pnpm check` passes. Local e2e not run (the owner's dev servers hold ports 5173 and 3000); CI's e2e job covers it.
 - The owner's local database needs `pnpm db:migrate` after this merges (migrations 0024 and 0025).
 
+### 2026-10-14 · M10-T02 · Web: one session lookup per request · loop/m10-t02-one-session-lookup
+- The root route now runs `sessionMiddleware`, which puts a lazy, memoized session lookup in the router context; the root loader, `requireViewerPermission`, and every loader that read the session use `viewerSession({ request, context })` (D-207). The root loader asks for the bell's notifications beside the session when the request has the `rp_session` cookie, and for none without it.
+- Proof on a production build (`react-router-serve` from this branch, its API calls counted by a proxy in front of the dev API): a Book page, an admin page, settings, and a Book `.data` navigation each asked `GET /v1/auth/session` exactly once (the Book page asked twice before, an admin page three times); a Visitor page asked for no notifications.
+- Tests: `session.server.test.ts` (one lookup shared in a request, none when unused, one per request, direct load without the middleware, Visitor on API failure, cookie detection) and `session-per-request.test.ts` (the real root, Book, admin, and settings loaders under the middleware make one lookup; with the Book loader bypassing the shared lookup the test fails; root loader notifications with and without a cookie, a stale cookie, and a failing notifications API). `pnpm check` passes.
+- Local e2e not run (the owner's dev servers hold ports 5173 and 3000); CI's e2e job covers it.
+
 ### 2026-10-14 · M10-T04 · API: one query reads a session and its permissions · loop/m10-t04-one-query-session
 - The session hook read the session and Member, then the Member's permissions, in two queries one after the other, on every request with a session cookie. The permission names now come in the same query, as an `array(select distinct …)` subquery over `user_roles`, `role_permissions`, and `permissions`. Renewal still writes only when the session was last seen over a day ago (D-027).
 - Tests: a new integration test counts the statements the hook sends through a logging client on the same database: 1 now, and 2 with the old hook put back (it fails). New cases for a Member with no roles (no permissions) and one with two overlapping roles (each permission once). The existing expired, too-old, suspended, deleted, renewal, and permission tests pass unchanged. `pnpm check` passes.
