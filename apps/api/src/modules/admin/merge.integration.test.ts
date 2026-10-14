@@ -14,6 +14,7 @@ import {
   adminBookMergeResponseSchema,
   adminMergeCandidatesResponseSchema,
   type BookCandidate,
+  bookDetailSchema,
 } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
@@ -324,6 +325,17 @@ describe('POST /v1/admin/books/merge', () => {
     const old = await app.inject({ method: 'GET', url: `/v1/books/${from.slug}` })
     expect(old.statusCode).toBe(200)
     expect(old.json().slug).toBe(into.slug)
+  })
+
+  it('keeps the merged Book’s outside rating on the Book that remains (D-204)', async () => {
+    const { from, into } = await pair()
+    const admin = await person(['admin'])
+    const response = await merge({ fromBookId: from.id, intoBookId: into.id }, admin.cookies)
+    expect(response.statusCode).toBe(200)
+    const detail = bookDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/books/${into.slug}` })).json(),
+    )
+    expect(detail.outsideRatings?.map((rating) => rating.count)).toEqual([500])
   })
 
   it('fails with 409 when a Member reviewed both Books and changes nothing', async () => {

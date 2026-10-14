@@ -3,6 +3,7 @@ import type {
   BookCandidate,
   BookCandidateEdition,
   BookSearchPage,
+  SourceRating,
 } from '@reprint/shared'
 
 /** What RePrint may do with a Source's data (PRD §5.2). The Catalog accepts records only from `store` Sources. */
@@ -82,6 +83,11 @@ export interface SourceAdapter {
    * or `[]` when the Source lists none (D-203). Throws when a page cannot be read.
    */
   getAuthorBooks?(sourceId: string): Promise<AuthorBook[]>
+  /**
+   * The current reader rating for each Book asked for, by Source ID; `null` when the Source has
+   * none, and Books it did not return are left out (D-204). Throws when a page cannot be read.
+   */
+  getBookRatings?(sourceIds: string[]): Promise<Map<string, SourceRating | null>>
   /** Optional and unused in v1: a bulk import if live search outgrows a Source's rate limit. */
   importBulk?(stream: AsyncIterable<Uint8Array>): Promise<{ imported: number }>
 }

@@ -77,6 +77,7 @@ Free-tier limits to expect: the API sleeps after ~15 minutes idle (the keep-warm
 Run each once per environment after the deploy that adds it, on your machine with `DATABASE_URL` set to that environment's direct URL for that one command only. Each is safe to run again.
 
 - **Source Markdown (D-202).** `pnpm --filter api catalog:clean-markup` re-reads stored Book descriptions and Author bios with the current Source rules (Open Library page links become text, its footers go). Admin-set and locked text is left alone. It prints how many rows changed.
+- **Outside ratings (D-204).** `pnpm --filter api catalog:backfill-ratings` (needs `REDIS_URL` and the Source settings as well) fills in Open Library readers' ratings for stored Books, 100 per request through the shared rate limit. It prints how many it saved and removed, and exits non-zero if a batch failed; run it again to retry.
 
 ## Rollback
 

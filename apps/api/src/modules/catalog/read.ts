@@ -10,6 +10,8 @@ import {
   editions,
   genres,
   series,
+  sourceLinks,
+  sourceRatings,
 } from '@reprint/db'
 import {
   AUTHOR_WRITTEN_PAGE_SIZE,
@@ -23,9 +25,11 @@ import {
   type ContributionRole,
   type Cover,
   type Edition,
+  type OutsideRating,
   type RatingSummary,
 } from '@reprint/shared'
 import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm'
+import { SOURCE_DISPLAY_NAMES } from '../../catalog/sources/index.js'
 
 type CoverRow = typeof covers.$inferSelect
 type EditionRow = typeof editions.$inferSelect
@@ -159,7 +163,7 @@ export async function findBookBySlug(db: Database, slug: string): Promise<BookRo
 }
 
 export async function loadBookDetail(db: Database, book: BookRow): Promise<BookDetail> {
-  const [editionRows, byline, seriesRows, genreRows] = await Promise.all([
+  const [editionRows, byline, seriesRows, genreRows, outsideRows] = await Promise.all([
     db.select().from(editions).where(eq(editions.bookId, book.id)),
     bylines(db, [book.id]),
     db
@@ -174,6 +178,16 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
       .innerJoin(genres, eq(genres.id, bookGenres.genreId))
       .where(eq(bookGenres.bookId, book.id))
       .orderBy(asc(genres.name)),
+    db
+      .select({
+        source: sourceLinks.source,
+        average: sourceRatings.average,
+        count: sourceRatings.count,
+        counts: sourceRatings.counts,
+      })
+      .from(sourceRatings)
+      .innerJoin(sourceLinks, eq(sourceLinks.id, sourceRatings.sourceLinkId))
+      .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, book.id))),
   ])
   const primary = editionRows.find((row) => row.id === book.primaryEditionId) ?? null
   const coverMap = await coversById(db, [book.coverId, primary?.coverId ?? null])
@@ -201,7 +215,31 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
     editionCount: editionRows.length,
     sourceEditionCount: book.sourceEditionCount,
     rating: ratingSummary(book),
+    // Other Sources' reader ratings, under a name readers know; never mixed into `rating` (D-204).
+    outsideRatings: outsideRatingsOf(outsideRows),
   }
+}
+
+/**
+ * One rating per Source name: a Book can hold several records from one Source (a reissue sharing
+ * its ISBN, a merge), so the one most readers rated stands for it (D-204). Unknown Sources are
+ * left out.
+ */
+function outsideRatingsOf(
+  rows: { source: string; average: number; count: number; counts: number[] }[],
+): OutsideRating[] {
+  const best = new Map<string, OutsideRating>()
+  for (const row of rows) {
+    const sourceName = SOURCE_DISPLAY_NAMES[row.source]
+    if (!sourceName || (best.get(sourceName)?.count ?? 0) >= row.count) continue
+    best.set(sourceName, {
+      sourceName,
+      average: row.average,
+      count: row.count,
+      distribution: row.counts,
+    })
+  }
+  return [...best.values()].sort((a, b) => a.sourceName.localeCompare(b.sourceName))
 }
 
 /** Newest printings first; Editions without a date go last. */

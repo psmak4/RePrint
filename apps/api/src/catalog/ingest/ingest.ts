@@ -26,6 +26,7 @@ import {
 import { and, eq, inArray, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
 import { enrichBook } from '../enrichment/enrich.js'
 import { createPriorityLookup, type PriorityLookup } from '../enrichment/priorities.js'
+import { saveSourceRating } from '../source-ratings.js'
 import type { SourceAdapter } from '../sources/types.js'
 import { STALE_AFTER_MS } from '../staleness.js'
 import { ADMIN_ORIGIN, type IncomingField, isLocked, planFieldUpdate } from './fields.js'
@@ -651,6 +652,13 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
       priorityOf,
     })
     await addLink(tx, 'book', book.id, source.name, candidate.sourceLink.sourceId)
+    // The Source's reader ratings, kept apart from RePrint's (D-204).
+    await saveSourceRating(tx, {
+      source: source.name,
+      sourceId: candidate.sourceLink.sourceId,
+      rating: candidate.book.sourceRating,
+      now,
+    })
     const skippedEditions = await upsertEditions(tx, {
       source: source.name,
       candidate,

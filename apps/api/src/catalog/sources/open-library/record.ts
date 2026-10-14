@@ -8,6 +8,7 @@ import {
 } from '@reprint/shared'
 import { z } from 'zod'
 import { toLanguage } from './languages.js'
+import { toSourceRating } from './ratings.js'
 import { SOURCE_NAME, toBookCandidate, toCover } from './search.js'
 
 /** The most subjects kept for a Book; Open Library lists dozens, many in other languages. */
@@ -309,6 +310,7 @@ export function toFullBook(
       series: base.book.series.length > 0 ? base.book.series : toSeries(seriesTexts),
       subjects: toSubjects(work.subjects),
       sourceEditionCount,
+      sourceRating: toSourceRating(bylineDoc),
     },
     // With no usable Edition on record, the search result's placeholder Edition keeps the Book valid.
     editions: editions.length > 0 ? editions : base.editions,

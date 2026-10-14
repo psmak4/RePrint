@@ -162,6 +162,13 @@
       "when": 1791866469859,
       "tag": "0022_rainy_marrow",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791953587881,
+      "tag": "0023_handy_quentin_quire",
+      "breakpoints": true
     }
   ]
 }

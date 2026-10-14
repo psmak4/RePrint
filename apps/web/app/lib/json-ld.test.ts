@@ -113,6 +113,26 @@ describe('bookJsonLd', () => {
     expect(node).not.toHaveProperty('aggregateRating')
     expect(node).not.toHaveProperty('review')
   })
+
+  it('never takes outside ratings into aggregateRating (D-204)', () => {
+    const node = bookJsonLd(
+      origin,
+      {
+        ...book,
+        rating: { average: null, count: 0, distribution: [0, 0, 0, 0, 0] },
+        outsideRatings: [
+          {
+            sourceName: 'Open Library',
+            average: 4.29,
+            count: 500,
+            distribution: [16, 18, 41, 155, 270],
+          },
+        ],
+      },
+      [],
+    )
+    expect(node).not.toHaveProperty('aggregateRating')
+  })
 })
 
 describe('authorJsonLd', () => {

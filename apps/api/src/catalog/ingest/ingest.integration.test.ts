@@ -11,6 +11,7 @@ import {
   mergeCandidates,
   series,
   sourceLinks,
+  sourceRatings,
   sourceRecords,
 } from '@reprint/db'
 import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
@@ -529,5 +530,63 @@ describe('ingestBook', () => {
       const [locked] = await db.select().from(books).where(eq(books.id, first.bookId))
       expect(locked?.description).toBe('Admin text')
     })
+  })
+})
+
+describe('outside ratings (D-204)', () => {
+  const rating = { average: 4.29, count: 500, distribution: [16, 18, 41, 155, 270] }
+
+  async function duneWith(sourceRating: unknown) {
+    const dune = await stub.getBook('stub-book-dune')
+    if (!dune) throw new Error('no dune')
+    return ingestBook(db, {
+      source: stub,
+      candidate: { ...dune, book: { ...dune.book, sourceRating } } as BookCandidate,
+    })
+  }
+  const stored = () => db.select().from(sourceRatings)
+
+  it('stores the Source rating apart from the Book’s RePrint aggregates', async () => {
+    const { bookId } = await duneWith(rating)
+    const [link] = await db
+      .select({ id: sourceLinks.id })
+      .from(sourceLinks)
+      .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, bookId)))
+    expect(await stored()).toMatchObject([
+      { sourceLinkId: link?.id, average: 4.29, count: 500, counts: [16, 18, 41, 155, 270] },
+    ])
+    const [book] = await db.select().from(books).where(eq(books.id, bookId))
+    expect(book).toMatchObject({ reviewCount: 0, ratingSum: 0, ratingCounts: [0, 0, 0, 0, 0] })
+  })
+
+  it('replaces it on a later read, and removes it when the Source has none', async () => {
+    await duneWith(rating)
+    await duneWith({ ...rating, average: 4.1, count: 501 })
+    expect(await stored()).toMatchObject([{ average: 4.1, count: 501 }])
+    await duneWith(null)
+    expect(await stored()).toEqual([])
+  })
+
+  it('keeps a rated work’s rating when another work of the same Book has none', async () => {
+    const { bookId } = await duneWith(rating)
+    const dune = await stub.getBook('stub-book-dune')
+    if (!dune) throw new Error('no dune')
+    // A second Source record for the same Book (it shares Dune's ISBN), with no ratings.
+    const reissue = await ingestBook(db, {
+      source: stub,
+      candidate: {
+        ...dune,
+        sourceLink: { ...dune.sourceLink, sourceId: 'stub-book-dune-reissue' },
+        book: { ...dune.book, sourceRating: null },
+      },
+    })
+    expect(reissue.bookId).toBe(bookId)
+    expect((await stored()).map((row) => row.count)).toEqual([500])
+  })
+
+  it('leaves it alone when the Source does not report ratings', async () => {
+    await duneWith(rating)
+    await duneWith(undefined)
+    expect(await stored()).toHaveLength(1)
   })
 })

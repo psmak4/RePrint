@@ -180,6 +180,28 @@ export const sourceLinks = pgTable(
   ],
 )
 
+/**
+ * A Source's own reader ratings for one of its records of a Book (D-204), keyed by that record's
+ * Source link: a Book can hold several links to one Source (a reissue sharing its ISBN, a merge),
+ * each keeps its own rating, and ratings move with their links. Shown on the Book page beside
+ * RePrint ratings and never counted in them (`books.rating_*` stay RePrint-only).
+ */
+export const sourceRatings = pgTable(
+  'source_ratings',
+  {
+    // The primary key, so the foreign key is indexed.
+    sourceLinkId: uuid('source_link_id')
+      .primaryKey()
+      .references(() => sourceLinks.id, { onDelete: 'cascade' }),
+    average: numeric('average', { precision: 3, scale: 2, mode: 'number' }).notNull(),
+    count: integer('count').notNull(),
+    /** Ratings at 1 to 5 stars, index 0 being one star. */
+    counts: integer('counts').array().notNull(),
+    fetchedAt: timestamptz('fetched_at').notNull(),
+  },
+  (t) => [check('source_ratings_count_check', sql`${t.count} > 0`)],
+)
+
 /** The raw Source response, kept 30 days for debugging (PRD §5.2). */
 export const sourceRecords = pgTable(
   'source_records',

@@ -72,6 +72,24 @@ function renderPage(
   )
 }
 
+describe('BookPage outside ratings (D-204)', () => {
+  it('shows Open Library readers’ rating under the review summary, even with no RePrint reviews', () => {
+    renderPage({
+      outsideRatings: [
+        {
+          sourceName: 'Open Library',
+          average: 4.29,
+          count: 500,
+          distribution: [16, 18, 41, 155, 270],
+        },
+      ],
+    })
+    const panel = screen.getByRole('region', { name: 'Ratings elsewhere' })
+    expect(panel.textContent).toContain('Open Library readers')
+    expect(screen.queryByRole('region', { name: 'Rating breakdown' })).toBeNull()
+  })
+})
+
 describe('BookPage header', () => {
   it('shows the details from the Book and its Primary Edition', () => {
     renderPage()

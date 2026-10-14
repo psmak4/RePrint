@@ -145,6 +145,15 @@ export const bookSchema = z.object({
 })
 export type Book = z.infer<typeof bookSchema>
 
+/** A Source's own reader ratings for a Book (D-204): shown beside RePrint ratings, never counted in them. */
+export const sourceRatingSchema = z.object({
+  average: z.number().min(0).max(5),
+  count: z.number().int().min(1),
+  /** Ratings at 1 to 5 stars, in that order. */
+  distribution: z.array(z.number().int().min(0)).length(5),
+})
+export type SourceRating = z.infer<typeof sourceRatingSchema>
+
 /**
  * What a Source adapter returns for a Book: a RePrint Book with at least one Edition and the Source link
  * (PRD §6), so it carries no RePrint IDs yet. Anything that fails validation is logged and skipped.
@@ -184,6 +193,8 @@ export const bookCandidateBookSchema = z.object({
   seriesReported: z.boolean().optional(),
   /** How many Editions the Source knows of in all, when it says; it may send only some of them. */
   sourceEditionCount: z.number().int().min(0).nullable().optional(),
+  /** The Source's reader ratings: `null` when it has none, absent when it did not say (D-204). */
+  sourceRating: sourceRatingSchema.nullable().optional(),
 })
 
 export const bookCandidateEditionSchema = editionSchema

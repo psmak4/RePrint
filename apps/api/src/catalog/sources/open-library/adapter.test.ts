@@ -5,6 +5,7 @@ import { runSourceContract } from '../../../testing/source-contract.js'
 import { SourceError } from '../types.js'
 import { createOpenLibraryAdapter, searchPath } from './adapter.js'
 import { createFixtureFetch } from './fixture-fetch.js'
+import { toSourceRating } from './ratings.js'
 import { FIXTURES_DIR } from './record-fixtures.js'
 
 const adapter = createOpenLibraryAdapter({ fetch: createFixtureFetch() })
@@ -474,5 +475,52 @@ describe('Open Library getAuthorBooks', () => {
     const empty = createOpenLibraryAdapter({ fetch: replay('{"numFound": 0, "docs": []}') })
     expect(await empty.getAuthorBooks?.('OL9A')).toEqual([])
     expect(await adapter.getAuthorBooks?.('../authors/OL1A')).toEqual([])
+  })
+})
+
+describe('Open Library ratings (D-204)', () => {
+  it('reads the byline result’s ratings into the Book', async () => {
+    const book = await adapter.getBook('OL59800W')
+    const rating = book?.book.sourceRating
+    expect(rating?.count).toBeGreaterThan(0)
+    expect(rating?.distribution).toHaveLength(5)
+    expect(rating?.distribution.reduce((sum, n) => sum + n, 0)).toBe(rating?.count)
+  })
+
+  it('gives null for a work with no ratings', () => {
+    expect(toSourceRating({ key: '/works/OL1W', ratings_count: 0 })).toBeNull()
+    expect(toSourceRating({ key: '/works/OL1W' })).toBeNull()
+  })
+
+  it('reads many Books in one search, skipping malformed IDs', async () => {
+    const asked: string[] = []
+    const many = createOpenLibraryAdapter({
+      fetch: async (input) => {
+        asked.push(new URL(String(input)).searchParams.get('q') ?? '')
+        return Response.json({
+          numFound: 2,
+          docs: [
+            {
+              key: '/works/OL1W',
+              ratings_average: 4.5,
+              ratings_count: 2,
+              ratings_count_4: 1,
+              ratings_count_5: 1,
+            },
+            { key: '/works/OL2W', ratings_count: 0 },
+          ],
+        })
+      },
+    })
+    const ratings = await many.getBookRatings?.(['OL1W', 'OL2W', '../x'])
+    expect(asked).toEqual(['key:(/works/OL1W OR /works/OL2W)'])
+    expect(ratings?.get('OL1W')).toEqual({ average: 4.5, count: 2, distribution: [0, 0, 0, 1, 1] })
+    expect(ratings?.get('OL2W')).toBeNull()
+    expect(ratings?.has('../x')).toBe(false)
+  })
+
+  it('throws when a ratings search cannot be read', async () => {
+    const broken = createOpenLibraryAdapter({ fetch: replay('{"docs": 4}') })
+    await expect(broken.getBookRatings?.(['OL1W'])).rejects.toBeInstanceOf(SourceError)
   })
 })

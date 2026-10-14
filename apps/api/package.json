@@ -20,6 +20,7 @@
     "seed:discover": "tsx --env-file-if-exists=../../.env src/scripts/seed-discover.ts",
     "seed:libraries": "tsx --env-file-if-exists=../../.env src/scripts/seed-libraries.ts",
     "catalog:clean-markup": "tsx --env-file-if-exists=../../.env src/scripts/clean-markup.ts",
+    "catalog:backfill-ratings": "tsx --env-file-if-exists=../../.env src/scripts/backfill-ratings.ts",
     "fixtures:record": "tsx src/catalog/sources/open-library/record-fixtures.ts",
     "openapi:check": "tsx src/scripts/openapi.ts --check"
   },

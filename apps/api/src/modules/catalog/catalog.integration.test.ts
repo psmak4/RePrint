@@ -1,4 +1,13 @@
-import { authors, books, contributions, editions, series, sourceRecords } from '@reprint/db'
+import {
+  authors,
+  books,
+  contributions,
+  editions,
+  series,
+  sourceLinks,
+  sourceRatings,
+  sourceRecords,
+} from '@reprint/db'
 import {
   AUTHOR_WRITTEN_PAGE_SIZE,
   authorDetailSchema,
@@ -65,6 +74,51 @@ async function ingest(sourceId: string, authorSourceId: string) {
 }
 
 describe('GET /v1/books/:slug', () => {
+  it('returns outside ratings under the Source’s display name, apart from RePrint’s (D-204)', async () => {
+    const { slug, bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
+    await stack.db.db
+      .update(books)
+      .set({ reviewCount: 1, ratingSum: 5, ratingCounts: [0, 0, 0, 0, 1] })
+      .where(eq(books.id, bookId))
+    // Dune's own record, a second record of the same Book with fewer ratings, and an unknown Source.
+    const [main] = await stack.db.db
+      .select({ id: sourceLinks.id })
+      .from(sourceLinks)
+      .where(eq(sourceLinks.entityId, bookId))
+    const [reissue, unknown] = await stack.db.db
+      .insert(sourceLinks)
+      .values([
+        { entityType: 'book', entityId: bookId, source: 'stub', sourceId: 'stub-dune-reissue' },
+        { entityType: 'book', entityId: bookId, source: 'unknown-source', sourceId: 'x1' },
+      ])
+      .returning({ id: sourceLinks.id })
+    if (!main || !reissue || !unknown) throw new Error('links missing')
+    const at = new Date()
+    await stack.db.db.insert(sourceRatings).values([
+      {
+        sourceLinkId: main.id,
+        average: 4.29,
+        count: 500,
+        counts: [16, 18, 41, 155, 270],
+        fetchedAt: at,
+      },
+      { sourceLinkId: reissue.id, average: 3, count: 3, counts: [0, 0, 3, 0, 0], fetchedAt: at },
+      { sourceLinkId: unknown.id, average: 1, count: 1, counts: [1, 0, 0, 0, 0], fetchedAt: at },
+    ])
+    const body = bookDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/books/${slug}` })).json(),
+    )
+    expect(body.outsideRatings).toEqual([
+      {
+        sourceName: 'Open Library',
+        average: 4.29,
+        count: 500,
+        distribution: [16, 18, 41, 155, 270],
+      },
+    ])
+    expect(body.rating).toEqual({ average: 5, count: 1, distribution: [0, 0, 0, 0, 1] })
+  })
+
   it('returns the Book with its Primary Edition, byline, and empty rating summary', async () => {
     const { slug } = await ingest('stub-book-dune', 'stub-author-herbert')
     const response = await app.inject({ method: 'GET', url: `/v1/books/${slug}` })

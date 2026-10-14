@@ -30,6 +30,15 @@ describe('stub Source', () => {
     expect(await stub.getAuthorBooks?.('stub-author-herbert')).toEqual([])
   })
 
+  it('rates The Hobbit and answers ratings for its Books (D-204)', async () => {
+    const stub = createStubSource()
+    expect((await stub.getBook('stub-book-hobbit'))?.book.sourceRating?.count).toBe(500)
+    const ratings = await stub.getBookRatings?.(['stub-book-hobbit', 'stub-book-dune', 'nope'])
+    expect(ratings?.get('stub-book-hobbit')?.average).toBe(4.29)
+    expect(ratings?.get('stub-book-dune')).toBeNull()
+    expect(ratings?.has('nope')).toBe(false)
+  })
+
   it('does not match a blank query', async () => {
     expect((await createStubSource().searchBooks('  ', 1)).candidates).toEqual([])
   })

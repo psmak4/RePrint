@@ -279,6 +279,17 @@ export const copy = {
         `${stars} ${stars === 1 ? 'star' : 'stars'}: ${count} ${count === 1 ? 'review' : 'reviews'}`,
       clearFilter: 'Show all ratings',
     },
+    outsideRatings: {
+      heading: 'Ratings elsewhere',
+      label: (source: string) => `${source} readers`,
+      average: (average: string) => `Average ${average} out of 5`,
+      count: (n: number) => `${n.toLocaleString('en-US')} ${n === 1 ? 'rating' : 'ratings'}`,
+      show: 'Show breakdown',
+      hide: 'Hide breakdown',
+      breakdown: (source: string) => `${source} readers’ ratings by stars`,
+      bar: (stars: number, n: number) =>
+        `${stars} ${stars === 1 ? 'star' : 'stars'}: ${n.toLocaleString('en-US')}`,
+    },
     series: {
       heading: 'In this series',
       position: (position: string, total: number | null) =>
