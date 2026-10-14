@@ -44,11 +44,11 @@ function Tabs({
             className={`-mb-px inline-flex h-[52px] shrink-0 items-center gap-2 border-b-2 text-base font-medium whitespace-nowrap ${
               current
                 ? 'border-accent text-foreground'
-                : 'border-transparent text-[#334155] hover:text-foreground'
+                : 'border-transparent text-strong hover:text-foreground'
             }`}
           >
             {text.tabs[tab.key]}
-            <span className="rounded-full bg-[#ece8e0] px-2 py-0.5 text-xs font-semibold text-[#334155]">
+            <span className="rounded-full bg-track px-2 py-0.5 text-xs font-semibold text-strong">
               {counts[tab.key]}
             </span>
           </Link>
@@ -156,7 +156,7 @@ export function LibraryPage({
           <SortForm username={username} view={view} />
         </div>
         {library.items.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-[#a8a29e] px-6 py-5">
+          <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-dashed-border px-6 py-5">
             <p className="text-muted-foreground">{text.empty}</p>
             <Link
               to="/"

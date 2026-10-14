@@ -46,7 +46,7 @@ function FormError({ message }: { message?: string }) {
   return (
     <p
       role="alert"
-      className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+      className="rounded-xl border border-danger bg-danger-tint px-4 py-3 text-sm text-danger"
     >
       {message}
     </p>
@@ -71,7 +71,7 @@ export function ChangeEmailForm({ me }: { me: Me }) {
       {pending ? (
         <div
           role="status"
-          className="mt-4 rounded-xl border border-[#fde68a] bg-[#fffbeb] px-4 py-3"
+          className="mt-4 rounded-xl border border-warning-edge bg-warning-tint px-4 py-3"
         >
           <p className="font-semibold">{c.email.pendingTitle}</p>
           <p className="text-sm">{c.email.pendingBody(pending)}</p>
@@ -166,7 +166,7 @@ export function DeleteAccountForm() {
   return (
     <section
       aria-labelledby="delete-heading"
-      className="rounded-2xl border border-[#fecaca] bg-surface p-6 md:p-8"
+      className="rounded-2xl border border-danger-edge bg-surface p-6 md:p-8"
     >
       <h2 id="delete-heading" className="font-serif text-2xl leading-tight font-medium text-danger">
         {c.title}

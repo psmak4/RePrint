@@ -31,9 +31,7 @@ export function PageHero({
             {title}
           </h1>
           {lead ? (
-            <p className="max-w-[640px] text-base leading-[1.55] text-[#334155] md:text-lg">
-              {lead}
-            </p>
+            <p className="max-w-[640px] text-base leading-[1.55] text-strong md:text-lg">{lead}</p>
           ) : null}
         </div>
       </div>
@@ -47,7 +45,7 @@ export const choiceClass = (active: boolean) =>
   `inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${
     active
       ? 'border-accent bg-accent text-accent-foreground'
-      : 'border-[#d9d4ca] bg-surface text-[#1e293b] hover:border-input-border'
+      : 'border-chip-border bg-surface text-foreground hover:border-input-border'
   }`
 
 /** Previous and next as pills, with the page number between. */

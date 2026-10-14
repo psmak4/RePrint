@@ -25,7 +25,7 @@ export function StarRating({
       aria-label={copy.redesign.starRating(clamped.toFixed(1))}
       className={cn('relative inline-block w-max text-base leading-none tracking-wider', className)}
     >
-      <span aria-hidden="true" className="text-[#d6d3d1]">
+      <span aria-hidden="true" className="text-star-empty">
         {STARS}
       </span>
       <span

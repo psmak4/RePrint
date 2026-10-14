@@ -184,7 +184,7 @@ export function UsersList({
                 </thead>
                 <tbody>
                   {users.items.map((user) => (
-                    <tr key={user.id} className="hover:bg-[#fdfcfa]">
+                    <tr key={user.id} className="hover:bg-surface-tint">
                       <th scope="row" className={cn(tdClass, 'text-left font-normal')}>
                         <span className="flex items-center gap-3">
                           <InitialsAvatar
@@ -245,7 +245,7 @@ export function UsersList({
             className="overflow-hidden rounded-[18px] border border-border bg-surface md:hidden"
           >
             {users.items.map((user) => (
-              <li key={user.id} className="border-t border-[#ece8e0] first:border-t-0">
+              <li key={user.id} className="border-t border-border first:border-t-0">
                 <Link
                   to={`/admin/users/${user.id}`}
                   className="grid grid-cols-[40px_minmax(0,1fr)_20px] items-center gap-3 px-4 py-3.5 focus-visible:outline-offset-[-2px]"
@@ -270,7 +270,7 @@ export function UsersList({
                       )}
                     </span>
                   </span>
-                  <AdminIcon name="chevronRight" className="text-[#64748b]" />
+                  <AdminIcon name="chevronRight" className="text-muted-foreground" />
                 </Link>
               </li>
             ))}

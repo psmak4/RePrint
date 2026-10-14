@@ -4,12 +4,12 @@ import { copy } from '../../copy/index.js'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `border-b-2 py-2 text-[15px] font-medium hover:text-foreground ${
-    isActive ? 'border-accent text-foreground' : 'border-transparent text-[#334155]'
+    isActive ? 'border-accent text-foreground' : 'border-transparent text-strong'
   }`
 
 const menuLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex h-11 items-center rounded-lg px-3 text-[15px] font-medium hover:bg-surface-raised ${
-    isActive ? 'bg-surface-raised text-foreground' : 'text-[#334155]'
+    isActive ? 'bg-surface-raised text-foreground' : 'text-strong'
   }`
 
 function links(viewer: Viewer | null) {

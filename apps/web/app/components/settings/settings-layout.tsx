@@ -17,7 +17,7 @@ export function SettingsLayout() {
             <NavLink
               key={tab.to}
               to={tab.to}
-              className="inline-flex h-[52px] items-center border-b-2 border-transparent text-base font-medium text-[#334155] hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:text-foreground"
+              className="inline-flex h-[52px] items-center border-b-2 border-transparent text-base font-medium text-strong hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:text-foreground"
             >
               {tab.label}
             </NavLink>

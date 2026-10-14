@@ -156,7 +156,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
             </thead>
             <tbody>
               {entries.items.map((entry) => (
-                <tr key={entry.id} className="hover:bg-[#fdfcfa]">
+                <tr key={entry.id} className="hover:bg-surface-tint">
                   <td className={cn(tdClass, 'align-top whitespace-nowrap')}>
                     <time dateTime={entry.createdAt}>
                       {timeFormat.format(new Date(entry.createdAt))}

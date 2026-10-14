@@ -86,7 +86,7 @@ function ReviewItem({ review }: { review: ProfileReview }) {
             {review.headline}
           </h3>
         ) : null}
-        <div className="text-[15px] leading-[1.65] text-[#1e293b] md:text-base md:leading-[1.7]">
+        <div className="text-[15px] leading-[1.65] text-foreground md:text-base md:leading-[1.7]">
           {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
         </div>
       </div>
@@ -141,16 +141,16 @@ export function ProfilePage({
         }
       >
         {profile.bio ? (
-          <p className="max-w-[640px] text-[15px] leading-relaxed whitespace-pre-line break-words text-[#334155] md:text-base">
+          <p className="max-w-[640px] text-[15px] leading-relaxed whitespace-pre-line break-words text-strong md:text-base">
             {profile.bio}
           </p>
         ) : null}
         <section aria-label={text.totalsLabel}>
           <ul className="flex flex-wrap gap-2">
-            <li className="inline-flex h-[34px] items-center rounded-full border border-[#d9d4ca] bg-surface px-3.5 text-sm font-medium">
+            <li className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm font-medium">
               {text.reviewsTotal(profile.reviewCount)}
             </li>
-            <li className="inline-flex h-[34px] items-center rounded-full border border-[#d9d4ca] bg-surface px-3.5 text-sm font-medium">
+            <li className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm font-medium">
               {text.helpfulTotal(profile.helpfulVotes)}
             </li>
           </ul>
@@ -164,7 +164,7 @@ export function ProfilePage({
           {showLibrary ? (
             <Link
               to={`/u/${profile.username}/library`}
-              className={`${tab} border-transparent text-[#334155] hover:text-foreground`}
+              className={`${tab} border-transparent text-strong hover:text-foreground`}
             >
               {text.libraryTab}
             </Link>

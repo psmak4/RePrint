@@ -47,7 +47,7 @@ function OutsideRatingLine({ rating }: { rating: OutsideRating }) {
               className="grid grid-cols-[36px_minmax(0,1fr)_48px] items-center gap-2.5 text-sm"
             >
               <span aria-hidden="true">{stars} ★</span>
-              <span aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-[#ece8e0]">
+              <span aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-track">
                 <span className={`block h-full rounded-full bg-star ${widthClass(n / max)}`} />
               </span>
               <span aria-hidden="true" className="text-right">

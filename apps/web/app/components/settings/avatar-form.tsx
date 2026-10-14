@@ -74,7 +74,7 @@ export function AvatarForm({
           ) : (
             <span
               aria-hidden="true"
-              className="flex size-24 shrink-0 items-center justify-center rounded-full bg-[#bfdbfe] font-serif text-3xl font-medium"
+              className="flex size-24 shrink-0 items-center justify-center rounded-full bg-accent-edge font-serif text-3xl font-medium"
             >
               {displayName.charAt(0).toUpperCase()}
             </span>

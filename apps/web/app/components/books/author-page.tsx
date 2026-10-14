@@ -157,7 +157,7 @@ const SECTION_HEADING =
   'font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]'
 
 const PHOTO_FRAME =
-  'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#bfdbfe] md:size-28'
+  'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent-edge md:size-28'
 
 /** The Author's photo, or their initial when there is none or it fails to load. */
 function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: string }) {
@@ -208,7 +208,7 @@ function Bio({ bio, tree }: { bio: string | null; tree: RichTree | null }) {
         {text.aboutHeading}
       </h2>
       {body && tree ? (
-        <RichText tree={tree} className="text-[15px] leading-relaxed text-[#334155]" />
+        <RichText tree={tree} className="text-[15px] leading-relaxed text-strong" />
       ) : (
         <p className="text-[15px] text-muted-foreground">{text.noBio}</p>
       )}

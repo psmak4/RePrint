@@ -49,7 +49,7 @@ function Locked({ field, book }: { field: string; book: AdminBookDetail }) {
   const origin = book.fieldOrigins[field]
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-      <span className="inline-flex items-center gap-1 rounded-full bg-[#ece8e0] px-2 py-0.5 font-medium text-[#334155]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-track px-2 py-0.5 font-medium text-strong">
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ function RemoveButton({
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-input-border bg-surface text-[#334155] hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-input-border bg-surface text-strong hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-50"
     >
       <svg
         aria-hidden="true"
@@ -568,7 +568,7 @@ function EditionChoice({
         <span className="flex flex-wrap items-center gap-2 font-semibold">
           {heading}
           {tag ? (
-            <span className="rounded-full bg-[#ece8e0] px-2 py-0.5 text-xs font-medium text-[#334155]">
+            <span className="rounded-full bg-track px-2 py-0.5 text-xs font-medium text-strong">
               {tag}
             </span>
           ) : null}

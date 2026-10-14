@@ -65,7 +65,7 @@ export function ReviewExcerpt({
             {text.quoted(review.headline)}
           </p>
         ) : null}
-        <blockquote className="line-clamp-2 text-[15px] leading-[1.55] break-words text-[#334155]">
+        <blockquote className="line-clamp-2 text-[15px] leading-[1.55] break-words text-strong">
           {review.excerpt}
         </blockquote>
         <figcaption className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted-foreground">
@@ -74,7 +74,7 @@ export function ReviewExcerpt({
             colorKey={review.authorUsername ?? review.authorName}
             size="xs"
           />
-          <span className="font-medium text-[#1e293b]">{review.authorName}</span>
+          <span className="font-medium text-foreground">{review.authorName}</span>
           {review.approvedAt ? (
             <>
               <span aria-hidden="true">·</span>

@@ -6,7 +6,7 @@ function Shield({ className }: { className?: string }) {
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className={cn('shrink-0 text-[#16a34a]', className)}
+      className={cn('shrink-0 text-success', className)}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -45,7 +45,7 @@ export function TrustBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2 rounded-full border border-[#a7f3d0] bg-[#ecfdf3] py-1.5 pr-3.5 pl-2.5 text-[13px] font-medium text-success md:text-sm',
+        'inline-flex items-center gap-2 rounded-full border border-success-edge bg-success-tint py-1.5 pr-3.5 pl-2.5 text-[13px] font-medium text-success md:text-sm',
         className,
       )}
     >

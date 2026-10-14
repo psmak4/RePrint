@@ -143,7 +143,7 @@ function FeaturedReview({
               {book.title}
             </Link>
           </p>
-          <div className="line-clamp-6 text-[15px] leading-[1.6] text-[#334155]">
+          <div className="line-clamp-6 text-[15px] leading-[1.6] text-strong">
             {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
           </div>
         </div>
@@ -199,7 +199,7 @@ function Hero({ discover }: { discover: DiscoverResponse }) {
           <h1 className="font-serif text-[40px] leading-[1.05] font-medium tracking-[-0.02em] md:text-[64px] md:leading-[1.04]">
             {t.headingLead} <em className="font-medium text-warning">{t.headingEmphasis}</em>
           </h1>
-          <p className="max-w-[560px] text-base leading-[1.55] text-[#334155] md:text-[19px]">
+          <p className="max-w-[560px] text-base leading-[1.55] text-strong md:text-[19px]">
             {t.lead}
           </p>
           <search aria-label={t.searchLabel} className="hidden w-full max-w-[620px] md:block">
@@ -229,7 +229,7 @@ function Hero({ discover }: { discover: DiscoverResponse }) {
                 <Link
                   key={genre.slug}
                   to={`/genres/${genre.slug}`}
-                  className="inline-flex h-[34px] items-center rounded-full border border-[#d9d4ca] bg-surface px-3.5 text-sm text-[#1e293b] hover:border-input-border"
+                  className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm text-foreground hover:border-input-border"
                 >
                   {genre.name}
                 </Link>
@@ -290,7 +290,7 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
           </div>
         </div>
       ))}
-      <div className="flex flex-col justify-center gap-2.5 rounded-[14px] border border-dashed border-[#a8a29e] px-5 py-4">
+      <div className="flex flex-col justify-center gap-2.5 rounded-[14px] border border-dashed border-dashed-border px-5 py-4">
         <p className="font-semibold">{t.finishedPrompt}</p>
         <p className="text-sm text-muted-foreground">{t.finishedNote}</p>
         <Link to={`/u/${viewer.username}/library?shelf=read`} className={actionLink}>
@@ -313,7 +313,7 @@ function MostReviewed({ books }: { books: MostReviewedItem[] }) {
           >
             <span
               aria-hidden="true"
-              className="text-center font-serif text-[26px] font-medium text-[#64748b] md:text-[34px]"
+              className="text-center font-serif text-[26px] font-medium text-muted-foreground md:text-[34px]"
             >
               {i + 1}
             </span>
@@ -399,9 +399,9 @@ const SPINES = [
 
 function PitchIcon({ kind }: { kind: 'shelf' | 'star' | 'helpful' }) {
   const tone = {
-    shelf: 'bg-[#eff6ff] text-accent',
-    star: 'bg-[#fffbeb] text-warning',
-    helpful: 'bg-[#ecfdf3] text-[#16a34a]',
+    shelf: 'bg-accent-tint text-accent',
+    star: 'bg-warning-tint text-warning',
+    helpful: 'bg-success-tint text-success',
   }[kind]
   return (
     <span className={`inline-flex size-8 shrink-0 items-center justify-center rounded-lg ${tone}`}>
@@ -445,7 +445,7 @@ function SignUpPitch({ titles }: { titles: { slug: string; title: string }[] }) 
         >
           {t.heading}
         </h2>
-        <p className="text-[15px] leading-relaxed text-[#334155] md:text-[17px]">{t.lead}</p>
+        <p className="text-[15px] leading-relaxed text-strong md:text-[17px]">{t.lead}</p>
         <ul className="flex flex-col gap-3.5">
           {t.items.map((item, i) => (
             <li key={item.lead} className="flex items-start gap-3.5">
@@ -475,14 +475,14 @@ function SignUpPitch({ titles }: { titles: { slug: string; title: string }[] }) 
       {titles.length > 0 ? (
         <div
           aria-hidden="true"
-          className="hidden h-[220px] items-end gap-1.5 border-b-[6px] border-[#d9d4ca] px-5 lg:flex"
+          className="hidden h-[220px] items-end gap-1.5 border-b-[6px] border-chip-border px-5 lg:flex"
         >
           {titles.slice(0, SPINES.length).map((book, i) => (
             <span
               key={book.slug}
               className={`flex items-center justify-center overflow-hidden rounded-t-[2px] shadow-[inset_-3px_0_0_rgba(0,0,0,0.2)] ${SPINES[i]} ${generatedCoverClass(book.slug)}`}
             >
-              <span className="max-h-[88%] rotate-180 overflow-hidden font-serif text-[13px] whitespace-nowrap text-[#fdfaf3] [writing-mode:vertical-rl]">
+              <span className="max-h-[88%] rotate-180 overflow-hidden font-serif text-[13px] whitespace-nowrap text-cover-ink [writing-mode:vertical-rl]">
                 {book.title}
               </span>
             </span>

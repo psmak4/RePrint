@@ -57,17 +57,13 @@ export function barWidth(percent: number): string {
 
 function Bar({ percent, label, tone }: { percent: number; label: string; tone: string }) {
   return (
-    <span
-      role="img"
-      aria-label={label}
-      className="block h-2 overflow-hidden rounded-full bg-[#ece8e0]"
-    >
+    <span role="img" aria-label={label} className="block h-2 overflow-hidden rounded-full bg-track">
       <span className={cn('block h-full rounded-full', tone, barWidth(percent))} />
     </span>
   )
 }
 
-const metric = 'flex flex-col gap-3 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] px-4 py-3.5'
+const metric = 'flex flex-col gap-3 rounded-xl border border-border bg-surface-tint px-4 py-3.5'
 
 /** Source requests per second, search cache hit rate, breaker state, and queue depth (PRD §6). */
 export function SystemDashboard({ system }: { system: AdminSystem }) {

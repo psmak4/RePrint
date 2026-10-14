@@ -39,7 +39,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span role="img" aria-label={text.ratingOf(rating)} className="text-star">
       {'★'.repeat(rating)}
-      <span className="text-[#d6d3d1]">{'★'.repeat(5 - rating)}</span>
+      <span className="text-star-empty">{'★'.repeat(5 - rating)}</span>
     </span>
   )
 }
@@ -128,8 +128,8 @@ function ClaimNotice({ claim }: { claim: ClaimState }) {
       className={cn(
         'flex items-center gap-2.5 border-b px-5 py-3 text-sm font-medium md:px-6',
         claim.state === 'mine'
-          ? 'border-[#bfdbfe] bg-[#eff6ff] text-[#1e40af]'
-          : 'border-[#fed7aa] bg-[#fff7ed] text-[#9a3412]',
+          ? 'border-accent-edge bg-accent-tint text-link'
+          : 'border-warning-edge bg-warning-tint text-warning',
       )}
     >
       <AdminIcon name="clock" className="size-4" />
@@ -179,7 +179,7 @@ function ReviewDetail({
             ) : null}
           </div>
         </header>
-        <div className="flex items-center gap-3.5 rounded-xl bg-[#f7f5f0] px-4 py-3.5">
+        <div className="flex items-center gap-3.5 rounded-xl bg-surface-raised px-4 py-3.5">
           <InitialsAvatar name={reviewer.displayName} colorKey={reviewer.username} size="md" />
           <div className="flex min-w-0 flex-col gap-1.5">
             <p className="text-[15px] font-semibold break-words">
@@ -209,7 +209,7 @@ function ReviewDetail({
           <p className="font-serif text-[26px] leading-tight font-medium break-words">
             {item.headline ?? text.untitled}
           </p>
-          <div className="font-serif text-lg leading-[1.65] text-[#1e293b]">
+          <div className="font-serif text-lg leading-[1.65] text-foreground">
             <ReviewBody body={item.body} />
           </div>
         </section>
@@ -278,7 +278,7 @@ export function ReviewQueue({
           {selected ? (
             <ReviewDetail item={selected} claim={claim} nextHref={nextHref} />
           ) : prompt ? (
-            <p className="rounded-[18px] border border-dashed border-[#d9d4ca] p-6 text-muted-foreground">
+            <p className="rounded-[18px] border border-dashed border-chip-border p-6 text-muted-foreground">
               {prompt}
             </p>
           ) : null}

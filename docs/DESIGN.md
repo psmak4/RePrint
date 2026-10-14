@@ -77,7 +77,20 @@ Exposed as Tailwind v4 theme variables (`bg-background`, `text-muted-foreground`
 | `accent-hover` | `#1d4ed8` | Hover state of primary buttons (a solid colour: a translucent `accent` over a light ground fails contrast) |
 | `link` | `#1d4ed8` | Text links (underlined in running text) |
 | `danger` / `success` / `warning` | `#b91c1c` / `#166534` / `#a8500a` | Status text and icons; never colour alone, always with text or an icon |
-| `star` | `#a8500a` (same value as `warning`) | Filled stars and rating bars only. Empty stars and bar tracks use `#d6d3d1` / `#ece8e0` (decorative: a rating always shows its number too) |
+| `star` | `#a8500a` (same value as `warning`) | Filled stars and rating bars only (decorative: a rating always shows its number too) |
+| `strong` | `#334155` | Text that needs more weight than `muted-foreground`: inactive tabs and nav links, footer links, lead paragraphs |
+| `chip-border` | `#d9d4ca` | Chip and pill-link edges, quiet card edges that sit on the band |
+| `dashed-border` | `#a8a29e` | Dashed boxes: empty states, the spoiler box, the dashed "not on RePrint yet" cover |
+| `surface-tint` | `#fdfcfa` | Quiet insets on a white surface: table row hover, a card's footer strip |
+| `track` | `#ece8e0` | Rating bar tracks and count chips |
+| `star-empty` | `#d6d3d1` | Empty stars (decorative) |
+| `cover-ink` | `#fdfaf3` | Text on generated covers and the drawn shelf of spines |
+| `accent-tint` / `accent-edge` | `#eff6ff` / `#bfdbfe` | Blue badges, the pressed Helpful pill, selected rows, avatar placeholders |
+| `success-tint` / `success-edge` | `#ecfdf3` / `#a7f3d0` | Green badges, the trust badge, success notices |
+| `warning-tint` / `warning-edge` | `#fff7ed` / `#fed7aa` | Amber badges, the spoiler box, the verification banner |
+| `danger-tint` / `danger-edge` | `#fef2f2` / `#fecaca` | Red badges, error summaries, the danger button's hover |
+
+Pages use these tokens only. A raw hex colour in a class name fails the style guard (`apps/web/app/style-guard.test.ts`), except in the two decorative palettes: generated covers (`lib/cover-color.ts`) and initials avatars (`lib/avatar.ts`).
 
 `color-scheme: light`. Shadows are soft and navy-tinted (`rgba(15, 23, 42, …)`), used on raised cards, menus, and covers.
 
@@ -93,11 +106,12 @@ Every pair is checked on all four grounds: background / surface / surface-raised
 | danger | 6.2 / 6.5 / 5.7 / 5.7 | Text 4.5:1 |
 | success | 6.8 / 7.1 / 6.3 / 6.2 | Text 4.5:1 |
 | warning and star | 5.3 / 5.5 / 4.9 / 4.8 | Text 4.5:1 (so amber labels are safe too) |
+| strong | 9.9 / 10.4 / 9.2 / 9.0 | Text 4.5:1 |
 | accent (focus ring) | 5.0 / 5.2 / 4.6 / 4.5 | UI 3:1 |
 | input-border | 3.9 / 4.0 / 3.6 / 3.5 | UI 3:1 |
 | accent-foreground on accent / accent-hover | 5.2 / 6.7 | Text 4.5:1 |
 
-Amber (`star`) only ever means a rating or a featured label; it is never an action colour. Body copy that needs more weight than `muted-foreground` uses `#334155` (9.9:1 on background).
+Amber (`star`) only ever means a rating or a featured label; it is never an action colour. Body copy that needs more weight than `muted-foreground` uses `strong` (9.9:1 on background). Status text sits on its own tint (`danger` on `danger-tint`, and so on), and `foreground`, `strong`, and `muted-foreground` stay above 4.5:1 on every tint and on `track`.
 
 ### Image covers
 

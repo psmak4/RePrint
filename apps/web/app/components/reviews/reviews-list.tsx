@@ -78,7 +78,7 @@ function ReviewItem({
           {review.headline}
         </h3>
       ) : null}
-      <div className="text-[15px] leading-[1.65] text-[#1e293b] md:text-base md:leading-[1.7]">
+      <div className="text-[15px] leading-[1.65] text-foreground md:text-base md:leading-[1.7]">
         {review.hasSpoilers ? <SpoilerToggle>{body}</SpoilerToggle> : body}
       </div>
       <div className="flex flex-wrap items-center gap-4">
@@ -113,7 +113,7 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
                   to={reviewsHref(slug, query, { rating: stars, page: 1 })}
                   aria-current={active ? 'true' : undefined}
                   aria-label={stars ? text.starsOnly(stars) : undefined}
-                  className={`inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-[#d9d4ca] bg-surface text-[#1e293b] hover:border-input-border'}`}
+                  className={`inline-flex h-[34px] items-center rounded-full border px-3.5 text-sm font-medium ${active ? 'border-accent bg-accent text-accent-foreground' : 'border-chip-border bg-surface text-foreground hover:border-input-border'}`}
                 >
                   {stars
                     ? copy.redesign.bookPage.starChip(stars)

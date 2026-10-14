@@ -35,7 +35,7 @@ function FormatIcon({ format }: { format: EditionsCardItem['format'] }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-raised text-[#334155]"
+      className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-raised text-strong"
     >
       <svg
         aria-hidden="true"
@@ -99,7 +99,7 @@ export function EditionsCard({
                 'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm font-medium',
                 format === f
                   ? 'border-accent bg-accent text-accent-foreground'
-                  : 'border-[#d9d4ca] bg-surface text-[#1e293b] hover:border-input-border',
+                  : 'border-chip-border bg-surface text-foreground hover:border-input-border',
               )}
             >
               {f ? copy.books.page.formats[f] : text.allFormats}
@@ -128,7 +128,7 @@ export function EditionsCard({
                     .filter(Boolean)
                     .join(' · ')}
                   {edition.primary ? (
-                    <span className="ml-2 inline-flex h-[22px] items-center rounded-full bg-[#ece8e0] px-2 align-middle text-xs font-medium text-[#334155]">
+                    <span className="ml-2 inline-flex h-[22px] items-center rounded-full bg-track px-2 align-middle text-xs font-medium text-strong">
                       {text.primary}
                     </span>
                   ) : null}

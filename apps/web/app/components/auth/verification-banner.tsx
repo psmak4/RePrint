@@ -11,7 +11,7 @@ export function VerificationBanner({ verified }: { verified: boolean }) {
   return (
     <section
       aria-label={c.label}
-      className="border-b border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-sm text-[#1e293b]"
+      className="border-b border-warning-edge bg-warning-tint px-4 py-3 text-sm text-foreground"
     >
       <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-4 gap-y-2">
         <p>{c.message}</p>

@@ -9,7 +9,7 @@ export function FactsRow({ facts }: { facts: { label: string; value: string }[] 
       {facts.map((fact) => (
         <div
           key={fact.label}
-          className="flex flex-col gap-0.5 bg-surface px-3.5 py-3 last:odd:col-span-2 md:gap-1 md:border-l md:border-[#d9d4ca] md:bg-transparent md:px-6 md:py-0 md:first:border-l-0 md:first:pl-0"
+          className="flex flex-col gap-0.5 bg-surface px-3.5 py-3 last:odd:col-span-2 md:gap-1 md:border-l md:border-chip-border md:bg-transparent md:px-6 md:py-0 md:first:border-l-0 md:first:pl-0"
         >
           <dt className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase md:text-xs">
             {fact.label}
