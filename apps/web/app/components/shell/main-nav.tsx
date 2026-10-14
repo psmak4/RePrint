@@ -1,4 +1,5 @@
 import type { Viewer } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import { NavLink } from 'react-router'
 import { copy } from '../../copy/index.js'
 
@@ -39,7 +40,10 @@ export function MainNav({ viewer }: { viewer: Viewer | null }) {
       <details className="relative order-1 md:hidden">
         <summary
           aria-label={copy.shell.menuLabel}
-          className="flex size-11 cursor-pointer list-none items-center justify-center rounded-full hover:bg-surface-raised"
+          className={cn(
+            buttonVariants({ variant: 'ghost', size: 'icon' }),
+            'cursor-pointer list-none',
+          )}
         >
           <svg
             aria-hidden="true"

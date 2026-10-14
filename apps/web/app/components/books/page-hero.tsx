@@ -1,3 +1,4 @@
+import { buttonVariants } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
@@ -60,8 +61,7 @@ export function PagerLinks({
   next: { href: string; text: string } | null
   status: string
 }) {
-  const pill =
-    'inline-flex h-11 items-center rounded-full border border-input-border bg-surface px-5 text-sm font-semibold hover:bg-surface-raised'
+  const pill = buttonVariants({ variant: 'outline' })
   return (
     <nav aria-label={label} className="flex items-center justify-between gap-4">
       {previous ? (

@@ -33,6 +33,17 @@ function findAll(pattern: RegExp, files: Array<{ file: string; text: string }>):
   )
 }
 
+/** Every string literal's classes, with where it starts, for the rules that look at class lists. */
+function classLists(files: Array<{ file: string; text: string }>) {
+  return files.flatMap(({ file, text }) =>
+    // Quoted strings stay on one line, so an apostrophe in a comment cannot start one.
+    [...text.matchAll(/"[^"\n]*"|'[^'\n]*'|`[^`]*`/g)].map((match) => ({
+      where: `${file}:${text.slice(0, match.index).split('\n').length}`,
+      classes: match[0].slice(1, -1).split(/\s+/),
+    })),
+  )
+}
+
 describe('style guard', () => {
   const files = sourceFiles()
 
@@ -44,5 +55,22 @@ describe('style guard', () => {
   it('uses theme colours, not raw hex values, outside the decorative palettes', () => {
     const outsidePalettes = files.filter(({ file }) => !PALETTES.has(file))
     expect(findAll(/[a-z]+-\[#[0-9a-fA-F]{3,8}\]/g, outsidePalettes)).toEqual([])
+  })
+
+  it('draws pill actions only through Button or buttonVariants (D-214)', () => {
+    // A hand-built pill: fully rounded, with a button's hover fill or outline edge. Fields that
+    // happen to be pill-shaped (the header search box, Discover's hero field) style their own
+    // container with `focus-within:` and are not buttons.
+    const pill =
+      /^(hover:bg-surface-raised|hover:bg-accent-hover|hover:bg-surface|border-input-border)$/
+    const handBuilt = classLists(files.filter(({ file }) => !file.startsWith('packages/ui/')))
+      .filter(
+        ({ classes }) =>
+          classes.includes('rounded-full') &&
+          classes.some((name) => pill.test(name)) &&
+          !classes.some((name) => name.startsWith('focus-within:')),
+      )
+      .map(({ where }) => where)
+    expect(handBuilt).toEqual([])
   })
 })

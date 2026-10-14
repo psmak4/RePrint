@@ -1,5 +1,5 @@
 import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@reprint/shared'
-import { Select } from '@reprint/ui'
+import { buttonVariants, Select } from '@reprint/ui'
 import { useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -75,10 +75,7 @@ function SortForm({ username, view }: { username: string; view: LibraryView }) {
           ))}
         </Select>
       </label>
-      <button
-        type="submit"
-        className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
-      >
+      <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
         {text.apply}
       </button>
     </Form>
@@ -158,10 +155,7 @@ export function LibraryPage({
         {library.items.length === 0 ? (
           <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-dashed-border px-6 py-5">
             <p className="text-muted-foreground">{text.empty}</p>
-            <Link
-              to="/"
-              className="inline-flex h-11 items-center rounded-full bg-accent px-5 text-[15px] font-semibold text-accent-foreground hover:bg-accent-hover"
-            >
+            <Link to="/" className={buttonVariants()}>
               {text.discoverPrompt}
             </Link>
           </div>

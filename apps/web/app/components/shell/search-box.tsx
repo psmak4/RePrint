@@ -1,4 +1,5 @@
 import { SEARCH_MIN_LENGTH, SEARCH_QUERY_MAX_LENGTH } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import { type KeyboardEvent, useEffect, useId, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -121,7 +122,10 @@ export function SearchBox({ suggest = fetchSuggestions }: { suggest?: Suggest })
       <button
         type="submit"
         aria-label={c.submit}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-surface-raised hover:text-foreground"
+        className={cn(
+          buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
+          'text-muted-foreground hover:text-foreground',
+        )}
       >
         <svg
           aria-hidden="true"
