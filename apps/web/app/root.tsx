@@ -22,6 +22,7 @@ import { MainNav } from './components/shell/main-nav.js'
 import { NotificationBell } from './components/shell/notification-bell.js'
 import { SearchBox } from './components/shell/search-box.js'
 import { analyticsConfig } from './lib/analytics.js'
+import { OPEN_LIBRARY_COVER_ORIGIN } from './lib/cover-url.js'
 import { logger } from './lib/logger.server.js'
 import { clientNonce } from './lib/nonce.js'
 import { loadNotifications } from './lib/notifications.server.js'
@@ -30,14 +31,17 @@ import { hasSessionCookie, sessionMiddleware, viewerSession } from './lib/sessio
 import './app.css'
 
 // Preload the two above-the-fold font files (D-180); the browser needs `crossOrigin` for font fetches.
-export const links: Route.LinksFunction = () =>
-  [newsreaderUrl, instrumentSansUrl].map((href) => ({
+// Covers come from Open Library's image host, so the connection to it opens early (M10-T12).
+export const links: Route.LinksFunction = () => [
+  ...[newsreaderUrl, instrumentSansUrl].map((href) => ({
     rel: 'preload',
     href,
     as: 'font',
     type: 'font/woff2',
-    crossOrigin: 'anonymous',
-  }))
+    crossOrigin: 'anonymous' as const,
+  })),
+  { rel: 'preconnect', href: OPEN_LIBRARY_COVER_ORIGIN },
+]
 
 export const middleware = [createRequestLogMiddleware(logger), sessionMiddleware]
 
