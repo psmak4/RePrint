@@ -62,3 +62,57 @@ Record the results below.
 First recorded run (local, 2026-10-02): LCP 516 ms, CLS 0, INP 40 ms.
 
 If it fails: LCP usually means a bigger bundle or an uncached API call in the Book loader; CLS means an image or banner without reserved space; INP means a slow handler in the search combobox.
+
+## Page-view cost (M10)
+
+M10 cut what the busiest pages cost to serve and download. These are the before and after figures, and how to take them again.
+
+### How it is measured
+
+Give the stack a database and a Redis of its own, so other traffic does not land in the counts:
+
+```
+docker compose exec -T postgres sh -c 'pg_dump -U reprint -Fc reprint > /tmp/p.dump && createdb -U reprint reprint_perf && pg_restore -U reprint -d reprint_perf --no-owner /tmp/p.dump; rm /tmp/p.dump'
+docker compose exec -T postgres psql -U reprint -d postgres -c "alter database reprint_perf set log_statement = 'all'"
+docker run -d --rm --name reprint-perf-redis -p 6390:6379 redis:7
+```
+
+Then run the built API against them (`DATABASE_URL=…/reprint_perf`, `REDIS_URL=redis://localhost:6390`, `TRUST_PROXY=true`, `PORT=3998`), the counting proxy in front of it (`PORT=3999 API_URL=http://localhost:3998 node apps/web/scripts/perf/count-api-requests.mjs`), and the built web app pointed at the proxy (`API_INTERNAL_URL=http://localhost:3999`, `PORT=5199`). Measure a page as a Visitor, and as a Member with `--cookie "rp_session=<token>"` (a session row you add to the copy):
+
+```
+WEB_URL=http://localhost:5199 REDIS_CONTAINER=reprint-perf-redis PROXY_URL=http://localhost:3999 \
+  node apps/web/scripts/perf/measure-page-view.mjs /books/<slug> --runs 5
+```
+
+It prints the API requests the web server made, the SQL statements Postgres logged, the Redis commands, and the fastest time, each the smallest of the runs. Statements come from the statement log, not `pg_stat_database`: since Postgres 15 a connection reports its counters only every few seconds, so short windows undercount. `node apps/web/scripts/perf/search-timing.mjs` (with `API_URL`) times suggestions and a Genre-filtered search. `pnpm bundle:check` prints each main page's JavaScript. Afterwards: `dropdb reprint_perf` and `docker stop reprint-perf-redis`.
+
+### Results (2026-10-14)
+
+Taken on a copy of the owner's local database (853 Books, 194 Authors), before M10 (`2c7931d`) and after it, with the same setup and the same Book (`a-harbor-for-ashford-a6bf8d`, which has an Author, a Series, and Genres). Each cell is API requests / SQL statements / Redis commands for one page view, the smallest of 5 runs.
+
+| Page | Visitor before | Visitor after | Member before | Member after |
+| --- | --- | --- | --- | --- |
+| Discover | 3 / 0 / 10 | 2 / 0 / 7 | 6 / 22 / 1 | 5 / 15 / 1 |
+| Book | 8 / 28 / 32 | 5 / 24 / 16 | 11 / 59 / 8 | 8 / 40 / 1 |
+| Author | 2 / 7 / 6 | 2 / 7 / 6 | 3 / 16 / 0 | 3 / 13 / 0 |
+| Search (`q=dune`) | 4 / 7 / 14 | 4 / 13 / 14 | 5 / 21 / 2 | 5 / 22 / 2 |
+
+- The Book page asks the API for everything in one round (it took three, with the root loader's two beside them), and asks for the session once. On localhost a round costs well under a millisecond, so page times differ by no more than run-to-run noise there; in production each round crosses from the web host to the API host.
+- Discover's Visitor view reads only Redis (its rows are cached). Most Redis commands are the per-IP read limit, one per API request a Visitor's page makes.
+- Search runs a few more statements: each search sets its trigram thresholds in its own transaction (begin, `set_config`, commit; D-206). In exchange it uses its indexes:
+
+| API time (median of 7, mean over 8 queries) | 853 Books before | after | 50,853 Books before | after |
+| --- | --- | --- | --- | --- |
+| Suggestions (`/v1/search/suggest`) | 7.5 ms | 5.6 ms | 336 ms | 28 ms |
+| Catalog search with a Genre filter | 6.3 ms | 5.2 ms | 6.7 ms | 14.8 ms |
+
+The 50,853-Book copy adds 50,000 generated Books and 10,000 generated Authors to the same data. Before M10 every suggestion scanned all of them; after, the indexes serve it. A search with a selective filter is slower there (the matches are gathered before the filter applies), still far inside the 300 ms target.
+
+| JavaScript (gzip, entry + root + route) | Before | After |
+| --- | --- | --- |
+| Discover | 198 KB | 161 KB |
+| Book | 251 KB | 167 KB |
+| Search | 187 KB | 150 KB |
+| Log in | 192 KB | 180 KB |
+
+The JavaScript every page loads no longer holds Zod or the admin, legal, and settings copy (a 45 KB gzip chunk before); Discover, Book, and search load no Zod at all (forms load it when opened); and the Book, Author, and Series pages no longer load a Markdown parser (35 KB gzip). `pnpm bundle:check` keeps all three that way. Elsewhere: a signed-in API request reads its session in 1 query, not 2 (`session.integration.test.ts`); storing a Book with 50 Editions takes 31 statements, not 325 (`ingest.integration.test.ts`).
