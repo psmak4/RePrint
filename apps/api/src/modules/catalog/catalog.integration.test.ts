@@ -2,6 +2,8 @@ import {
   authors,
   books,
   contributions,
+  covers,
+  type Database,
   editions,
   series,
   sourceLinks,
@@ -16,6 +18,7 @@ import {
   problemDetailsSchema,
 } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
@@ -24,6 +27,7 @@ import { purgeSourceRecords, refreshBook, STALE_AFTER_MS } from '../../catalog/r
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
 import { loadEnv } from '../../config/env.js'
 import { startTestStack, type TestStack } from '../../testing/stack.js'
+import { findBookBySlug, loadAuthorDetail, loadBookDetail, loadBookSummaries } from './read.js'
 
 const stub = createStubSource()
 const queued: { name: string; payload: unknown; options: unknown }[] = []
@@ -281,6 +285,75 @@ describe('GET /v1/books/:slug', () => {
         await failing.close()
       }
     })
+  })
+})
+
+describe('Book reads (M10-T09)', () => {
+  /** The same database through a client that records the SQL of each statement. */
+  function recording() {
+    const queries: string[] = []
+    const db = drizzle(stack.db.sql, {
+      logger: { logQuery: (query) => queries.push(query) },
+    }) as unknown as Database
+    return { db, queries }
+  }
+  const HEAVY_COLUMNS = ['"search_vector"', '"field_origins"', '"locked_fields"']
+
+  it('reads Book cards and Author pages without the heavy columns or the description', async () => {
+    const { bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
+    const [author] = await stack.db.db
+      .select()
+      .from(authors)
+      .where(eq(authors.name, 'Frank Herbert'))
+    if (!author) throw new Error('author missing')
+    const { db, queries } = recording()
+    const [card] = await loadBookSummaries(db, [bookId])
+    const page = await loadAuthorDetail(db, author)
+    expect(card?.title).toBe('Dune')
+    expect(page.works[0]?.books[0]?.title).toBe('Dune')
+    const bookQueries = queries.filter((query) => query.includes('from "books"'))
+    expect(bookQueries.length).toBeGreaterThan(0)
+    for (const query of bookQueries) {
+      for (const column of [...HEAVY_COLUMNS, '"description"']) expect(query).not.toContain(column)
+    }
+  })
+
+  it('reads a Book page with an Edition count and only its Primary Edition', async () => {
+    const { slug } = await ingest('stub-book-dune', 'stub-author-herbert')
+    const { db, queries } = recording()
+    const book = await findBookBySlug(db, slug)
+    if (!book) throw new Error('book missing')
+    await loadBookDetail(db, book)
+    for (const query of queries.filter((q) => q.includes('from "books"'))) {
+      for (const column of HEAVY_COLUMNS) expect(query).not.toContain(column)
+    }
+    const editionQueries = queries.filter((query) => query.includes('from "editions"'))
+    expect(editionQueries).toHaveLength(2)
+    expect(editionQueries.some((query) => query.includes('count('))).toBe(true)
+    expect(editionQueries.some((query) => query.includes('"editions"."id" = $'))).toBe(true)
+  })
+
+  it('counts every Edition and falls back to the Primary Edition’s Cover', async () => {
+    const { slug, bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
+    const [cover] = await stack.db.db
+      .insert(covers)
+      .values({ origin: 'open_library', originRef: '424242', width: 300, height: 450 })
+      .returning()
+    const [book] = await stack.db.db.select().from(books).where(eq(books.id, bookId))
+    if (!cover || !book?.primaryEditionId) throw new Error('fixture missing')
+    await stack.db.db.update(books).set({ coverId: null }).where(eq(books.id, bookId))
+    await stack.db.db
+      .update(editions)
+      .set({ coverId: cover.id })
+      .where(eq(editions.id, book.primaryEditionId))
+    const stored = await stack.db.db.select().from(editions).where(eq(editions.bookId, bookId))
+    const body = bookDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/books/${slug}` })).json(),
+    )
+    expect(body.editionCount).toBe(stored.length)
+    expect(body.primaryEdition?.id).toBe(book.primaryEditionId)
+    expect(body.primaryEdition?.cover?.originRef).toBe('424242')
+    expect(body.cover?.originRef).toBe('424242')
   })
 })
 
