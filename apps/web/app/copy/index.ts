@@ -38,6 +38,13 @@ export const copy = {
     register: 'Create account',
     logOut: 'Log out',
     accountMenuLabel: 'Account menu',
+    // The account menu's links (D-214).
+    account: {
+      profile: 'Your profile',
+      library: 'Your library',
+      settings: 'Settings',
+      admin: 'Admin',
+    },
     notifications: {
       label: 'Notifications',
       unreadLabel: (count: number) => `Notifications, ${count} unread`,
