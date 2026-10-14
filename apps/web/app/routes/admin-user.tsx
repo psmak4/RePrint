@@ -25,8 +25,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** One user with what the viewer may do to them (PRD §7.11). Moderators get the limited view (D-044). */
-export async function loader({ request, params }: Route.LoaderArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.usersView)
+export async function loader({ request, params, context }: Route.LoaderArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.usersView)
   let response: Response
   try {
     response = await apiClientFor(request).get(`/v1/admin/users/${encodeURIComponent(params.id)}`)
@@ -67,8 +67,8 @@ const userActionSchema = z.discriminatedUnion('intent', [
 ])
 
 /** Each action is one permission-checked, audited API call; the buttons are hidden without the permission. */
-export async function action({ request, params }: Route.ActionArgs) {
-  const viewer = await requireViewerPermission(request, PERMISSIONS.usersView)
+export async function action({ request, params, context }: Route.ActionArgs) {
+  const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.usersView)
   const parsed = userActionSchema.safeParse(await request.json().catch(() => null))
   const fallback = copy.admin.users.actions.failed
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })

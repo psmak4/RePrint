@@ -2,16 +2,17 @@ import { APP_NAME, registerRequestSchema } from '@reprint/shared'
 import { redirect } from 'react-router'
 import { RegisterPage } from '../components/auth/register-page.js'
 import { copy } from '../copy/index.js'
-import { failed, forwardCookies, loadSession, postToApi } from '../lib/auth.server.js'
+import { failed, forwardCookies, postToApi } from '../lib/auth.server.js'
 import { pageMeta } from '../lib/seo.js'
+import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/register'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.register.title}`, noindex: true })
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await loadSession(request)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const session = await viewerSession({ request, context })
   if (session.viewer) throw redirect('/')
   return { signupsOpen: session.signupsOpen }
 }
