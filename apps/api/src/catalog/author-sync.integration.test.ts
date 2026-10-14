@@ -181,19 +181,27 @@ describe('authorDueForSync', () => {
 describe('queueing', () => {
   it('queues one sync per Author and one import per Book, deduplicated, in the background', async () => {
     const enqueue = vi.fn(async () => '1')
+    const enqueueMany = vi.fn(async () => ['1', '2'])
     await queueAuthorSync({ enqueue }, 'a1')
-    await queueAuthorBookImports({ enqueue }, [{ authorId: 'a1', sourceId: 'b1' }])
-    expect(enqueue).toHaveBeenNthCalledWith(
-      1,
+    await queueAuthorBookImports({ enqueueMany }, [
+      { authorId: 'a1', sourceId: 'b1' },
+      { authorId: 'a1', sourceId: 'b2' },
+    ])
+    expect(enqueue).toHaveBeenCalledExactlyOnceWith(
       'catalog.author-sync',
       { authorId: 'a1' },
       { deduplicationId: 'catalog.author-sync-a1', priority: 10 },
     )
-    expect(enqueue).toHaveBeenNthCalledWith(
-      2,
-      'catalog.author-book',
-      { authorId: 'a1', sourceId: 'b1' },
-      { deduplicationId: 'catalog.author-book-a1-b1', priority: 10 },
-    )
+    // Every missing Book goes out in one bulk add (M10-T11).
+    expect(enqueueMany).toHaveBeenCalledExactlyOnceWith('catalog.author-book', [
+      {
+        payload: { authorId: 'a1', sourceId: 'b1' },
+        options: { deduplicationId: 'catalog.author-book-a1-b1', priority: 10 },
+      },
+      {
+        payload: { authorId: 'a1', sourceId: 'b2' },
+        options: { deduplicationId: 'catalog.author-book-a1-b2', priority: 10 },
+      },
+    ])
   })
 })

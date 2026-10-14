@@ -134,15 +134,22 @@ export async function queueAuthorSync(
   )
 }
 
-/** Queues one background import per missing Book, each retried on its own (D-203). */
+/**
+ * Queues one background import per missing Book, each retried on its own (D-203), in one bulk
+ * call: a prolific Author can have hundreds (M10-T11).
+ */
 export async function queueAuthorBookImports(
-  jobs: Pick<JobQueue, 'enqueue'>,
+  jobs: Pick<JobQueue, 'enqueueMany'>,
   missing: readonly AuthorBookImport[],
 ): Promise<void> {
-  for (const book of missing) {
-    await jobs.enqueue('catalog.author-book', book, {
-      deduplicationId: `catalog.author-book-${book.authorId}-${book.sourceId}`,
-      priority: AUTHOR_SYNC_PRIORITY,
-    })
-  }
+  await jobs.enqueueMany(
+    'catalog.author-book',
+    missing.map((book) => ({
+      payload: book,
+      options: {
+        deduplicationId: `catalog.author-book-${book.authorId}-${book.sourceId}`,
+        priority: AUTHOR_SYNC_PRIORITY,
+      },
+    })),
+  )
 }

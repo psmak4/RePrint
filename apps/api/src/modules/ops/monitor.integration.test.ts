@@ -122,6 +122,7 @@ describe('system.monitor job', () => {
         catalog: undefined as never,
         queue,
         enqueue: undefined as never,
+        enqueueMany: undefined as never,
         sourceRps: 2,
         alert: (alert) => reported.push(alert),
       },
