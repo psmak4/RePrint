@@ -5,7 +5,9 @@ import {
   bookSubjects,
   books,
   contributions,
+  covers,
   createDb,
+  type Database,
   editions,
   genres,
   mergeCandidates,
@@ -17,6 +19,7 @@ import {
 import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
 import type { BookCandidate } from '@reprint/shared'
 import { and, count, eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createStubSource } from '../sources/stub/stub-adapter.js'
 import type { SourceAdapter } from '../sources/types.js'
@@ -54,6 +57,114 @@ async function rowCounts() {
   }
   return result
 }
+
+/** A valid ISBN-13 for `n`: 978, nine digits, and the check digit. */
+function isbn13(n: number): string {
+  const body = `978${String(n).padStart(9, '0')}`
+  const sum = [...body].reduce((total, digit, i) => total + Number(digit) * (i % 2 ? 3 : 1), 0)
+  return `${body}${(10 - (sum % 10)) % 10}`
+}
+
+/** Dune with `n` Editions, each with its own ISBN, Source link, and Cover. */
+async function withEditions(n: number): Promise<BookCandidate> {
+  const base = await stubCandidate('stub-book-dune')
+  const [first] = base.editions
+  if (!first) throw new Error('Dune has no Edition')
+  return {
+    ...base,
+    editions: Array.from({ length: n }, (_, i) => ({
+      ...first,
+      isbn13: isbn13(i + 1),
+      cover: {
+        origin: 'open_library' as const,
+        originRef: String(9000 + i),
+        width: null,
+        height: null,
+        url: null,
+      },
+      sourceLink: { source: 'stub', entityType: 'edition' as const, sourceId: `stub-edition-${i}` },
+    })),
+  }
+}
+
+/** The statements one ingest sends, through a client that records each one. */
+async function statementsFor(candidate: BookCandidate): Promise<number> {
+  const statements: string[] = []
+  const recording = drizzle(database.sql, {
+    logger: { logQuery: (query) => statements.push(query) },
+  }) as unknown as Database
+  await ingestBook(recording, { source: stub, candidate })
+  return statements.length
+}
+
+describe('ingestBook Edition batching (M10-T10)', () => {
+  it('stores a 50-Edition Book in as many statements as a 5-Edition one', async () => {
+    const five = await statementsFor(await withEditions(5))
+    await truncateAllTables(database.sql)
+    const fifty = await statementsFor(await withEditions(50))
+    expect(fifty).toBe(five)
+    expect(await db.select().from(editions)).toHaveLength(50)
+    // The Editions' Covers, besides the Book's own.
+    const editionCovers = (await db.select().from(covers)).filter(
+      (cover) => Number(cover.originRef) >= 9000,
+    )
+    expect(editionCovers).toHaveLength(50)
+    expect(
+      await db.select().from(sourceLinks).where(eq(sourceLinks.entityType, 'edition')),
+    ).toHaveLength(50)
+  })
+
+  it('matches Editions within one candidate as the one-by-one writes did', async () => {
+    const base = await stubCandidate('stub-book-dune')
+    const [first] = base.editions
+    if (!first) throw new Error('Dune has no Edition')
+    const cover = {
+      origin: 'open_library' as const,
+      originRef: '777',
+      width: null,
+      height: null,
+      url: null,
+    }
+    const plain = { ...first, isbn13: null, sourceLink: undefined, cover: null }
+    const candidate: BookCandidate = {
+      ...base,
+      editions: [
+        // One ISBN under two Source links, with one Cover: one Edition, one Cover, two links.
+        {
+          ...first,
+          isbn13: isbn13(7),
+          cover,
+          sourceLink: { source: 'stub', entityType: 'edition', sourceId: 'a' },
+        },
+        {
+          ...first,
+          isbn13: isbn13(7),
+          cover,
+          sourceLink: { source: 'stub', entityType: 'edition', sourceId: 'b' },
+        },
+        // Two Editions nothing identifies, saying the same thing: one Edition.
+        { ...plain, format: 'paperback', language: 'en', pageCount: 412 },
+        { ...plain, format: 'paperback', language: 'en', pageCount: 412 },
+        // Saying something else: its own Edition.
+        { ...plain, format: 'hardcover', language: 'en', pageCount: 412 },
+      ],
+    }
+    const { bookId } = await ingestBook(db, { source: stub, candidate })
+    const stored = await db.select().from(editions).where(eq(editions.bookId, bookId))
+    expect(stored).toHaveLength(3)
+    expect(await db.select().from(covers).where(eq(covers.originRef, '777'))).toHaveLength(1)
+    const withIsbn = stored.find((edition) => edition.isbn13 === isbn13(7))
+    const links = await db.select().from(sourceLinks).where(eq(sourceLinks.entityType, 'edition'))
+    expect(links.map((link) => [link.sourceId, link.entityId]).sort()).toEqual([
+      ['a', withIsbn?.id],
+      ['b', withIsbn?.id],
+    ])
+    // Ingesting it again changes nothing.
+    const before = await rowCounts()
+    await ingestBook(db, { source: stub, candidate })
+    expect(await rowCounts()).toEqual(before)
+  })
+})
 
 describe('ingestBook', () => {
   it('stores a Book with its Editions, Authors, Subjects, and Source links', async () => {
