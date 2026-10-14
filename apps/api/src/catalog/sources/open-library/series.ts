@@ -32,10 +32,14 @@ export function seriesOfDoc(doc: {
   })
 }
 
-/** The search for a Series' members, `SERIES_PAGE_SIZE` a page; `page` starts at 1. */
+/**
+ * The search for a Series' members, `SERIES_PAGE_SIZE` a page; `page` starts at 1. It asks only for the
+ * fields the adapter reads from a member.
+ */
 export function seriesMembersPath(seriesId: string, page: number): string {
   const params = new URLSearchParams({
     q: `series_key:${seriesId}`,
+    fields: 'key,title,series_key,series_name,series_position',
     limit: String(SERIES_PAGE_SIZE),
   })
   if (page > 1) params.set('page', String(page))

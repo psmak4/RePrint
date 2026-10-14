@@ -16,7 +16,7 @@ import {
   toFullBook,
   workSchema,
 } from './record.js'
-import { SOURCE_NAME, searchResponseSchema, toBookCandidate } from './search.js'
+import { SEARCH_FIELDS, SOURCE_NAME, searchResponseSchema, toBookCandidate } from './search.js'
 import { SERIES_PAGE_SIZE, seriesMembersPath, toPosition } from './series.js'
 
 export const OPEN_LIBRARY_URL = 'https://openlibrary.org'
@@ -32,11 +32,15 @@ export interface OpenLibraryOptions {
   onInvalid?: (message: string, context: Record<string, unknown>) => void
 }
 
-/** The request path for a search: `q`, then `limit`, then `page` from the second page on. */
+/**
+ * The request path for a search: `q`, then the fields the adapter reads, then `limit`, then `page`
+ * from the second page on.
+ */
 export function searchPath(query: string, page: number): string {
   const params = new URLSearchParams()
   const isbn13 = toIsbn13(query.replace(/[\s-]/g, ''))
   params.set('q', isbn13 ? `isbn:${isbn13}` : query.trim())
+  params.set('fields', SEARCH_FIELDS.join(','))
   params.set('limit', String(SEARCH_PAGE_SIZE))
   if (page > 1) params.set('page', String(page))
   return `/search.json?${params.toString()}`
