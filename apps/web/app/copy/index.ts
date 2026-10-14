@@ -439,6 +439,7 @@ export const copy = {
       write: 'Write a review',
       edit: 'Edit your review',
       editHeading: 'Edit your review',
+      opening: 'Opening the editor…',
       cancel: 'Cancel',
       delete: 'Delete review',
       deleting: 'Deleting…',

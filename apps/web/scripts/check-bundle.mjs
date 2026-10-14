@@ -65,6 +65,14 @@ for (const file of everyPage) {
   }
 }
 
+// Discover, Book, and search load Zod only with a write or a form a Member opens (M10-T14).
+for (const id of ['routes/home', 'routes/book', 'routes/search']) {
+  for (const file of filesFor(id)) {
+    const hit = forbidden[0].markers.find((marker) => read(file).includes(marker))
+    if (hit) problems.push(`${id} loads ${file}, which contains Zod ("${hit}")`)
+  }
+}
+
 const pages = {
   Discover: 'routes/home',
   Book: 'routes/book',
@@ -85,5 +93,5 @@ if (problems.length > 0) {
   process.exit(1)
 }
 console.log(
-  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads',
+  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads, and no Zod on Discover, Book, or search',
 )
