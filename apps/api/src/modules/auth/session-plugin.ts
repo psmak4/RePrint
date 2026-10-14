@@ -1,6 +1,6 @@
 import type { Database } from '@reprint/db'
 import { permissions, rolePermissions, sessions, userRoles, users } from '@reprint/db'
-import { and, eq, gt } from 'drizzle-orm'
+import { and, eq, gt, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import type { Env } from '../../config/env.js'
 import { SESSION_COOKIE, sessionCookieOptions } from './session-cookie.js'
@@ -72,6 +72,7 @@ export function registerSessions(app: FastifyInstance, env: Env, db: Database | 
     const token = request.cookies[SESSION_COOKIE]
     if (!token) return
     const now = new Date()
+    // One query: the session, its Member, and their permission names (M10-T04).
     const [found] = await db
       .select({
         sessionId: sessions.id,
@@ -82,6 +83,11 @@ export function registerSessions(app: FastifyInstance, env: Env, db: Database | 
         displayName: users.displayName,
         emailVerifiedAt: users.emailVerifiedAt,
         status: users.status,
+        permissions: sql<string[]>`array(
+          select distinct ${permissions.name} from ${userRoles}
+          join ${rolePermissions} on ${rolePermissions.roleId} = ${userRoles.roleId}
+          join ${permissions} on ${permissions.id} = ${rolePermissions.permissionId}
+          where ${userRoles.userId} = ${users.id})`,
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
@@ -108,13 +114,6 @@ export function registerSessions(app: FastifyInstance, env: Env, db: Database | 
       reply.setCookie(SESSION_COOKIE, token, cookieOptions)
     }
 
-    const granted = await db
-      .selectDistinct({ name: permissions.name })
-      .from(userRoles)
-      .innerJoin(rolePermissions, eq(rolePermissions.roleId, userRoles.roleId))
-      .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
-      .where(eq(userRoles.userId, row.userId))
-
     request.auth = {
       sessionId: row.sessionId,
       user: {
@@ -124,7 +123,7 @@ export function registerSessions(app: FastifyInstance, env: Env, db: Database | 
         displayName: row.displayName,
         emailVerifiedAt: row.emailVerifiedAt,
       },
-      permissions: new Set(granted.map((permission) => permission.name)),
+      permissions: new Set(row.permissions),
     }
   })
 }
