@@ -169,6 +169,20 @@
       "when": 1791953587881,
       "tag": "0023_handy_quentin_quire",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791956334719,
+      "tag": "0024_search_fold",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791956357572,
+      "tag": "0025_search_indexes",
+      "breakpoints": true
     }
   ]
 }

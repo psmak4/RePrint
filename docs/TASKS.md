@@ -661,7 +661,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 
 ## M10 · Performance
 
-- [ ] M10-T01 · Catalog search and suggestions use their indexes · deps: M9-T20 · PRD: §6, §9, §11
+- [x] M10-T01 · Catalog search and suggestions use their indexes · deps: M9-T20 · PRD: §6, §9, §11
   - Accept: a migration adds an immutable `unaccent` wrapper and GIN trigram indexes on the normalized Book title, Author name and other names, and Series name; `searchCatalogBooks` and `searchCatalogAuthors` match through index-supported operators, and the Book query gathers candidate IDs per kind of match so each can use its index
   - Accept: an integration test reads the `EXPLAIN` plans of a Book search, an Author search, and a suggestion with `enable_seqscan = off` and finds the new indexes and `books_search_vector_idx`, with no sequential scan of `books`, `authors`, or `series`
   - Accept: the thresholds stay 0.3 (title similarity) and 0.45 (name word similarity) without a session-level `SET`, so it works on Neon's pooled connections; every existing search, suggestion, and admin Book search test passes unchanged
