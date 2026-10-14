@@ -1,11 +1,17 @@
-import { books } from '@reprint/db'
+import { authors, books } from '@reprint/db'
 import { type BookCandidate, searchSuggestResponseSchema } from '@reprint/shared'
-import { eq } from 'drizzle-orm'
+import { eq, type SQL, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
 import { ingestBook } from '../../catalog/ingest/ingest.js'
-import { searchCatalogAuthors, searchCatalogBooks } from '../../catalog/search/catalog-search.js'
+import {
+  authorSearchQuery,
+  bookSearchQuery,
+  searchCatalogAuthors,
+  searchCatalogBooks,
+  withSearchThresholds,
+} from '../../catalog/search/catalog-search.js'
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
 import type { SourceAdapter } from '../../catalog/sources/types.js'
 import { loadEnv } from '../../config/env.js'
@@ -242,6 +248,120 @@ describe('Catalog search', () => {
     expect((await names('victor hugo')).authors).toEqual(['Victor Hugo'])
     expect((await names('frank hebert')).authors).toEqual(['Frank Herbert'])
     expect((await names('100%')).count).toBe(0)
+  })
+
+  it('finds an Author by another name they use, without accents', async () => {
+    await seedShelf()
+    await stack.db.db
+      .update(authors)
+      .set({ alternateNames: ['Victor Marie Hugó'] })
+      .where(eq(authors.name, 'Victor Hugo'))
+    const hits = await searchCatalogAuthors(stack.db.db, { q: 'marie hugo', limit: 5 })
+    const [hugo] = await stack.db.db
+      .select({ id: authors.id })
+      .from(authors)
+      .where(eq(authors.name, 'Victor Hugo'))
+    expect(hits.map((hit) => hit.id)).toEqual([hugo?.id])
+  })
+})
+
+/** Every scan in an `EXPLAIN (format json)` plan: its table, its index, and its index condition. */
+interface Scan {
+  nodeType: string
+  relation?: string
+  index?: string
+  indexCond?: string
+}
+
+function scansOf(node: Record<string, unknown>): Scan[] {
+  const nodeType = String(node['Node Type'])
+  const own: Scan[] = nodeType.endsWith('Scan')
+    ? [
+        {
+          nodeType,
+          relation: node['Relation Name'] as string | undefined,
+          index: node['Index Name'] as string | undefined,
+          indexCond: node['Index Cond'] as string | undefined,
+        },
+      ]
+    : []
+  const children = (node.Plans as Record<string, unknown>[] | undefined) ?? []
+  return [...own, ...children.flatMap(scansOf)]
+}
+
+/** The scans Postgres plans for `query` when it must use an index wherever one fits. */
+async function planScans(query: SQL | null): Promise<Scan[]> {
+  if (!query) throw new Error('expected a searchable query')
+  const [row] = await withSearchThresholds(stack.db.db, async (tx) => {
+    await tx.execute(sql`set local enable_seqscan = off`)
+    return tx.execute<{ 'QUERY PLAN': [{ Plan: Record<string, unknown> }] }>(
+      sql`explain (format json) ${query}`,
+    )
+  })
+  const plan = row?.['QUERY PLAN'][0]?.Plan
+  if (!plan) throw new Error('no plan')
+  return scansOf(plan)
+}
+
+const SEARCHED_TABLES = ['books', 'authors', 'series']
+
+/**
+ * No scan reads a whole searched table: no sequential scan, and no index scan without a condition
+ * (walking the primary key is a full scan too). A bitmap heap scan reads only what its index scans
+ * found, and those always carry a condition.
+ */
+function expectNoFullScans(scans: Scan[]) {
+  const full = scans.filter(
+    (scan) =>
+      scan.relation !== undefined &&
+      SEARCHED_TABLES.includes(scan.relation) &&
+      (scan.nodeType === 'Seq Scan' ||
+        (scan.nodeType.startsWith('Index') && scan.indexCond === undefined)),
+  )
+  expect(full).toEqual([])
+}
+
+describe('Catalog search plans (M10-T01)', () => {
+  it('serves a Book search from the search vector and the folded-name trigram indexes', async () => {
+    await seedShelf()
+    const scans = await planScans(bookSearchQuery({ q: 'tolkien hobbit', limit: 20 }))
+    expectNoFullScans(scans)
+    const indexes = scans.map((scan) => scan.index)
+    for (const name of [
+      'books_search_vector_idx',
+      'books_title_search_idx',
+      'authors_name_search_idx',
+      'series_name_search_idx',
+    ]) {
+      expect(indexes).toContain(name)
+    }
+  })
+
+  it('keeps a filtered, sorted Book search on the same indexes', async () => {
+    await seedShelf()
+    const scans = await planScans(
+      bookSearchQuery({
+        q: 'darkness',
+        limit: 21,
+        offset: 20,
+        filters: { language: 'en', decade: 1960, minRating: 3 },
+        sort: 'highest_rated',
+      }),
+    )
+    expectNoFullScans(scans)
+    expect(scans.map((scan) => scan.index)).toContain('books_title_search_idx')
+  })
+
+  it('serves an Author search and a suggestion from the name and other-name indexes', async () => {
+    await seedShelf()
+    for (const limit of [20, 3]) {
+      const scans = await planScans(authorSearchQuery({ q: 'le guin', limit }))
+      expectNoFullScans(scans)
+      const indexes = scans.map((scan) => scan.index)
+      expect(indexes).toContain('authors_name_search_idx')
+      expect(indexes).toContain('authors_alternate_names_search_idx')
+    }
+    expectNoFullScans(await planScans(bookSearchQuery({ q: 'le guin', limit: 5 })))
   })
 })
 
