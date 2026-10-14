@@ -1,3 +1,4 @@
+import { buttonVariants, cn } from '@reprint/ui'
 import type { ReactNode } from 'react'
 
 /**
@@ -44,10 +45,7 @@ export function AuthCard({
 /** A full-width pill link for the one next step on a result card. */
 export function AuthNextLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
-      className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-accent px-5 text-[15px] font-semibold text-accent-foreground hover:bg-accent-hover"
-    >
+    <a href={href} className={cn(buttonVariants(), 'mt-6 w-full')}>
       {children}
     </a>
   )

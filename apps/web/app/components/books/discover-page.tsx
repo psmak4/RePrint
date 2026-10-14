@@ -5,6 +5,7 @@ import type {
   MostReviewedItem,
   Viewer,
 } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -216,7 +217,8 @@ function Hero({ discover }: { discover: DiscoverResponse }) {
               </label>
               <button
                 type="submit"
-                className="hidden h-[60px] rounded-full bg-accent px-7 text-base font-semibold text-accent-foreground hover:bg-accent-hover sm:block"
+                // The hero's Search button matches its 60 px field (DESIGN.md: Discover).
+                className={cn(buttonVariants({ size: 'lg' }), 'hidden h-[60px] sm:inline-flex')}
               >
                 {t.submit}
               </button>
@@ -458,16 +460,10 @@ function SignUpPitch({ titles }: { titles: { slug: string; title: string }[] }) 
           ))}
         </ul>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            to="/register"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 font-semibold text-accent-foreground hover:bg-accent-hover md:h-11"
-          >
+          <Link to="/register" className={buttonVariants()}>
             {t.create}
           </Link>
-          <Link
-            to="/login"
-            className="inline-flex h-12 items-center justify-center rounded-full border border-input-border bg-surface px-6 font-semibold text-foreground hover:bg-surface-raised md:h-11"
-          >
+          <Link to="/login" className={buttonVariants({ variant: 'outline' })}>
             {t.logIn}
           </Link>
         </div>

@@ -4,7 +4,7 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
-import { Select } from '@reprint/ui'
+import { buttonVariants, Select } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -141,10 +141,7 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
           </Select>
         </label>
         {query.rating ? <input type="hidden" name="rating" value={query.rating} /> : null}
-        <button
-          type="submit"
-          className="inline-flex h-10 items-center rounded-full border border-input-border bg-surface px-4 text-sm font-semibold hover:bg-surface-raised"
-        >
+        <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
           {text.apply}
         </button>
         {query.rating ? (

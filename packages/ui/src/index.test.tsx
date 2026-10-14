@@ -1,13 +1,30 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { Button, cn, Input, Label, Select } from './index.js'
+import { Button, buttonVariants, cn, Input, Label, Select } from './index.js'
 
 describe('@reprint/ui', () => {
   it('renders a Button with its variant classes', () => {
     render(<Button variant="secondary">Save</Button>)
     const button = screen.getByRole('button', { name: 'Save' })
     expect(button.className).toContain('bg-surface')
+  })
+
+  it('pairs each Button height with one text size (D-214)', () => {
+    const sizes = [
+      ['sm', 'h-10', 'text-sm'],
+      ['default', 'h-11', 'text-[15px]'],
+      ['lg', 'h-12', 'text-base'],
+    ] as const
+    for (const [size, height, text] of sizes) {
+      const classes = buttonVariants({ size }).split(' ')
+      expect(classes).toContain(height)
+      expect(classes).toContain(text)
+      expect(classes).toContain('rounded-full')
+      expect(classes).toContain('font-semibold')
+    }
+    expect(buttonVariants({ size: 'icon' }).split(' ')).toContain('size-11')
+    expect(buttonVariants({ size: 'icon-sm' }).split(' ')).toContain('size-9')
   })
 
   it('renders the child element when asChild is set', () => {

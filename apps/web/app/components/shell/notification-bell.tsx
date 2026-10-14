@@ -1,4 +1,5 @@
 import type { NotificationListResponse } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import { type SyntheticEvent, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -34,7 +35,7 @@ export function NotificationBell({
     <details className="relative" onToggle={onToggle}>
       <summary
         aria-label={unread > 0 ? c.unreadLabel(unread) : c.label}
-        className="flex h-10 cursor-pointer list-none items-center gap-1 rounded-full px-3 text-sm font-medium hover:bg-surface-raised"
+        className={cn(buttonVariants({ variant: 'ghost' }), 'cursor-pointer list-none gap-1 px-3')}
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-none stroke-current">
           <path

@@ -1,5 +1,5 @@
 import type { Viewer } from '@reprint/shared'
-import { Button } from '@reprint/ui'
+import { Button, buttonVariants, cn } from '@reprint/ui'
 import { Form } from 'react-router'
 import { copy } from '../../copy/index.js'
 
@@ -21,7 +21,7 @@ export function AccountMenu({ viewer }: { viewer: Viewer | null }) {
     <details className="relative">
       <summary
         aria-label={copy.shell.accountMenuLabel}
-        className="flex h-10 cursor-pointer list-none items-center rounded-full px-3 text-sm font-medium hover:bg-surface-raised"
+        className={cn(buttonVariants({ variant: 'ghost' }), 'cursor-pointer list-none')}
       >
         {viewer.displayName}
       </summary>

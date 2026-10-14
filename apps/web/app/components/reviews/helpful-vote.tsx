@@ -1,4 +1,5 @@
 import type { HelpfulVoteResponse } from '@reprint/shared'
+import { buttonVariants, cn } from '@reprint/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { copy } from '../../copy/index.js'
 import { lazySchemas } from '../../lib/lazy-schemas.js'
@@ -64,7 +65,10 @@ export function HelpfulVote({
           aria-pressed={state.helpful}
           disabled={mutation.isPending}
           onClick={() => mutation.mutate(!state.helpful)}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised aria-pressed:border-accent aria-pressed:bg-accent-tint aria-pressed:text-link"
+          className={cn(
+            buttonVariants({ variant: 'outline', size: 'sm' }),
+            'aria-pressed:border-accent aria-pressed:bg-accent-tint aria-pressed:text-link',
+          )}
         >
           <svg
             aria-hidden="true"
