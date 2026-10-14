@@ -7,6 +7,7 @@ import {
 } from '@reprint/shared'
 import { eq, like } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
+import { Redis } from 'ioredis'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
 import { loadEnv } from '../../config/env.js'
@@ -127,6 +128,71 @@ describe('GET /v1/genres/:slug', () => {
     await makeBook('unrated', genre.id)
     const body = genreDetailResponseSchema.parse((await get('/v1/genres/zz-rank')).json())
     expect(body.items.map((book) => book.slug)).toEqual(['many-good', 'single-five', 'unrated'])
+  })
+
+  describe('the site mean for top_rated (M10-T05)', () => {
+    const SITE_MEAN_KEY = 'discover:v3:site-mean'
+
+    /** The weighted-average fixture above: the computed mean (about 3.3) puts many-good first. */
+    async function rankFixture() {
+      const genre = await makeGenre('zz-mean')
+      await makeBook('elsewhere', null, { count: 100, sum: 280 })
+      await makeBook('single-five', genre.id, { count: 1, sum: 5 })
+      await makeBook('many-good', genre.id, { count: 40, sum: 40 * 4.5 })
+      await makeBook('unrated', genre.id)
+    }
+    const slugs = async (instance: FastifyInstance, url = '/v1/genres/zz-mean') =>
+      genreDetailResponseSchema
+        .parse((await instance.inject({ method: 'GET', url })).json())
+        .items.map((book) => book.slug)
+
+    it('reads the mean the Discover job cached', async () => {
+      await rankFixture()
+      // A cached mean of 5 lifts every Book to at most 5, so the single five-star review now leads.
+      await stack.redis.set(SITE_MEAN_KEY, '5')
+      expect(await slugs(app)).toEqual(['single-five', 'unrated', 'many-good'])
+    })
+
+    it('computes the mean when the cache is empty, and caches it', async () => {
+      await rankFixture()
+      expect(await slugs(app)).toEqual(['many-good', 'single-five', 'unrated'])
+      expect(Number(await stack.redis.get(SITE_MEAN_KEY))).toBeCloseTo(465 / 141, 10)
+      expect(await stack.redis.ttl(SITE_MEAN_KEY)).toBeGreaterThan(0)
+    })
+
+    it('computes the mean when Redis is down', async () => {
+      await rankFixture()
+      const down = new Redis({
+        port: 1,
+        lazyConnect: true,
+        enableOfflineQueue: false,
+        maxRetriesPerRequest: 0,
+      })
+      const env = loadEnv({
+        NODE_ENV: 'test',
+        LOG_LEVEL: 'silent',
+        WEB_ORIGINS: 'http://www.reprint.test:5173',
+        DATABASE_URL: stack.databaseUrl,
+        REDIS_URL: stack.redisUrl,
+        HIBP_MODE: 'off',
+      })
+      const offline = await buildApp(env, { database: stack.db.db, redis: down })
+      await offline.ready()
+      try {
+        expect(await slugs(offline)).toEqual(['many-good', 'single-five', 'unrated'])
+      } finally {
+        await offline.close()
+        down.disconnect()
+      }
+    })
+
+    it('is not read by the other sorts', async () => {
+      await rankFixture()
+      for (const sort of ['most_reviewed', 'newest_review']) {
+        await slugs(app, `/v1/genres/zz-mean?sort=${sort}`)
+      }
+      expect(await stack.redis.exists(SITE_MEAN_KEY)).toBe(0)
+    })
   })
 
   it('most_reviewed orders by review count', async () => {
