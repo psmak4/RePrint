@@ -1,4 +1,4 @@
-import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from './reviews.js'
+import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from './ui-constants.js'
 
 /** `C` in the weighted rating: how many reviews at the site-wide average a Book starts with (PRD §7.6). */
 export const WEIGHTED_RATING_C = 5
