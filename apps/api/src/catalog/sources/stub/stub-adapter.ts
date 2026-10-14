@@ -3,6 +3,7 @@ import type {
   BookCandidate,
   BookCandidateEdition,
   BookSearchPage,
+  SourceRating,
 } from '@reprint/shared'
 import type { SourceAdapter } from '../types.js'
 
@@ -137,6 +138,13 @@ function bookCandidate(
   }
 }
 
+/** The Hobbit's reader ratings, so the Book page can show an outside rating in specs (D-204). */
+const HOBBIT_RATING = { average: 4.29, count: 500, distribution: [16, 18, 41, 155, 270] }
+
+function withRating(candidate: BookCandidate, sourceRating: SourceRating): BookCandidate {
+  return { ...candidate, book: { ...candidate.book, sourceRating } }
+}
+
 const BOOKS: Record<string, BookCandidate> = {
   'stub-book-dune': bookCandidate(
     'stub-book-dune',
@@ -145,13 +153,11 @@ const BOOKS: Record<string, BookCandidate> = {
     'Frank Herbert',
     1,
   ),
-  'stub-book-hobbit': bookCandidate(
-    'stub-book-hobbit',
-    'The Hobbit',
-    'stub-author-tolkien',
-    'J. R. R. Tolkien',
-    1,
-    [{ name: 'Middle-earth', position: 1, sourceLink: MIDDLE_EARTH }],
+  'stub-book-hobbit': withRating(
+    bookCandidate('stub-book-hobbit', 'The Hobbit', 'stub-author-tolkien', 'J. R. R. Tolkien', 1, [
+      { name: 'Middle-earth', position: 1, sourceLink: MIDDLE_EARTH },
+    ]),
+    HOBBIT_RATING,
   ),
   'stub-book-fellowship': bookCandidate(
     'stub-book-fellowship',
@@ -226,6 +232,14 @@ export function createStubSource(): SourceAdapter {
         { sourceId: 'stub-book-fellowship', title: 'The Fellowship of the Ring', editionCount: 2 },
         { sourceId: 'stub-book-silmarillion', title: 'The Silmarillion', editionCount: 1 },
       ]
+    },
+    async getBookRatings(sourceIds) {
+      const found = new Map<string, SourceRating | null>()
+      for (const id of sourceIds) {
+        const book = BOOKS[id]
+        if (book) found.set(id, book.book.sourceRating ?? null)
+      }
+      return found
     },
   }
 }

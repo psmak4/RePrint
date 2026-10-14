@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { bylinePath } from './adapter.js'
 
 const BASE_URL = 'https://openlibrary.org'
 export const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__')
@@ -24,14 +25,14 @@ export const FIXTURE_REQUESTS: readonly FixtureRequest[] = [
   { name: 'search-empty', path: '/search.json?q=zzz+little+known+pamphlet+1890&limit=10' },
   // One Book end to end: its record, its byline (a `key:` search), its Editions, and its Author.
   { name: 'work-left-hand', path: '/works/OL59800W.json' },
-  { name: 'work-left-hand-byline', path: '/search.json?q=key%3A%2Fworks%2FOL59800W&limit=1' },
+  { name: 'work-left-hand-byline', path: bylinePath('OL59800W') },
   { name: 'work-left-hand-editions', path: '/works/OL59800W/editions.json?limit=50' },
   // The Edition behind the work's Cover, which is not in the first page of Editions.
   { name: 'edition-left-hand-cover', path: '/books/OL31935740M.json' },
   { name: 'author-le-guin', path: '/authors/OL31353A.json' },
   // A Book with an Open Library Series record, and that Series' members (D-199).
   { name: 'work-hitchhiker', path: '/works/OL2163649W.json' },
-  { name: 'work-hitchhiker-byline', path: '/search.json?q=key%3A%2Fworks%2FOL2163649W&limit=1' },
+  { name: 'work-hitchhiker-byline', path: bylinePath('OL2163649W') },
   { name: 'work-hitchhiker-editions', path: '/works/OL2163649W/editions.json?limit=50' },
   { name: 'edition-hitchhiker-cover', path: '/books/OL17837787M.json' },
   { name: 'series-hitchhiker', path: '/search.json?q=series_key%3AOL326782L&limit=100' },

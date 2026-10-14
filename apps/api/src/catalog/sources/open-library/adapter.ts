@@ -1,7 +1,13 @@
-import { type BookCandidateEdition, type BookSearchPage, toIsbn13 } from '@reprint/shared'
+import {
+  type BookCandidateEdition,
+  type BookSearchPage,
+  type SourceRating,
+  toIsbn13,
+} from '@reprint/shared'
 import { z } from 'zod'
 import { type AuthorBook, type SeriesMembers, type SourceAdapter, SourceError } from '../types.js'
 import { AUTHOR_WORKS_PAGE_SIZE, authorWorksPath } from './author-works.js'
+import { BYLINE_FIELDS, RATINGS_BATCH_SIZE, ratingsSearchPath, toSourceRating } from './ratings.js'
 import {
   editionsResponseSchema,
   type SeriesText,
@@ -38,7 +44,11 @@ export function searchPath(query: string, page: number): string {
 
 /** The request path for a Book's byline: a search on its own key, which names the Authors. */
 export function bylinePath(workId: string): string {
-  const params = new URLSearchParams({ q: `key:/works/${workId}`, limit: '1' })
+  const params = new URLSearchParams({
+    q: `key:/works/${workId}`,
+    fields: BYLINE_FIELDS,
+    limit: '1',
+  })
   return `/search.json?${params.toString()}`
 }
 
@@ -62,6 +72,8 @@ const memberDocSchema = z.object({
   series_name: z.array(z.string()).optional(),
   series_position: z.array(z.string()).optional(),
 })
+/** The key of a ratings search result (D-204). */
+const ratingKeySchema = z.object({ key: z.string().regex(/^\/works\/OL\d+W$/) })
 /** The part of an Author's work search result the adapter reads (D-203). */
 const workDocSchema = z.object({
   key: z.string().regex(/^\/works\/OL\d+W$/),
@@ -278,6 +290,24 @@ export function createOpenLibraryAdapter(options: OpenLibraryOptions): SourceAda
         if (lastPage) break
       }
       return works
+    },
+
+    async getBookRatings(sourceIds): Promise<Map<string, SourceRating | null>> {
+      const ids = sourceIds.filter((id) => workIdSchema.safeParse(id).success)
+      const found = new Map<string, SourceRating | null>()
+      for (let start = 0; start < ids.length; start += RATINGS_BATCH_SIZE) {
+        const body = searchResponseSchema.safeParse(
+          await getJson(ratingsSearchPath(ids.slice(start, start + RATINGS_BATCH_SIZE))),
+        )
+        if (!body.success) {
+          throw new SourceError('Open Library returned an unreadable ratings search')
+        }
+        for (const doc of body.data.docs) {
+          const key = ratingKeySchema.safeParse(doc)
+          if (key.success) found.set(key.data.key.replace('/works/', ''), toSourceRating(doc))
+        }
+      }
+      return found
     },
   }
 
