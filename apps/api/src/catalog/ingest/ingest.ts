@@ -235,15 +235,31 @@ async function upsertBook(
   return { id, slug, created: true, lockedFields: [], origins: plan.origins }
 }
 
-async function isbnTaken(tx: Tx, isbn13: string): Promise<boolean> {
-  const [row] = await tx
-    .select({ id: editions.id })
-    .from(editions)
-    .where(eq(editions.isbn13, isbn13))
-    .limit(1)
-  return row !== undefined
+type EditionRow = typeof editions.$inferSelect
+type CandidateEdition = BookCandidate['editions'][number]
+
+/** A Cover's lookup key; Covers without an origin reference are never shared. */
+const coverKey = (origin: string, originRef: string) => `${origin}\u0000${originRef}`
+
+/** Whether a stored Edition with no ISBN-13 says the same thing as the candidate. */
+function sameUnidentifiedEdition(row: EditionRow, edition: CandidateEdition): boolean {
+  return (
+    row.isbn13 === null &&
+    row.format === edition.format &&
+    row.language === (edition.language || null) &&
+    row.publisherName === (edition.publisherName || null) &&
+    row.publishedDate === (edition.publishedDate || null) &&
+    row.pageCount === (edition.pageCount || null)
+  )
 }
 
+/**
+ * Stores a candidate's Editions (PRD §5.4, §9). The Covers, Source links, and Editions it could
+ * match are read up front in three queries, each Edition is matched in memory (including the ones
+ * stored earlier in this candidate), and the writes go out in batches, so the number of round
+ * trips no longer grows with the Edition count (M10-T10). Matching is unchanged: Source link, then
+ * ISBN-13, then (with neither) an identical Edition of this Book without one.
+ */
 async function upsertEditions(
   tx: Tx,
   input: {
@@ -255,47 +271,103 @@ async function upsertEditions(
   },
 ): Promise<number> {
   const { source, candidate, bookId, now, priorityOf } = input
+  const list = candidate.editions
+  if (list.length === 0) return 0
+  const coverRefs = list.flatMap(({ cover }) =>
+    cover && cover.origin !== 'upload' && cover.originRef
+      ? [{ origin: cover.origin, originRef: cover.originRef }]
+      : [],
+  )
+  const sourceIds = list.flatMap(({ sourceLink }) => (sourceLink ? [sourceLink.sourceId] : []))
+  const isbns = list.flatMap(({ isbn13 }) => (isbn13 ? [isbn13] : []))
+
+  const [coverRows, linkRows] = await Promise.all([
+    coverRefs.length === 0
+      ? []
+      : tx
+          .select({ id: covers.id, origin: covers.origin, originRef: covers.originRef })
+          .from(covers)
+          .where(
+            or(
+              ...coverRefs.map((ref) =>
+                and(eq(covers.origin, ref.origin), eq(covers.originRef, ref.originRef)),
+              ),
+            ),
+          ),
+    sourceIds.length === 0
+      ? []
+      : tx
+          .select({ sourceId: sourceLinks.sourceId, entityId: sourceLinks.entityId })
+          .from(sourceLinks)
+          .where(
+            and(
+              eq(sourceLinks.source, source),
+              eq(sourceLinks.entityType, 'edition'),
+              inArray(sourceLinks.sourceId, sourceIds),
+            ),
+          ),
+  ])
+  const linkedIds = linkRows.map((row) => row.entityId)
+  const editionRows = await tx
+    .select()
+    .from(editions)
+    .where(
+      or(
+        linkedIds.length > 0 ? inArray(editions.id, linkedIds) : undefined,
+        isbns.length > 0 ? inArray(editions.isbn13, isbns) : undefined,
+        and(eq(editions.bookId, bookId), isNull(editions.isbn13)),
+      ),
+    )
+
+  const coverIds = new Map<string, string>()
+  for (const row of coverRows) {
+    if (row.originRef && !coverIds.has(coverKey(row.origin, row.originRef))) {
+      coverIds.set(coverKey(row.origin, row.originRef), row.id)
+    }
+  }
+  const linked = new Map(linkRows.map((row) => [row.sourceId, row.entityId]))
+  const byId = new Map(editionRows.map((row) => [row.id, row]))
+  const byIsbn = new Map<string, EditionRow>()
+  for (const row of editionRows) if (row.isbn13) byIsbn.set(row.isbn13, row)
+
+  const newCovers: (typeof covers.$inferInsert)[] = []
+  // Keyed by Edition ID: a later Edition of the candidate that matches one of these folds its
+  // changes into the same insert or update, as the one-by-one writes used to leave the row.
+  const newEditions = new Map<string, typeof editions.$inferInsert>()
+  const updates = new Map<string, Partial<typeof editions.$inferInsert>>()
+  const newLinks: (typeof sourceLinks.$inferInsert)[] = []
+  const coverIdFor = (cover: CandidateEdition['cover']): string | null => {
+    if (!cover || cover.origin === 'upload') return null
+    const key = cover.originRef ? coverKey(cover.origin, cover.originRef) : null
+    const known = key ? coverIds.get(key) : undefined
+    if (known) return known
+    const id = newId()
+    newCovers.push({
+      id,
+      origin: cover.origin,
+      originRef: cover.originRef,
+      width: cover.width,
+      height: cover.height,
+    })
+    if (key) coverIds.set(key, id)
+    return id
+  }
+
   let skipped = 0
-  for (const edition of candidate.editions) {
-    const coverId = await resolveCover(tx, edition.cover)
+  for (const edition of list) {
+    const coverId = coverIdFor(edition.cover)
     const sourceId = edition.sourceLink?.sourceId
-    let existing: typeof editions.$inferSelect | undefined
+    let existing: EditionRow | undefined
     if (sourceId) {
-      const linked = await linkedEntityId(tx, 'edition', source, sourceId)
-      if (linked) {
-        ;[existing] = await tx.select().from(editions).where(eq(editions.id, linked)).limit(1)
-      }
+      const id = linked.get(sourceId)
+      if (id) existing = byId.get(id)
     }
-    if (!existing && edition.isbn13) {
-      ;[existing] = await tx
-        .select()
-        .from(editions)
-        .where(eq(editions.isbn13, edition.isbn13))
-        .limit(1)
-    }
+    if (!existing && edition.isbn13) existing = byIsbn.get(edition.isbn13)
     if (!existing && !edition.isbn13 && !sourceId) {
       // Nothing identifies it, so match a stored Edition of this Book that says the same thing.
-      ;[existing] = await tx
-        .select()
-        .from(editions)
-        .where(
-          and(
-            eq(editions.bookId, bookId),
-            isNull(editions.isbn13),
-            eq(editions.format, edition.format),
-            edition.language ? eq(editions.language, edition.language) : isNull(editions.language),
-            edition.publisherName
-              ? eq(editions.publisherName, edition.publisherName)
-              : isNull(editions.publisherName),
-            edition.publishedDate
-              ? eq(editions.publishedDate, edition.publishedDate)
-              : isNull(editions.publishedDate),
-            edition.pageCount
-              ? eq(editions.pageCount, edition.pageCount)
-              : isNull(editions.pageCount),
-          ),
-        )
-        .limit(1)
+      existing = [...byId.values()].find(
+        (row) => row.bookId === bookId && sameUnidentifiedEdition(row, edition),
+      )
     }
     if (existing && existing.bookId !== bookId) {
       skipped += 1 // the ISBN-13 or Source link belongs to another Book; never move an Edition
@@ -303,7 +375,7 @@ async function upsertEditions(
     }
     // An ISBN-13 is set once: a stored one is never replaced, and one held by another Edition is not taken.
     let isbn13: string | null = edition.isbn13
-    if (isbn13 && existing && (existing.isbn13 || (await isbnTaken(tx, isbn13)))) isbn13 = null
+    if (isbn13 && existing && (existing.isbn13 || byIsbn.has(isbn13))) isbn13 = null
     const incoming: IncomingField[] = [
       { field: 'isbn13', column: 'isbn13', value: isbn13 },
       { field: 'format', column: 'format', value: edition.format },
@@ -313,9 +385,8 @@ async function upsertEditions(
       { field: 'pageCount', column: 'pageCount', value: edition.pageCount },
       { field: 'cover', column: 'coverId', value: coverId },
     ]
-    let editionId: string
+    let row: EditionRow
     if (existing) {
-      editionId = existing.id
       const plan = planFieldUpdate({
         source,
         now,
@@ -324,25 +395,54 @@ async function upsertEditions(
         incoming,
         priorityOf,
       })
-      await tx
-        .update(editions)
-        .set({
-          ...(plan.set as Partial<typeof editions.$inferInsert>),
-          fieldOrigins: plan.origins,
-        })
-        .where(eq(editions.id, existing.id))
-    } else {
-      editionId = newId()
-      const plan = planFieldUpdate({ source, now, current: {}, origins: {}, incoming })
-      await tx.insert(editions).values({
+      const set = {
         ...(plan.set as Partial<typeof editions.$inferInsert>),
-        id: editionId,
+        fieldOrigins: plan.origins,
+      }
+      const inserting = newEditions.get(existing.id)
+      if (inserting) Object.assign(inserting, set)
+      else updates.set(existing.id, { ...updates.get(existing.id), ...set })
+      // Later Editions in this candidate see the row as it now is.
+      row = Object.assign(existing, set)
+    } else {
+      const plan = planFieldUpdate({ source, now, current: {}, origins: {}, incoming })
+      const values = {
+        ...(plan.set as Partial<typeof editions.$inferInsert>),
+        id: newId(),
         bookId,
         fieldOrigins: plan.origins,
-      })
+      }
+      newEditions.set(values.id, values)
+      // The rest of the row as the database would fill it in, for matching later Editions.
+      row = {
+        isbn13: null,
+        format: 'unknown',
+        language: null,
+        publisherName: null,
+        publishedDate: null,
+        pageCount: null,
+        coverId: null,
+        createdAt: now,
+        updatedAt: now,
+        ...values,
+      } as EditionRow
+      byId.set(row.id, row)
     }
-    if (sourceId) await addLink(tx, 'edition', editionId, source, sourceId)
+    if (row.isbn13) byIsbn.set(row.isbn13, row)
+    if (sourceId) {
+      linked.set(sourceId, row.id)
+      newLinks.push({ entityType: 'edition', entityId: row.id, source, sourceId })
+    }
   }
+
+  // Covers first (Editions point at them). The rest touch different rows, so they go out side by
+  // side: postgres.js sends statements issued together on one connection in one round trip.
+  if (newCovers.length > 0) await tx.insert(covers).values(newCovers)
+  await Promise.all([
+    newEditions.size > 0 ? tx.insert(editions).values([...newEditions.values()]) : undefined,
+    ...[...updates].map(([id, set]) => tx.update(editions).set(set).where(eq(editions.id, id))),
+    newLinks.length > 0 ? tx.insert(sourceLinks).values(newLinks).onConflictDoNothing() : undefined,
+  ])
   return skipped
 }
 
