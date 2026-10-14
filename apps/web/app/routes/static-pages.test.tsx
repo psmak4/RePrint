@@ -3,6 +3,7 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import axe from 'axe-core'
 import { afterEach, describe, expect, it } from 'vitest'
 import { copy } from '../copy/index.js'
+import { legalCopy } from '../copy/legal.js'
 import { metaArgs } from '../lib/seo.testing.js'
 import About, { meta as aboutMeta } from './about.js'
 import CommunityGuidelines from './community-guidelines.js'
@@ -60,8 +61,8 @@ describe('legal and static pages', () => {
 
   it('Contact shows the owner email as a mailto link', () => {
     render(<Contact />)
-    const link = screen.getByRole('link', { name: copy.legal.contactEmail })
-    expect(link.getAttribute('href')).toBe(`mailto:${copy.legal.contactEmail}`)
+    const link = screen.getByRole('link', { name: legalCopy.contactEmail })
+    expect(link.getAttribute('href')).toBe(`mailto:${legalCopy.contactEmail}`)
     expect(document.body.textContent).not.toContain('owner to supply')
   })
 

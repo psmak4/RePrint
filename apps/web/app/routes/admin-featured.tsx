@@ -6,7 +6,7 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { FeaturedManager } from '../components/admin/featured-manager.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -15,7 +15,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-featured'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.featured.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.featured.title}`, noindex: true })
 }
 
 /** The current picks and what can be picked (PRD §7.2, §7.11). */
@@ -26,14 +26,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get('/v1/admin/featured')
   } catch (error) {
     logger.error({ err: error }, 'could not load featured content')
-    throw data(copy.admin.featured.loadFailed, { status: 502 })
+    throw data(adminCopy.featured.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'featured content request failed')
-    throw data(copy.admin.featured.loadFailed, { status: 502 })
+    throw data(adminCopy.featured.loadFailed, { status: 502 })
   }
   return {
     featured: adminFeaturedSchema.parse(await response.json()),
@@ -44,7 +44,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 /** Each action is one permission-checked, audited API call; the API rebuilds Discover. */
 export async function action({ request, context }: Route.ActionArgs) {
   await requireViewerPermission({ request, context }, PERMISSIONS.featuredManage)
-  const fallback = copy.admin.featured.failed
+  const fallback = adminCopy.featured.failed
   const parsed = adminFeaturedUpdateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })
   const result = await sendToApi(request, 'PUT', '/v1/admin/featured', parsed.data, fallback)

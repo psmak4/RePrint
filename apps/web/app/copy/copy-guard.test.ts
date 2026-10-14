@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { copy } from './index.js'
+
+// Every copy module in this folder (split by area in M10-T07), so a new one is checked too.
+const modules = import.meta.glob<Record<string, unknown>>(['./*.ts', '!./*.test.ts'], {
+  eager: true,
+})
 
 // RePrint is not a store (PRD §1, M9 criterion 9): no price, cart, or buy language in any string.
 const FORBIDDEN =
@@ -21,9 +25,18 @@ function collect(value: unknown, path: string, out: Array<[string, string]>): vo
 }
 
 describe('copy guard', () => {
-  it('has no price, cart, or buy language anywhere in the copy file', () => {
+  it('checks every copy module', () => {
+    expect(Object.keys(modules).sort()).toEqual([
+      './admin.ts',
+      './index.ts',
+      './legal.ts',
+      './settings.ts',
+    ])
+  })
+
+  it('has no price, cart, or buy language anywhere in the copy files', () => {
     const strings: Array<[string, string]> = []
-    collect(copy, 'copy', strings)
+    for (const [file, exports] of Object.entries(modules)) collect(exports, file, strings)
     expect(strings.length).toBeGreaterThan(100)
     const offenders = strings.filter(([, text]) => FORBIDDEN.test(text)).map(([path]) => path)
     expect(offenders).toEqual([])

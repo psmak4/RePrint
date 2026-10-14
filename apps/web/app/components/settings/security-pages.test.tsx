@@ -3,12 +3,12 @@ import type { Me, SessionInfo } from '@reprint/shared'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createRoutesStub, data } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 import { SecuritySettingsPage } from './security-settings-page.js'
 
 afterEach(cleanup)
 
-const c = copy.settings.security
+const c = settingsCopy.security
 
 const me: Me = {
   id: '0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b',

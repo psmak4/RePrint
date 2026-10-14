@@ -8,13 +8,9 @@ import {
 } from './catalog.js'
 import { bookSummarySchema, candidateRefSchema } from './catalog-api.js'
 import { reviewExcerptSchema } from './reviews.js'
+import { SEARCH_QUERY_MAX_LENGTH } from './search-limits.js'
 
 /** Request and response shapes for Catalog search (PRD §7.3, §10). */
-
-/** Longest query the search box accepts. */
-export const SEARCH_QUERY_MAX_LENGTH = 100
-/** Suggestions and search start at this many characters (PRD §7.3). */
-export const SEARCH_MIN_LENGTH = 2
 
 /** `GET /search/suggest?q=`. A query under `SEARCH_MIN_LENGTH` is valid and suggests nothing. */
 export const searchSuggestQuerySchema = z.object({

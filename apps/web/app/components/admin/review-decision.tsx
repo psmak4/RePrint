@@ -2,12 +2,12 @@ import { type ModQueueItem, REVIEW_DECISION_REASON_MAX } from '@reprint/shared'
 import { Button, Label, Select, Textarea } from '@reprint/ui'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useFetcher, useNavigate } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { Kbd } from './admin-ui.js'
 import { AdminIcon } from './icons.js'
 
-const text = copy.admin.reviews
+const text = adminCopy.reviews
 
 /** What the `/admin/reviews` action returns: the decision, or a form error. */
 type DecisionResult = { decided: 'approved' | 'rejected'; reviewId: string } | { formError: string }

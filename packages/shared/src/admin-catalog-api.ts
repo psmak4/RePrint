@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { contributionRoleSchema, coverSchema, fieldOriginsSchema, formatSchema } from './catalog.js'
 import { bookSummarySchema } from './catalog-api.js'
 import { cursorPageOf, cursorQuerySchema } from './pagination.js'
-import { SEARCH_QUERY_MAX_LENGTH } from './search-api.js'
+import { SEARCH_QUERY_MAX_LENGTH } from './search-limits.js'
 
 /** Schemas for the Admin Catalog editing endpoint (PRD §5.2, §5.4, §7.11, D-155). */
 

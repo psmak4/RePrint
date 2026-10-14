@@ -12,7 +12,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { ReviewQueue } from '../components/admin/review-queue.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -23,7 +23,7 @@ import type { Route } from './+types/admin-reviews'
 const QUEUE_PAGE_SIZE = 20
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.reviews.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.reviews.title}`, noindex: true })
 }
 
 export type ClaimState =
@@ -49,14 +49,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await api.get(`/v1/mod/reviews?${query}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load the review queue')
-    throw data(copy.admin.reviews.loadFailed, { status: 502 })
+    throw data(adminCopy.reviews.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'review queue request failed')
-    throw data(copy.admin.reviews.loadFailed, { status: 502 })
+    throw data(adminCopy.reviews.loadFailed, { status: 502 })
   }
   const queue: ModQueueResponse = modQueueResponseSchema.parse(await response.json())
 
@@ -86,7 +86,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   await requireViewerPermission({ request, context }, PERMISSIONS.reviewsModerate)
   const parsed = decisionActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
-    return data({ formError: copy.admin.reviews.decideFailed }, { status: 400 })
+    return data({ formError: adminCopy.reviews.decideFailed }, { status: 400 })
   }
   const { intent, reviewId, reason } = parsed.data
   // The API takes a JSON body even without a reason.
@@ -95,7 +95,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     'POST',
     `/v1/mod/reviews/${reviewId}/${intent}`,
     reason ? { reason } : {},
-    copy.admin.reviews.decideFailed,
+    adminCopy.reviews.decideFailed,
   )
   if (!result.ok) return failed(result)
   const { status } = reviewDecisionResponseSchema.parse(result.body)

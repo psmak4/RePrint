@@ -11,7 +11,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { ReportsQueue } from '../components/admin/reports-queue.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -22,7 +22,7 @@ import type { Route } from './+types/admin-reports'
 const QUEUE_PAGE_SIZE = 20
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.reports.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.reports.title}`, noindex: true })
 }
 
 /** The Reports queue (reviews with open reports, oldest first) and what the viewer may do (PRD §7.10). */
@@ -36,14 +36,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get(`/v1/mod/reports?${query}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load the reports queue')
-    throw data(copy.admin.reports.loadFailed, { status: 502 })
+    throw data(adminCopy.reports.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'reports queue request failed')
-    throw data(copy.admin.reports.loadFailed, { status: 502 })
+    throw data(adminCopy.reports.loadFailed, { status: 502 })
   }
   const queue: ModReportsResponse = modReportsResponseSchema.parse(await response.json())
   return {
@@ -77,10 +77,10 @@ export async function action({ request, context }: Route.ActionArgs) {
   const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.reportsResolve)
   const parsed = reportActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
-    return data({ formError: copy.admin.reports.actionFailed }, { status: 400 })
+    return data({ formError: adminCopy.reports.actionFailed }, { status: 400 })
   }
   const input = parsed.data
-  const fallback = copy.admin.reports.actionFailed
+  const fallback = adminCopy.reports.actionFailed
 
   if (input.intent === 'dismiss') {
     const result = await sendToApi(
