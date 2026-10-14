@@ -1,9 +1,10 @@
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { books, newId, reviews, users } from '@reprint/db'
+import { books, type Database, newId, reviews, users } from '@reprint/db'
 import { ACCOUNT_ERASE_AFTER_DAYS, type ReviewStatus } from '@reprint/shared'
 import { eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import { pino } from 'pino'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { jobs } from '../../jobs/registry.js'
@@ -260,6 +261,47 @@ describe('ratings.recompute', () => {
 })
 
 describe('account deletion and erase', () => {
+  it('takes all of a Member’s Approved reviews out in one statement (M10-T12)', async () => {
+    const [one, two, three] = [await newBook(), await newBook(), await newBook()]
+    const leaver = await createTestUser(stack.db.db)
+    const stayer = await createTestUser(stack.db.db)
+    await addReview(one, leaver.id, 5, 'approved')
+    await addReview(two, leaver.id, 2, 'approved')
+    await addReview(three, leaver.id, 4, 'pending')
+    await addReview(one, stayer.id, 3, 'approved')
+    await addReview(two, stayer.id, 2, 'approved')
+    await addReview(three, stayer.id, 1, 'approved')
+    await stack.db.db
+      .update(users)
+      .set({ status: 'deleted', deletedAt: new Date() })
+      .where(eq(users.id, leaver.id))
+
+    const statements: string[] = []
+    const counting = drizzle(stack.db.sql, {
+      logger: { logQuery: (query) => statements.push(query) },
+    }) as unknown as Database
+    await counting.transaction((tx) => removeMemberFromAggregates(tx, leaver.id))
+    expect(statements).toHaveLength(1)
+
+    expect(await totals(one)).toEqual({
+      reviewCount: 1,
+      ratingSum: 3,
+      ratingCounts: [0, 0, 1, 0, 0],
+    })
+    expect(await totals(two)).toEqual({
+      reviewCount: 1,
+      ratingSum: 2,
+      ratingCounts: [0, 1, 0, 0, 0],
+    })
+    expect(await totals(three)).toEqual({
+      reviewCount: 1,
+      ratingSum: 1,
+      ratingCounts: [1, 0, 0, 0, 0],
+    })
+    // The nightly recompute (which skips deleted accounts) agrees with every Book.
+    expect((await recomputeRatings({ db: stack.db.db, log })).mismatches).toEqual([])
+  })
+
   it('drops a Member’s Approved reviews from aggregates at deletion, and erase leaves them right', async () => {
     const one = await newBook()
     const two = await newBook()

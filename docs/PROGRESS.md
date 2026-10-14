@@ -804,6 +804,13 @@ Entry format:
 - New `JobQueue.enqueueMany` adds many jobs of one kind with one BullMQ `addBulk`, every payload validated first. `queueAuthorBookImports` (hundreds for a prolific Author) and `queueSeriesMemberImports` use it; `queueSeriesSyncs` (one or two Series, called from requests) adds its jobs side by side instead, and the task's accept bullet says so. Worker job context gains `enqueueMany`.
 - Tests: a new `queue.integration.test.ts` against Redis with no worker (300 imports in one `addBulk` and no `add`, payload and options kept; a repeat while waiting adds only the new member; one bad payload adds nothing; an empty list makes no call); the queueing unit tests now expect the bulk call. The catalog, review, Library, moderation, job, and sync suites pass unchanged. `pnpm check` passes.
 
+### 2026-10-14 · M10-T12 · Small efficiency fixes · loop/m10-t12-small-fixes
+- `DATABASE_POOL_MAX` (default 10, 1 to 100) sets the API's and the worker's Postgres pool; it was fixed at 10. Documented in `.env.example` and `docs/deploy.md`.
+- Discover's cached rows were checked three times per request (each row, the whole response, then the serializer). The whole-response parse is gone: each row is still checked on read, so a bad row falls back to a rebuild (new test), and the serializer checks the response as PRD §10 requires. The task's accept bullet now says twice, with why.
+- The home page asks for the 2 Reading entries its strip shows, not 4. The root layout preconnects to `https://covers.openlibrary.org`, where most covers load from (`OPEN_LIBRARY_COVER_ORIGIN` in `cover-url.ts`).
+- `removeMemberFromAggregates` (account deletion, D-043) takes every affected Book's totals down in one `update … from (select … group by book_id)` statement instead of one update per review. A new test with three Books checks the totals, the nightly recompute agrees, and one statement is sent; with the old loop it sends three.
+- `pnpm check` passes.
+
 ### 2026-10-14 · M10-T06 · Book page rails from light queries, with no Author sync · loop/m10-t06-book-page-rails
 - New `GET /v1/books/:slug/related` returns the Book page's Author card and other Books, Series window, and Genre's top-rated Books from the slug alone (D-209). The Book loader asks for it beside the Book, so every request the page makes now goes out in one round, and the page no longer reads a full Author page (with its bibliography import check: a Book page view never queues `catalog.author-sync`, D-205), a 24-Book Genre page, or the Series endpoint. `groupContributors` moved to `@reprint/shared` so both sides pick the same first Author.
 - The Author card now counts every Book the Author is credited on; since D-203 paged the Written list it had counted only the first 24 plus other Roles.
