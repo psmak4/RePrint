@@ -218,13 +218,20 @@ describe('queueing', () => {
   })
 
   it('queues one import per member, deduplicated per Series and member', async () => {
-    const enqueue = vi.fn(async () => 'id')
-    await queueSeriesMemberImports({ enqueue }, [{ seriesId: 's1', sourceId: 'w1', position: 1 }])
-    expect(enqueue.mock.calls).toEqual([
+    const enqueueMany = vi.fn(async () => ['id'])
+    await queueSeriesMemberImports({ enqueueMany }, [
+      { seriesId: 's1', sourceId: 'w1', position: 1 },
+    ])
+    // Every missing member goes out in one bulk add (M10-T11).
+    expect(enqueueMany.mock.calls).toEqual([
       [
         'catalog.series-member',
-        { seriesId: 's1', sourceId: 'w1', position: 1 },
-        { deduplicationId: 'catalog.series-member-s1-w1', priority: 10 },
+        [
+          {
+            payload: { seriesId: 's1', sourceId: 'w1', position: 1 },
+            options: { deduplicationId: 'catalog.series-member-s1-w1', priority: 10 },
+          },
+        ],
       ],
     ])
   })

@@ -98,29 +98,32 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
           ne(users.status, 'deleted'),
           rating === undefined ? undefined : eq(reviews.rating, rating),
         )
-        const [totalRow] = await db
-          .select({ total: count() })
-          .from(reviews)
-          .innerJoin(users, eq(users.id, reviews.userId))
-          .where(where)
-        const rows = await db
-          .select({
-            id: reviews.id,
-            rating: reviews.rating,
-            headline: reviews.headline,
-            body: reviews.body,
-            hasSpoilers: reviews.hasSpoilers,
-            helpfulCount: reviews.helpfulCount,
-            submittedAt: reviews.submittedAt,
-            username: users.username,
-            displayName: users.displayName,
-          })
-          .from(reviews)
-          .innerJoin(users, eq(users.id, reviews.userId))
-          .where(where)
-          .orderBy(...REVIEW_ORDER[sort])
-          .limit(pageSize)
-          .offset((page - 1) * pageSize)
+        // The total and the page do not depend on each other (M10-T11).
+        const [[totalRow], rows] = await Promise.all([
+          db
+            .select({ total: count() })
+            .from(reviews)
+            .innerJoin(users, eq(users.id, reviews.userId))
+            .where(where),
+          db
+            .select({
+              id: reviews.id,
+              rating: reviews.rating,
+              headline: reviews.headline,
+              body: reviews.body,
+              hasSpoilers: reviews.hasSpoilers,
+              helpfulCount: reviews.helpfulCount,
+              submittedAt: reviews.submittedAt,
+              username: users.username,
+              displayName: users.displayName,
+            })
+            .from(reviews)
+            .innerJoin(users, eq(users.id, reviews.userId))
+            .where(where)
+            .orderBy(...REVIEW_ORDER[sort])
+            .limit(pageSize)
+            .offset((page - 1) * pageSize),
+        ])
         return {
           items: rows.map(({ username, displayName, submittedAt, ...row }) => ({
             ...row,
@@ -143,18 +146,21 @@ export const reviewRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app
     async (request) => {
       if (!db || !request.auth) throw new Error('review routes need a database')
       const bookId = await bookIdFor(request.params.slug)
-      const [review] = await db
-        .select()
+      // The review and its latest decision reason in one query (M10-T11).
+      const [found] = await db
+        .select({
+          review: reviews,
+          // Qualified by hand: Drizzle leaves a lone table's columns bare, and a bare "id" here
+          // would be the version's own.
+          reason: sql<string | null>`(
+            select ${reviewVersions.decisionReason} from ${reviewVersions}
+            where ${reviewVersions.reviewId} = "reviews"."id"
+            order by ${reviewVersions.version} desc limit 1)`,
+        })
         .from(reviews)
         .where(and(eq(reviews.userId, request.auth.user.id), eq(reviews.bookId, bookId)))
-      if (!review) throw new HttpProblem(404, 'You have not reviewed this Book.')
-      const [latest] = await db
-        .select({ reason: reviewVersions.decisionReason })
-        .from(reviewVersions)
-        .where(eq(reviewVersions.reviewId, review.id))
-        .orderBy(desc(reviewVersions.version))
-        .limit(1)
-      return toMyReview(review, latest?.reason ?? null)
+      if (!found) throw new HttpProblem(404, 'You have not reviewed this Book.')
+      return toMyReview(found.review, found.reason)
     },
   )
 

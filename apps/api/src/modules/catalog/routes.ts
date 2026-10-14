@@ -130,8 +130,11 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
       if (!db) throw new Error('catalog routes need a database')
       const book = await findBookBySlug(db, request.params.slug)
       if (!book) throw new HttpProblem(404, 'We could not find that book.')
-      if (isStale(book.refreshedAt)) {
-        // One job per Book per day; a queue failure must never fail the page view.
+      // Queueing the stale refresh and due Series syncs never fails or slows the page: they run
+      // beside the detail load (M10-T11).
+      const queueRefresh = async () => {
+        if (!isStale(book.refreshedAt)) return
+        // One job per Book per day.
         const day = new Date().toISOString().slice(0, 10)
         await jobs
           ?.enqueue(
@@ -146,15 +149,16 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
             request.log.warn({ err: error, bookId: book.id }, 'could not queue book refresh'),
           )
       }
-      if (jobs) {
-        // A Book stored before its Series was synced fills it in on view (D-199); never fails the page.
+      // A Book stored before its Series was synced fills it in on view (D-199).
+      const queueSeries = async () => {
+        if (!jobs) return
         await seriesDueForBook(db, book.id)
           .then((due) => queueSeriesSyncs(jobs, due))
           .catch((error: unknown) =>
             request.log.warn({ err: error, bookId: book.id }, 'could not queue Series syncs'),
           )
       }
-      const detail = await loadBookDetail(db, book)
+      const [detail] = await Promise.all([loadBookDetail(db, book), queueRefresh(), queueSeries()])
       await addViewerShelves(db, request, [detail])
       return detail
     },

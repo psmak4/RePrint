@@ -106,31 +106,33 @@ async function matchStoredBooks(
 ): Promise<Map<BookCandidate, string>> {
   const matched = new Map<BookCandidate, string>()
   if (candidates.length === 0) return matched
-  const links = await db
-    .select({ sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
-    .from(sourceLinks)
-    .where(
-      and(
-        eq(sourceLinks.entityType, 'book'),
-        eq(sourceLinks.source, source.name),
-        inArray(
-          sourceLinks.sourceId,
-          candidates.map((candidate) => candidate.sourceLink.sourceId),
-        ),
-      ),
-    )
-  const bySourceId = new Map(links.map((link) => [link.sourceId, link.bookId]))
   const isbns = candidates.flatMap((candidate) =>
     candidate.editions.flatMap((edition) => (edition.isbn13 ? [edition.isbn13] : [])),
   )
-  const isbnRows =
+  // The two lookups do not depend on each other (M10-T11).
+  const [links, isbnRows] = await Promise.all([
+    db
+      .select({ sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
+      .from(sourceLinks)
+      .where(
+        and(
+          eq(sourceLinks.entityType, 'book'),
+          eq(sourceLinks.source, source.name),
+          inArray(
+            sourceLinks.sourceId,
+            candidates.map((candidate) => candidate.sourceLink.sourceId),
+          ),
+        ),
+      ),
     isbns.length === 0
       ? []
-      : await db
+      : db
           .select({ isbn13: editions.isbn13, bookId: editions.bookId })
           .from(editions)
           .where(inArray(editions.isbn13, isbns))
-          .orderBy(editions.bookId)
+          .orderBy(editions.bookId),
+  ])
+  const bySourceId = new Map(links.map((link) => [link.sourceId, link.bookId]))
   const byIsbn = new Map<string, string>()
   for (const row of isbnRows)
     if (row.isbn13 && !byIsbn.has(row.isbn13)) byIsbn.set(row.isbn13, row.bookId)
