@@ -24,8 +24,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** Open merge candidates, oldest first (PRD §7.11). */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const cursor = new URL(request.url).searchParams.get('cursor') || null
   const query = new URLSearchParams({ limit: String(QUEUE_PAGE_SIZE) })
   if (cursor) query.set('cursor', cursor)
@@ -59,8 +59,8 @@ const mergeActionSchema = z.discriminatedUnion('intent', [
 ])
 
 /** Merge a pair (one Book into the other) or dismiss it. Each is an audited API call. */
-export async function action({ request }: Route.ActionArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function action({ request, context }: Route.ActionArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const fallback = copy.admin.merge.failed
   const parsed = mergeActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })

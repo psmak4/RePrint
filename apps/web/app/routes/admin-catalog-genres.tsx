@@ -26,8 +26,8 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** Every Genre (archived too) and every Subject rule (PRD §5.4, §7.11). */
-export async function loader({ request }: Route.LoaderArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function loader({ request, context }: Route.LoaderArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const client = apiClientFor(request)
   let genresResponse: Response
   let rulesResponse: Response
@@ -71,8 +71,8 @@ const genreActionSchema = z.discriminatedUnion('intent', [
 ])
 
 /** Each action is one permission-checked, audited API call. */
-export async function action({ request }: Route.ActionArgs) {
-  await requireViewerPermission(request, PERMISSIONS.catalogManage)
+export async function action({ request, context }: Route.ActionArgs) {
+  await requireViewerPermission({ request, context }, PERMISSIONS.catalogManage)
   const fallback = copy.admin.genres.failed
   const parsed = genreActionSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })

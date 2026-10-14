@@ -666,7 +666,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: an integration test reads the `EXPLAIN` plans of a Book search, an Author search, and a suggestion with `enable_seqscan = off` and finds the new indexes and `books_search_vector_idx`, with no sequential scan of `books`, `authors`, or `series`
   - Accept: the thresholds stay 0.3 (title similarity) and 0.45 (name word similarity) without a session-level `SET`, so it works on Neon's pooled connections; every existing search, suggestion, and admin Book search test passes unchanged
   - Accept: a `docs/DECISIONS.md` entry records the wrapper and how the thresholds are applied; `pnpm check` passes
-- [ ] M10-T02 · Web: one session lookup per request · deps: M9-T20 · PRD: §8, §11
+- [x] M10-T02 · Web: one session lookup per request · deps: M9-T20 · PRD: §8, §11
   - Accept: a root middleware puts a memoized session loader in the router context, and the root loader, `requireViewerPermission`, and every loader or action that called `loadSession` read it; route tests show one `GET /v1/auth/session` per request for the Book page, an admin page, and settings
   - Accept: the root loader asks for the session and the bell's notifications at the same time when the request carries the session cookie, and asks for no notifications without it; Visitor pages and a failing API render as before
   - Accept: `pnpm check` passes

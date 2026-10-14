@@ -1,8 +1,9 @@
 import { APP_NAME, confirmEmailChangeRequestSchema } from '@reprint/shared'
 import { ConfirmEmailChangePage } from '../components/settings/confirm-email-change-page.js'
 import { copy } from '../copy/index.js'
-import { loadSession, postToApi } from '../lib/auth.server.js'
+import { postToApi } from '../lib/auth.server.js'
 import { pageMeta } from '../lib/seo.js'
+import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/confirm-email-change'
 
 export function meta(args: Route.MetaArgs) {
@@ -13,10 +14,10 @@ export function meta(args: Route.MetaArgs) {
 }
 
 /** The emailed link is a GET, so the loader spends the token, as verify-email does (D-082). */
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
   const token = new URL(request.url).searchParams.get('token')
   const parsed = confirmEmailChangeRequestSchema.safeParse({ token })
-  const signedIn = Boolean((await loadSession(request)).viewer)
+  const signedIn = Boolean((await viewerSession({ request, context })).viewer)
   if (!parsed.success) return { changed: false, signedIn }
   const result = await postToApi(
     request,
