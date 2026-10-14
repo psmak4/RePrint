@@ -1,15 +1,15 @@
-import { type AdminSystem, APP_NAME, adminSystemSchema, PERMISSIONS } from '@reprint/shared'
+import { type AdminSystem, adminSystemSchema, PERMISSIONS } from '@reprint/shared'
 import { data } from 'react-router'
 import { SystemDashboard } from '../components/admin/system-dashboard.js'
 import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-system'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.system.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.system.title), noindex: true })
 }
 
 /** Source usage, search cache, and queue health from `GET /v1/admin/system` (PRD §6). */

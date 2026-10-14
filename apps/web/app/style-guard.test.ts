@@ -97,6 +97,19 @@ describe('style guard', () => {
     expect(findAll(/rel="(prev|next)"/g, elsewhere('pager.tsx'))).toEqual([])
   })
 
+  it('draws dashed boxes only through EmptyState (D-214)', () => {
+    // The dashed cover ("not on RePrint yet") and the spoiler box are their own elements.
+    const own = new Set([
+      'apps/web/app/components/common/empty-state.tsx',
+      'apps/web/app/components/books/cover.tsx',
+      'apps/web/app/components/reviews/spoiler-toggle.tsx',
+    ])
+    const dashed = classLists(files.filter(({ file }) => !own.has(file)))
+      .filter(({ classes }) => classes.includes('border-dashed'))
+      .map(({ where }) => where)
+    expect(dashed).toEqual([])
+  })
+
   it('gives surface cards 16 px corners (the auth card keeps 24 px)', () => {
     const corner = /^(md:|lg:)?rounded-(xl|3xl|lg|md|\[\d+px\])$/
     const odd = classLists(

@@ -3,6 +3,7 @@ import { GENRE_SORTS } from '@reprint/shared'
 import { chipVariants } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { EmptyState } from '../common/empty-state.js'
 import { Pager } from '../common/pager.js'
 import { SortControl } from '../common/sort-control.js'
 import type { BookCardData } from './book-card.js'
@@ -109,9 +110,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
         />
       </div>
       {items.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-dashed-border px-6 py-5 text-muted-foreground">
-          {text.noBooks}
-        </p>
+        <EmptyState>{text.noBooks}</EmptyState>
       ) : (
         <BookGrid items={items.map((book) => ({ slug: book.slug, book: summaryCard(book) }))} />
       )}

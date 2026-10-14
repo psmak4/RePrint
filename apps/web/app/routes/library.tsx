@@ -1,17 +1,17 @@
-import { APP_NAME, libraryQuerySchema, libraryResponseSchema } from '@reprint/shared'
+import { libraryQuerySchema, libraryResponseSchema } from '@reprint/shared'
 import { data, useRouteLoaderData } from 'react-router'
 import { LibraryPage, PrivateLibrary } from '../components/library/library-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/library'
 
 export function meta(args: Route.MetaArgs) {
   const username = args.params.username ?? ''
   return pageMeta(args, {
-    title: `${copy.library.title(username)} | ${APP_NAME}`,
+    title: pageTitle(copy.library.title(username)),
     description: copy.library.metaDescription(username),
     noindex: true,
   })

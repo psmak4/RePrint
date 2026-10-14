@@ -1,14 +1,14 @@
-import { APP_NAME, loginRequestSchema } from '@reprint/shared'
+import { loginRequestSchema } from '@reprint/shared'
 import { redirect } from 'react-router'
 import { LoginPage } from '../components/auth/login-page.js'
 import { copy } from '../copy/index.js'
 import { failed, forwardCookies, postToApi } from '../lib/auth.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/login'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.login.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(copy.auth.login.title), noindex: true })
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {

@@ -1,13 +1,12 @@
-import { APP_NAME } from '@reprint/shared'
 import { redirect } from 'react-router'
 import { SettingsLayout } from '../components/settings/settings-layout.js'
 import { settingsCopy } from '../copy/settings.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/settings'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${settingsCopy.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(settingsCopy.title), noindex: true })
 }
 
 /** Every settings page needs a signed-in Member. */

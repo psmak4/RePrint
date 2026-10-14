@@ -1,7 +1,6 @@
 import {
   type AdminBookSearchResponse,
   type AdminCatalogStats,
-  APP_NAME,
   adminBookSearchQuerySchema,
   adminBookSearchResponseSchema,
   adminCatalogStatsSchema,
@@ -13,11 +12,11 @@ import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.catalog.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.catalog.title), noindex: true })
 }
 
 type Api = ReturnType<typeof apiClientFor>

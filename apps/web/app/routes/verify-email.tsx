@@ -1,13 +1,13 @@
-import { APP_NAME, verifyEmailRequestSchema } from '@reprint/shared'
+import { verifyEmailRequestSchema } from '@reprint/shared'
 import { VerifyEmailPage } from '../components/auth/verify-email-page.js'
 import { copy } from '../copy/index.js'
 import { postToApi } from '../lib/auth.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/verify-email'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.verify.successTitle}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(copy.auth.verify.successTitle), noindex: true })
 }
 
 /** The emailed link is a GET, so the loader spends the token (D-082). */

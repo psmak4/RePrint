@@ -1,13 +1,13 @@
-import { APP_NAME, resetPasswordRequestSchema } from '@reprint/shared'
+import { resetPasswordRequestSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { ResetPasswordPage } from '../components/auth/reset-password-page.js'
 import { copy } from '../copy/index.js'
 import { failed, postToApi } from '../lib/auth.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/reset-password'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.reset.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(copy.auth.reset.title), noindex: true })
 }
 
 export function loader({ request }: Route.LoaderArgs) {

@@ -1,14 +1,14 @@
-import { APP_NAME, forgotPasswordRequestSchema } from '@reprint/shared'
+import { forgotPasswordRequestSchema } from '@reprint/shared'
 import { redirect } from 'react-router'
 import { ForgotPasswordPage } from '../components/auth/forgot-password-page.js'
 import { copy } from '../copy/index.js'
 import { failed, postToApi } from '../lib/auth.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import { viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/forgot-password'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.auth.forgot.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(copy.auth.forgot.title), noindex: true })
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {

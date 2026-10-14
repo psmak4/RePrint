@@ -32,6 +32,11 @@ function siteOrigin(matches: SeoArgs['matches']): string | null {
   return null
 }
 
+/** Every tab title but the home page's: "<page> | RePrint" (D-214). */
+export function pageTitle(name: string): string {
+  return `${name} | ${APP_NAME}`
+}
+
 /**
  * The `meta` descriptors every page returns (PRD §7.4, §11): title, description, canonical URL, `noindex`
  * when asked, and Open Graph tags when the page is shareable.

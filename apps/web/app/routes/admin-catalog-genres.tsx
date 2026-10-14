@@ -1,7 +1,6 @@
 import {
   type AdminGenre,
   type AdminSubjectRule,
-  APP_NAME,
   adminGenreCreateSchema,
   adminGenreEditSchema,
   adminGenreSchema,
@@ -18,11 +17,11 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog-genres'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.genres.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.genres.title), noindex: true })
 }
 
 /** Every Genre (archived too) and every Subject rule (PRD §5.4, §7.11). */

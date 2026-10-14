@@ -1,15 +1,15 @@
-import { APP_NAME, genreTreeResponseSchema } from '@reprint/shared'
+import { genreTreeResponseSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { GenresIndexPage } from '../components/books/genre-pages.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/genres'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, {
-    title: `${copy.genres.indexTitle} | ${APP_NAME}`,
+    title: pageTitle(copy.genres.indexTitle),
     description: copy.genres.indexMetaDescription,
   })
 }

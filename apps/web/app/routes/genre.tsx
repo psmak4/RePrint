@@ -11,7 +11,7 @@ import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { genreBreadcrumbs } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/genre'
 
 export function meta(args: Route.MetaArgs) {
@@ -19,7 +19,7 @@ export function meta(args: Route.MetaArgs) {
   const { detail, page } = args.loaderData
   const { name } = detail.genre
   return pageMeta(args, {
-    title: `${name} | ${APP_NAME}`,
+    title: pageTitle(name),
     description: copy.genres.metaDescription(name),
     keepParams: { page: page > 1 ? String(page) : undefined },
     openGraph: { type: 'website', title: name },
