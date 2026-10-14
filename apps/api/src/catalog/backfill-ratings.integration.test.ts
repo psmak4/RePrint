@@ -1,4 +1,4 @@
-import { books, createDb, sourceRatings } from '@reprint/db'
+import { books, createDb, sourceLinks, sourceRatings } from '@reprint/db'
 import { startTestDatabase, type TestDatabase, truncateAllTables } from '@reprint/db/testing'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -39,17 +39,20 @@ const ratingsByTitle = async () =>
     await db
       .select({ title: books.title, count: sourceRatings.count })
       .from(sourceRatings)
-      .innerJoin(books, eq(books.id, sourceRatings.bookId))
+      .innerJoin(sourceLinks, eq(sourceLinks.id, sourceRatings.sourceLinkId))
+      .innerJoin(books, eq(books.id, sourceLinks.entityId))
   ).map((row) => [row.title, row.count])
 
 describe('backfillSourceRatings (D-204)', () => {
   it('fills in the ratings the Source has and removes those it no longer has', async () => {
     await storeWithoutRatings()
-    const [dune] = await db.select({ id: books.id }).from(books).where(eq(books.title, 'Dune'))
+    const [dune] = await db
+      .select({ id: sourceLinks.id })
+      .from(sourceLinks)
+      .where(eq(sourceLinks.sourceId, 'stub-book-dune'))
     if (!dune) throw new Error('no dune')
     await db.insert(sourceRatings).values({
-      bookId: dune.id,
-      source: 'stub',
+      sourceLinkId: dune.id,
       average: 3,
       count: 2,
       counts: [0, 0, 2, 0, 0],

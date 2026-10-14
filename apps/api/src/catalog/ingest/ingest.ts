@@ -654,8 +654,8 @@ export async function ingestBook(db: Database, input: IngestInput): Promise<Inge
     await addLink(tx, 'book', book.id, source.name, candidate.sourceLink.sourceId)
     // The Source's reader ratings, kept apart from RePrint's (D-204).
     await saveSourceRating(tx, {
-      bookId: book.id,
       source: source.name,
+      sourceId: candidate.sourceLink.sourceId,
       rating: candidate.book.sourceRating,
       now,
     })

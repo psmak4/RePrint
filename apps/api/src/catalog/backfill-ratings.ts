@@ -27,7 +27,7 @@ export async function backfillSourceRatings(options: {
   if (!getBookRatings) return totals
   for (let after = ''; ; ) {
     const links = await db
-      .select({ id: sourceLinks.id, sourceId: sourceLinks.sourceId, bookId: sourceLinks.entityId })
+      .select({ id: sourceLinks.id, sourceId: sourceLinks.sourceId })
       .from(sourceLinks)
       .where(
         and(
@@ -56,8 +56,8 @@ export async function backfillSourceRatings(options: {
       for (const link of links) {
         if (!ratings.has(link.sourceId)) continue
         const result = await saveSourceRating(tx, {
-          bookId: link.bookId,
           source: source.name,
+          sourceId: link.sourceId,
           rating: ratings.get(link.sourceId) ?? null,
           now,
         })

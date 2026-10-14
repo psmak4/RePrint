@@ -1,5 +1,5 @@
 {
-  "id": "2a38e31b-ab04-4645-844b-5e2e74be44f4",
+  "id": "581968af-9d82-4883-99b4-55b87a3bd501",
   "prevId": "a65525c4-5a56-4e5e-ad32-ddaf0830f750",
   "version": "7",
   "dialect": "postgresql",
@@ -2106,16 +2106,10 @@
       "name": "source_ratings",
       "schema": "",
       "columns": {
-        "book_id": {
-          "name": "book_id",
+        "source_link_id": {
+          "name": "source_link_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source": {
-          "name": "source",
-          "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "average": {
@@ -2145,22 +2139,17 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "source_ratings_book_id_books_id_fk": {
-          "name": "source_ratings_book_id_books_id_fk",
+        "source_ratings_source_link_id_source_links_id_fk": {
+          "name": "source_ratings_source_link_id_source_links_id_fk",
           "tableFrom": "source_ratings",
-          "tableTo": "books",
-          "columnsFrom": ["book_id"],
+          "tableTo": "source_links",
+          "columnsFrom": ["source_link_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "source_ratings_book_id_source_pk": {
-          "name": "source_ratings_book_id_source_pk",
-          "columns": ["book_id", "source"]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {

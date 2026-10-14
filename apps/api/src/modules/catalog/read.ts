@@ -10,6 +10,7 @@ import {
   editions,
   genres,
   series,
+  sourceLinks,
   sourceRatings,
 } from '@reprint/db'
 import {
@@ -24,6 +25,7 @@ import {
   type ContributionRole,
   type Cover,
   type Edition,
+  type OutsideRating,
   type RatingSummary,
 } from '@reprint/shared'
 import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm'
@@ -176,7 +178,16 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
       .innerJoin(genres, eq(genres.id, bookGenres.genreId))
       .where(eq(bookGenres.bookId, book.id))
       .orderBy(asc(genres.name)),
-    db.select().from(sourceRatings).where(eq(sourceRatings.bookId, book.id)),
+    db
+      .select({
+        source: sourceLinks.source,
+        average: sourceRatings.average,
+        count: sourceRatings.count,
+        counts: sourceRatings.counts,
+      })
+      .from(sourceRatings)
+      .innerJoin(sourceLinks, eq(sourceLinks.id, sourceRatings.sourceLinkId))
+      .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, book.id))),
   ])
   const primary = editionRows.find((row) => row.id === book.primaryEditionId) ?? null
   const coverMap = await coversById(db, [book.coverId, primary?.coverId ?? null])
@@ -205,15 +216,30 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
     sourceEditionCount: book.sourceEditionCount,
     rating: ratingSummary(book),
     // Other Sources' reader ratings, under a name readers know; never mixed into `rating` (D-204).
-    outsideRatings: outsideRows
-      .flatMap((row) => {
-        const sourceName = SOURCE_DISPLAY_NAMES[row.source]
-        return sourceName
-          ? [{ sourceName, average: row.average, count: row.count, distribution: row.counts }]
-          : []
-      })
-      .sort((a, b) => a.sourceName.localeCompare(b.sourceName)),
+    outsideRatings: outsideRatingsOf(outsideRows),
   }
+}
+
+/**
+ * One rating per Source name: a Book can hold several records from one Source (a reissue sharing
+ * its ISBN, a merge), so the one most readers rated stands for it (D-204). Unknown Sources are
+ * left out.
+ */
+function outsideRatingsOf(
+  rows: { source: string; average: number; count: number; counts: number[] }[],
+): OutsideRating[] {
+  const best = new Map<string, OutsideRating>()
+  for (const row of rows) {
+    const sourceName = SOURCE_DISPLAY_NAMES[row.source]
+    if (!sourceName || (best.get(sourceName)?.count ?? 0) >= row.count) continue
+    best.set(sourceName, {
+      sourceName,
+      average: row.average,
+      count: row.count,
+      distribution: row.counts,
+    })
+  }
+  return [...best.values()].sort((a, b) => a.sourceName.localeCompare(b.sourceName))
 }
 
 /** Newest printings first; Editions without a date go last. */
