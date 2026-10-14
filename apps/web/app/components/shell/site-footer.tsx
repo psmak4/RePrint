@@ -21,7 +21,7 @@ export function SiteFooter() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="inline-block py-2 text-sm text-[#334155] hover:text-foreground hover:underline md:py-0"
+                  className="inline-block py-2 text-sm text-strong hover:text-foreground hover:underline md:py-0"
                 >
                   {link.label}
                 </a>

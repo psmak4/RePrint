@@ -135,9 +135,9 @@ export function GeneratedCover({
       aria-label={copy.books.coverAlt(title)}
       data-generated-cover=""
       className={cn(
-        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] text-[#fdfaf3]',
+        '@container relative aspect-[2/3] shrink-0 overflow-hidden rounded-[3px_6px_6px_3px] text-cover-ink',
         dashed
-          ? 'border border-dashed border-[#a8a29e] bg-surface-raised text-[#334155]'
+          ? 'border border-dashed border-dashed-border bg-surface-raised text-strong'
           : [generatedCoverClass(slug), raised ? COVER_SHADOW_RAISED : COVER_SHADOW],
         className,
       )}
@@ -146,7 +146,7 @@ export function GeneratedCover({
         aria-hidden="true"
         className={cn(
           'absolute inset-[6cqw] flex flex-col items-center justify-between border px-[7cqw] pt-[10cqw] pb-[9cqw] text-center',
-          dashed ? 'border-[#a8a29e]' : 'border-[rgba(253,250,243,0.32)]',
+          dashed ? 'border-dashed-border' : 'border-[rgba(253,250,243,0.32)]',
         )}
       >
         <span className="line-clamp-2 w-full text-[6.4cqw] leading-[1.3] tracking-[0.14em] break-words uppercase opacity-[0.88]">

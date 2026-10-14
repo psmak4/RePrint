@@ -8,7 +8,7 @@ export function SpoilerToggle({ children }: { children: ReactNode }) {
   const contentId = useId()
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-[#a8a29e] bg-[#fffbeb] px-4 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-dashed-border bg-warning-tint px-4 py-3.5">
         <p className="inline-flex items-center gap-2.5 text-[15px]">
           <svg
             aria-hidden="true"

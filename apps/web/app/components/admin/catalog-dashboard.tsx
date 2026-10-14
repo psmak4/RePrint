@@ -75,7 +75,7 @@ function BookSearch({ search }: { search: CatalogSearch }) {
               return (
                 <li
                   key={book.id}
-                  className="flex items-center gap-4 border-b border-[#ece8e0] py-3 last:border-b-0"
+                  className="flex items-center gap-4 border-b border-border py-3 last:border-b-0"
                 >
                   <Cover
                     cover={book.cover}
@@ -190,7 +190,7 @@ export function CatalogDashboard({
                 </tbody>
               </table>
             </ScrollRegion>
-            <p className="border-t border-border bg-[#fdfcfa] px-5 py-3.5 text-sm text-muted-foreground">
+            <p className="border-t border-border bg-surface-tint px-5 py-3.5 text-sm text-muted-foreground">
               {text.growthCaption}
             </p>
           </div>

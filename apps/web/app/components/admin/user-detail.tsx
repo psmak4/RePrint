@@ -261,7 +261,7 @@ export function UserDetail({
     >
       {panel}
       {user.status === 'suspended' ? (
-        <p className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm break-words text-[#9a3412]">
+        <p className="rounded-xl border border-warning-edge bg-warning-tint px-4 py-3 text-sm break-words text-warning">
           {user.suspendedUntil
             ? d.suspendedUntil(fmt(user.suspendedUntil))
             : d.suspendedIndefinitely}
@@ -362,7 +362,7 @@ export function UserDetail({
                   {admin.sessions.map((session) => (
                     <li
                       key={session.id}
-                      className="flex flex-col gap-0.5 border-t border-[#ece8e0] py-3 first:border-t-0 first:pt-0"
+                      className="flex flex-col gap-0.5 border-t border-border py-3 first:border-t-0 first:pt-0"
                     >
                       <span className="text-[15px] font-semibold break-words">
                         {session.device}

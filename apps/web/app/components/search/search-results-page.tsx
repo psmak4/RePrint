@@ -102,7 +102,7 @@ function Tabs({ query }: { query: SearchQuery }) {
           className={`-mb-px inline-flex h-[52px] items-center border-b-2 text-base font-medium ${
             query.type === tab.type
               ? 'border-accent text-foreground'
-              : 'border-transparent text-[#334155] hover:text-foreground'
+              : 'border-transparent text-strong hover:text-foreground'
           }`}
         >
           {tab.label}
@@ -454,7 +454,7 @@ export function SearchResultsPage({
               )}
               <Pagination query={query} hasMore={results.hasMore} />
               {query.type === 'books' ? (
-                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[14px] border border-dashed border-[#a8a29e] px-6 py-5">
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[14px] border border-dashed border-dashed-border px-6 py-5">
                   <span className="font-semibold">{c.isbnHint}</span>
                   <span className="text-[15px] text-muted-foreground">{c.isbnHintNote}</span>
                 </p>

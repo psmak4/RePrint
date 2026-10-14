@@ -62,7 +62,7 @@ export function ProfileForm({ me }: { me: Me }) {
         {fetcher.data?.formError ? (
           <p
             role="alert"
-            className="rounded-xl border border-danger bg-[#fef2f2] px-4 py-3 text-sm text-danger"
+            className="rounded-xl border border-danger bg-danger-tint px-4 py-3 text-sm text-danger"
           >
             {fetcher.data.formError}
           </p>

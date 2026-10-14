@@ -47,7 +47,7 @@ function Breadcrumb({
         {trail.map((crumb, i) => (
           <li key={crumb.href} className="flex gap-2">
             {i > 0 ? <span aria-hidden="true">/</span> : null}
-            <Link to={crumb.href} className="text-[#334155] hover:underline">
+            <Link to={crumb.href} className="text-strong hover:underline">
               {crumb.label}
             </Link>
           </li>
@@ -85,7 +85,7 @@ export function GenresIndexPage({ items }: { items: GenreNode[] }) {
                     <Link
                       key={child.slug}
                       to={`/genres/${child.slug}`}
-                      className="inline-flex h-7 items-center rounded-full border border-[#d9d4ca] bg-surface px-2.5 text-[13px] text-[#1e293b] hover:border-input-border"
+                      className="inline-flex h-7 items-center rounded-full border border-chip-border bg-surface px-2.5 text-[13px] text-foreground hover:border-input-border"
                     >
                       {child.name}
                     </Link>
@@ -141,7 +141,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
         ))}
       </nav>
       {items.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-[#a8a29e] px-6 py-5 text-muted-foreground">
+        <p className="rounded-[14px] border border-dashed border-dashed-border px-6 py-5 text-muted-foreground">
           {text.noBooks}
         </p>
       ) : (

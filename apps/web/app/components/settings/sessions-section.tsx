@@ -19,7 +19,7 @@ function SessionRow({ session }: { session: SessionInfo }) {
         <p className="font-medium">
           {session.device}
           {session.current ? (
-            <span className="ml-2 rounded-full bg-[#ecfdf3] px-2.5 py-0.5 text-xs font-medium text-success">
+            <span className="ml-2 rounded-full bg-success-tint px-2.5 py-0.5 text-xs font-medium text-success">
               {c.thisDevice}
             </span>
           ) : null}

@@ -6,11 +6,11 @@ import { AdminIcon } from './icons.js'
 export type BadgeTone = 'green' | 'amber' | 'red' | 'blue' | 'gray'
 
 const TONES: Record<BadgeTone, string> = {
-  green: 'border-[#a7f3d0] bg-[#ecfdf3] text-success',
-  amber: 'border-[#fed7aa] bg-[#fff7ed] text-[#9a3412]',
-  red: 'border-[#fecaca] bg-[#fef2f2] text-danger',
-  blue: 'border-[#bfdbfe] bg-[#eff6ff] text-[#1e40af]',
-  gray: 'border-border bg-surface-raised text-[#334155]',
+  green: 'border-success-edge bg-success-tint text-success',
+  amber: 'border-warning-edge bg-warning-tint text-warning',
+  red: 'border-danger-edge bg-danger-tint text-danger',
+  blue: 'border-accent-edge bg-accent-tint text-link',
+  gray: 'border-border bg-surface-raised text-strong',
 }
 
 /** A small pill for a status, a role, a count, or an age. */
@@ -108,7 +108,7 @@ export function StatTile({
   note?: ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] px-4 py-3.5">
+    <div className="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface-tint px-4 py-3.5">
       <dt className="text-[13px] text-muted-foreground">{label}</dt>
       <dd className="text-[28px] leading-none font-semibold tracking-[-0.01em] tabular-nums">
         {value}
@@ -121,11 +121,11 @@ export function StatTile({
 /** A dashed box with a green check and one sentence, and optionally one action. */
 export function EmptyState({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-[18px] border border-dashed border-[#d9d4ca] bg-[#fdfcfa] p-5 sm:flex-row sm:items-center">
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#ecfdf3] text-success">
+    <div className="flex flex-col items-start gap-3 rounded-[18px] border border-dashed border-chip-border bg-surface-tint p-5 sm:flex-row sm:items-center">
+      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-success-tint text-success">
         <AdminIcon name="check" />
       </span>
-      <p className="flex-1 text-[15px] text-[#334155]">{children}</p>
+      <p className="flex-1 text-[15px] text-strong">{children}</p>
       {action}
     </div>
   )
@@ -173,7 +173,7 @@ export const filtersFormClass = (open: boolean) =>
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-b-2 border-[#d9d4ca] bg-surface px-1.5 font-sans text-xs font-semibold text-[#1e293b]">
+    <kbd className="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-b-2 border-chip-border bg-surface px-1.5 font-sans text-xs font-semibold text-foreground">
       {children}
     </kbd>
   )
@@ -182,6 +182,6 @@ export function Kbd({ children }: { children: ReactNode }) {
 export const tableClass =
   'w-full border-collapse text-left text-[15px] [&_tbody_tr:last-child>*]:border-b-0'
 export const thClass =
-  'border-b border-border bg-[#f7f5f0] px-4 py-3 text-xs font-semibold tracking-[0.06em] whitespace-nowrap text-muted-foreground uppercase'
-export const tdClass = 'border-b border-[#ece8e0] px-4 py-3 align-middle'
+  'border-b border-border bg-surface-raised px-4 py-3 text-xs font-semibold tracking-[0.06em] whitespace-nowrap text-muted-foreground uppercase'
+export const tdClass = 'border-b border-border px-4 py-3 align-middle'
 export const numClass = 'text-right tabular-nums'

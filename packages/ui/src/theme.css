@@ -21,6 +21,23 @@
   --color-warning: #a8500a;
   --color-star: #a8500a;
 
+  /* Roles the pages once filled with raw colours (M11-T02, D-215). */
+  --color-strong: #334155;
+  --color-chip-border: #d9d4ca;
+  --color-dashed-border: #a8a29e;
+  --color-surface-tint: #fdfcfa;
+  --color-track: #ece8e0;
+  --color-star-empty: #d6d3d1;
+  --color-cover-ink: #fdfaf3;
+  --color-accent-tint: #eff6ff;
+  --color-accent-edge: #bfdbfe;
+  --color-success-tint: #ecfdf3;
+  --color-success-edge: #a7f3d0;
+  --color-warning-tint: #fff7ed;
+  --color-warning-edge: #fed7aa;
+  --color-danger-tint: #fef2f2;
+  --color-danger-edge: #fecaca;
+
   /* The web app's fonts.css defines the web fonts and the metric-adjusted "Fallback" faces (D-180). */
   --font-sans:
     "Instrument Sans Variable", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system,

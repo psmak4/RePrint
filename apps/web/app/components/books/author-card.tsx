@@ -59,7 +59,7 @@ export function AuthorCard({
       </div>
       {bio ? (
         // Plain text: a three-line excerpt with its own link to the Author has no use for links (D-202).
-        <p className="line-clamp-3 text-[15px] leading-relaxed whitespace-pre-line text-[#334155]">
+        <p className="line-clamp-3 text-[15px] leading-relaxed whitespace-pre-line text-strong">
           {markdownToText(bio)}
         </p>
       ) : null}

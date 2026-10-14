@@ -24,7 +24,7 @@ type ActionResult =
 
 function BookSummary({ book }: { book: AdminMergeBook }) {
   return (
-    <div className="flex gap-3.5 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] p-4">
+    <div className="flex gap-3.5 rounded-xl border border-border bg-surface-tint p-4">
       <Cover cover={book.cover} title={book.title} size="small" className="shrink-0" />
       <div className="flex min-w-0 flex-col gap-1">
         <h3 className="font-serif text-lg leading-tight font-medium break-words">
@@ -131,10 +131,10 @@ function Candidate({ candidate }: { candidate: AdminMergeCandidate }) {
             {kept && removed ? (
               <section
                 aria-label={text.confirmHeading(removed.title, kept.title)}
-                className="flex flex-col gap-3 rounded-xl border border-[#fecaca] bg-[#fef2f2] p-4"
+                className="flex flex-col gap-3 rounded-xl border border-danger-edge bg-danger-tint p-4"
               >
                 <p className="font-medium">{text.confirmHeading(removed.title, kept.title)}</p>
-                <p className="text-sm text-[#334155]">{text.confirmHint}</p>
+                <p className="text-sm text-strong">{text.confirmHint}</p>
                 <div className="flex flex-wrap gap-3">
                   <Button
                     type="button"

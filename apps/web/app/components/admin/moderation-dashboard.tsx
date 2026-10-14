@@ -79,7 +79,7 @@ export function ModerationDashboard({
       <dl className="grid gap-5 md:grid-cols-2">
         <QueueCard
           icon="reviews"
-          iconClass="bg-[#eff6ff] text-accent"
+          iconClass="bg-accent-tint text-accent"
           label={text.pendingLabel}
           count={stats.pendingCount}
           oldestAt={stats.oldestPendingAt}
@@ -90,7 +90,7 @@ export function ModerationDashboard({
         />
         <QueueCard
           icon="reports"
-          iconClass="bg-[#fff7ed] text-[#9a3412]"
+          iconClass="bg-warning-tint text-warning"
           label={text.reportsLabel}
           count={stats.openReportCount}
           oldestAt={stats.oldestOpenReportAt}
@@ -116,7 +116,7 @@ export function ModerationDashboard({
             {oldest.map((item) => (
               <li
                 key={item.id}
-                className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-t border-[#ece8e0] py-3.5 first:border-t-0 first:pt-0 sm:grid-cols-[40px_minmax(0,1fr)_auto_auto]"
+                className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-t border-border py-3.5 first:border-t-0 first:pt-0 sm:grid-cols-[40px_minmax(0,1fr)_auto_auto]"
               >
                 <Cover
                   cover={null}
@@ -137,7 +137,7 @@ export function ModerationDashboard({
                       className="text-star"
                     >
                       {'★'.repeat(item.rating)}
-                      <span className="text-[#d6d3d1]">{'★'.repeat(5 - item.rating)}</span>
+                      <span className="text-star-empty">{'★'.repeat(5 - item.rating)}</span>
                     </span>
                   </span>
                 </div>

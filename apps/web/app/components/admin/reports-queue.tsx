@@ -134,7 +134,7 @@ function ReportActions({
               })
             }
           }}
-          className="flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4"
+          className="flex flex-col gap-3 rounded-xl border border-border bg-surface-tint p-4"
         >
           <ReasonField
             label={panel === 'unpublish' ? text.reasonLabel : text.suspendReasonLabel}
@@ -248,14 +248,14 @@ function ReportedReview({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <span role="img" aria-label={text.ratingOf(review.rating)} className="text-star">
             {'★'.repeat(review.rating)}
-            <span className="text-[#d6d3d1]">{'★'.repeat(5 - review.rating)}</span>
+            <span className="text-star-empty">{'★'.repeat(5 - review.rating)}</span>
           </span>
           <span className="font-serif text-xl leading-tight font-medium break-words">
             {review.headline ?? text.untitled}
           </span>
           {review.hasSpoilers ? <Badge>{text.spoilerFlag}</Badge> : null}
         </div>
-        <div className="font-serif text-[17px] leading-[1.6] text-[#1e293b]">
+        <div className="font-serif text-[17px] leading-[1.6] text-foreground">
           <ReviewBody body={review.body} />
         </div>
         <section aria-label={text.reportsHeading} className="flex flex-col gap-2">
@@ -264,7 +264,7 @@ function ReportedReview({
             {item.reports.map((report) => (
               <li
                 key={report.id}
-                className="flex flex-col gap-1.5 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] p-3.5"
+                className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface-tint p-3.5"
               >
                 <span>
                   <Badge>{text.reasons[report.reason]}</Badge>

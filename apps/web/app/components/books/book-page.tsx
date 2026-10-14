@@ -372,14 +372,14 @@ function BookHeader({
         <nav aria-label={labels.breadcrumbLabel} className="text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-x-2">
             <li>
-              <Link to="/" className="text-[#334155] hover:underline">
+              <Link to="/" className="text-strong hover:underline">
                 {labels.discover}
               </Link>
             </li>
             {firstGenre ? (
               <li className="flex gap-2">
                 <span aria-hidden="true">/</span>
-                <Link to={`/genres/${firstGenre.slug}`} className="text-[#334155] hover:underline">
+                <Link to={`/genres/${firstGenre.slug}`} className="text-strong hover:underline">
                   {firstGenre.name}
                 </Link>
               </li>
@@ -429,7 +429,7 @@ function BookHeader({
           {membership ? (
             <Link
               to={`/series/${membership.series.slug}`}
-              className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-[#d9d4ca] bg-surface px-3 text-[13px] text-[#1e293b] hover:border-input-border"
+              className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-chip-border bg-surface px-3 text-[13px] text-foreground hover:border-input-border"
             >
               <svg
                 aria-hidden="true"
@@ -458,7 +458,7 @@ function BookHeader({
               <p className="text-lg text-muted-foreground">{book.subtitle}</p>
             ) : null}
             {groups.length > 0 ? (
-              <p className="text-base text-[#334155] md:text-lg">
+              <p className="text-base text-strong md:text-lg">
                 {groups.map((group, g) => (
                   <span key={group.role}>
                     {g > 0 ? <span className="text-muted-foreground"> · </span> : null}
@@ -519,7 +519,7 @@ function BookHeader({
                 <li key={genre.slug}>
                   <Link
                     to={`/genres/${genre.slug}`}
-                    className="inline-flex h-[34px] items-center rounded-full border border-[#d9d4ca] bg-surface px-3.5 text-sm text-[#1e293b] hover:border-input-border"
+                    className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm text-foreground hover:border-input-border"
                   >
                     {genre.name}
                   </Link>
@@ -610,7 +610,7 @@ function Description({ text: description, tree }: { text: string | null; tree: R
           <RichText
             id="book-description-text"
             tree={tree}
-            className={`font-serif text-lg leading-[1.6] text-[#1e293b] md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
+            className={`font-serif text-lg leading-[1.6] text-foreground md:text-[19px] md:leading-[1.65] ${collapsible && !expanded ? 'line-clamp-6' : ''}`}
           />
           {collapsible ? (
             <button

@@ -52,14 +52,14 @@ export function SearchResultCard({
         {book.subtitle ? <p className="text-sm text-muted-foreground">{book.subtitle}</p> : null}
         {authors || book.firstPublishedYear ? (
           <p className="text-[15px] text-muted-foreground">
-            {authors ? <span className="text-[#1e293b]">{authors}</span> : null}
+            {authors ? <span className="text-foreground">{authors}</span> : null}
             {authors && book.firstPublishedYear ? ' · ' : null}
             {book.firstPublishedYear ? copy.search.firstPublished(book.firstPublishedYear) : null}
           </p>
         ) : null}
         {book.candidate ? (
           <p className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex h-[26px] items-center rounded-full bg-[#ece8e0] px-2.5 text-[13px] font-medium text-[#334155]">
+            <span className="inline-flex h-[26px] items-center rounded-full bg-track px-2.5 text-[13px] font-medium text-strong">
               {copy.search.notOnReprint}
             </span>
             <span className="text-[15px] text-muted-foreground">{copy.search.beNotFirst}</span>
@@ -81,8 +81,8 @@ export function SearchResultCard({
           <p className="text-sm text-muted-foreground">{copy.books.noReviews}</p>
         )}
         {book.topReview ? (
-          <figure className="border-l-2 border-[#d9d4ca] pl-4">
-            <blockquote className="font-serif text-[17px] leading-normal break-words text-[#334155] italic">
+          <figure className="border-l-2 border-chip-border pl-4">
+            <blockquote className="font-serif text-[17px] leading-normal break-words text-strong italic">
               {copy.redesign.reviewExcerpt.quoted(
                 book.topReview.headline
                   ? `${book.topReview.headline}. ${book.topReview.excerpt}`

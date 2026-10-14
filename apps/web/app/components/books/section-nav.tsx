@@ -54,12 +54,12 @@ export function SectionNav({ items }: { items: SectionNavItem[] }) {
                   'inline-flex h-[52px] items-center gap-1.5 border-b-2 px-1 text-[15px] font-medium whitespace-nowrap md:h-14',
                   active
                     ? 'border-accent text-foreground'
-                    : 'border-transparent text-[#334155] hover:text-foreground',
+                    : 'border-transparent text-strong hover:text-foreground',
                 )}
               >
                 {item.label}
                 {item.count !== undefined ? (
-                  <span className="rounded-full bg-[#ece8e0] px-[7px] py-0.5 text-xs font-semibold text-[#334155]">
+                  <span className="rounded-full bg-track px-[7px] py-0.5 text-xs font-semibold text-strong">
                     {item.count}
                   </span>
                 ) : null}

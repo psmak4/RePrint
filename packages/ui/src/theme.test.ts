@@ -41,8 +41,9 @@ describe('theme tokens', () => {
     expect(css).toContain('color-scheme: light')
     expect(css).not.toContain('color-scheme: dark')
     expect(css).not.toMatch(/prefers-color-scheme|\.dark\b/)
-    // The old dark palette's values must be gone.
-    for (const dark of ['#1e293b', '#273449', '#94a3b8', '#334155', '#3b82f6', '#60a5fa']) {
+    // The old dark palette's values must be gone. (#334155 is back as the light theme's `strong`
+    // text, D-215, so it is not on this list.)
+    for (const dark of ['#1e293b', '#273449', '#94a3b8', '#3b82f6', '#60a5fa']) {
       expect(css.toLowerCase()).not.toContain(dark)
     }
   })
@@ -55,6 +56,7 @@ describe('theme tokens', () => {
   // WCAG 2.2 AA: 4.5:1 for text, 3:1 for UI component boundaries and focus indicators.
   const textColours = [
     'foreground',
+    'strong',
     'muted-foreground',
     'link',
     'danger',
@@ -73,6 +75,53 @@ describe('theme tokens', () => {
 
   it('accent-foreground on accent-hover meets 4.5:1', () => {
     expect(contrast(token('accent-foreground'), token('accent-hover'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  // Status text and the text around it sit on the matching tint (badges, alerts, banners).
+  const tinted: Array<[string, string]> = [
+    ['danger', 'danger-tint'],
+    ['success', 'success-tint'],
+    ['warning', 'warning-tint'],
+    ['link', 'accent-tint'],
+    ...[
+      'danger-tint',
+      'success-tint',
+      'warning-tint',
+      'accent-tint',
+      'surface-tint',
+      'track',
+    ].flatMap(
+      (tint): Array<[string, string]> => [
+        ['foreground', tint],
+        ['strong', tint],
+        ['muted-foreground', tint],
+      ],
+    ),
+  ]
+  it.each(tinted)('text %s on %s meets 4.5:1', (fg, bg) => {
+    expect(contrast(token(fg), token(bg))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('names a token for every colour role the pages use (D-215)', () => {
+    for (const name of [
+      'strong',
+      'chip-border',
+      'dashed-border',
+      'surface-tint',
+      'track',
+      'star-empty',
+      'cover-ink',
+      'accent-tint',
+      'accent-edge',
+      'success-tint',
+      'success-edge',
+      'warning-tint',
+      'warning-edge',
+      'danger-tint',
+      'danger-edge',
+    ]) {
+      expect(token(name)).toMatch(/^#[0-9a-f]{6}$/)
+    }
   })
 
   const uiColours = ['ring', 'input-border']

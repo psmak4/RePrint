@@ -64,7 +64,7 @@ export function HelpfulVote({
           aria-pressed={state.helpful}
           disabled={mutation.isPending}
           onClick={() => mutation.mutate(!state.helpful)}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised aria-pressed:border-accent aria-pressed:bg-[#eff6ff] aria-pressed:text-[#1e40af]"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-input-border bg-surface px-4 text-sm font-medium hover:bg-surface-raised aria-pressed:border-accent aria-pressed:bg-accent-tint aria-pressed:text-link"
         >
           <svg
             aria-hidden="true"

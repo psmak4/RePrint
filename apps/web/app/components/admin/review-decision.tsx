@@ -96,7 +96,7 @@ export function DecisionPanel({
     return (
       <section
         aria-label={text.actionsLabel}
-        className="border-t border-border bg-[#fdfcfa] px-5 py-4 text-sm text-muted-foreground md:px-6"
+        className="border-t border-border bg-surface-tint px-5 py-4 text-sm text-muted-foreground md:px-6"
       >
         <p>{text.readOnly}</p>
       </section>
@@ -106,7 +106,7 @@ export function DecisionPanel({
     <>
       {/* The reject form sits above the pinned bar, so the bar stays small on a phone. */}
       {rejecting ? (
-        <div className="mx-5 mb-4 flex flex-col gap-3 rounded-xl border border-border bg-[#fdfcfa] p-4 md:mx-6">
+        <div className="mx-5 mb-4 flex flex-col gap-3 rounded-xl border border-border bg-surface-tint p-4 md:mx-6">
           <div className="flex flex-col gap-1">
             <Label htmlFor={phraseId}>{text.phraseLabel}</Label>
             <Select id={phraseId} value="" onChange={(event) => setReason(event.target.value)}>

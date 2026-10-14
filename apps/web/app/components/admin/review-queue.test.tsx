@@ -118,14 +118,14 @@ describe('ReviewQueue', () => {
     renderQueue({ selected: item(1), claim: { state: 'other', name: 'Bo' } })
     const status = await screen.findByRole('status')
     expect(status.textContent).toContain('Bo is handling this review.')
-    expect(status.className).toContain('bg-[#fff7ed]')
+    expect(status.className).toContain('bg-warning-tint')
   })
 
   it('marks an edited review and flags a long wait in the list', async () => {
     renderQueue({ queue: { items: [item(1, { version: 2 })], meta: { nextCursor: null } } })
     const list = await screen.findByRole('list', { name: 'Pending reviews' })
     expect(within(list).getByText('Edited')).toBeTruthy()
-    expect(within(list).getByText('Waiting 3 hours').className).toContain('bg-[#fff7ed]')
+    expect(within(list).getByText('Waiting 3 hours').className).toContain('bg-warning-tint')
   })
 
   it('keeps the decision bar pinned: the review card clips without becoming a scroller', async () => {

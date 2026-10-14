@@ -47,14 +47,14 @@ export function RatingBreakdown({
                 aria-pressed={active}
                 aria-label={text.barLabel(stars, n)}
                 onClick={() => onSelect(active ? null : stars)}
-                className={`grid min-h-8 w-full grid-cols-[36px_minmax(0,1fr)_32px] items-center gap-2.5 rounded-lg border px-1.5 text-sm font-medium md:grid-cols-[40px_minmax(0,1fr)_32px] md:px-2 ${active ? 'border-accent bg-[#eff6ff]' : 'border-transparent hover:bg-surface-raised'}`}
+                className={`grid min-h-8 w-full grid-cols-[36px_minmax(0,1fr)_32px] items-center gap-2.5 rounded-lg border px-1.5 text-sm font-medium md:grid-cols-[40px_minmax(0,1fr)_32px] md:px-2 ${active ? 'border-accent bg-accent-tint' : 'border-transparent hover:bg-surface-raised'}`}
               >
                 <span aria-hidden="true" className="text-left">
                   {stars} ★
                 </span>
                 <span
                   aria-hidden="true"
-                  className="h-2 overflow-hidden rounded-full bg-[#ece8e0] md:h-2.5"
+                  className="h-2 overflow-hidden rounded-full bg-track md:h-2.5"
                 >
                   <span className={`block h-full rounded-full bg-star ${widthClass(n / max)}`} />
                 </span>

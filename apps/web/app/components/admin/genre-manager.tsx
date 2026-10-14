@@ -238,13 +238,13 @@ function GenreRow({
   const parent = genres.find((candidate) => candidate.id === genre.parentId)
   return (
     <>
-      <tr className={genre.archived ? 'bg-[#fdfcfa]' : undefined}>
+      <tr className={genre.archived ? 'bg-surface-tint' : undefined}>
         <td className={tdClass}>
           <span
             className={cn(
               'flex flex-col gap-0.5',
               indent &&
-                'relative pl-6 before:absolute before:top-1 before:left-1.5 before:h-3 before:w-2.5 before:rounded-bl before:border-b-[1.5px] before:border-l-[1.5px] before:border-[#c9c3b8]',
+                'relative pl-6 before:absolute before:top-1 before:left-1.5 before:h-3 before:w-2.5 before:rounded-bl before:border-b-[1.5px] before:border-l-[1.5px] before:border-chip-border',
             )}
           >
             <span className={cn('font-semibold', genre.archived && 'text-muted-foreground')}>
@@ -292,7 +292,7 @@ function GenreRow({
       </tr>
       {editing || action.done || action.formError ? (
         <tr>
-          <td colSpan={5} className={cn(tdClass, 'bg-[#fdfcfa]')}>
+          <td colSpan={5} className={cn(tdClass, 'bg-surface-tint')}>
             <div className="flex flex-col gap-3">
               {editing ? (
                 <GenreForm
@@ -447,7 +447,7 @@ function RulesSection({ genres, rules }: { genres: AdminGenre[]; rules: AdminSub
 }
 
 const tabClass =
-  'inline-flex h-12 items-center gap-2 border-b-[3px] border-transparent text-[15px] font-medium text-[#334155] hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:font-semibold aria-[current=page]:text-foreground'
+  'inline-flex h-12 items-center gap-2 border-b-[3px] border-transparent text-[15px] font-medium text-strong hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:font-semibold aria-[current=page]:text-foreground'
 
 function TabCount({ n }: { n: number }) {
   return (
@@ -610,7 +610,7 @@ export function GenreManager({
                   </tbody>
                 </table>
               </ScrollRegion>
-              <p className="border-t border-border bg-[#fdfcfa] px-5 py-3.5 text-sm text-muted-foreground">
+              <p className="border-t border-border bg-surface-tint px-5 py-3.5 text-sm text-muted-foreground">
                 {text.shown(shown.length, genres.length)}
               </p>
             </div>

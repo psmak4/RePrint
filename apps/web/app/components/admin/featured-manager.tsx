@@ -94,7 +94,7 @@ function GenrePicker({
           {picked.map((genre, index) => (
             <li
               key={genre.id}
-              className="flex flex-wrap items-center gap-2 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] px-4 py-2.5"
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface-tint px-4 py-2.5"
             >
               <span className="flex-1 font-medium">{genre.name}</span>
               {canEdit ? (
@@ -199,7 +199,7 @@ function ReviewPicker({
     <AdminCard title={text.reviewHeading}>
       <p className="text-sm text-muted-foreground">{text.reviewHint}</p>
       {current ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-[#a7f3d0] bg-[#f6fef9] p-4">
+        <div className="flex flex-col gap-2 rounded-xl border border-success-edge bg-success-tint p-4">
           <ReviewCard item={current} />
           <div>
             <Button
@@ -224,7 +224,7 @@ function ReviewPicker({
           {candidates.map((item) => (
             <li
               key={item.review.id}
-              className="flex flex-col gap-2 rounded-xl border border-[#ece8e0] bg-[#fdfcfa] p-4"
+              className="flex flex-col gap-2 rounded-xl border border-border bg-surface-tint p-4"
             >
               <ReviewCard item={item} />
               <div>

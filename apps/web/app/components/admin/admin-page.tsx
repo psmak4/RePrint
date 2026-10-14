@@ -29,11 +29,11 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
                   // Exact matches, so Catalog is not marked on Genres and rules; a user's page
                   // still marks Users.
                   end={item.to !== '/admin/users'}
-                  className="group flex h-10 items-center gap-3 rounded-[10px] border border-transparent px-3 text-[15px] font-medium text-[#1e293b] hover:bg-surface-raised aria-[current=page]:border-border aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
+                  className="group flex h-10 items-center gap-3 rounded-[10px] border border-transparent px-3 text-[15px] font-medium text-foreground hover:bg-surface-raised aria-[current=page]:border-border aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
                 >
                   <AdminIcon
                     name={item.icon}
-                    className="text-[#64748b] group-aria-[current=page]:text-accent"
+                    className="text-muted-foreground group-aria-[current=page]:text-accent"
                   />
                   {item.label}
                   {item.count ? (

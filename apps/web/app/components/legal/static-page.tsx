@@ -29,12 +29,12 @@ export function StaticPage({
               {section.heading}
             </h2>
             {section.paragraphs?.map((paragraph) => (
-              <p key={paragraph} className="text-[17px] leading-[1.7] text-[#1e293b]">
+              <p key={paragraph} className="text-[17px] leading-[1.7] text-foreground">
                 {paragraph}
               </p>
             ))}
             {section.items && (
-              <ul className="list-disc space-y-2 pl-6 text-[17px] leading-[1.7] text-[#1e293b] marker:text-muted-foreground">
+              <ul className="list-disc space-y-2 pl-6 text-[17px] leading-[1.7] text-foreground marker:text-muted-foreground">
                 {section.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
