@@ -2,13 +2,13 @@ import { type AdminUserDetail, ASSIGNABLE_ROLES, REVIEW_STATUSES } from '@reprin
 import { Button, Input, Label, Textarea } from '@reprint/ui'
 import { type ReactNode, useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge, StatTile, USER_STATUS_TONE } from './admin-ui.js'
 import { RoleBadges } from './users-list.js'
 
-const text = copy.admin.users
+const text = adminCopy.users
 const actions = text.actions
 const REASON_MAX = 500
 
@@ -242,7 +242,7 @@ export function UserDetail({
   return (
     <AdminPage
       crumbs={[
-        { label: copy.admin.title, to: '/admin' },
+        { label: adminCopy.title, to: '/admin' },
         { label: text.title, to: '/admin/users' },
         { label: `@${user.username}` },
       ]}

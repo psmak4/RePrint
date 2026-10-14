@@ -1,4 +1,4 @@
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 import { AuthCard, AuthNextLink } from '../auth/auth-card.js'
 
 export function ConfirmEmailChangePage({
@@ -8,7 +8,7 @@ export function ConfirmEmailChangePage({
   changed: boolean
   signedIn: boolean
 }) {
-  const c = copy.settings.confirmEmail
+  const c = settingsCopy.confirmEmail
   return (
     <AuthCard
       title={changed ? c.successTitle : c.failedTitle}

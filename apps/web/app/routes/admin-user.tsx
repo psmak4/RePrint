@@ -12,7 +12,7 @@ import {
 import { data } from 'react-router'
 import { z } from 'zod'
 import { UserDetail } from '../components/admin/user-detail.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
@@ -21,7 +21,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-user'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.users.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.users.title}`, noindex: true })
 }
 
 /** One user with what the viewer may do to them (PRD §7.11). Moderators get the limited view (D-044). */
@@ -32,7 +32,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
     response = await apiClientFor(request).get(`/v1/admin/users/${encodeURIComponent(params.id)}`)
   } catch (error) {
     logger.error({ err: error }, 'could not load the admin user')
-    throw data(copy.admin.users.loadFailed, { status: 502 })
+    throw data(adminCopy.users.loadFailed, { status: 502 })
   }
   if (response.status === 404 || response.status === 400) {
     throw data('Not found', { status: 404 })
@@ -42,7 +42,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'admin user request failed')
-    throw data(copy.admin.users.loadFailed, { status: 502 })
+    throw data(adminCopy.users.loadFailed, { status: 502 })
   }
   const detail: AdminUserDetail = adminUserDetailSchema.parse(await response.json())
   return {
@@ -70,7 +70,7 @@ const userActionSchema = z.discriminatedUnion('intent', [
 export async function action({ request, params, context }: Route.ActionArgs) {
   const viewer = await requireViewerPermission({ request, context }, PERMISSIONS.usersView)
   const parsed = userActionSchema.safeParse(await request.json().catch(() => null))
-  const fallback = copy.admin.users.actions.failed
+  const fallback = adminCopy.users.actions.failed
   if (!parsed.success) return data({ formError: fallback }, { status: 400 })
   const input = parsed.data
   const base = `/v1/admin/users/${encodeURIComponent(params.id)}`

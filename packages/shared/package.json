@@ -4,6 +4,7 @@
   "private": true,
   "description": "Zod schemas, domain types, permission names, constants, and pure domain logic",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

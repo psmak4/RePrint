@@ -1,7 +1,7 @@
 import { Button, Input, Label } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 
 type UploadResult = { avatarUrl?: string; formError?: string }
 
@@ -13,7 +13,7 @@ export function AvatarForm({
   avatarUrl: string | null
   displayName: string
 }) {
-  const c = copy.settings.avatar
+  const c = settingsCopy.avatar
   const fetcher = useFetcher<UploadResult>()
   const formRef = useRef<HTMLFormElement>(null)
   const [file, setFile] = useState<File | null>(null)

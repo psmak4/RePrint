@@ -5,14 +5,14 @@ import {
 } from '@reprint/shared'
 import { Button, cn, Input, Label } from '@reprint/ui'
 import { Form, Link } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
 import { PagerLinks } from '../books/page-hero.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, numClass, StatTile, tableClass, tdClass, thClass } from './admin-ui.js'
 import { ScrollRegion } from './scroll-region.js'
 
-const text = copy.admin.catalog
+const text = adminCopy.catalog
 
 const monthFormat = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -130,7 +130,7 @@ export function CatalogDashboard({
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
       actions={
         <>
           <Button asChild variant="outline">

@@ -7,7 +7,7 @@ import {
 import { Button, cn, Input, Label, Select } from '@reprint/ui'
 import { useState } from 'react'
 import { Form, Link } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { AdminPage } from './admin-page.js'
 import {
@@ -24,7 +24,7 @@ import {
 import { AdminIcon } from './icons.js'
 import { ScrollRegion } from './scroll-region.js'
 
-const text = copy.admin.users
+const text = adminCopy.users
 
 type Filters = { q: string; role: string; status: string; joinedFrom: string; joinedTo: string }
 
@@ -69,7 +69,7 @@ export function UsersList({
     <AdminPage
       title={text.title}
       lead={text.lead}
-      crumbs={[{ label: copy.admin.title, to: '/admin' }, { label: text.title }]}
+      crumbs={[{ label: adminCopy.title, to: '/admin' }, { label: text.title }]}
     >
       <FiltersToggle
         open={filtersOpen}

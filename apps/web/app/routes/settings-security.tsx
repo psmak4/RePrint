@@ -10,6 +10,7 @@ import { data, redirect } from 'react-router'
 import { z } from 'zod'
 import { SecuritySettingsPage } from '../components/settings/security-settings-page.js'
 import { copy } from '../copy/index.js'
+import { settingsCopy } from '../copy/settings.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, forwardCookies, sendToApi } from '../lib/auth.server.js'
 import { loadMe } from '../lib/me.server.js'
@@ -17,7 +18,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/settings-security'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.settings.security.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${settingsCopy.security.title}`, noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -40,7 +41,7 @@ const intentSchema = z.discriminatedUnion('intent', [
 
 /** One action for every security form; each posts JSON with an `intent` (D-091). */
 export async function action({ request }: Route.ActionArgs) {
-  const c = copy.settings.security
+  const c = settingsCopy.security
   const parsed = intentSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return data({ formError: copy.auth.genericError }, { status: 400 })
   const { intent, ...body } = parsed.data

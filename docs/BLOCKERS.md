@@ -52,10 +52,10 @@ Entry format:
 
 ### 2026-10-03 · M8-T14 · HUMAN
 - Task: M8-T14 Provide or approve final legal and static page copy. The loop can't write binding legal text or choose a monitored inbox.
-- State: the About, Terms, Privacy, Community Guidelines, and Contact pages exist as draft copy (M8-T04, D-166). Each is marked `DRAFT – owner review`, and the Contact page shows the placeholder `copy.legal.contactPlaceholder` in `apps/web/app/copy/index.ts`.
+- State: the About, Terms, Privacy, Community Guidelines, and Contact pages exist as draft copy (M8-T04, D-166). Each is marked `DRAFT – owner review`, and the Contact page shows the placeholder `legalCopy.contactPlaceholder` in `apps/web/app/copy/legal.ts` (moved from `copy.legal` in `index.ts` by M10-T07).
 - Owner must:
   1. Read the five pages (`/about`, `/terms`, `/privacy`, `/community-guidelines`, `/contact`) and have counsel review Terms and Privacy as needed.
-  2. Edit the copy under `copy.legal` in `apps/web/app/copy/index.ts`, or approve it as is.
+  2. Edit the copy in `apps/web/app/copy/legal.ts` (`legalCopy`), or approve it as is.
   3. Replace `contactPlaceholder` with a real, monitored inbox.
   4. Remove the `DRAFT – owner review` markers, update the component tests in `apps/web/app/routes/static-pages.test.tsx` to match, and run `pnpm check`.
   5. Merge that change through a PR and mark M8-T14 `[x]` in `docs/TASKS.md`.

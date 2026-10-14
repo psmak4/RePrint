@@ -684,7 +684,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the Book page gets the Author card plus up to 6 other Books by its first Author, and up to 6 top-rated Books in its first Genre, without loading the full Author or Genre page data; the API shape is recorded in `docs/DECISIONS.md` and the OpenAPI spec regenerated
   - Accept: a Book page view never queues `catalog.author-sync` (D-205), and an Author page view still does when due (D-203); integration tests prove both
   - Accept: the rails show the same Books in the same order as before (route and integration tests); `pnpm check` and the Book page e2e specs pass
-- [ ] M10-T07 · Web: the root bundle carries no Zod and no admin or legal copy · deps: M9-T20 · PRD: §3, §11
+- [x] M10-T07 · Web: the root bundle carries no Zod and no admin or legal copy · deps: M9-T20 · PRD: §3, §11
   - Accept: copy is split by area under `apps/web/app/copy/` (still one place per app, PRD §3), so each route's chunks hold only the copy it uses; the copy guard checks every file
   - Accept: the header search box no longer brings schemas into the root chunk (the suggestion response is checked by code loaded when first needed)
   - Accept: a check in `pnpm check` fails if the built root route's JS contains Zod or admin copy; the PR lists gzip JS per route (Discover, Book, search, log in) before and after
@@ -710,7 +710,11 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Discover's cached rows are checked against their schemas twice per request, not three times: the per-row read check that falls back to a rebuild, and the response serializer PRD §10 requires (changed in M10-T12: one check would mean giving up either the rebuild on a bad row or the required serializer)
   - Accept: the home page asks for only the 2 Reading entries it shows, and the root layout preconnects to the Open Library cover host
   - Accept: `removeMemberFromAggregates` updates every affected Book in one statement (integration test); `pnpm check` passes
-- [ ] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12 · PRD: §11, §12
+- [ ] M10-T14 · Web: Discover, Book, and search pages load Zod only when a form or a write needs it · deps: M10-T07 · PRD: §11
+  - Accept: the components those pages render for a Visitor (`ShelfSelector`, `HelpfulVote`, `ReviewExcerpt`, `search-links`, and the review form's module) no longer import schemas at load time: response checks load with the first write, as the header search box's do (D-208), and the review form loads with its editor
+  - Accept: `pnpm bundle:check` also fails if the Discover, Book, or search route's JS contains Zod, and the PR lists gzip JS per route before and after
+  - Accept: the existing component tests and the review, shelf, helpful vote, and search e2e specs pass; `pnpm check` passes
+- [ ] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12, M10-T14 · PRD: §11, §12
   - Accept: every acceptance criterion in `docs/milestones/M10-performance.md` is checked off in the PR body with the command that proved it, with each baseline measure taken again on the same data
   - Accept: `docs/performance.md` explains how to repeat the measurements and records the results
   - Accept: `pnpm check` and `pnpm test:e2e` pass, and the web vitals check still meets PRD §11
