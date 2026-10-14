@@ -6,12 +6,12 @@ import type {
 import { Button } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
-import { copy } from '../../copy/index.js'
+import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
 import { AdminPage } from './admin-page.js'
 import { Badge, EmptyState } from './admin-ui.js'
 
-const text = copy.admin.merge
+const text = adminCopy.merge
 
 type ActionResult =
   | { done: 'dismissed'; candidateId: string }
@@ -180,8 +180,8 @@ export function MergeQueue({ queue }: { queue: AdminMergeCandidatesResponse }) {
       title={text.title}
       lead={text.lead}
       crumbs={[
-        { label: copy.admin.title, to: '/admin' },
-        { label: copy.admin.catalogNav, to: '/admin/catalog' },
+        { label: adminCopy.title, to: '/admin' },
+        { label: adminCopy.catalogNav, to: '/admin/catalog' },
         { label: text.title },
       ]}
     >

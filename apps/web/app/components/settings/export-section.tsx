@@ -1,8 +1,8 @@
-import { copy } from '../../copy/index.js'
+import { settingsCopy } from '../../copy/settings.js'
 
 /** A plain link to the download route, so the browser saves the file the API sends. */
 export function ExportSection() {
-  const c = copy.settings.security.export
+  const c = settingsCopy.security.export
   return (
     <section
       aria-labelledby="export-heading"

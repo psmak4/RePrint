@@ -9,7 +9,7 @@ import {
 } from '@reprint/shared'
 import { data } from 'react-router'
 import { CatalogDashboard } from '../components/admin/catalog-dashboard.js'
-import { copy } from '../copy/index.js'
+import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
@@ -17,7 +17,7 @@ import { pageMeta } from '../lib/seo.js'
 import type { Route } from './+types/admin-catalog'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${copy.admin.catalog.title}`, noindex: true })
+  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.catalog.title}`, noindex: true })
 }
 
 type Api = ReturnType<typeof apiClientFor>
@@ -28,14 +28,14 @@ async function loadStats(api: Api): Promise<AdminCatalogStats> {
     response = await api.get('/v1/admin/catalog/stats')
   } catch (error) {
     logger.error({ err: error }, 'could not load the Catalog stats')
-    throw data(copy.admin.catalog.loadFailed, { status: 502 })
+    throw data(adminCopy.catalog.loadFailed, { status: 502 })
   }
   if (response.status === 401 || response.status === 403) {
     throw data('Forbidden', { status: response.status })
   }
   if (!response.ok) {
     logger.error({ status: response.status }, 'Catalog stats request failed')
-    throw data(copy.admin.catalog.loadFailed, { status: 502 })
+    throw data(adminCopy.catalog.loadFailed, { status: 502 })
   }
   return adminCatalogStatsSchema.parse(await response.json())
 }

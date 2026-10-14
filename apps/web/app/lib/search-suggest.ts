@@ -1,18 +1,23 @@
-import {
-  type BookSummary,
-  type SearchSuggestResponse,
-  searchSuggestResponseSchema,
-} from '@reprint/shared'
+import type { BookSummary, SearchSuggestResponse } from '@reprint/shared'
 import { copy } from '../copy/index.js'
 
 export type Suggest = (q: string, signal: AbortSignal) => Promise<SearchSuggestResponse>
 
+/**
+ * The header box's suggestions. The response schema (and Zod with it) is loaded beside the first
+ * request, not with every page, since the box is in every page's root bundle (M10-T07).
+ */
 export async function fetchSuggestions(
   q: string,
   signal: AbortSignal,
 ): Promise<SearchSuggestResponse> {
+  const schemas = import('./search-suggest-schema.js')
+  // A failed load still throws where it is awaited; this only keeps an early return from leaving
+  // the import unhandled.
+  schemas.catch(() => {})
   const response = await fetch(`/search/suggest?q=${encodeURIComponent(q)}`, { signal })
   if (!response.ok) throw new Error(`suggestions failed with ${response.status}`)
+  const { searchSuggestResponseSchema } = await schemas
   return searchSuggestResponseSchema.parse(await response.json())
 }
 
