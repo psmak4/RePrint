@@ -693,7 +693,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: descriptions, bios, and Series descriptions are parsed on the server and drawn on the client from a small tree, with D-202's output and link rules (raw HTML skipped; only absolute http(s) links outside Open Library are links) and no `dangerouslySetInnerHTML`
   - Accept: the Book, Author, and Series pages' client JS holds no Markdown parser; the existing `RichText` tests and the D-202 e2e test pass
   - Accept: a `docs/DECISIONS.md` entry amends D-202's library choice; `pnpm check` passes
-- [ ] M10-T09 · API: Book cards and details read only the columns they show · deps: M9-T20 · PRD: §9, §11
+- [x] M10-T09 · API: Book cards and details read only the columns they show · deps: M9-T20 · PRD: §9, §11
   - Accept: `loadBookSummaries`, `loadAuthorDetail`, and the other Book card lists select one shared set of summary columns (never `search_vector`, `field_origins`, `locked_fields`, or `description`)
   - Accept: `loadBookDetail` counts Editions and reads only the Primary Edition with its Cover, instead of every Edition
   - Accept: responses are unchanged (existing integration and contract tests pass, OpenAPI unchanged); `pnpm check` passes

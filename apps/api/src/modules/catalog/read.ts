@@ -33,7 +33,37 @@ import { SOURCE_DISPLAY_NAMES } from '../../catalog/sources/index.js'
 
 type CoverRow = typeof covers.$inferSelect
 type EditionRow = typeof editions.$inferSelect
-type BookRow = typeof books.$inferSelect
+
+/**
+ * What a Book card shows (M10-T09). Lists read only these, never the search vector, field origins,
+ * locked fields, or description, which a card has no use for.
+ */
+export const bookSummaryColumns = {
+  id: books.id,
+  slug: books.slug,
+  title: books.title,
+  subtitle: books.subtitle,
+  coverId: books.coverId,
+  firstPublishedYear: books.firstPublishedYear,
+  reviewCount: books.reviewCount,
+  ratingSum: books.ratingSum,
+  ratingCounts: books.ratingCounts,
+}
+
+/** What the Book page and its side requests read: the card plus the details, and when it was refreshed. */
+const bookDetailColumns = {
+  ...bookSummaryColumns,
+  description: books.description,
+  originalLanguage: books.originalLanguage,
+  primaryEditionId: books.primaryEditionId,
+  sourceEditionCount: books.sourceEditionCount,
+  refreshedAt: books.refreshedAt,
+}
+
+type BookSummaryRow = { [K in keyof typeof bookSummaryColumns]: (typeof books.$inferSelect)[K] }
+export type BookDetailRow = {
+  [K in keyof typeof bookDetailColumns]: (typeof books.$inferSelect)[K]
+}
 
 let uploadUrlOf: ((key: string) => string) | null = null
 
@@ -63,7 +93,7 @@ async function coversById(db: Database, ids: (string | null)[]): Promise<Map<str
 
 /** The average is rounded to one decimal (PRD §7.4); `distribution[0]` is the one-star count. */
 export function ratingSummary(
-  book: Pick<BookRow, 'reviewCount' | 'ratingSum' | 'ratingCounts'>,
+  book: Pick<BookSummaryRow, 'reviewCount' | 'ratingSum' | 'ratingCounts'>,
 ): RatingSummary {
   return {
     average: averageRating(book),
@@ -119,7 +149,7 @@ async function bylines(db: Database, bookIds: string[]): Promise<Map<string, Con
 /** Cards for the given Books, in the order of `ids`; IDs that no longer exist are dropped. */
 export async function loadBookSummaries(db: Database, ids: string[]): Promise<BookSummary[]> {
   if (ids.length === 0) return []
-  const rows = await db.select().from(books).where(inArray(books.id, ids))
+  const rows = await db.select(bookSummaryColumns).from(books).where(inArray(books.id, ids))
   const [byline, coverMap] = await Promise.all([
     bylines(
       db,
@@ -149,12 +179,12 @@ export async function loadBookSummaries(db: Database, ids: string[]): Promise<Bo
   })
 }
 
-export async function findBookBySlug(db: Database, slug: string): Promise<BookRow | null> {
-  const [row] = await db.select().from(books).where(eq(books.slug, slug)).limit(1)
+export async function findBookBySlug(db: Database, slug: string): Promise<BookDetailRow | null> {
+  const [row] = await db.select(bookDetailColumns).from(books).where(eq(books.slug, slug)).limit(1)
   if (row) return row
   // The slug of a Book that was merged into another finds the remaining Book (D-157).
   const [merged] = await db
-    .select({ book: books })
+    .select({ book: bookDetailColumns })
     .from(bookSlugRedirects)
     .innerJoin(books, eq(books.id, bookSlugRedirects.bookId))
     .where(eq(bookSlugRedirects.slug, slug))
@@ -162,35 +192,47 @@ export async function findBookBySlug(db: Database, slug: string): Promise<BookRo
   return merged?.book ?? null
 }
 
-export async function loadBookDetail(db: Database, book: BookRow): Promise<BookDetail> {
-  const [editionRows, byline, seriesRows, genreRows, outsideRows] = await Promise.all([
-    db.select().from(editions).where(eq(editions.bookId, book.id)),
-    bylines(db, [book.id]),
-    db
-      .select({ slug: series.slug, name: series.name, position: bookSeries.position })
-      .from(bookSeries)
-      .innerJoin(series, eq(series.id, bookSeries.seriesId))
-      .where(eq(bookSeries.bookId, book.id))
-      .orderBy(asc(series.name)),
-    db
-      .select({ slug: genres.slug, name: genres.name })
-      .from(bookGenres)
-      .innerJoin(genres, eq(genres.id, bookGenres.genreId))
-      .where(eq(bookGenres.bookId, book.id))
-      .orderBy(asc(genres.name)),
-    db
-      .select({
-        source: sourceLinks.source,
-        average: sourceRatings.average,
-        count: sourceRatings.count,
-        counts: sourceRatings.counts,
-      })
-      .from(sourceRatings)
-      .innerJoin(sourceLinks, eq(sourceLinks.id, sourceRatings.sourceLinkId))
-      .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, book.id))),
-  ])
-  const primary = editionRows.find((row) => row.id === book.primaryEditionId) ?? null
-  const coverMap = await coversById(db, [book.coverId, primary?.coverId ?? null])
+export async function loadBookDetail(db: Database, book: BookDetailRow): Promise<BookDetail> {
+  // The Book page needs only the Primary Edition and how many there are; the list is its own request.
+  const [[editionCount], [primaryRow], bookCover, byline, seriesRows, genreRows, outsideRows] =
+    await Promise.all([
+      db.select({ n: count() }).from(editions).where(eq(editions.bookId, book.id)),
+      book.primaryEditionId
+        ? db
+            .select({ edition: editions, cover: covers })
+            .from(editions)
+            .leftJoin(covers, eq(covers.id, editions.coverId))
+            .where(and(eq(editions.id, book.primaryEditionId), eq(editions.bookId, book.id)))
+            .limit(1)
+        : Promise.resolve([]),
+      coversById(db, [book.coverId]),
+      bylines(db, [book.id]),
+      db
+        .select({ slug: series.slug, name: series.name, position: bookSeries.position })
+        .from(bookSeries)
+        .innerJoin(series, eq(series.id, bookSeries.seriesId))
+        .where(eq(bookSeries.bookId, book.id))
+        .orderBy(asc(series.name)),
+      db
+        .select({ slug: genres.slug, name: genres.name })
+        .from(bookGenres)
+        .innerJoin(genres, eq(genres.id, bookGenres.genreId))
+        .where(eq(bookGenres.bookId, book.id))
+        .orderBy(asc(genres.name)),
+      db
+        .select({
+          source: sourceLinks.source,
+          average: sourceRatings.average,
+          count: sourceRatings.count,
+          counts: sourceRatings.counts,
+        })
+        .from(sourceRatings)
+        .innerJoin(sourceLinks, eq(sourceLinks.id, sourceRatings.sourceLinkId))
+        .where(and(eq(sourceLinks.entityType, 'book'), eq(sourceLinks.entityId, book.id))),
+    ])
+  const primary = primaryRow?.edition ?? null
+  const coverMap = new Map(bookCover)
+  if (primaryRow?.cover) coverMap.set(primaryRow.cover.id, primaryRow.cover)
   return {
     id: book.id,
     slug: book.slug,
@@ -212,7 +254,7 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
     })),
     genres: genreRows,
     primaryEdition: primary ? toEdition(primary, coverMap) : null,
-    editionCount: editionRows.length,
+    editionCount: editionCount?.n ?? 0,
     sourceEditionCount: book.sourceEditionCount,
     rating: ratingSummary(book),
     // Other Sources' reader ratings, under a name readers know; never mixed into `rating` (D-204).
@@ -313,14 +355,14 @@ export async function loadAuthorDetail(
   // counted in the database; the other Roles are short and come whole.
   const [writtenRows, otherRows, [writtenCount]] = await Promise.all([
     db
-      .select({ role: contributions.role, book: books })
+      .select({ role: contributions.role, book: bookSummaryColumns })
       .from(contributions)
       .innerJoin(books, eq(books.id, contributions.bookId))
       .where(byAuthor('written'))
       .orderBy(...order)
       .limit((options.page ?? 1) * AUTHOR_WRITTEN_PAGE_SIZE),
     db
-      .select({ role: contributions.role, book: books })
+      .select({ role: contributions.role, book: bookSummaryColumns })
       .from(contributions)
       .innerJoin(books, eq(books.id, contributions.bookId))
       .where(byAuthor('other'))
