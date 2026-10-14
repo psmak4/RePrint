@@ -697,7 +697,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `loadBookSummaries`, `loadAuthorDetail`, and the other Book card lists select one shared set of summary columns (never `search_vector`, `field_origins`, `locked_fields`, or `description`)
   - Accept: `loadBookDetail` counts Editions and reads only the Primary Edition with its Cover, instead of every Edition
   - Accept: responses are unchanged (existing integration and contract tests pass, OpenAPI unchanged); `pnpm check` passes
-- [ ] M10-T10 · API: storing a Book looks up its Editions in batches · deps: M9-T20 · PRD: §5.4, §6
+- [x] M10-T10 · API: storing a Book looks up its Editions in batches · deps: M9-T20 · PRD: §5.4, §6
   - Accept: `ingestBook` finds existing Edition links and ISBN-13 matches for all of a candidate's Editions in a fixed number of queries, and inserts new Editions and links in batches
   - Accept: the ingest integration suite passes unchanged (matching, locked fields, field origins, ISBN rules, repeat runs), and a new test shows the query count for a 50-Edition candidate does not grow with its Editions
   - Accept: `pnpm check` passes
