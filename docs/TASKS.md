@@ -658,3 +658,59 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: every admin page renders `AdminPage` (breadcrumb, its own `h1`, lead, actions) with the grouped nav and queue counts; counts are never requested without `reviews.moderate` and are left off when `/v1/mod/stats` fails (D-201)
   - Accept: dashboard, review and reports queues, users (table and phone list), user detail, audit log, catalog, merge queue, Genres and rules (tabs, filter, form cards), featured content, system, and Edit Book use the shared building blocks and pills; no admin page scrolls sideways at 390 px
   - Accept: component tests for each page and the building blocks, route tests for the layout and dashboard loaders, and the admin e2e sweep by page title at desktop and phone widths; `pnpm check` and `pnpm test:e2e` pass
+
+## M10 · Performance
+
+- [ ] M10-T01 · Catalog search and suggestions use their indexes · deps: M9-T20 · PRD: §6, §9, §11
+  - Accept: a migration adds an immutable `unaccent` wrapper and GIN trigram indexes on the normalized Book title, Author name and other names, and Series name; `searchCatalogBooks` and `searchCatalogAuthors` match through index-supported operators, and the Book query gathers candidate IDs per kind of match so each can use its index
+  - Accept: an integration test reads the `EXPLAIN` plans of a Book search, an Author search, and a suggestion with `enable_seqscan = off` and finds the new indexes and `books_search_vector_idx`, with no sequential scan of `books`, `authors`, or `series`
+  - Accept: the thresholds stay 0.3 (title similarity) and 0.45 (name word similarity) without a session-level `SET`, so it works on Neon's pooled connections; every existing search, suggestion, and admin Book search test passes unchanged
+  - Accept: a `docs/DECISIONS.md` entry records the wrapper and how the thresholds are applied; `pnpm check` passes
+- [ ] M10-T02 · Web: one session lookup per request · deps: M9-T20 · PRD: §8, §11
+  - Accept: a root middleware puts a memoized session loader in the router context, and the root loader, `requireViewerPermission`, and every loader or action that called `loadSession` read it; route tests show one `GET /v1/auth/session` per request for the Book page, an admin page, and settings
+  - Accept: the root loader asks for the session and the bell's notifications at the same time when the request carries the session cookie, and asks for no notifications without it; Visitor pages and a failing API render as before
+  - Accept: `pnpm check` passes
+- [ ] M10-T03 · Web: the Book page loads in two rounds · deps: M10-T02 · PRD: §7.4, §11
+  - Accept: the Book loader starts the requests that need only the slug at once (the Book, Editions, reviews, and with a session cookie, my review and helpful votes); only the Author, Series, and Genre rails wait for the Book
+  - Accept: a merged Book's old slug still redirects (301) with its query, and nothing fetched under the old slug reaches the page
+  - Accept: route tests check which requests wait for the Book, plus the Visitor, Member, and failing-API cases; `pnpm check` and the Book page e2e specs pass
+- [ ] M10-T04 · API: one query reads a session and its permissions · deps: M9-T20 · PRD: §4, §11
+  - Accept: the session hook reads the session, the Member, and their permission names in one query; renewal still writes only when the session was last seen over a day ago (D-027)
+  - Accept: integration tests show expired, too-old, suspended, and deleted sessions still read as Visitor and permissions are unchanged; `pnpm check` passes
+- [ ] M10-T05 · API: Genre "Top rated" reuses the cached site mean · deps: M9-T20 · PRD: §7.2, §7.5
+  - Accept: `loadGenreBooks` with `sort=top_rated` takes the site mean from the Discover cache (`discover:v3:site-mean`) and computes it from `books` only when the cache is empty or Redis is down
+  - Accept: integration tests give the same order with a warm cache, a cold cache, and Redis unavailable; `pnpm check` passes
+- [ ] M10-T06 · Book page rails from light queries, with no Author sync · deps: M10-T03, M10-T05 · PRD: §7.4, §7.5
+  - Accept: the Book page gets the Author card plus up to 6 other Books by its first Author, and up to 6 top-rated Books in its first Genre, without loading the full Author or Genre page data; the API shape is recorded in `docs/DECISIONS.md` and the OpenAPI spec regenerated
+  - Accept: a Book page view never queues `catalog.author-sync` (D-205), and an Author page view still does when due (D-203); integration tests prove both
+  - Accept: the rails show the same Books in the same order as before (route and integration tests); `pnpm check` and the Book page e2e specs pass
+- [ ] M10-T07 · Web: the root bundle carries no Zod and no admin or legal copy · deps: M9-T20 · PRD: §3, §11
+  - Accept: copy is split by area under `apps/web/app/copy/` (still one place per app, PRD §3), so each route's chunks hold only the copy it uses; the copy guard checks every file
+  - Accept: the header search box no longer brings schemas into the root chunk (the suggestion response is checked by code loaded when first needed)
+  - Accept: a check in `pnpm check` fails if the built root route's JS contains Zod or admin copy; the PR lists gzip JS per route (Discover, Book, search, log in) before and after
+  - Accept: `pnpm check` and `pnpm test:e2e` pass
+- [ ] M10-T08 · Web: render Markdown without shipping a Markdown parser · deps: M10-T07 · PRD: §7.4, §7.5, §11
+  - Accept: descriptions, bios, and Series descriptions are parsed on the server and drawn on the client from a small tree, with D-202's output and link rules (raw HTML skipped; only absolute http(s) links outside Open Library are links) and no `dangerouslySetInnerHTML`
+  - Accept: the Book, Author, and Series pages' client JS holds no Markdown parser; the existing `RichText` tests and the D-202 e2e test pass
+  - Accept: a `docs/DECISIONS.md` entry amends D-202's library choice; `pnpm check` passes
+- [ ] M10-T09 · API: Book cards and details read only the columns they show · deps: M9-T20 · PRD: §9, §11
+  - Accept: `loadBookSummaries`, `loadAuthorDetail`, and the other Book card lists select one shared set of summary columns (never `search_vector`, `field_origins`, `locked_fields`, or `description`)
+  - Accept: `loadBookDetail` counts Editions and reads only the Primary Edition with its Cover, instead of every Edition
+  - Accept: responses are unchanged (existing integration and contract tests pass, OpenAPI unchanged); `pnpm check` passes
+- [ ] M10-T10 · API: storing a Book looks up its Editions in batches · deps: M9-T20 · PRD: §5.4, §6
+  - Accept: `ingestBook` finds existing Edition links and ISBN-13 matches for all of a candidate's Editions in a fixed number of queries, and inserts new Editions and links in batches
+  - Accept: the ingest integration suite passes unchanged (matching, locked fields, field origins, ISBN rules, repeat runs), and a new test shows the query count for a 50-Edition candidate does not grow with its Editions
+  - Accept: `pnpm check` passes
+- [ ] M10-T11 · API: independent queries run together, and jobs are queued in bulk · deps: M9-T20 · PRD: §11
+  - Accept: the public review list, my review, `GET /books/:slug` (the stale-refresh and Series checks run beside the detail load), the Library endpoint, `/mod/stats`, and Source candidate matching no longer wait on queries they do not depend on
+  - Accept: `queueAuthorBookImports`, `queueSeriesMemberImports`, and `queueSeriesSyncs` add their jobs in one bulk call each and keep per-job deduplication (integration test against Redis)
+  - Accept: existing tests pass; `pnpm check` passes
+- [ ] M10-T12 · Small efficiency fixes · deps: M9-T20 · PRD: §7.2, §7.4, §11, §13
+  - Accept: `DATABASE_POOL_MAX` sets the API and worker pool size (default 10), documented in `.env.example` and `docs/deploy.md`
+  - Accept: Discover's cached rows are checked against their schemas once per request, not three times
+  - Accept: the home page asks for only the 2 Reading entries it shows, and the root layout preconnects to the Open Library cover host
+  - Accept: `removeMemberFromAggregates` updates every affected Book in one statement (integration test); `pnpm check` passes
+- [ ] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12 · PRD: §11, §12
+  - Accept: every acceptance criterion in `docs/milestones/M10-performance.md` is checked off in the PR body with the command that proved it, with each baseline measure taken again on the same data
+  - Accept: `docs/performance.md` explains how to repeat the measurements and records the results
+  - Accept: `pnpm check` and `pnpm test:e2e` pass, and the web vitals check still meets PRD §11
