@@ -22,6 +22,8 @@ const baseEnvSchema = z.object({
   /** Origins allowed to send non-GET requests and to use credentialed CORS (PRD §10). */
   WEB_ORIGINS: originList,
   DATABASE_URL: z.url(),
+  /** Connections each API or worker process may hold; size it against the database's limit (M10-T12). */
+  DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   REDIS_URL: z.url(),
   TRUST_PROXY: booleanFlag.default(false),
   /** Session lifetime; it renews while the session is in use (PRD §7.1, D-027). */
@@ -134,6 +136,7 @@ export const workerEnvSchema = baseEnvSchema
     SENTRY_ENVIRONMENT: true,
     SENTRY_TRACES_SAMPLE_RATE: true,
     DATABASE_URL: true,
+    DATABASE_POOL_MAX: true,
     REDIS_URL: true,
     EMAIL_TRANSPORT: true,
     EMAIL_FROM: true,

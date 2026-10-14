@@ -60,7 +60,8 @@ async function readCached(redis: Redis): Promise<DiscoverResponse | null> {
     if (!parsed.success) return null
     rows[key] = parsed.data
   }
-  return discoverResponseSchema.parse(rows)
+  // Each row was just checked, and the response serializer checks the whole again (M10-T12).
+  return rows as DiscoverResponse
 }
 
 /**

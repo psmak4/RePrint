@@ -49,8 +49,11 @@ describe('home loader', () => {
     })
     const result = await loader({ request } as never)
     expect(result.reading).toEqual({ reading: [], wantToRead: [] })
-    expect(seen.some((url) => url.includes('shelf=reading'))).toBe(true)
-    expect(seen.some((url) => url.includes('shelf=want_to_read'))).toBe(true)
+    // Only as many entries as the strip shows: two Reading, one Want to Read (M10-T12).
+    const reading = new URL(seen.find((url) => url.includes('shelf=reading')) ?? 'x:')
+    const wantToRead = new URL(seen.find((url) => url.includes('shelf=want_to_read')) ?? 'x:')
+    expect(reading.searchParams.get('pageSize')).toBe('2')
+    expect(wantToRead.searchParams.get('pageSize')).toBe('1')
   })
 
   it('has no Your reading data for a Visitor', async () => {
