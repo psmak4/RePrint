@@ -714,7 +714,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the components those pages render for a Visitor (`ShelfSelector`, `HelpfulVote`, `ReviewExcerpt`, `search-links`, and the review form's module) no longer import schemas at load time: response checks load with the first write, as the header search box's do (D-208), and the review form loads with its editor
   - Accept: `pnpm bundle:check` also fails if the Discover, Book, or search route's JS contains Zod, and the PR lists gzip JS per route before and after
   - Accept: the existing component tests and the review, shelf, helpful vote, and search e2e specs pass; `pnpm check` passes
-- [ ] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12, M10-T14 · PRD: §11, §12
+- [x] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12, M10-T14 · PRD: §11, §12
   - Accept: every acceptance criterion in `docs/milestones/M10-performance.md` is checked off in the PR body with the command that proved it, with each baseline measure taken again on the same data
   - Accept: `docs/performance.md` explains how to repeat the measurements and records the results
   - Accept: `pnpm check` and `pnpm test:e2e` pass, and the web vitals check still meets PRD §11
