@@ -53,6 +53,7 @@ export interface JobContext {
   queue: Queue
   /** Adds a job, for jobs that start others (a refresh queues Series syncs, D-199). */
   enqueue: JobQueue['enqueue']
+  enqueueMany: JobQueue['enqueueMany']
   /** `SOURCE_RATE_LIMIT_RPS`, the Source limit the monitor compares usage with. */
   sourceRps: number
   /** Reports an operational alert (the entry point wires this to Sentry). */
@@ -243,14 +244,16 @@ export const jobs = {
     // Reads a Series' members and queues one import per missing member, behind interactive
     // requests (D-199). Short, so a long Series never holds a worker.
     payload: z.object({ seriesId: z.uuid() }),
-    handler: async ({ seriesId }, { db, log, catalog, enqueue }) => {
+    handler: async ({ seriesId }, { db, log, catalog, enqueueMany }) => {
       const result = await syncSeries({
         db,
         source: catalog.source,
         seriesId,
         call: catalog.background,
       })
-      if (result.outcome === 'synced') await queueSeriesMemberImports({ enqueue }, result.toImport)
+      if (result.outcome === 'synced') {
+        await queueSeriesMemberImports({ enqueueMany }, result.toImport)
+      }
       const queued = result.outcome === 'synced' ? result.toImport.length : 0
       log.info({ seriesId, outcome: result.outcome, queued }, 'series synced')
       return { outcome: result.outcome, queued }
@@ -283,14 +286,16 @@ export const jobs = {
     // Reads an Author's Books and queues one import per missing Book, behind interactive
     // requests (D-203). Short, so a prolific Author never holds a worker.
     payload: z.object({ authorId: z.uuid() }),
-    handler: async ({ authorId }, { db, log, catalog, enqueue }) => {
+    handler: async ({ authorId }, { db, log, catalog, enqueueMany }) => {
       const result = await syncAuthorBooks({
         db,
         source: catalog.source,
         authorId,
         call: catalog.background,
       })
-      if (result.outcome === 'synced') await queueAuthorBookImports({ enqueue }, result.toImport)
+      if (result.outcome === 'synced') {
+        await queueAuthorBookImports({ enqueueMany }, result.toImport)
+      }
       const queued = result.outcome === 'synced' ? result.toImport.length : 0
       log.info({ authorId, outcome: result.outcome, queued }, 'author books synced')
       return { outcome: result.outcome, queued }
