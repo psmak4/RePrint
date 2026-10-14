@@ -1,6 +1,5 @@
-import { buttonVariants, cn, textStyles } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
 import { Breadcrumb, type Crumb } from '../common/breadcrumb.js'
 
 /**
@@ -61,39 +60,5 @@ export function PageHero({
       {children}
       {tabs}
     </div>
-  )
-}
-
-/** Previous and next as pills, with the page number between. */
-export function PagerLinks({
-  label,
-  previous,
-  next,
-  status,
-}: {
-  label: string
-  previous: { href: string; text: string } | null
-  next: { href: string; text: string } | null
-  status: string
-}) {
-  const pill = buttonVariants({ variant: 'outline' })
-  return (
-    <nav aria-label={label} className="flex items-center justify-between gap-4">
-      {previous ? (
-        <Link rel="prev" to={previous.href} className={pill}>
-          {previous.text}
-        </Link>
-      ) : (
-        <span />
-      )}
-      <span className="text-sm text-muted-foreground">{status}</span>
-      {next ? (
-        <Link rel="next" to={next.href} className={pill}>
-          {next.text}
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
   )
 }

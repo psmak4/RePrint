@@ -8,6 +8,7 @@ import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
+import { ShowMore } from '../common/show-more.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { AdminPage } from './admin-page.js'
 import { Badge, EmptyState } from './admin-ui.js'
@@ -320,13 +321,9 @@ export function ReportsQueue({
         </ul>
       )}
       {queue.meta.nextCursor ? (
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link to={`/admin/reports?${new URLSearchParams({ cursor: queue.meta.nextCursor })}`}>
-              {text.next}
-            </Link>
-          </Button>
-        </div>
+        <ShowMore to={`/admin/reports?${new URLSearchParams({ cursor: queue.meta.nextCursor })}`}>
+          {text.next}
+        </ShowMore>
       ) : null}
     </AdminPage>
   )

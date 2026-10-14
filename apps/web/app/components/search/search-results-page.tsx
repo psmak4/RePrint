@@ -10,7 +10,7 @@ import {
 } from '@reprint/shared'
 import { Button, buttonVariants, cn, Label, Select } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router'
+import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { ANALYTICS_EVENTS, trackEvent } from '../../lib/analytics.js'
 import { sendReached } from '../../lib/reached.js'
@@ -19,6 +19,8 @@ import { AuthorMatchCard } from '../books/author-match-card.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
+import { Pager } from '../common/pager.js'
+import { SortControl } from '../common/sort-control.js'
 import { TabNav } from '../common/tab-nav.js'
 import { SearchResultCard, type SearchResultData } from './search-result-card.js'
 
@@ -126,39 +128,29 @@ function clearHref(query: SearchQuery): string {
   })
 }
 
-/** Sort sits above the results; a GET form that keeps the query and filters, so it works without JS. */
+/** Sort sits above the results and keeps the query and filters (D-214). */
 function SortForm({ query }: { query: SearchQuery }) {
-  const c = copy.search
   return (
-    <form action="/search" method="get" className="flex items-center gap-2.5">
-      <input type="hidden" name="q" value={query.q} />
-      {query.genre ? <input type="hidden" name="genre" value={query.genre} /> : null}
-      {query.language ? <input type="hidden" name="language" value={query.language} /> : null}
-      {query.decade ? <input type="hidden" name="decade" value={query.decade} /> : null}
-      {query.minRating ? <input type="hidden" name="minRating" value={query.minRating} /> : null}
-      <label htmlFor="results-sort" className="text-sm text-muted-foreground">
-        {c.sort}
-      </label>
-      {/* Keyed by its value: the page stays mounted from one search to the next, and `defaultValue`
-          alone would keep showing the last search's choice. The filters below do the same. */}
-      <Select key={query.sort} id="results-sort" name="sort" defaultValue={query.sort} compact>
-        {SEARCH_SORTS.map((sort) => (
-          <option key={sort} value={sort}>
-            {c.sorts[sort]}
-          </option>
-        ))}
-      </Select>
-      <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-        {c.applySort}
-      </button>
-    </form>
+    <SortControl
+      action="/search"
+      value={query.sort}
+      options={SEARCH_SORTS}
+      optionLabel={(sort) => copy.search.sorts[sort]}
+      keep={{
+        q: query.q,
+        genre: query.genre,
+        language: query.language,
+        decade: query.decade,
+        minRating: query.minRating,
+      }}
+    />
   )
 }
 
 function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] }) {
   const c = copy.search
   return (
-    <form
+    <Form
       action="/search"
       method="get"
       aria-label={c.filtersLabel}
@@ -255,7 +247,7 @@ function Filters({ query, genres }: { query: SearchQuery; genres: GenreNode[] })
       <p className="border-t border-border pt-4 text-[13px] leading-normal text-muted-foreground">
         {c.catalogOnly}
       </p>
-    </form>
+    </Form>
   )
 }
 
@@ -291,31 +283,16 @@ function Pagination({ query, hasMore }: { query: SearchQuery; hasMore: boolean }
   const c = copy.search
   if (query.page === 1 && !hasMore) return null
   return (
-    <nav aria-label={c.pagesLabel} className="flex items-center justify-between">
-      {query.page > 1 ? (
-        <Link
-          rel="prev"
-          to={searchHref(query, { page: query.page - 1 })}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          {c.previous}
-        </Link>
-      ) : (
-        <span />
-      )}
-      <span className="text-sm text-muted-foreground">{c.pageOf(query.page)}</span>
-      {hasMore ? (
-        <Link
-          rel="next"
-          to={searchHref(query, { page: query.page + 1 })}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          {c.next}
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
+    <Pager
+      label={c.pagesLabel}
+      previous={
+        query.page > 1
+          ? { href: searchHref(query, { page: query.page - 1 }), text: c.previous }
+          : null
+      }
+      next={hasMore ? { href: searchHref(query, { page: query.page + 1 }), text: c.next } : null}
+      status={c.pageOf(query.page)}
+    />
   )
 }
 

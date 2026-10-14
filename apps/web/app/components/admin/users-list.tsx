@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { Form, Link } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
 import { InitialsAvatar } from '../books/avatar.js'
+import { ShowMore } from '../common/show-more.js'
 import { AdminPage } from './admin-page.js'
 import {
   Badge,
@@ -278,11 +279,7 @@ export function UsersList({
         </>
       )}
       {users.meta.nextCursor ? (
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link to={`/admin/users?${nextParams}`}>{text.next}</Link>
-          </Button>
-        </div>
+        <ShowMore to={`/admin/users?${nextParams}`}>{text.next}</ShowMore>
       ) : null}
     </AdminPage>
   )

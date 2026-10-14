@@ -88,7 +88,7 @@ describe('SearchResultsPage', () => {
     expect(form.getAttribute('method')).toBe('get')
     expect(form.getAttribute('action')).toBe('/search')
     expect((screen.getByLabelText(copy.search.decade) as HTMLSelectElement).value).toBe('1960')
-    expect((screen.getByLabelText(copy.search.sort) as HTMLSelectElement).value).toBe('newest')
+    expect((screen.getByLabelText(copy.shell.sortLabel) as HTMLSelectElement).value).toBe('newest')
     const pages = within(screen.getByRole('navigation', { name: copy.search.pagesLabel }))
     expect(pages.getByRole('link', { name: 'Previous' }).getAttribute('href')).toBe(
       '/search?q=dune&decade=1960&sort=newest',
@@ -260,10 +260,12 @@ describe('SearchResultsPage after a new search', () => {
       </QueryClientProvider>,
     )
     const field = (selector: string) => container.querySelector(selector) as HTMLSelectElement
-    expect(field('#results-sort').value).toBe('newest')
+    expect((screen.getByLabelText('Sort by') as HTMLSelectElement).value).toBe('newest')
     expect(field('#filter-decade').value).toBe('1960')
     fireEvent.click(screen.getByRole('link', { name: 'Search for tolkien' }))
-    await waitFor(() => expect(field('#results-sort').value).toBe('relevance'))
+    await waitFor(() =>
+      expect((screen.getByLabelText('Sort by') as HTMLSelectElement).value).toBe('relevance'),
+    )
     expect(field('#filter-decade').value).toBe('')
   })
 })

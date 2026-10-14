@@ -5,8 +5,9 @@ import { copy } from '../../copy/index.js'
 import { avatarClass, initialsOf } from '../../lib/avatar.js'
 import { Cover } from '../books/cover.js'
 import { summaryCard } from '../books/genre-pages.js'
-import { PageHero, PagerLinks } from '../books/page-hero.js'
+import { PageHero } from '../books/page-hero.js'
 import { StarRating } from '../books/star-rating.js'
+import { Pager } from '../common/pager.js'
 import { TabNav } from '../common/tab-nav.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { SpoilerToggle } from '../reviews/spoiler-toggle.js'
@@ -100,7 +101,7 @@ function Pagination({ username, view }: { username: string; view: ProfileReviews
   if (view.totalPages <= 1) return null
   const href = (page: number) => (page > 1 ? `/u/${username}?page=${page}` : `/u/${username}`)
   return (
-    <PagerLinks
+    <Pager
       label={text.pagesLabel}
       previous={view.page > 1 ? { href: href(view.page - 1), text: text.previous } : null}
       next={view.page < view.totalPages ? { href: href(view.page + 1), text: text.next } : null}

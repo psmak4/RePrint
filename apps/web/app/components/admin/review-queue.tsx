@@ -1,11 +1,12 @@
 import type { ModQueueItem, ModQueueResponse } from '@reprint/shared'
-import { Button, cn, textStyles } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
 import type { ClaimState } from '../../routes/admin-reviews.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { Cover } from '../books/cover.js'
+import { ShowMore } from '../common/show-more.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, Badge, EmptyState } from './admin-ui.js'
@@ -101,13 +102,9 @@ function QueueList({
         })}
       </ul>
       {queue.meta.nextCursor ? (
-        <div className="flex justify-center p-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to={`/admin/reviews?cursor=${encodeURIComponent(queue.meta.nextCursor)}`}>
-              {text.next}
-            </Link>
-          </Button>
-        </div>
+        <ShowMore to={`/admin/reviews?cursor=${encodeURIComponent(queue.meta.nextCursor)}`}>
+          {text.next}
+        </ShowMore>
       ) : null}
     </AdminCard>
   )

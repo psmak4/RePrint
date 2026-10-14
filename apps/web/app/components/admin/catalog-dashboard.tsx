@@ -7,7 +7,7 @@ import { Button, cn, Input, Label } from '@reprint/ui'
 import { Form, Link } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
 import { Cover } from '../books/cover.js'
-import { PagerLinks } from '../books/page-hero.js'
+import { Pager } from '../common/pager.js'
 import { AdminPage } from './admin-page.js'
 import { AdminCard, numClass, StatTile, tableClass, tdClass, thClass } from './admin-ui.js'
 import { ScrollRegion } from './scroll-region.js'
@@ -104,7 +104,7 @@ function BookSearch({ search }: { search: CatalogSearch }) {
             })}
           </ul>
           {page > 1 || results.hasMore ? (
-            <PagerLinks
+            <Pager
               label={text.pagerLabel}
               previous={page > 1 ? { href: searchHref(q, page - 1), text: text.previous } : null}
               next={results.hasMore ? { href: searchHref(q, page + 1), text: text.next } : null}

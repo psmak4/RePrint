@@ -1,14 +1,15 @@
 import { LIBRARY_SORTS, type LibraryResponse, type Shelf, type Viewer } from '@reprint/shared'
-import { buttonVariants, Select } from '@reprint/ui'
-import { useId } from 'react'
-import { Form, Link } from 'react-router'
+import { buttonVariants } from '@reprint/ui'
+import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type LibraryView, libraryHref } from '../../lib/library-links.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { BookGrid } from '../books/book-tile.js'
 import { summaryCard } from '../books/genre-pages.js'
-import { PageHero, PagerLinks } from '../books/page-hero.js'
+import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector } from '../books/shelf-selector.js'
+import { Pager } from '../common/pager.js'
+import { SortControl } from '../common/sort-control.js'
 import { TabNav } from '../common/tab-nav.js'
 
 const text = copy.library
@@ -43,26 +44,15 @@ function Tabs({
 }
 
 function SortForm({ username, view }: { username: string; view: LibraryView }) {
-  const sortId = useId()
-  // A plain GET form, so sorting works without JavaScript; the Shelf tab is kept and the page resets.
+  // The Shelf tab is kept and the page resets (D-214).
   return (
-    <Form method="get" action={`/u/${username}/library`} className="flex items-center gap-2.5">
-      {view.shelf ? <input type="hidden" name="shelf" value={view.shelf} /> : null}
-      <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-        {text.sortLabel}
-        {/* Keyed by its value, so Back or a new link shows that URL's sort, not the last one. */}
-        <Select key={view.sort} id={sortId} name="sort" defaultValue={view.sort} compact>
-          {LIBRARY_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {text.sorts[sort]}
-            </option>
-          ))}
-        </Select>
-      </label>
-      <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-        {text.apply}
-      </button>
-    </Form>
+    <SortControl
+      action={`/u/${username}/library`}
+      value={view.sort}
+      options={LIBRARY_SORTS}
+      optionLabel={(sort) => text.sorts[sort]}
+      keep={{ shelf: view.shelf }}
+    />
   )
 }
 
@@ -77,7 +67,7 @@ function Pagination({
 }) {
   if (totalPages <= 1) return null
   return (
-    <PagerLinks
+    <Pager
       label={text.pagesLabel}
       previous={
         view.page > 1

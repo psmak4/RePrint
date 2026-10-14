@@ -4,13 +4,14 @@ import {
   type BookSummary,
   type ContributionRole,
 } from '@reprint/shared'
-import { buttonVariants, cn, textStyles } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
 import type { RichTree } from '../../lib/rich-tree.js'
+import { ShowMore } from '../common/show-more.js'
 import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
 import { PageHero } from './page-hero.js'
@@ -132,12 +133,9 @@ export function AuthorPage({
                   }))}
                 />
                 {group === 'author' && writtenRemaining > 0 && page < AUTHOR_MAX_PAGE ? (
-                  <Link
-                    to={`${pathname}?page=${page + 1}#author-books-author`}
-                    className={cn(buttonVariants({ variant: 'outline' }), 'self-start')}
-                  >
+                  <ShowMore to={`${pathname}?page=${page + 1}#author-books-author`}>
                     {text.showMore(writtenRemaining)}
-                  </Link>
+                  </ShowMore>
                 ) : null}
               </section>
             ))

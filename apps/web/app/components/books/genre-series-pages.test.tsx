@@ -114,16 +114,15 @@ describe('GenrePage', () => {
     )
     expect(screen.getByText(/Rated 4\.5 out of 5 from 12 reviews/)).toBeTruthy()
 
-    const sorts = within(screen.getByRole('navigation', { name: 'Sort by' }))
-    expect(sorts.getByRole('link', { name: 'Top rated' }).getAttribute('href')).toBe(
-      '/genres/science-fiction',
-    )
-    expect(sorts.getByRole('link', { name: 'Newest review' }).getAttribute('href')).toBe(
-      '/genres/science-fiction?sort=newest_review',
-    )
-    expect(sorts.getByRole('link', { name: 'Most reviewed' }).getAttribute('aria-current')).toBe(
-      'true',
-    )
+    // One sort control (D-214): a dropdown in a GET form to the Genre page, showing this sort.
+    const sort = screen.getByLabelText('Sort by') as HTMLSelectElement
+    expect(sort.value).toBe('most_reviewed')
+    expect([...sort.options].map((option) => option.text)).toEqual([
+      'Top rated',
+      'Most reviewed',
+      'Newest review',
+    ])
+    expect(sort.closest('form')?.getAttribute('action')).toBe('/genres/science-fiction')
 
     expect(screen.getByRole('link', { name: 'Previous' }).getAttribute('href')).toBe(
       '/genres/science-fiction?sort=most_reviewed',

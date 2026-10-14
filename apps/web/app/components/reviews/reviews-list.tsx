@@ -4,14 +4,16 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
-import { buttonVariants, chipVariants, Select, textStyles } from '@reprint/ui'
-import { type ReactNode, useId } from 'react'
-import { Form, Link } from 'react-router'
+import { chipVariants, textStyles } from '@reprint/ui'
+import type { ReactNode } from 'react'
+import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { type ReviewListQuery, reviewsHref } from '../../lib/review-links.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { StarRating } from '../books/star-rating.js'
 import { TrustBadge } from '../books/trust-badge.js'
+import { Pager } from '../common/pager.js'
+import { SortControl } from '../common/sort-control.js'
 import { HelpfulVote } from './helpful-vote.js'
 import { ReportReview } from './report-review.js'
 import { SpoilerToggle } from './spoiler-toggle.js'
@@ -99,8 +101,7 @@ function ReviewItem({
 }
 
 function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
-  const sortId = useId()
-  // A plain GET form, so sorting works without JavaScript; changing sort resets to page 1.
+  // Changing sort keeps the star filter and resets to page 1 (D-214).
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <nav aria-label={copy.redesign.bookPage.filterByRating}>
@@ -124,26 +125,15 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
           })}
         </ul>
       </nav>
-      <Form
-        method="get"
-        action={`/books/${slug}#reviews`}
-        className="flex flex-wrap items-center gap-2.5"
-      >
-        <label htmlFor={sortId} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-          {text.sortLabel}
-          {/* Keyed by its value, so Back or a new link shows that URL's sort, not the last one. */}
-          <Select key={query.sort} id={sortId} name="sort" defaultValue={query.sort} compact>
-            {REVIEW_SORTS.map((sort) => (
-              <option key={sort} value={sort}>
-                {text.sorts[sort]}
-              </option>
-            ))}
-          </Select>
-        </label>
-        {query.rating ? <input type="hidden" name="rating" value={query.rating} /> : null}
-        <button type="submit" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-          {text.apply}
-        </button>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <SortControl
+          action={`/books/${slug}`}
+          anchor="reviews"
+          value={query.sort}
+          options={REVIEW_SORTS}
+          optionLabel={(sort) => text.sorts[sort]}
+          keep={{ rating: query.rating }}
+        />
         {query.rating ? (
           <Link
             to={reviewsHref(slug, query, { rating: undefined, page: 1 })}
@@ -152,7 +142,7 @@ function Controls({ slug, query }: { slug: string; query: ReviewListQuery }) {
             {text.clearFilter}
           </Link>
         ) : null}
-      </Form>
+      </div>
     </div>
   )
 }
@@ -168,31 +158,20 @@ function Pagination({
 }) {
   if (totalPages <= 1) return null
   return (
-    <nav aria-label={text.pagesLabel} className="flex items-center justify-between">
-      {query.page > 1 ? (
-        <Link
-          rel="prev"
-          to={reviewsHref(slug, query, { page: query.page - 1 })}
-          className="text-link underline"
-        >
-          {text.previous}
-        </Link>
-      ) : (
-        <span />
-      )}
-      <span className="text-sm text-muted-foreground">{text.pageOf(query.page, totalPages)}</span>
-      {query.page < totalPages ? (
-        <Link
-          rel="next"
-          to={reviewsHref(slug, query, { page: query.page + 1 })}
-          className="text-link underline"
-        >
-          {text.next}
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
+    <Pager
+      label={text.pagesLabel}
+      previous={
+        query.page > 1
+          ? { href: reviewsHref(slug, query, { page: query.page - 1 }), text: text.previous }
+          : null
+      }
+      next={
+        query.page < totalPages
+          ? { href: reviewsHref(slug, query, { page: query.page + 1 }), text: text.next }
+          : null
+      }
+      status={text.pageOf(query.page, totalPages)}
+    />
   )
 }
 

@@ -90,6 +90,13 @@ describe('style guard', () => {
     expect(sized).toEqual([])
   })
 
+  it('sorts only through SortControl and pages only through Pager (D-214)', () => {
+    const elsewhere = (own: string) =>
+      files.filter(({ file }) => file !== `apps/web/app/components/common/${own}`)
+    expect(findAll(/<Select\b[^>]*name="sort"/g, elsewhere('sort-control.tsx'))).toEqual([])
+    expect(findAll(/rel="(prev|next)"/g, elsewhere('pager.tsx'))).toEqual([])
+  })
+
   it('gives surface cards 16 px corners (the auth card keeps 24 px)', () => {
     const corner = /^(md:|lg:)?rounded-(xl|3xl|lg|md|\[\d+px\])$/
     const odd = classLists(
