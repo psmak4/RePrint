@@ -18,11 +18,16 @@ export async function findSeriesBySlug(db: Database, slug: string): Promise<Seri
  * many are stored. With `around` (a Book slug), only the `SERIES_WINDOW` Books around that Book,
  * so a Book page loads a few summaries however long the Series is (D-199).
  */
-export async function loadSeriesEntries(
+/**
+ * The Series' members in reading order (empty positions last), or only the `SERIES_WINDOW` around
+ * the `around` Book, with how many are stored. No Book cards, so a caller can load them together
+ * with others (M10-T13).
+ */
+export async function seriesWindow(
   db: Database,
   row: SeriesRow,
   around?: string,
-): Promise<{ items: SeriesEntry[]; total: number }> {
+): Promise<{ members: { bookId: string; position: number | null }[]; total: number }> {
   const members = await db
     .select({ bookId: bookSeries.bookId, position: bookSeries.position, slug: books.slug })
     .from(bookSeries)
@@ -39,19 +44,31 @@ export async function loadSeriesEntries(
     )
     shown = members.slice(start, start + SERIES_WINDOW)
   }
+  return {
+    members: shown.map(({ bookId, position }) => ({ bookId, position })),
+    total: members.length,
+  }
+}
+
+/** The Series' entries with their Book cards (see `seriesWindow`). */
+export async function loadSeriesEntries(
+  db: Database,
+  row: SeriesRow,
+  around?: string,
+): Promise<{ items: SeriesEntry[]; total: number }> {
+  const { members, total } = await seriesWindow(db, row, around)
   const summaries = await loadBookSummaries(
     db,
-    shown.map((member) => member.bookId),
+    members.map((member) => member.bookId),
   )
   const byId = new Map(summaries.map((book) => [book.id, book]))
-  const items = shown.flatMap((member) => {
+  const items = members.flatMap((member) => {
     const book = byId.get(member.bookId)
     return book ? [{ position: member.position, book }] : []
   })
-  return { items, total: members.length }
+  return { items, total }
 }
 
-/** True while a recent sync is still importing members the Source lists (D-199). */
 export function isAdding(row: SeriesRow, stored: number, now: Date = new Date()): boolean {
   if (row.sourceMemberCount === null || row.membersSyncedAt === null) return false
   if (stored >= row.sourceMemberCount) return false

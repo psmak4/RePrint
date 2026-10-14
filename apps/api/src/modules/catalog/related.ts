@@ -17,7 +17,7 @@ import {
 import { and, asc, countDistinct, eq, sql } from 'drizzle-orm'
 import { genreBookIds } from './genres.js'
 import { type BookDetailRow, bylines, coversById, loadBookSummaries, toCover } from './read.js'
-import { loadSeriesEntries } from './series.js'
+import { seriesWindow } from './series.js'
 
 /** The Author page's Role order (`CONTRIBUTION_ROLES`), as a SQL array for `array_position`. */
 const ROLE_ORDER = sql`array[${sql.join(
@@ -48,14 +48,16 @@ async function otherBooksBy(db: Database, authorId: string, bookId: string): Pro
   return rows.map((row) => row.id)
 }
 
+type AuthorCard = Omit<NonNullable<BookRelatedResponse['author']>, 'books'>
+
 async function authorPart(
   db: Database,
   slug: string,
   bookId: string,
-): Promise<BookRelatedResponse['author']> {
+): Promise<{ card: AuthorCard; bookIds: string[] } | null> {
   const [author] = await db.select().from(authors).where(eq(authors.slug, slug)).limit(1)
   if (!author) return null
-  const [ids, [credited], photos] = await Promise.all([
+  const [bookIds, [credited], photos] = await Promise.all([
     otherBooksBy(db, author.id, bookId),
     db
       .select({ n: countDistinct(contributions.bookId) })
@@ -64,14 +66,16 @@ async function authorPart(
     coversById(db, [author.photoId]),
   ])
   return {
-    slug: author.slug,
-    name: author.name,
-    bio: author.bio,
-    birthDate: author.birthDate,
-    deathDate: author.deathDate,
-    photo: toCover(author.photoId ? photos.get(author.photoId) : null),
-    bookCount: credited?.n ?? 0,
-    books: await loadBookSummaries(db, ids),
+    card: {
+      slug: author.slug,
+      name: author.name,
+      bio: author.bio,
+      birthDate: author.birthDate,
+      deathDate: author.deathDate,
+      photo: toCover(author.photoId ? photos.get(author.photoId) : null),
+      bookCount: credited?.n ?? 0,
+    },
+    bookIds,
   }
 }
 
@@ -112,35 +116,50 @@ export async function loadBookRelated(
   const firstAuthor = groupContributors(byline.get(book.id) ?? [])[0]?.people[0]
   const genre = firstGenre && firstGenre.archivedAt === null ? firstGenre : null
 
-  const [author, seriesPart, genreBooks] = await Promise.all([
+  const [author, window, genreIds] = await Promise.all([
     firstAuthor ? authorPart(db, firstAuthor.slug, book.id) : null,
-    firstSeries
-      ? loadSeriesEntries(db, firstSeries.series, book.slug).then(({ items, total }) =>
-          items.length === 0
-            ? null
-            : {
-                slug: firstSeries.series.slug,
-                name: firstSeries.series.name,
-                memberCount: firstSeries.series.sourceMemberCount,
-                total,
-                items,
-              },
-        )
-      : null,
+    firstSeries ? seriesWindow(db, firstSeries.series, book.slug) : null,
     genre
       ? genreBookIds(db, genre.id, {
           sort: 'top_rated',
           siteMean,
           limit: RELATED_BOOKS_LIMIT,
           excludeBookId: book.id,
-        }).then((ids) => loadBookSummaries(db, ids))
+        })
       : null,
   ])
+  // Every rail's Book cards in one load (M10-T13).
+  const cards = new Map(
+    (
+      await loadBookSummaries(db, [
+        ...new Set([
+          ...(author?.bookIds ?? []),
+          ...(window?.members.map((member) => member.bookId) ?? []),
+          ...(genreIds ?? []),
+        ]),
+      ])
+    ).map((card) => [card.id, card]),
+  )
+  const cardsOf = (ids: string[]) => ids.flatMap((id) => cards.get(id) ?? [])
+  const seriesItems = (window?.members ?? []).flatMap((member) => {
+    const card = cards.get(member.bookId)
+    return card ? [{ position: member.position, book: card }] : []
+  })
+  const genreBooks = cardsOf(genreIds ?? [])
   return {
-    author,
-    series: seriesPart,
+    author: author ? { ...author.card, books: cardsOf(author.bookIds) } : null,
+    series:
+      firstSeries && window && seriesItems.length > 0
+        ? {
+            slug: firstSeries.series.slug,
+            name: firstSeries.series.name,
+            memberCount: firstSeries.series.sourceMemberCount,
+            total: window.total,
+            items: seriesItems,
+          }
+        : null,
     genre:
-      genre && genreBooks && genreBooks.length > 0
+      genre && genreBooks.length > 0
         ? { slug: genre.slug, name: genre.name, books: genreBooks }
         : null,
   }

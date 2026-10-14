@@ -4,6 +4,7 @@ import {
   bookSeries,
   books,
   contributions,
+  type Database,
   genres,
   series,
   sourceLinks,
@@ -17,11 +18,14 @@ import {
   seriesDetailResponseSchema,
 } from '@reprint/shared'
 import { like } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../../app.js'
 import { loadEnv } from '../../config/env.js'
 import { startTestStack, type TestStack } from '../../testing/stack.js'
+import { findBookBySlug } from './read.js'
+import { loadBookRelated } from './related.js'
 
 const queued: string[] = []
 let stack: TestStack
@@ -223,6 +227,46 @@ describe('GET /v1/books/:slug/related (M10-T06)', () => {
     expect(related.genre?.books.map((book) => book.slug)).toEqual(old.genreBooks)
     expect(old.authorBooks).toHaveLength(6)
     expect(old.genreBooks).toHaveLength(6)
+  })
+
+  it('loads every rail’s Book cards in one query (M10-T13)', async () => {
+    const current = await makeBook('anchor')
+    const ada = await makeAuthor('ada-batch')
+    await credit(current.id, ada.id, 'author')
+    const [saga] = await db()
+      .insert(series)
+      .values({ slug: 'batch-saga', name: 'Batch Saga' })
+      .returning()
+    const [genre] = await db()
+      .insert(genres)
+      .values({ slug: 'zz-batch', name: 'Batch' })
+      .returning()
+    if (!saga || !genre) throw new Error('fixture missing')
+    await db().insert(bookSeries).values({ bookId: current.id, seriesId: saga.id, position: 1 })
+    await db().insert(bookGenres).values({ bookId: current.id, genreId: genre.id })
+    for (let i = 0; i < 3; i += 1) {
+      const other = await makeBook(`batch-${i}`, { reviews: i + 1, sum: (i + 1) * 4 })
+      await credit(other.id, ada.id, 'author')
+      await db()
+        .insert(bookSeries)
+        .values({ bookId: other.id, seriesId: saga.id, position: i + 2 })
+      await db().insert(bookGenres).values({ bookId: other.id, genreId: genre.id })
+    }
+    const statements: string[] = []
+    const recording = drizzle(stack.db.sql, {
+      logger: { logQuery: (query) => statements.push(query) },
+    }) as unknown as Database
+    const book = await findBookBySlug(recording, 'anchor')
+    if (!book) throw new Error('book missing')
+    statements.length = 0
+    const related = await loadBookRelated(recording, book, async () => 4)
+    expect(related.author?.books).toHaveLength(3)
+    expect(related.series?.items).toHaveLength(4)
+    expect(related.genre?.books).toHaveLength(3)
+    const cardLoads = statements.filter((query) =>
+      query.includes('from "books" where "books"."id" in'),
+    )
+    expect(cardLoads).toHaveLength(1)
   })
 
   it('counts every Book the Author is credited on, past the first page of Written Books', async () => {
