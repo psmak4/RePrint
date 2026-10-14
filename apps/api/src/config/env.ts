@@ -77,9 +77,9 @@ const baseEnvSchema = z.object({
   SOURCE_MODE: z.enum(['fixtures', 'live', 'stub']).default('fixtures'),
   /** Outgoing Source requests per second, shared across processes. */
   SOURCE_RATE_LIMIT_RPS: z.coerce.number().positive().default(2),
-  /** Limit for a full Book fetch, in milliseconds. */
+  /** Limit for one Source request, search included, and for a full Book fetch, in milliseconds (D-213). */
   SOURCE_TIMEOUT_MS: z.coerce.number().int().min(1).default(5000),
-  /** How long search waits for the Source before showing Catalog-only results. */
+  /** How long search waits for the Source before showing Catalog-only results (D-213). */
   SOURCE_SEARCH_TIMEOUT_MS: z.coerce.number().int().min(1).default(1500),
   /** Sent in `User-Agent: RePrint/<version> (<email>)` on every Source request. */
   SOURCE_CONTACT_EMAIL: z.email().default('ops@reprint.com'),
