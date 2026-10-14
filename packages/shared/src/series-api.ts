@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { slugSchema } from './catalog.js'
 import { bookSummarySchema } from './catalog-api.js'
+import { SERIES_WINDOW } from './ui-constants.js'
 
 /** Response shape for a Series page (PRD §7.5, §10). */
 
@@ -10,9 +11,6 @@ export const seriesEntrySchema = z.object({
   book: bookSummarySchema,
 })
 export type SeriesEntry = z.infer<typeof seriesEntrySchema>
-
-/** How many Books a Book page's Series card shows, around the current Book (D-199). */
-export const SERIES_WINDOW = 8
 
 /**
  * `GET /series/:slug?around=<book slug>`: with `around`, only the `SERIES_WINDOW` Books around that

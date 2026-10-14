@@ -1,5 +1,6 @@
 import type { BookSummary, SearchSuggestResponse } from '@reprint/shared'
 import { copy } from '../copy/index.js'
+import { lazySchemas } from './lazy-schemas.js'
 
 export type Suggest = (q: string, signal: AbortSignal) => Promise<SearchSuggestResponse>
 
@@ -11,10 +12,7 @@ export async function fetchSuggestions(
   q: string,
   signal: AbortSignal,
 ): Promise<SearchSuggestResponse> {
-  const schemas = import('./search-suggest-schema.js')
-  // A failed load still throws where it is awaited; this only keeps an early return from leaving
-  // the import unhandled.
-  schemas.catch(() => {})
+  const schemas = lazySchemas()
   const response = await fetch(`/search/suggest?q=${encodeURIComponent(q)}`, { signal })
   if (!response.ok) throw new Error(`suggestions failed with ${response.status}`)
   const { searchSuggestResponseSchema } = await schemas

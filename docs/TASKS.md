@@ -710,7 +710,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: Discover's cached rows are checked against their schemas twice per request, not three times: the per-row read check that falls back to a rebuild, and the response serializer PRD §10 requires (changed in M10-T12: one check would mean giving up either the rebuild on a bad row or the required serializer)
   - Accept: the home page asks for only the 2 Reading entries it shows, and the root layout preconnects to the Open Library cover host
   - Accept: `removeMemberFromAggregates` updates every affected Book in one statement (integration test); `pnpm check` passes
-- [ ] M10-T14 · Web: Discover, Book, and search pages load Zod only when a form or a write needs it · deps: M10-T07 · PRD: §11
+- [x] M10-T14 · Web: Discover, Book, and search pages load Zod only when a form or a write needs it · deps: M10-T07 · PRD: §11
   - Accept: the components those pages render for a Visitor (`ShelfSelector`, `HelpfulVote`, `ReviewExcerpt`, `search-links`, and the review form's module) no longer import schemas at load time: response checks load with the first write, as the header search box's do (D-208), and the review form loads with its editor
   - Accept: `pnpm bundle:check` also fails if the Discover, Book, or search route's JS contains Zod, and the PR lists gzip JS per route before and after
   - Accept: the existing component tests and the review, shelf, helpful vote, and search e2e specs pass; `pnpm check` passes

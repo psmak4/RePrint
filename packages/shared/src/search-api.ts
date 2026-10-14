@@ -9,6 +9,7 @@ import {
 import { bookSummarySchema, candidateRefSchema } from './catalog-api.js'
 import { reviewExcerptSchema } from './reviews.js'
 import { SEARCH_QUERY_MAX_LENGTH } from './search-limits.js'
+import { SEARCH_SORTS } from './ui-constants.js'
 
 /** Request and response shapes for Catalog search (PRD §7.3, §10). */
 
@@ -31,7 +32,6 @@ export type SearchSuggestResponse = z.infer<typeof searchSuggestResponseSchema>
 export const SEARCH_PAGE_SIZE = 20
 
 export const SEARCH_TYPES = ['books', 'authors'] as const
-export const SEARCH_SORTS = ['relevance', 'most_reviewed', 'highest_rated', 'newest'] as const
 export type SearchSort = (typeof SEARCH_SORTS)[number]
 
 /**

@@ -1,13 +1,13 @@
 import { z } from 'zod'
 import { genreSchema } from './catalog.js'
 import { bookSummarySchema } from './catalog-api.js'
+import { GENRE_SORTS } from './ui-constants.js'
 
 /** Request and response shapes for browsing by Genre (PRD §7.5, §10). */
 
 /** Books per page on a Genre page. */
 export const GENRE_PAGE_SIZE = 20
 
-export const GENRE_SORTS = ['top_rated', 'most_reviewed', 'newest_review'] as const
 export const genreSortSchema = z.enum(GENRE_SORTS)
 export type GenreSort = z.infer<typeof genreSortSchema>
 

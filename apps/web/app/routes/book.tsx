@@ -185,13 +185,13 @@ async function loadMyReview(api: ReturnType<typeof apiClientFor>, slug: string) 
   }
 }
 
-const reviewActionSchema = z.discriminatedUnion('intent', [
-  reviewInputSchema.extend({ intent: z.literal('save') }),
-  z.object({ intent: z.literal('delete') }),
-])
-
 /** Saves or deletes the viewer's own Review of this Book (PRD §7.6). */
 export async function action({ request, params }: Route.ActionArgs) {
+  // Built here, not at module level, so the page's JavaScript does not carry it (M10-T14).
+  const reviewActionSchema = z.discriminatedUnion('intent', [
+    reviewInputSchema.extend({ intent: z.literal('save') }),
+    z.object({ intent: z.literal('delete') }),
+  ])
   const slug = slugSchema.safeParse(params.slug)
   if (!slug.success) throw data('Not found', { status: 404 })
   const parsed = reviewActionSchema.safeParse(await request.json().catch(() => null))

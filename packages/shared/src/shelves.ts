@@ -1,9 +1,7 @@
 import { z } from 'zod'
+import { SHELVES } from './shelf-names.js'
 
-/** The three Shelves (PRD §5.3, §7.7). A Book is on at most one per Member. */
-export const SHELVES = ['want_to_read', 'reading', 'read'] as const
 export const shelfSchema = z.enum(SHELVES)
-export type Shelf = z.infer<typeof shelfSchema>
 
 /** `PUT /books/:slug/shelf` body. */
 export const setShelfInputSchema = z.object({ shelf: shelfSchema })

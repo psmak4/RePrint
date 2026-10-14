@@ -1,7 +1,8 @@
 // Checks the built client bundle (M10-T07): the JavaScript every page loads (the client entry and
 // the root route) must not contain Zod or the copy of the admin, legal, or settings pages, which
-// only their own routes need, and the Book, Author, and Series pages must not contain a Markdown
-// parser (M10-T08). Prints the gzip size each main page loads. Run after `pnpm build`.
+// only their own routes need; the Book, Author, and Series pages must not contain a Markdown
+// parser (M10-T08); and Discover, Book, and search must not contain Zod at all (M10-T14). Prints
+// the gzip size each main page loads. Run after `pnpm build`.
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -79,6 +80,14 @@ for (const id of ['routes/book', 'routes/author', 'routes/series']) {
   }
 }
 
+// Discover, Book, and search load Zod only with a write or a form a Member opens (M10-T14).
+for (const id of ['routes/home', 'routes/book', 'routes/search']) {
+  for (const file of filesFor(id)) {
+    const hit = forbidden[0].markers.find((marker) => read(file).includes(marker))
+    if (hit) problems.push(`${id} loads ${file}, which contains Zod ("${hit}")`)
+  }
+}
+
 const pages = {
   Discover: 'routes/home',
   Book: 'routes/book',
@@ -99,5 +108,5 @@ if (problems.length > 0) {
   process.exit(1)
 }
 console.log(
-  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads, and no Markdown parser on the Book, Author, or Series page',
+  'check-bundle: OK, no Zod or admin, legal, or settings copy in the JavaScript every page loads, no Markdown parser on the Book, Author, or Series page, and no Zod on Discover, Book, or search',
 )
