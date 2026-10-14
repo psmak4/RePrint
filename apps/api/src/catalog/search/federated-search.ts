@@ -35,6 +35,12 @@ export interface FederatedSearchDeps {
   candidateRefs: CandidateRefs
   /** How long the Source has to answer before Catalog results are shown alone (PRD §6). */
   sourceTimeoutMs: number
+  /**
+   * How long the Source request itself may run (`SOURCE_TIMEOUT_MS`). An answer slower than
+   * `sourceTimeoutMs` but inside this is still cached for the next search, and only a request that
+   * runs out this limit counts against the circuit breaker (D-213).
+   */
+  sourceRequestTimeoutMs: number
   /** Counts a Source-cache hit or miss for the headroom dashboard. */
   recordCache?: (hit: boolean) => Promise<void>
   onError?: (error: unknown) => void
@@ -68,7 +74,7 @@ async function sourcePage(
   q: string,
   page: number,
 ): Promise<BookSearchPage | null> {
-  const { redis, source, call, sourceTimeoutMs } = deps
+  const { redis, source, call, sourceTimeoutMs, sourceRequestTimeoutMs } = deps
   const key = sourceSearchCacheKey(q, page)
   const cached = await redis.get(key).catch(() => null)
   if (cached) {
@@ -79,10 +85,13 @@ async function sourcePage(
     }
   }
   await deps.recordCache?.(false).catch(() => {})
-  const fetching = call(() => source.searchBooks(q, page), sourceTimeoutMs).then(async (result) => {
-    await redis.set(key, JSON.stringify(result), 'EX', SOURCE_SEARCH_CACHE_TTL_SECONDS)
-    return result
-  })
+  // The request gets the full Source limit, not the page's wait, so a slow answer is not cut off.
+  const fetching = call(() => source.searchBooks(q, page), sourceRequestTimeoutMs).then(
+    async (result) => {
+      await redis.set(key, JSON.stringify(result), 'EX', SOURCE_SEARCH_CACHE_TTL_SECONDS)
+      return result
+    },
+  )
   const settled = fetching.catch((error: unknown) => {
     deps.onError?.(error)
     return null

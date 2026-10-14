@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildApp } from '../../app.js'
+import { createSourceGateway, type SourceGateway } from '../../catalog/gateway/gateway.js'
 import { resolveCandidate } from '../../catalog/resolve.js'
 import { sourceSearchCacheKey } from '../../catalog/search/federated-search.js'
 import { createStubSource } from '../../catalog/sources/stub/stub-adapter.js'
@@ -246,5 +247,133 @@ describe('GET /v1/search', () => {
     const response = await app.inject({ method: 'GET', url: '/v1/search?q=dune&page=0' })
     expect(response.statusCode).toBe(400)
     expect(problemDetailsSchema.safeParse(response.json()).success).toBe(true)
+  })
+})
+
+describe('GET /v1/search through the Source gateway', () => {
+  // The page waits SOURCE_SEARCH_TIMEOUT_MS (200 ms); the request itself may run SOURCE_TIMEOUT_MS (600 ms).
+  const SLOW_MS = 400
+  const STALLED_MS = 2000
+  let gateway: SourceGateway
+  let transportDelayMs = 0
+  let transportCalls = 0
+  let gatewayApp: FastifyInstance
+
+  /** The Source's HTTP side: answers after `transportDelayMs` and, like `fetch`, gives up when aborted. */
+  const transport: typeof fetch = (_input, init) => {
+    transportCalls += 1
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => resolve(Response.json({})), transportDelayMs)
+      init?.signal?.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(timer)
+          reject(init.signal?.reason)
+        },
+        { once: true },
+      )
+    })
+  }
+
+  beforeAll(async () => {
+    const env = loadEnv({
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'silent',
+      WEB_ORIGINS: 'http://www.reprint.test:5173',
+      DATABASE_URL: stack.databaseUrl,
+      REDIS_URL: stack.redisUrl,
+      HIBP_MODE: 'off',
+      SOURCE_SEARCH_TIMEOUT_MS: '200',
+      SOURCE_TIMEOUT_MS: '600',
+    })
+    const source: SourceAdapter = {
+      ...stub,
+      searchBooks: async (query, page) => {
+        const response = await gateway.fetch(
+          `https://source.test/search?q=${encodeURIComponent(query)}`,
+        )
+        if (!response.ok) throw new SourceError(`HTTP ${response.status}`)
+        return pageOf([candidateOf(`gateway-${query}`, `Found ${query}`)], page)
+      },
+    }
+    gatewayApp = await buildApp(env, {
+      database: stack.db.db,
+      redis: stack.redis,
+      jobs: { enqueue: async () => '1' },
+      catalog: {
+        source,
+        interactive: (fn, timeoutMs) => gateway.run({ priority: 'interactive', timeoutMs }, fn),
+        recordCache: async () => {},
+      },
+    })
+    await gatewayApp.ready()
+  })
+  afterAll(async () => {
+    await gatewayApp?.close()
+  })
+  beforeEach(() => {
+    gateway = createSourceGateway({
+      redis: stack.redis,
+      rps: 100,
+      timeoutMs: 600,
+      version: '0.0.0',
+      contactEmail: 'ops@reprint.test',
+      fetch: transport,
+    })
+    transportDelayMs = 0
+    transportCalls = 0
+  })
+
+  const searchThroughGateway = async (q: string): Promise<SearchResponse> => {
+    const response = await gatewayApp.inject({
+      method: 'GET',
+      url: `/v1/search?q=${encodeURIComponent(q)}`,
+    })
+    expect(response.statusCode, response.body).toBe(200)
+    return searchResponseSchema.parse(response.json())
+  }
+
+  it('lets a slow answer finish after the page stops waiting, and shows it on the next search', async () => {
+    transportDelayMs = SLOW_MS
+    // The page stopped waiting before the answer came.
+    expect((await searchThroughGateway('patience')).sourceUnavailable).toBe(true)
+    await vi.waitFor(
+      async () => {
+        expect(await stack.redis.get(sourceSearchCacheKey('patience', 1))).not.toBeNull()
+      },
+      { timeout: 2000 },
+    )
+    const second = await searchThroughGateway('patience')
+    expect(second.sourceUnavailable).toBe(false)
+    expect(second.items.map((item) => item.kind)).toEqual(['candidate'])
+    expect(transportCalls).toBe(1)
+  })
+
+  it('does not count answers slower than the page waits against the circuit breaker', async () => {
+    transportDelayMs = SLOW_MS
+    const queries = ['one', 'two', 'three', 'four', 'five', 'six']
+    for (const q of queries) expect((await searchThroughGateway(q)).sourceUnavailable).toBe(true)
+    await vi.waitFor(
+      async () => {
+        for (const q of queries) {
+          expect(await stack.redis.get(sourceSearchCacheKey(q, 1))).not.toBeNull()
+        }
+      },
+      { timeout: 3000 },
+    )
+    expect(gateway.breaker.state).toBe('closed')
+    transportDelayMs = 0
+    expect((await searchThroughGateway('seven')).sourceUnavailable).toBe(false)
+  })
+
+  it('still opens the circuit breaker when the Source stalls past SOURCE_TIMEOUT_MS', async () => {
+    transportDelayMs = STALLED_MS
+    for (const q of ['a1', 'a2', 'a3', 'a4', 'a5']) {
+      expect((await searchThroughGateway(q)).sourceUnavailable).toBe(true)
+    }
+    await vi.waitFor(() => expect(gateway.breaker.state).toBe('open'), { timeout: 3000 })
+    const callsWhileOpen = transportCalls
+    expect((await searchThroughGateway('a6')).sourceUnavailable).toBe(true)
+    expect(transportCalls).toBe(callsWhileOpen)
   })
 })

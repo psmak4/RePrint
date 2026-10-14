@@ -111,6 +111,7 @@ export const catalogRoutes: FastifyPluginAsyncZod<CatalogRoutesOptions> = async 
           call: catalog.call,
           candidateRefs: catalog.candidateRefs,
           sourceTimeoutMs: options.env.SOURCE_SEARCH_TIMEOUT_MS,
+          sourceRequestTimeoutMs: options.env.SOURCE_TIMEOUT_MS,
           recordCache: catalog.recordCache,
           onError: (error) => request.log.warn({ err: error }, 'Source search failed'),
         },
