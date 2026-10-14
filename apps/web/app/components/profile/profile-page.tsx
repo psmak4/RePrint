@@ -1,4 +1,5 @@
 import type { Profile, ProfileReview, Viewer } from '@reprint/shared'
+import { chipVariants } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { avatarClass, initialsOf } from '../../lib/avatar.js'
@@ -147,10 +148,10 @@ export function ProfilePage({
         ) : null}
         <section aria-label={text.totalsLabel}>
           <ul className="flex flex-wrap gap-2">
-            <li className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm font-medium">
+            <li className={chipVariants({ interactive: false })}>
               {text.reviewsTotal(profile.reviewCount)}
             </li>
-            <li className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm font-medium">
+            <li className={chipVariants({ interactive: false })}>
               {text.helpfulTotal(profile.helpfulVotes)}
             </li>
           </ul>

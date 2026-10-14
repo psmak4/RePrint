@@ -732,7 +732,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: `Button` pairs each height with one text size (sm 40 px / 14 px, default 44 / 15, lg 48 / 16, semibold), and every pill-shaped action or action link uses it (`asChild` for links): account forms and the auth card, the Book page actions, the Library empty Shelf, Discover's sign-up, the Author match card, Author "Show more", the export link, and the search filter disclosure
   - Accept: the Discover hero search field and the header search box are the only hand-built pills, named in `DESIGN.md`; the style guard fails on any other (`rounded-full` with `border-input-border` or `bg-accent`)
   - Accept: component tests are updated; `pnpm check` passes
-- [ ] M11-T04 · One Chip · deps: M11-T02 · PRD: §7.2 to §7.5, §8
+- [x] M11-T04 · One Chip · deps: M11-T02 · PRD: §7.2 to §7.5, §8
   - Accept: a `Chip` in `@reprint/ui` (34 px, 14 px medium, chip border, accent fill when selected; a link, button, or label through `asChild`) is used for Genre chips, the Discover "Try" chips, child Genres on the Genres index, the Series pill, the review star filters, and the Editions format filter
   - Accept: the style guard fails on a hand-built chip; component tests are updated; `pnpm check` passes
 - [ ] M11-T05 · Page titles, section headings, and card corners from one scale · deps: M11-T02 · PRD: §11

@@ -1,11 +1,12 @@
 import type { GenreDetailResponse, GenreNode, GenreSort } from '@reprint/shared'
 import { GENRE_SORTS } from '@reprint/shared'
+import { chipVariants } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import type { BookCardData } from './book-card.js'
 import { BookGrid } from './book-tile.js'
 import { GenreTile } from './genre-tile.js'
-import { choiceClass, PageHero, PagerLinks } from './page-hero.js'
+import { PageHero, PagerLinks } from './page-hero.js'
 
 const text = copy.genres
 
@@ -82,11 +83,7 @@ export function GenresIndexPage({ items }: { items: GenreNode[] }) {
                 <p className="flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground">
                   {text.includes}
                   {node.children.map((child) => (
-                    <Link
-                      key={child.slug}
-                      to={`/genres/${child.slug}`}
-                      className="inline-flex h-7 items-center rounded-full border border-chip-border bg-surface px-2.5 text-[13px] text-foreground hover:border-input-border"
-                    >
+                    <Link key={child.slug} to={`/genres/${child.slug}`} className={chipVariants()}>
                       {child.name}
                     </Link>
                   ))}
@@ -120,7 +117,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
               {text.childrenHeading}
             </h2>
             {children.map((child) => (
-              <Link key={child.slug} to={`/genres/${child.slug}`} className={choiceClass(false)}>
+              <Link key={child.slug} to={`/genres/${child.slug}`} className={chipVariants()}>
                 {child.name}
               </Link>
             ))}
@@ -134,7 +131,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
             key={option}
             to={genreHref(genre.slug, option, 1)}
             aria-current={option === sort ? 'true' : undefined}
-            className={choiceClass(option === sort)}
+            className={chipVariants({ selected: option === sort })}
           >
             {text.sorts[option]}
           </Link>

@@ -5,7 +5,7 @@ import type {
   MostReviewedItem,
   Viewer,
 } from '@reprint/shared'
-import { buttonVariants, cn } from '@reprint/ui'
+import { buttonVariants, chipVariants, cn } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -228,11 +228,7 @@ function Hero({ discover }: { discover: DiscoverResponse }) {
             <p className="hidden flex-wrap items-center gap-2 md:flex">
               <span className="mr-1 text-sm text-muted-foreground">{t.try}</span>
               {tries.map((genre) => (
-                <Link
-                  key={genre.slug}
-                  to={`/genres/${genre.slug}`}
-                  className="inline-flex h-[34px] items-center rounded-full border border-chip-border bg-surface px-3.5 text-sm text-foreground hover:border-input-border"
-                >
+                <Link key={genre.slug} to={`/genres/${genre.slug}`} className={chipVariants()}>
                   {genre.name}
                 </Link>
               ))}

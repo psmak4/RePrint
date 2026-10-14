@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { Button, buttonVariants, cn, Input, Label, Select } from './index.js'
+import { Button, buttonVariants, Chip, chipVariants, cn, Input, Label, Select } from './index.js'
 
 describe('@reprint/ui', () => {
   it('renders a Button with its variant classes', () => {
@@ -25,6 +25,28 @@ describe('@reprint/ui', () => {
     }
     expect(buttonVariants({ size: 'icon' }).split(' ')).toContain('size-11')
     expect(buttonVariants({ size: 'icon-sm' }).split(' ')).toContain('size-9')
+  })
+
+  it('draws one Chip: 34 px, 14 px, accent when selected, no hover edge when not interactive', () => {
+    const plain = chipVariants().split(' ')
+    expect(plain).toEqual(
+      expect.arrayContaining(['h-[34px]', 'text-sm', 'font-medium', 'rounded-full']),
+    )
+    expect(plain).toEqual(
+      expect.arrayContaining(['border-chip-border', 'hover:border-input-border']),
+    )
+    expect(chipVariants({ selected: true }).split(' ')).toEqual(
+      expect.arrayContaining(['bg-accent', 'text-accent-foreground']),
+    )
+    expect(chipVariants({ interactive: false }).split(' ')).not.toContain(
+      'hover:border-input-border',
+    )
+    render(
+      <Chip asChild>
+        <a href="/genres/fantasy">Fantasy</a>
+      </Chip>,
+    )
+    expect(screen.getByRole('link', { name: 'Fantasy' }).className).toContain('h-[34px]')
   })
 
   it('renders the child element when asChild is set', () => {
