@@ -32,7 +32,8 @@ const NO_ROWS: DiscoverResponse = {
   justApproved: null,
 }
 
-const READING_ENTRIES = 4
+/** The "Your reading" strip shows at most two entries, Reading ones first (M10-T12). */
+const READING_ENTRIES = 2
 
 async function loadShelf(request: Request, username: string, shelf: Shelf, pageSize: number) {
   const search = new URLSearchParams({ shelf, sort: 'added_desc', pageSize: String(pageSize) })

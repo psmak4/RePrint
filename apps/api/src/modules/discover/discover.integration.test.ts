@@ -238,6 +238,19 @@ describe('GET /v1/discover', () => {
     ])
   })
 
+  it('rebuilds when a cached row no longer fits its schema (M10-T12)', async () => {
+    await fillCatalog()
+    await discover()
+    await stack.redis.set('discover:v3:row:topRated', JSON.stringify([{ not: 'a Book' }]))
+    await makeBook('fresh', [5])
+    // `discover()` checks the 200; a bad row is rebuilt, not sent.
+    const { body } = await discover()
+    expect(body.recentlyReviewed?.map((book) => book.slug)).toContain('fresh')
+    expect(JSON.parse((await stack.redis.get('discover:v3:row:topRated')) ?? 'null')).not.toEqual([
+      { not: 'a Book' },
+    ])
+  })
+
   it('rebuilds on a miss when the cache has been flushed', async () => {
     await fillCatalog()
     await discover()

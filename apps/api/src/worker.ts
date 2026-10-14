@@ -14,7 +14,7 @@ async function main(): Promise<void> {
   initSentry(env, 'worker')
   const log = pino({ ...baseLoggerOptions(env), base: { service: 'worker' } })
   const mailer = createMailer(env)
-  const database = createDb(env.DATABASE_URL)
+  const database = createDb(env.DATABASE_URL, { max: env.DATABASE_POOL_MAX })
   const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: 1 })
   redis.on('error', (error) => log.warn({ err: error }, 'redis connection error'))
   const catalog = createCatalogRuntime(env, redis)

@@ -705,9 +705,9 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: the public review list, my review, `GET /books/:slug` (the stale-refresh and Series checks run beside the detail load), the Library endpoint, `/mod/stats`, and Source candidate matching no longer wait on queries they do not depend on
   - Accept: `queueAuthorBookImports`, `queueSeriesMemberImports`, and `queueSeriesSyncs` add their jobs in one bulk call each and keep per-job deduplication (integration test against Redis)
   - Accept: existing tests pass; `pnpm check` passes
-- [ ] M10-T12 · Small efficiency fixes · deps: M9-T20 · PRD: §7.2, §7.4, §11, §13
+- [x] M10-T12 · Small efficiency fixes · deps: M9-T20 · PRD: §7.2, §7.4, §11, §13
   - Accept: `DATABASE_POOL_MAX` sets the API and worker pool size (default 10), documented in `.env.example` and `docs/deploy.md`
-  - Accept: Discover's cached rows are checked against their schemas once per request, not three times
+  - Accept: Discover's cached rows are checked against their schemas twice per request, not three times: the per-row read check that falls back to a rebuild, and the response serializer PRD §10 requires (changed in M10-T12: one check would mean giving up either the rebuild on a bad row or the required serializer)
   - Accept: the home page asks for only the 2 Reading entries it shows, and the root layout preconnects to the Open Library cover host
   - Accept: `removeMemberFromAggregates` updates every affected Book in one statement (integration test); `pnpm check` passes
 - [ ] M10-T13 · M10 verification: measure again and record how · deps: M10-T01, M10-T04, M10-T06, M10-T08, M10-T09, M10-T10, M10-T11, M10-T12 · PRD: §11, §12
