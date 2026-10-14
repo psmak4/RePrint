@@ -26,6 +26,14 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...source, SOURCE_MODE: 'mock' })).toThrow(/SOURCE_MODE/)
   })
 
+  it('defaults DATABASE_POOL_MAX to 10 and reads it for the API and the worker (M10-T12)', () => {
+    const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
+    expect(loadEnv(source).DATABASE_POOL_MAX).toBe(10)
+    expect(loadEnv({ ...source, DATABASE_POOL_MAX: '25' }).DATABASE_POOL_MAX).toBe(25)
+    expect(loadWorkerEnv({ ...SERVICES, DATABASE_POOL_MAX: '4' }).DATABASE_POOL_MAX).toBe(4)
+    expect(() => loadEnv({ ...source, DATABASE_POOL_MAX: '0' })).toThrow(/DATABASE_POOL_MAX/)
+  })
+
   it('reads WORKER_IN_PROCESS', () => {
     const source = { ...SERVICES, WEB_ORIGINS: 'http://a.test' }
     expect(loadEnv({ ...source, WORKER_IN_PROCESS: 'true' }).WORKER_IN_PROCESS).toBe(true)

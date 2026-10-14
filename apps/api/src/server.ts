@@ -15,7 +15,7 @@ import { createImageStorage } from './storage/index.js'
 async function main(): Promise<void> {
   const env = loadEnv()
   initSentry(env, 'api')
-  const database = createDb(env.DATABASE_URL)
+  const database = createDb(env.DATABASE_URL, { max: env.DATABASE_POOL_MAX })
   // Connect lazily so the API can start (and report not ready) while Redis is down.
   const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 1 })
   const jobQueue = createJobQueue(env.REDIS_URL)

@@ -54,9 +54,25 @@ export async function removeMemberFromAggregates(
   executor: Executor,
   userId: string,
 ): Promise<void> {
-  const rows = await executor.execute<{ book_id: string; rating: number }>(sql`
-    select book_id, rating from reviews where user_id = ${userId} and status = 'approved'`)
-  for (const row of rows) await adjust(executor, row.book_id, row.rating, -1)
+  // Every affected Book in one statement, however many reviews the Member wrote (M10-T12).
+  await executor.execute(sql`
+    update books b set
+      review_count = b.review_count - gone.n,
+      rating_sum = b.rating_sum - gone.total,
+      rating_counts = array[
+        b.rating_counts[1] - gone.c1, b.rating_counts[2] - gone.c2, b.rating_counts[3] - gone.c3,
+        b.rating_counts[4] - gone.c4, b.rating_counts[5] - gone.c5]
+    from (
+      select book_id, count(*)::int as n, sum(rating)::int as total,
+        (count(*) filter (where rating = 1))::int as c1,
+        (count(*) filter (where rating = 2))::int as c2,
+        (count(*) filter (where rating = 3))::int as c3,
+        (count(*) filter (where rating = 4))::int as c4,
+        (count(*) filter (where rating = 5))::int as c5
+      from reviews where user_id = ${userId} and status = 'approved'
+      group by book_id
+    ) gone
+    where b.id = gone.book_id`)
 }
 
 export interface RatingMismatch {
