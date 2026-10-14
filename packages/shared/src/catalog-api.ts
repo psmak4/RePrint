@@ -7,6 +7,7 @@ import {
   coverSchema,
   editionSchema,
   slugSchema,
+  sourceRatingSchema,
 } from './catalog.js'
 import { shelfSchema } from './shelves.js'
 
@@ -29,6 +30,10 @@ export type RatingSummary = z.infer<typeof ratingSummarySchema>
  */
 export const viewerShelfSchema = shelfSchema.nullable().optional()
 
+/** A Source's reader rating as the Book page shows it, under the Source's display name (D-204). */
+export const outsideRatingSchema = sourceRatingSchema.extend({ sourceName: z.string().min(1) })
+export type OutsideRating = z.infer<typeof outsideRatingSchema>
+
 /** `GET /books/:slug`: the Book with its Primary Edition and rating summary. */
 export const bookDetailSchema = bookSchema.omit({ reviewCount: true }).extend({
   primaryEdition: editionSchema.nullable(),
@@ -39,6 +44,8 @@ export const bookDetailSchema = bookSchema.omit({ reviewCount: true }).extend({
    */
   sourceEditionCount: z.number().int().min(0).nullable().optional(),
   rating: ratingSummarySchema,
+  /** Other Sources' reader ratings, shown apart from RePrint's and never counted in them (D-204). */
+  outsideRatings: z.array(outsideRatingSchema).optional(),
   viewerShelf: viewerShelfSchema,
 })
 export type BookDetail = z.infer<typeof bookDetailSchema>

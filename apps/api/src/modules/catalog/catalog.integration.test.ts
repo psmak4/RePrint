@@ -1,4 +1,12 @@
-import { authors, books, contributions, editions, series, sourceRecords } from '@reprint/db'
+import {
+  authors,
+  books,
+  contributions,
+  editions,
+  series,
+  sourceRatings,
+  sourceRecords,
+} from '@reprint/db'
 import {
   AUTHOR_WRITTEN_PAGE_SIZE,
   authorDetailSchema,
@@ -65,6 +73,44 @@ async function ingest(sourceId: string, authorSourceId: string) {
 }
 
 describe('GET /v1/books/:slug', () => {
+  it('returns outside ratings under the Source’s display name, apart from RePrint’s (D-204)', async () => {
+    const { slug, bookId } = await ingest('stub-book-dune', 'stub-author-herbert')
+    await stack.db.db
+      .update(books)
+      .set({ reviewCount: 1, ratingSum: 5, ratingCounts: [0, 0, 0, 0, 1] })
+      .where(eq(books.id, bookId))
+    await stack.db.db.insert(sourceRatings).values([
+      {
+        bookId,
+        source: 'stub',
+        average: 4.29,
+        count: 500,
+        counts: [16, 18, 41, 155, 270],
+        fetchedAt: new Date(),
+      },
+      {
+        bookId,
+        source: 'unknown-source',
+        average: 1,
+        count: 1,
+        counts: [1, 0, 0, 0, 0],
+        fetchedAt: new Date(),
+      },
+    ])
+    const body = bookDetailSchema.parse(
+      (await app.inject({ method: 'GET', url: `/v1/books/${slug}` })).json(),
+    )
+    expect(body.outsideRatings).toEqual([
+      {
+        sourceName: 'Open Library',
+        average: 4.29,
+        count: 500,
+        distribution: [16, 18, 41, 155, 270],
+      },
+    ])
+    expect(body.rating).toEqual({ average: 5, count: 1, distribution: [0, 0, 0, 0, 1] })
+  })
+
   it('returns the Book with its Primary Edition, byline, and empty rating summary', async () => {
     const { slug } = await ingest('stub-book-dune', 'stub-author-herbert')
     const response = await app.inject({ method: 'GET', url: `/v1/books/${slug}` })

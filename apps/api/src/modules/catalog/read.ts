@@ -10,6 +10,7 @@ import {
   editions,
   genres,
   series,
+  sourceRatings,
 } from '@reprint/db'
 import {
   AUTHOR_WRITTEN_PAGE_SIZE,
@@ -26,6 +27,7 @@ import {
   type RatingSummary,
 } from '@reprint/shared'
 import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm'
+import { SOURCE_DISPLAY_NAMES } from '../../catalog/sources/index.js'
 
 type CoverRow = typeof covers.$inferSelect
 type EditionRow = typeof editions.$inferSelect
@@ -159,7 +161,7 @@ export async function findBookBySlug(db: Database, slug: string): Promise<BookRo
 }
 
 export async function loadBookDetail(db: Database, book: BookRow): Promise<BookDetail> {
-  const [editionRows, byline, seriesRows, genreRows] = await Promise.all([
+  const [editionRows, byline, seriesRows, genreRows, outsideRows] = await Promise.all([
     db.select().from(editions).where(eq(editions.bookId, book.id)),
     bylines(db, [book.id]),
     db
@@ -174,6 +176,7 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
       .innerJoin(genres, eq(genres.id, bookGenres.genreId))
       .where(eq(bookGenres.bookId, book.id))
       .orderBy(asc(genres.name)),
+    db.select().from(sourceRatings).where(eq(sourceRatings.bookId, book.id)),
   ])
   const primary = editionRows.find((row) => row.id === book.primaryEditionId) ?? null
   const coverMap = await coversById(db, [book.coverId, primary?.coverId ?? null])
@@ -201,6 +204,15 @@ export async function loadBookDetail(db: Database, book: BookRow): Promise<BookD
     editionCount: editionRows.length,
     sourceEditionCount: book.sourceEditionCount,
     rating: ratingSummary(book),
+    // Other Sources' reader ratings, under a name readers know; never mixed into `rating` (D-204).
+    outsideRatings: outsideRows
+      .flatMap((row) => {
+        const sourceName = SOURCE_DISPLAY_NAMES[row.source]
+        return sourceName
+          ? [{ sourceName, average: row.average, count: row.count, distribution: row.counts }]
+          : []
+      })
+      .sort((a, b) => a.sourceName.localeCompare(b.sourceName)),
   }
 }
 

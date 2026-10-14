@@ -11,6 +11,15 @@ export const sourceTextCleaners: Readonly<Record<string, (raw: string) => string
   [OPEN_LIBRARY]: toSourceMarkdown,
 }
 
+/**
+ * The name readers see for each Source's data (D-204). The stub stands in for Open Library in local
+ * runs and specs, so it shows the same name.
+ */
+export const SOURCE_DISPLAY_NAMES: Readonly<Record<string, string>> = {
+  [OPEN_LIBRARY]: 'Open Library',
+  stub: 'Open Library',
+}
+
 export const SOURCE_MODES = ['fixtures', 'live', 'stub'] as const
 export type SourceMode = (typeof SOURCE_MODES)[number]
 
