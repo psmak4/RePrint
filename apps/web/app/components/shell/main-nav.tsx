@@ -1,16 +1,12 @@
 import type { Viewer } from '@reprint/shared'
-import { buttonVariants, cn } from '@reprint/ui'
+import { buttonVariants } from '@reprint/ui'
 import { NavLink } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { Menu, menuItemClass } from '../common/menu.js'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `border-b-2 py-2 text-[15px] font-medium hover:text-foreground ${
     isActive ? 'border-accent text-foreground' : 'border-transparent text-strong'
-  }`
-
-const menuLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex h-11 items-center rounded-lg px-3 text-[15px] font-medium hover:bg-surface-raised ${
-    isActive ? 'bg-surface-raised text-foreground' : 'text-strong'
   }`
 
 function links(viewer: Viewer | null) {
@@ -37,14 +33,10 @@ export function MainNav({ viewer }: { viewer: Viewer | null }) {
           </NavLink>
         ))}
       </nav>
-      <details className="relative order-1 md:hidden">
-        <summary
-          aria-label={copy.shell.menuLabel}
-          className={cn(
-            buttonVariants({ variant: 'ghost', size: 'icon' }),
-            'cursor-pointer list-none',
-          )}
-        >
+      <Menu
+        className="order-1 md:hidden"
+        label={copy.shell.menuLabel}
+        button={
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -56,18 +48,18 @@ export function MainNav({ viewer }: { viewer: Viewer | null }) {
           >
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
-        </summary>
-        <nav
-          aria-label={copy.shell.mainNavLabel}
-          className="absolute right-0 z-40 mt-2 flex w-56 flex-col rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)]"
-        >
+        }
+        buttonClassName={buttonVariants({ variant: 'ghost', size: 'icon' })}
+        panelClassName="w-56"
+      >
+        <nav aria-label={copy.shell.mainNavLabel} className="flex flex-col">
           {items.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={menuLinkClass}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={menuItemClass}>
               {item.label}
             </NavLink>
           ))}
         </nav>
-      </details>
+      </Menu>
     </>
   )
 }

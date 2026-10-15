@@ -748,7 +748,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: search's sort and filter forms navigate in the app; every filter panel (search, admin Users, audit log) submits with one primary "Apply filters" button
   - Accept: one `Pager` (Previous, "Page N of M", Next as outline pills) on Library, profile, Genre, search, and Book reviews; lists that grow in place (Author, admin) use one centred "Show more" button
   - Accept: component and route tests cover the sort control with and without JavaScript; `pnpm check` and the e2e specs pass
-- [ ] M11-T08 · Menus that close, and an account menu with the Member's pages · deps: M11-T03 · PRD: §7.1, §7.11, §7.12, §11
+- [x] M11-T08 · Menus that close, and an account menu with the Member's pages · deps: M11-T03 · PRD: §7.1, §7.11, §7.12, §11
   - Accept: one `Menu` disclosure (a native `<details>`, so it opens without JavaScript) closes when the page changes, on Escape (focus returns to its button), on a click or tap outside, and when another menu opens; the phone menu, account menu, and notifications use it, and component tests cover each way of closing
   - Accept: the account menu lists Your profile, Your library, Settings, Admin (only for holders of an admin-area permission), and Log out; the e2e specs that use it pass
   - Accept: `pnpm check` passes

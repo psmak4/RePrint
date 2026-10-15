@@ -1,8 +1,9 @@
 import type { NotificationListResponse } from '@reprint/shared'
 import { buttonVariants, cn } from '@reprint/ui'
-import { type SyntheticEvent, useState } from 'react'
+import { useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { Menu } from '../common/menu.js'
 
 const NONE: ReadonlySet<string> = new Set()
 
@@ -25,54 +26,56 @@ export function NotificationBell({
   // Marking is optimistic; the loader's count takes over once the request settles.
   const unread = fetcher.state === 'idle' ? notifications.unreadCount : 0
 
-  function onToggle(event: SyntheticEvent<HTMLDetailsElement>) {
-    if (!event.currentTarget.open || !notifications || notifications.unreadCount === 0) return
+  function onOpen() {
+    if (!notifications || notifications.unreadCount === 0) return
     setFresh(new Set(notifications.items.filter((n) => !n.read).map((n) => n.id)))
     fetcher.submit(null, { method: 'post', action: '/notifications/read' })
   }
 
   return (
-    <details className="relative" onToggle={onToggle}>
-      <summary
-        aria-label={unread > 0 ? c.unreadLabel(unread) : c.label}
-        className={cn(buttonVariants({ variant: 'ghost' }), 'cursor-pointer list-none gap-1 px-3')}
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-none stroke-current">
-          <path
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"
-          />
-        </svg>
-        {unread > 0 ? (
-          <span
-            aria-hidden="true"
-            className="rounded-full bg-accent px-1.5 text-xs text-accent-foreground"
-          >
-            {unread}
-          </span>
-        ) : null}
-      </summary>
-      <div className="absolute right-0 z-40 mt-2 w-80 max-w-[90vw] rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.3)]">
-        {notifications.items.length === 0 ? (
-          <p className="p-3 text-sm">{c.empty}</p>
-        ) : (
-          <ul aria-label={c.label}>
-            {notifications.items.map((item) => (
-              <li key={item.id} className="rounded-lg p-3 text-sm">
-                <p>
-                  {fresh.has(item.id) ? <strong className="sr-only">{c.unreadMark} </strong> : null}
-                  {c.messages[item.type]}
-                </p>
-                <time dateTime={item.createdAt} className="text-xs text-muted-foreground">
-                  {dateFormat.format(new Date(item.createdAt))}
-                </time>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </details>
+    <Menu
+      label={unread > 0 ? c.unreadLabel(unread) : c.label}
+      button={
+        <>
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-none stroke-current">
+            <path
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"
+            />
+          </svg>
+          {unread > 0 ? (
+            <span
+              aria-hidden="true"
+              className="rounded-full bg-accent px-1.5 text-xs text-accent-foreground"
+            >
+              {unread}
+            </span>
+          ) : null}
+        </>
+      }
+      buttonClassName={cn(buttonVariants({ variant: 'ghost' }), 'gap-1 px-3')}
+      panelClassName="w-80 max-w-[90vw]"
+      onOpen={onOpen}
+    >
+      {notifications.items.length === 0 ? (
+        <p className="p-3 text-sm">{c.empty}</p>
+      ) : (
+        <ul aria-label={c.label}>
+          {notifications.items.map((item) => (
+            <li key={item.id} className="rounded-lg p-3 text-sm">
+              <p>
+                {fresh.has(item.id) ? <strong className="sr-only">{c.unreadMark} </strong> : null}
+                {c.messages[item.type]}
+              </p>
+              <time dateTime={item.createdAt} className="text-xs text-muted-foreground">
+                {dateFormat.format(new Date(item.createdAt))}
+              </time>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Menu>
   )
 }
