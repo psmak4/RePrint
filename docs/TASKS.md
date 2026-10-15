@@ -752,7 +752,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
   - Accept: one `Menu` disclosure (a native `<details>`, so it opens without JavaScript) closes when the page changes, on Escape (focus returns to its button), on a click or tap outside, and when another menu opens; the phone menu, account menu, and notifications use it, and component tests cover each way of closing
   - Accept: the account menu lists Your profile, Your library, Settings, Admin (only for holders of an admin-area permission), and Log out; the e2e specs that use it pass
   - Accept: `pnpm check` passes
-- [ ] M11-T09 · One empty state, and titled error pages · deps: M11-T05 · PRD: §11
+- [x] M11-T09 · One empty state, and titled error pages · deps: M11-T05 · PRD: §11
   - Accept: one `EmptyState` (dashed border, 16 px corners, one sentence, optional icon and action) replaces the Library, Genre, search, Discover, and admin versions
   - Accept: error pages (404, 500, and the resolve page's errors) set a `<title>`; a route test checks it; `pnpm check` passes
 - [ ] M11-T10 · M11 verification: measure again · deps: M11-T01, M11-T04, M11-T07, M11-T08, M11-T09 · PRD: §11, §12

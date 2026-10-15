@@ -1,5 +1,4 @@
 import {
-  APP_NAME,
   changeEmailRequestSchema,
   changePasswordRequestSchema,
   deleteAccountRequestSchema,
@@ -14,11 +13,11 @@ import { settingsCopy } from '../copy/settings.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, forwardCookies, sendToApi } from '../lib/auth.server.js'
 import { loadMe } from '../lib/me.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/settings-security'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${settingsCopy.security.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(settingsCopy.security.title), noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

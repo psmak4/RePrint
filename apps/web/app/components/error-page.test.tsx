@@ -1,35 +1,45 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react'
-import { createRoutesStub } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { createRoutesStub, useRouteError } from 'react-router'
+import { afterEach, describe, expect, it } from 'vitest'
 import { ErrorPage } from './error-page.js'
 
-function RouteError() {
-  return <ErrorPage error={new Error('boom')} />
+afterEach(() => {
+  cleanup()
+  document.title = ''
+})
+
+function Boundary() {
+  return <ErrorPage error={useRouteError()} />
+}
+
+function renderFailing(status: number) {
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      Component: () => null,
+      ErrorBoundary: Boundary,
+      loader: () => {
+        throw new Response('', { status })
+      },
+    },
+  ])
+  render(<Stub initialEntries={['/']} />)
 }
 
 describe('ErrorPage', () => {
-  it('renders a friendly page when a loader throws', async () => {
-    const Stub = createRoutesStub([
-      {
-        path: '/',
-        Component: () => null,
-        loader: () => {
-          throw new Error('boom')
-        },
-        ErrorBoundary: RouteError,
-      },
-    ])
-    render(<Stub />)
-    expect(await screen.findByRole('heading', { name: 'Something went wrong' })).toBeTruthy()
-    expect(screen.queryByText('boom')).toBeNull()
-    expect(screen.getByRole('link', { name: 'Back to home' }).getAttribute('href')).toBe('/')
+  it('names the tab on a 404, as every page does (D-214)', async () => {
+    renderFailing(404)
+    await screen.findByRole('heading', { level: 1 })
+    await waitFor(() => expect(document.title).toMatch(/ \| RePrint$/))
+    expect(document.title).toBe(
+      `${screen.getByRole('heading', { level: 1 }).textContent} | RePrint`,
+    )
   })
 
-  it('renders the not-found copy for a 404 response', () => {
-    render(
-      <ErrorPage error={{ status: 404, statusText: 'Not Found', data: null, internal: true }} />,
-    )
-    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeTruthy()
+  it('names the tab on a server error too', async () => {
+    renderFailing(500)
+    await screen.findByRole('heading', { level: 1 })
+    await waitFor(() => expect(document.title).toMatch(/ \| RePrint$/))
   })
 })

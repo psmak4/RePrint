@@ -8,6 +8,7 @@ import { BookGrid } from '../books/book-tile.js'
 import { summaryCard } from '../books/genre-pages.js'
 import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector } from '../books/shelf-selector.js'
+import { EmptyState } from '../common/empty-state.js'
 import { Pager } from '../common/pager.js'
 import { SortControl } from '../common/sort-control.js'
 import { TabNav } from '../common/tab-nav.js'
@@ -129,12 +130,15 @@ export function LibraryPage({
           <SortForm username={username} view={view} />
         </div>
         {library.items.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-dashed-border px-6 py-5">
-            <p className="text-muted-foreground">{text.empty}</p>
-            <Link to="/" className={buttonVariants()}>
-              {text.discoverPrompt}
-            </Link>
-          </div>
+          <EmptyState
+            action={
+              <Link to="/" className={buttonVariants()}>
+                {text.discoverPrompt}
+              </Link>
+            }
+          >
+            {text.empty}
+          </EmptyState>
         ) : (
           <BookGrid
             items={library.items.map(({ shelf, book }) => ({

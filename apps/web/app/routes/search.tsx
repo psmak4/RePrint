@@ -1,5 +1,4 @@
 import {
-  APP_NAME,
   type AuthorSuggestion,
   type GenreNode,
   genreTreeResponseSchema,
@@ -13,13 +12,13 @@ import { matchAuthor } from '../lib/author-match.js'
 import { logger } from '../lib/logger.server.js'
 import { isSearchable, resolveHref, searchHref } from '../lib/search-links.js'
 import { parseSearchParams } from '../lib/search-params.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/search'
 
 export function meta(args: Route.MetaArgs) {
   return pageMeta(args, {
-    title: `${APP_NAME}: ${copy.search.title(args.loaderData?.query.q ?? '')}`,
+    title: pageTitle(copy.search.title(args.loaderData?.query.q ?? '')),
     noindex: true,
   })
 }

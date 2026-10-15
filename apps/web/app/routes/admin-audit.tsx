@@ -1,6 +1,5 @@
 import {
   type AdminAuditResponse,
-  APP_NAME,
   adminAuditFiltersSchema,
   adminAuditQuerySchema,
   adminAuditResponseSchema,
@@ -12,7 +11,7 @@ import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-audit'
 
 const PAGE_SIZE = 25
@@ -21,7 +20,7 @@ const FILTERS = Object.keys(
 ) as (keyof typeof adminAuditFiltersSchema.shape)[]
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.audit.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.audit.title), noindex: true })
 }
 
 /** The audit log, newest first, filtered by the URL (PRD §7.11). Empty or invalid filters are dropped. */

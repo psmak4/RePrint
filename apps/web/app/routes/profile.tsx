@@ -9,7 +9,7 @@ import { ProfilePage } from '../components/profile/profile-page.js'
 import { copy } from '../copy/index.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { loader as rootLoader } from '../root.js'
 import type { Route } from './+types/profile'
 
@@ -17,7 +17,7 @@ export function meta(args: Route.MetaArgs) {
   if (!args.loaderData) return [{ title: APP_NAME }]
   const { profile, canonicalUrl } = args.loaderData
   return pageMeta(args, {
-    title: `${copy.profile.title(profile.displayName)} | ${APP_NAME}`,
+    title: pageTitle(copy.profile.title(profile.displayName)),
     description: copy.profile.metaDescription(profile.displayName, profile.reviewCount),
     canonicalUrl,
     // Only verified Members are indexed (PRD §11).

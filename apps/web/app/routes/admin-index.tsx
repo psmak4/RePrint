@@ -1,4 +1,4 @@
-import { APP_NAME, type ModQueueItem, modQueueResponseSchema, PERMISSIONS } from '@reprint/shared'
+import { type ModQueueItem, modQueueResponseSchema, PERMISSIONS } from '@reprint/shared'
 import { useRouteLoaderData } from 'react-router'
 import { AdminPage } from '../components/admin/admin-page.js'
 import { ModerationDashboard } from '../components/admin/moderation-dashboard.js'
@@ -6,12 +6,12 @@ import { adminCopy } from '../copy/admin.js'
 import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-index'
 import type { loader as adminLoader } from './admin.js'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.dashboard.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.dashboard.title), noindex: true })
 }
 
 /** The three oldest pending reviews for "Waiting longest"; null when the API did not answer. */

@@ -1,7 +1,8 @@
 import type { AdminUserStatus } from '@reprint/shared'
-import { Button, cn, textStyles } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
-import { AdminIcon } from './icons.js'
+import { EmptyState as SharedEmptyState } from '../common/empty-state.js'
+import { FiltersToggleLabel, filtersToggleClass } from '../common/filters-toggle.js'
 
 export type BadgeTone = 'green' | 'amber' | 'red' | 'blue' | 'gray'
 
@@ -119,15 +120,12 @@ export function StatTile({
 }
 
 /** A dashed box with a green check and one sentence, and optionally one action. */
+/** An admin list's empty state: the shared dashed box with the "all caught up" check (D-214). */
 export function EmptyState({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-chip-border bg-surface-tint p-5 sm:flex-row sm:items-center">
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-success-tint text-success">
-        <AdminIcon name="check" />
-      </span>
-      <p className="flex-1 text-[15px] text-strong">{children}</p>
-      {action}
-    </div>
+    <SharedEmptyState icon="check" action={action}>
+      {children}
+    </SharedEmptyState>
   )
 }
 
@@ -147,20 +145,15 @@ export function FiltersToggle({
   label: string
 }) {
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      className="w-full justify-between md:hidden"
+      className={cn(filtersToggleClass, 'md:hidden')}
       aria-expanded={open}
       aria-controls={controls}
       onClick={onToggle}
     >
-      <span className="inline-flex items-center gap-2.5">
-        <AdminIcon name="filter" />
-        {label}
-      </span>
-      <AdminIcon name="chevronDown" />
-    </Button>
+      <FiltersToggleLabel label={label} />
+    </button>
   )
 }
 

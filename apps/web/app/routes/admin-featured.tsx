@@ -1,9 +1,4 @@
-import {
-  APP_NAME,
-  adminFeaturedSchema,
-  adminFeaturedUpdateSchema,
-  PERMISSIONS,
-} from '@reprint/shared'
+import { adminFeaturedSchema, adminFeaturedUpdateSchema, PERMISSIONS } from '@reprint/shared'
 import { data } from 'react-router'
 import { FeaturedManager } from '../components/admin/featured-manager.js'
 import { adminCopy } from '../copy/admin.js'
@@ -11,11 +6,11 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-featured'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.featured.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.featured.title), noindex: true })
 }
 
 /** The current picks and what can be picked (PRD §7.2, §7.11). */

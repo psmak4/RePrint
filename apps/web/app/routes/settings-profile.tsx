@@ -1,14 +1,14 @@
-import { APP_NAME, updateMeRequestSchema } from '@reprint/shared'
+import { updateMeRequestSchema } from '@reprint/shared'
 import { data } from 'react-router'
 import { ProfileSettingsPage } from '../components/settings/profile-settings-page.js'
 import { settingsCopy } from '../copy/settings.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { loadMe } from '../lib/me.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/settings-profile'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${settingsCopy.profile.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(settingsCopy.profile.title), noindex: true })
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

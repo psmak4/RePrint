@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { generatedCoverClass } from '../../lib/cover-color.js'
+import { EmptyState } from '../common/empty-state.js'
 import { ReviewExcerpt } from '../reviews/review-excerpt.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { SpoilerToggle } from '../reviews/spoiler-toggle.js'
@@ -282,13 +283,16 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
           </div>
         </div>
       ))}
-      <div className="flex flex-col justify-center gap-2.5 rounded-2xl border border-dashed border-dashed-border px-5 py-4">
-        <p className="font-semibold">{t.finishedPrompt}</p>
-        <p className="text-sm text-muted-foreground">{t.finishedNote}</p>
-        <Link to={`/u/${viewer.username}/library?shelf=read`} className={actionLink}>
+      <EmptyState className="sm:flex-col sm:items-start">
+        <p className="font-semibold text-foreground">{t.finishedPrompt}</p>
+        <p className="mt-1 text-muted-foreground">{t.finishedNote}</p>
+        <Link
+          to={`/u/${viewer.username}/library?shelf=read`}
+          className={`${actionLink} mt-2.5 inline-block`}
+        >
           {t.writeReview}
         </Link>
-      </div>
+      </EmptyState>
     </section>
   )
 }

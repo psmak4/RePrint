@@ -1,5 +1,4 @@
 import {
-  APP_NAME,
   type ModReportsResponse,
   modReportsResponseSchema,
   PERMISSIONS,
@@ -16,13 +15,13 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-reports'
 
 const QUEUE_PAGE_SIZE = 20
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.reports.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.reports.title), noindex: true })
 }
 
 /** The Reports queue (reviews with open reports, oldest first) and what the viewer may do (PRD §7.10). */

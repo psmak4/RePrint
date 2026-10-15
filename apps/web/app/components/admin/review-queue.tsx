@@ -6,6 +6,7 @@ import { adminCopy } from '../../copy/admin.js'
 import type { ClaimState } from '../../routes/admin-reviews.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { Cover } from '../books/cover.js'
+import { EmptyState as SharedEmptyState } from '../common/empty-state.js'
 import { ShowMore } from '../common/show-more.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { AdminPage } from './admin-page.js'
@@ -273,9 +274,7 @@ export function ReviewQueue({
           {selected ? (
             <ReviewDetail item={selected} claim={claim} nextHref={nextHref} />
           ) : prompt ? (
-            <p className="rounded-2xl border border-dashed border-chip-border p-6 text-muted-foreground">
-              {prompt}
-            </p>
+            <SharedEmptyState>{prompt}</SharedEmptyState>
           ) : null}
         </div>
       </div>

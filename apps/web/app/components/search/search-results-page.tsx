@@ -8,7 +8,7 @@ import {
   type SearchResponse,
   type Viewer,
 } from '@reprint/shared'
-import { Button, buttonVariants, cn, Label, Select } from '@reprint/ui'
+import { Button, cn, Label, Select } from '@reprint/ui'
 import { useEffect, useRef } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -19,6 +19,8 @@ import { AuthorMatchCard } from '../books/author-match-card.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
+import { EmptyState } from '../common/empty-state.js'
+import { FiltersToggleLabel, filtersToggleClass } from '../common/filters-toggle.js'
 import { Pager } from '../common/pager.js'
 import { SortControl } from '../common/sort-control.js'
 import { TabNav } from '../common/tab-nav.js'
@@ -269,10 +271,8 @@ function FilterPanel({ children }: { children: React.ReactNode }) {
   }, [])
   return (
     <details ref={ref} className="group lg:[&::details-content]:[content-visibility:visible]">
-      <summary
-        className={cn(buttonVariants({ variant: 'outline' }), 'cursor-pointer list-none lg:hidden')}
-      >
-        {copy.search.filtersToggle}
+      <summary className={cn(filtersToggleClass, 'cursor-pointer list-none lg:hidden')}>
+        <FiltersToggleLabel label={copy.search.filtersToggle} />
       </summary>
       <div className="mt-2 lg:mt-0">{children}</div>
     </details>
@@ -426,10 +426,10 @@ export function SearchResultsPage({
               )}
               <Pagination query={query} hasMore={results.hasMore} />
               {query.type === 'books' ? (
-                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-dashed border-dashed-border px-6 py-5">
-                  <span className="font-semibold">{c.isbnHint}</span>
-                  <span className="text-[15px] text-muted-foreground">{c.isbnHintNote}</span>
-                </p>
+                <EmptyState>
+                  <span className="mr-4 font-semibold text-foreground">{c.isbnHint}</span>
+                  <span className="text-muted-foreground">{c.isbnHintNote}</span>
+                </EmptyState>
               ) : null}
             </>
           )}

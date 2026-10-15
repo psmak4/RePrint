@@ -32,7 +32,7 @@ import { bookBreadcrumbs, bookJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import type { ReviewListQuery } from '../lib/review-links.js'
 import { toRichTree } from '../lib/rich-text.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import { hasSessionCookie, viewerSession } from '../lib/session.server.js'
 import type { Route } from './+types/book'
 
@@ -40,7 +40,7 @@ export function meta(args: Route.MetaArgs) {
   if (!args.loaderData) return [{ title: APP_NAME }]
   const { book, canonicalUrl, metaDescription } = args.loaderData
   return pageMeta(args, {
-    title: `${book.title} | ${APP_NAME}`,
+    title: pageTitle(book.title),
     description: metaDescription,
     canonicalUrl,
     openGraph: {

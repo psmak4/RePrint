@@ -14,7 +14,7 @@ import { coverUrl } from '../lib/cover-url.js'
 import { authorBreadcrumbs, authorJsonLd } from '../lib/json-ld.js'
 import { logger } from '../lib/logger.server.js'
 import { toRichTree } from '../lib/rich-text.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/author'
 
 const META_DESCRIPTION_LIMIT = 160
@@ -23,7 +23,7 @@ export function meta(args: Route.MetaArgs) {
   if (!args.loaderData) return [{ title: APP_NAME }]
   const { author, canonicalUrl, metaDescription } = args.loaderData
   return pageMeta(args, {
-    title: `${author.name} | ${APP_NAME}`,
+    title: pageTitle(author.name),
     description: metaDescription,
     canonicalUrl,
     openGraph: { type: 'profile', title: author.name, image: coverUrl(author.photo, 'large') },

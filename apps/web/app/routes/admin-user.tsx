@@ -1,6 +1,5 @@
 import {
   type AdminUserDetail,
-  APP_NAME,
   adminUserDetailSchema,
   adminUserResendVerificationResponseSchema,
   adminUserRevokeSessionsResponseSchema,
@@ -17,11 +16,11 @@ import { requireViewerPermission } from '../lib/admin.server.js'
 import { apiClientFor } from '../lib/api.server.js'
 import { failed, sendToApi } from '../lib/auth.server.js'
 import { logger } from '../lib/logger.server.js'
-import { pageMeta } from '../lib/seo.js'
+import { pageMeta, pageTitle } from '../lib/seo.js'
 import type { Route } from './+types/admin-user'
 
 export function meta(args: Route.MetaArgs) {
-  return pageMeta(args, { title: `${APP_NAME}: ${adminCopy.users.title}`, noindex: true })
+  return pageMeta(args, { title: pageTitle(adminCopy.users.title), noindex: true })
 }
 
 /** One user with what the viewer may do to them (PRD §7.11). Moderators get the limited view (D-044). */
