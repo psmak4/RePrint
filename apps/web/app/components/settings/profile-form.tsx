@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { BIO_MAX_LENGTH, type Me, updateMeRequestSchema } from '@reprint/shared'
-import { Button, Checkbox, Input, Label, Textarea } from '@reprint/ui'
+import { Button, Checkbox, Input, Label, Textarea, textStyles } from '@reprint/ui'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
@@ -48,7 +48,7 @@ export function ProfileForm({ me }: { me: Me }) {
       aria-labelledby="profile-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="profile-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="profile-heading" className={textStyles.cardTitle}>
         {c.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>

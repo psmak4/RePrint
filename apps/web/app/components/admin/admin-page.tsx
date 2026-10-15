@@ -1,4 +1,4 @@
-import { cn } from '@reprint/ui'
+import { cn, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link, NavLink, useOutletContext } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -18,7 +18,7 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
     <div className="flex flex-col gap-5">
       {groups.map((group) => (
         <div key={group.label} className="flex flex-col gap-0.5">
-          <p className="px-3 pb-1.5 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <p className={cn(textStyles.eyebrow, 'text-muted-foreground px-3 pb-1.5')}>
             {group.label}
           </p>
           <ul className="flex flex-col gap-0.5">
@@ -56,7 +56,7 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
 function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
   return (
     <nav aria-label={adminCopy.navLabel} className="lg:w-56 lg:shrink-0">
-      <details className="rounded-xl border border-border bg-surface lg:hidden">
+      <details className="rounded-2xl border border-border bg-surface lg:hidden">
         <summary className="flex h-12 cursor-pointer items-center justify-between gap-2 px-4 text-[15px] font-semibold">
           {adminCopy.navToggle}
           <AdminIcon name="chevronDown" />
@@ -142,16 +142,12 @@ export function AdminPage({
           <div className="flex min-w-0 flex-col gap-2.5">
             {shownCrumbs ? <Crumbs crumbs={shownCrumbs} /> : null}
             {eyebrow ? (
-              <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                {eyebrow}
-              </p>
+              <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{eyebrow}</p>
             ) : null}
             <div className="flex items-center gap-4 md:gap-5">
               {leading}
               <div className="flex min-w-0 flex-col gap-2">
-                <h1 className="font-serif text-[34px] leading-[1.05] font-medium tracking-[-0.02em] break-words md:text-[44px]">
-                  {title}
-                </h1>
+                <h1 className={textStyles.pageTitle}>{title}</h1>
                 {lead ? (
                   <div className="max-w-[640px] text-base leading-[1.5] text-muted-foreground">
                     {lead}

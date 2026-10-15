@@ -1,5 +1,5 @@
 import type { ModQueueItem, ModQueueResponse } from '@reprint/shared'
-import { Button, cn } from '@reprint/ui'
+import { Button, cn, textStyles } from '@reprint/ui'
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -153,7 +153,7 @@ function ReviewDetail({
       aria-label={text.detailLabel}
       // `overflow-clip`, not `overflow-hidden`: a hidden overflow would become the sticky bar's
       // scroller, and the bar would never stay pinned.
-      className="flex min-w-0 flex-col overflow-clip rounded-[18px] border border-border bg-surface"
+      className="flex min-w-0 flex-col overflow-clip rounded-2xl border border-border bg-surface"
     >
       {claim ? <ClaimNotice claim={claim} /> : null}
       <div className="flex flex-col gap-6 p-5 md:p-6">
@@ -166,10 +166,8 @@ function ReviewDetail({
             className="w-14 shrink-0"
           />
           <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              {text.bookLabel}
-            </p>
-            <h2 className="font-serif text-[26px] leading-tight font-medium break-words">
+            <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.bookLabel}</p>
+            <h2 className={cn(textStyles.cardTitle, 'break-words')}>
               <Link to={`/books/${item.book.slug}`} className="hover:underline">
                 {item.book.title}
               </Link>
@@ -278,7 +276,7 @@ export function ReviewQueue({
           {selected ? (
             <ReviewDetail item={selected} claim={claim} nextHref={nextHref} />
           ) : prompt ? (
-            <p className="rounded-[18px] border border-dashed border-chip-border p-6 text-muted-foreground">
+            <p className="rounded-2xl border border-dashed border-chip-border p-6 text-muted-foreground">
               {prompt}
             </p>
           ) : null}

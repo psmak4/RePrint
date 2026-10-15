@@ -1,3 +1,4 @@
+import { cn, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -43,9 +44,7 @@ export function BookTile({
       </Link>
       {shelf ? <div className="absolute top-2 right-2">{shelf}</div> : null}
       {eyebrow ? (
-        <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-          {eyebrow}
-        </p>
+        <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{eyebrow}</p>
       ) : null}
       <h3 className="font-serif text-base leading-5 font-medium md:text-lg md:leading-[22px]">
         <Link to={href} className="hover:underline">

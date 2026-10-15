@@ -74,6 +74,37 @@ describe('style guard', () => {
     expect(handBuilt).toEqual([])
   })
 
+  it('takes serif page and section headings from textStyles (D-214)', () => {
+    // The display headings with their own scale: Discover's hero, the Book header, the auth card.
+    const ownScale = new Set([
+      'apps/web/app/components/books/discover-page.tsx:h1',
+      'apps/web/app/components/books/book-page.tsx:h1',
+      'apps/web/app/components/auth/auth-card.tsx:h1',
+    ])
+    const sized = files.flatMap(({ file, text }) =>
+      [...text.matchAll(/<(h1|h2)\b[^>]*className="([^"]*)"/g)]
+        .filter((match) => (match[2] ?? '').split(/\s+/).includes('font-serif'))
+        .filter((match) => !ownScale.has(`${file}:${match[1]}`))
+        .map((match) => `${file}:${text.slice(0, match.index).split('\n').length} ${match[1]}`),
+    )
+    expect(sized).toEqual([])
+  })
+
+  it('gives surface cards 16 px corners (the auth card keeps 24 px)', () => {
+    const corner = /^(md:|lg:)?rounded-(xl|3xl|lg|md|\[\d+px\])$/
+    const odd = classLists(
+      files.filter(({ file }) => file !== 'apps/web/app/components/auth/auth-card.tsx'),
+    )
+      .filter(
+        ({ classes }) =>
+          classes.includes('bg-surface') &&
+          classes.includes('border-border') &&
+          classes.some((name) => corner.test(name)),
+      )
+      .map(({ where }) => where)
+    expect(odd).toEqual([])
+  })
+
   it('draws chips only through Chip or chipVariants (D-214)', () => {
     // A hand-built chip: fully rounded with the chip edge, or a chip-sized rounded box with a border.
     const chipHeight = /^h-(\[(2[8-9]|3[0-6])px\]|7|8|9)$/

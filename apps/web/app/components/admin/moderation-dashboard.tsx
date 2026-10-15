@@ -33,7 +33,7 @@ function QueueCard({
   primary: boolean
 }) {
   return (
-    <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-5 rounded-[18px] border border-border bg-surface p-6">
+    <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-5 rounded-2xl border border-border bg-surface p-6">
       <dt className="flex basis-full items-center gap-3.5 text-base font-semibold">
         <span
           className={`inline-flex size-11 shrink-0 items-center justify-center rounded-xl ${iconClass}`}

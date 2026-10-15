@@ -575,7 +575,7 @@ export function GenreManager({
           ) : shown.length === 0 ? (
             <p className="text-muted-foreground">{text.noMatch}</p>
           ) : (
-            <div className="overflow-hidden rounded-[18px] border border-border bg-surface">
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
               <ScrollRegion label={text.listLabel} className="rounded-none border-0">
                 <table aria-label={text.listLabel} className={tableClass}>
                   <thead>

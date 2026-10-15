@@ -71,9 +71,7 @@ describe('CatalogDashboard', () => {
   it('shows the totals as tiles and the search in a card', () => {
     renderDashboard()
     expect(screen.getAllByText('Books')[0]?.parentElement?.className).toContain('rounded-xl')
-    expect(screen.getByRole('region', { name: 'Find a Book' }).className).toContain(
-      'rounded-[18px]',
-    )
+    expect(screen.getByRole('region', { name: 'Find a Book' }).className).toContain('rounded-2xl')
   })
 
   it('says so when nothing was added', () => {

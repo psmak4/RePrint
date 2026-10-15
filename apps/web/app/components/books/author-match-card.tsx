@@ -1,4 +1,4 @@
-import { buttonVariants, cn } from '@reprint/ui'
+import { buttonVariants, cn, textStyles } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { InitialsAvatar } from './avatar.js'
@@ -25,7 +25,7 @@ export function AuthorMatchCard({
   return (
     <Link
       to={href}
-      className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-4 rounded-[18px] border border-border bg-surface p-5 text-foreground hover:border-input-border md:grid-cols-[88px_minmax(0,1fr)_auto] md:gap-6 md:p-6"
+      className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-4 rounded-2xl border border-border bg-surface p-5 text-foreground hover:border-input-border md:grid-cols-[88px_minmax(0,1fr)_auto] md:gap-6 md:p-6"
     >
       <InitialsAvatar
         name={name}
@@ -33,9 +33,7 @@ export function AuthorMatchCard({
         className="size-16 text-2xl md:size-[88px] md:text-[32px]"
       />
       <span className="flex min-w-0 flex-col gap-1.5">
-        <span className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-          {text.match}
-        </span>
+        <span className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.match}</span>
         <span className="font-serif text-2xl leading-tight font-medium md:text-[28px]">{name}</span>
         {meta ? <span className="text-[15px] text-muted-foreground">{meta}</span> : null}
       </span>

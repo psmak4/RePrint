@@ -3,7 +3,7 @@ import {
   type ModReportsResponse,
   REVIEW_DECISION_REASON_MAX,
 } from '@reprint/shared'
-import { Button, Input, Label, Textarea } from '@reprint/ui'
+import { Button, cn, Input, Label, Textarea, textStyles } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -214,7 +214,7 @@ function ReportedReview({
     <li>
       <article
         aria-labelledby={headingId}
-        className="flex flex-col gap-5 rounded-[18px] border border-border bg-surface p-5 md:p-6"
+        className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-5 md:p-6"
       >
         <header className="flex items-start gap-4">
           <Cover
@@ -225,10 +225,7 @@ function ReportedReview({
             className="w-12 shrink-0"
           />
           <div className="flex min-w-0 flex-col gap-2">
-            <h2
-              id={headingId}
-              className="font-serif text-[22px] leading-tight font-medium break-words"
-            >
+            <h2 id={headingId} className={cn(textStyles.cardTitle, 'break-words')}>
               <Link to={`/books/${review.book.slug}`} className="hover:underline">
                 {review.book.title}
               </Link>

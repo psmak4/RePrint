@@ -5,7 +5,7 @@ import {
   deleteAccountRequestSchema,
   type Me,
 } from '@reprint/shared'
-import { Button } from '@reprint/ui'
+import { Button, cn, textStyles } from '@reprint/ui'
 import { useEffect } from 'react'
 import { type FieldValues, type Resolver, useForm } from 'react-hook-form'
 import { useFetcher } from 'react-router'
@@ -64,7 +64,7 @@ export function ChangeEmailForm({ me }: { me: Me }) {
       aria-labelledby="email-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="email-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="email-heading" className={textStyles.cardTitle}>
         {c.email.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.email.lead(me.email)}</p>
@@ -117,7 +117,7 @@ export function ChangePasswordForm() {
       aria-labelledby="password-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="password-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="password-heading" className={textStyles.cardTitle}>
         {c.password.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.password.lead}</p>
@@ -168,7 +168,7 @@ export function DeleteAccountForm() {
       aria-labelledby="delete-heading"
       className="rounded-2xl border border-danger-edge bg-surface p-6 md:p-8"
     >
-      <h2 id="delete-heading" className="font-serif text-2xl leading-tight font-medium text-danger">
+      <h2 id="delete-heading" className={cn(textStyles.cardTitle, 'text-danger')}>
         {c.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>

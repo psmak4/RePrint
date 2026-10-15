@@ -4,7 +4,7 @@ import {
   REVIEW_SORTS,
   type Viewer,
 } from '@reprint/shared'
-import { buttonVariants, chipVariants, Select } from '@reprint/ui'
+import { buttonVariants, chipVariants, Select, textStyles } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
 import { Form, Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -222,10 +222,7 @@ export function ReviewsList({
       className="flex scroll-mt-16 flex-col gap-5 md:gap-6"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2
-          id="reviews-heading"
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-        >
+        <h2 id="reviews-heading" className={textStyles.sectionTitle}>
           {text.heading}
         </h2>
         <TrustBadge variant="inline" label={copy.redesign.bookPage.moderated} />

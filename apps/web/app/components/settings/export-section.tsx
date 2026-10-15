@@ -1,4 +1,4 @@
-import { buttonVariants, cn } from '@reprint/ui'
+import { buttonVariants, cn, textStyles } from '@reprint/ui'
 import { settingsCopy } from '../../copy/settings.js'
 
 /** A plain link to the download route, so the browser saves the file the API sends. */
@@ -9,7 +9,7 @@ export function ExportSection() {
       aria-labelledby="export-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="export-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="export-heading" className={textStyles.cardTitle}>
         {c.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>

@@ -1,4 +1,5 @@
 import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
+import { cn, textStyles } from '@reprint/ui'
 import { copy } from '../../copy/index.js'
 import type { RichTree } from '../../lib/rich-tree.js'
 import { RichText } from '../rich-text.js'
@@ -26,11 +27,7 @@ export function SeriesPage({
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       <PageHero
-        eyebrow={
-          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:text-[13px]">
-            {text.eyebrow}
-          </p>
-        }
+        eyebrow={<p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.eyebrow}</p>}
         title={series.name}
         lead={
           series.description && descriptionTree ? (
@@ -41,10 +38,7 @@ export function SeriesPage({
         }
       />
       <section aria-labelledby="series-books" className="flex flex-col gap-5 md:gap-6">
-        <h2
-          id="series-books"
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-        >
+        <h2 id="series-books" className={textStyles.sectionTitle}>
           {text.booksHeading}
         </h2>
         {stillAdding ? (

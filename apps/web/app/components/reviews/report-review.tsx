@@ -1,5 +1,5 @@
 import { REPORT_NOTE_MAX, REVIEW_REPORT_REASONS, type ReviewReportReason } from '@reprint/shared'
-import { Button, Label, Textarea } from '@reprint/ui'
+import { Button, Label, Textarea, textStyles } from '@reprint/ui'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -77,7 +77,7 @@ export function ReportReview({ reviewId }: { reviewId: string }) {
           }}
           className="flex flex-col gap-4"
         >
-          <h2 id={titleId} className="font-serif text-xl leading-tight font-medium">
+          <h2 id={titleId} className={textStyles.cardTitle}>
             {text.title}
           </h2>
           {received ? (

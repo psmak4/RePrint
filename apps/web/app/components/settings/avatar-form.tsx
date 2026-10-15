@@ -1,4 +1,4 @@
-import { Button, Input, Label } from '@reprint/ui'
+import { Button, Input, Label, textStyles } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { settingsCopy } from '../../copy/settings.js'
@@ -43,7 +43,7 @@ export function AvatarForm({
       aria-labelledby="avatar-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="avatar-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="avatar-heading" className={textStyles.cardTitle}>
         {c.title}
       </h2>
       <form

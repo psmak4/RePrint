@@ -1,5 +1,5 @@
 import type { SessionInfo } from '@reprint/shared'
-import { Button } from '@reprint/ui'
+import { Button, textStyles } from '@reprint/ui'
 import { useFetcher } from 'react-router'
 import { settingsCopy } from '../../copy/settings.js'
 
@@ -62,7 +62,7 @@ export function SessionsSection({ sessions }: { sessions: SessionInfo[] }) {
       aria-labelledby="sessions-heading"
       className="rounded-2xl border border-border bg-surface p-6 md:p-8"
     >
-      <h2 id="sessions-heading" className="font-serif text-2xl leading-tight font-medium">
+      <h2 id="sessions-heading" className={textStyles.cardTitle}>
         {c.title}
       </h2>
       <p className="mt-2 text-[15px] text-muted-foreground">{c.lead}</p>

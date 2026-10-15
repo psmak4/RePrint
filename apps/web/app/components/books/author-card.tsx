@@ -1,4 +1,5 @@
 import { markdownToText } from '@reprint/shared'
+import { cn, textStyles } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { InitialsAvatar } from './avatar.js'
@@ -45,13 +46,11 @@ export function AuthorCard({
       aria-labelledby="author-card-heading"
       className="flex flex-col gap-3.5 rounded-2xl border border-border bg-surface p-[22px]"
     >
-      <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-        {text.heading}
-      </p>
+      <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.heading}</p>
       <div className="flex items-center gap-3.5">
         <Photo name={name} photoUrl={photoUrl} />
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 id="author-card-heading" className="font-serif text-[22px] leading-tight font-medium">
+          <h2 id="author-card-heading" className={textStyles.cardTitle}>
             {name}
           </h2>
           {life ? <p className="text-sm text-muted-foreground">{life}</p> : null}

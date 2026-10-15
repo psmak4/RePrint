@@ -1,4 +1,4 @@
-import { buttonVariants } from '@reprint/ui'
+import { buttonVariants, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
@@ -28,9 +28,7 @@ export function PageHero({
       <div className="flex items-center gap-4 md:gap-6">
         {leading}
         <div className="flex min-w-0 flex-col gap-2.5">
-          <h1 className="font-serif text-[38px] leading-[1.05] font-medium tracking-[-0.02em] break-words md:text-[56px]">
-            {title}
-          </h1>
+          <h1 className={textStyles.pageTitle}>{title}</h1>
           {lead ? (
             <p className="max-w-[640px] text-base leading-[1.55] text-strong md:text-lg">{lead}</p>
           ) : null}

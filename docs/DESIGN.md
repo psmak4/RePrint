@@ -39,8 +39,9 @@ Two typefaces (D-180), self-hosted from the Google Fonts files via Fontsource, L
 | --- | --- | --- | --- |
 | Hero title (Discover h1) | serif | 40/42 → 64/66, tracking −0.02em | 500 |
 | Book title (Book page h1) | serif | 38/40 → 60/62, tracking −0.02em | 500 |
-| Page title (other h1) | serif | 32/36 → 44/48 | 500 |
-| Section title (h2) | serif | 26/30 → 32/36 (Discover rows 36/40) | 500 |
+| Page title (every other h1: `PageHero`, admin, search) | serif | 32/36 → 44/48, tracking −0.02em | 500 |
+| Auth card title (the auth card's h1) | serif | 32/35 → 38/42 | 500 |
+| Section title (h2), on every page including Discover | serif | 26/30 → 32/36, tracking −0.01em | 500 |
 | Card or panel title (h3) | serif | 21/26 → 22/28 | 500 |
 | Review headline | serif | 21/26 → 24/30 | 500 |
 | Book title on a card | serif | 16/20 → 18/22 | 500 |
@@ -48,9 +49,9 @@ Two typefaces (D-180), self-hosted from the Google Fonts files via Fontsource, L
 | Body | sans | 16/24 (review bodies 16/27) | 400 |
 | Lead | sans | 16/25 → 19/29 | 400 |
 | Secondary, meta | sans `text-muted-foreground` | 14/20 | 400 |
-| Eyebrow label | sans, uppercase, tracking 0.12em | 12/16 → 13/16 | 600 |
+| Eyebrow label (also the Book facts' labels) | sans, uppercase, tracking 0.12em | 12/16 → 13/16 | 600 |
 
-One `h1` per page; do not skip heading levels. Body text never goes below 14 px; only eyebrow labels and badge counts use 12 or 13 px.
+Pages take the page title, section title, card title, and eyebrow classes from `textStyles` in `@reprint/ui` (D-214); the style guard fails on a serif `h1` or `h2` with its own size outside Discover's hero, the Book header, and the auth card. One `h1` per page; do not skip heading levels. Body text never goes below 14 px; only eyebrow labels and badge counts use 12 or 13 px.
 
 Source text (Book descriptions, Author bios, Series descriptions) is Markdown and renders through `RichText` (D-202): paragraphs 16 px apart, italic and bold, lists indented with markers, and outside links in `text-link`, underlined, same tab. It keeps the surrounding type (serif for a description, sans for a bio); headings or images in the text become plain text so the page's own outline stays intact. Excerpts (the Author card's three lines, meta descriptions) use its plain text.
 
@@ -185,7 +186,7 @@ Below `lg` the side column follows the reviews; on phones the actions become a t
 - **`PageHero`** opens every browse and account-area page (Genres, Genre, Library, Author, Series, profile, settings, admin, static pages): the `ground-deep` band with an optional breadcrumb or eyebrow, an optional avatar, the serif `h1`, a lead, and anything the page adds (tabs, chips, totals).
 - **`AuthCard`** is the centered white card (460 px, 24 px corners) for log in, register, password recovery, email verification and change, the error page, and the resolve page: serif title, lead, body, a full-width pill for the one next step, and links under the card.
 - **`BookGrid` / `BookTile`** show Books cover-first everywhere outside rails (2, 3, 4, then 6 across; `narrow` stops at 4 beside a sidebar). A tile reads its rating as one phrase for screen readers and says "No RePrint reviews yet" when it has none.
-- Form controls are 44 px tall with 10 px corners and 15 px text; labels are 15 px semibold. Settings sections and admin tables sit in `surface` cards with 16 to 24 px corners.
+- Form controls are 44 px tall with 10 px corners and 15 px text; labels are 15 px semibold. Settings sections and admin tables sit in `surface` cards. Every surface card and panel has 16 px corners (insets inside a card 12 px); the auth card keeps 24 px as a page frame, and the style guard checks both.
 
 ### Review form
 
@@ -197,7 +198,7 @@ Admin layout (below). Two panes from `lg`: a queue list on the left (oldest firs
 
 ### Genres (`/genres`) and Genre (`/genres/:slug`)
 
-Both open with the `PageHero` band (`ground-deep`): breadcrumb, serif `h1` (38 px, 56 px from `md`), and a lead. The index is a grid of `GenreTile`s (2 across at base, 3 at `md`, 6 at `lg`); a child Genre is a small chip under its parent's tile. A Genre page adds its child Genres as pill links in the band, then sort as pill links (Top rated, Most reviewed, Newest review), the Books as a `BookGrid` (2, 3, 4, then 6 across), and Previous / Next pills.
+Both open with the `PageHero` band (`ground-deep`): breadcrumb, the page title, and a lead. The index is a grid of `GenreTile`s (2 across at base, 3 at `md`, 6 at `lg`); a child Genre is a small chip under its parent's tile. A Genre page adds its child Genres as pill links in the band, then sort as pill links (Top rated, Most reviewed, Newest review), the Books as a `BookGrid` (2, 3, 4, then 6 across), and Previous / Next pills.
 
 ### Library (`/u/:username/library`)
 
@@ -211,9 +212,9 @@ Header with avatar, display name, username, bio, and join date. Below: tabs for 
 
 Mockups: the "Admin section" row of the RePrint Redesign canvas. Every admin page renders `AdminPage`, and the `/admin` layout passes it the grouped nav through the outlet context. `noindex`.
 
-- **Band** (`ground-deep`, full bleed): a breadcrumb (Administration / section / item; the dashboard shows an "Administration" eyebrow instead), the page's own serif `h1` (34 px, 44 px from `md`), a one-line lead, and the page's main actions as pills on the right. `leading` holds an avatar (user detail) or a cover (Edit Book); `below` holds tabs (Genres and rules: underlined tabs with count chips, chosen by `?tab=rules`).
+- **Band** (`ground-deep`, full bleed): a breadcrumb (Administration / section / item; the dashboard shows an "Administration" eyebrow instead), the page title (`textStyles.pageTitle`, as on every other band), a one-line lead, and the page's main actions as pills on the right. `leading` holds an avatar (user detail) or a cover (Edit Book); `below` holds tabs (Genres and rules: underlined tabs with count chips, chosen by `?tab=rules`).
 - **Nav:** grouped Moderation (Dashboard, Review queue, Reports queue), People (Users, Audit log), Catalog (Catalog, Merge queue, Genres and rules, Featured content), Operations (System), each link with a stroke icon. Review queue and Reports queue carry a count badge from `/v1/mod/stats` for viewers who may moderate; the badge reads "…, N waiting" to screen readers and is left off when the stats fail. The current page uses a white surface, a border, and an accent icon. Left column (224 px, 32 px gap) from `lg`; a full-width "Admin menu" disclosure below.
-- **Building blocks** (`components/admin/admin-ui.tsx`): `AdminCard` (white, 18 px corners, serif `h2` title that names the region, optional `actions`, `flush` for tables), `Badge` (green, amber, red, blue, gray; optional dot; `USER_STATUS_TONE` for account status), `StatTile` (label and number in the sans with `tabular-nums`, never the serif), `EmptyState` (dashed box, green check, one sentence), `Kbd`, and the table classes (tinted header row, uppercase 12 px headers, right-aligned numbers, long values truncated with a `title`).
+- **Building blocks** (`components/admin/admin-ui.tsx`): `AdminCard` (white, 16 px corners, serif `h2` title that names the region, optional `actions`, `flush` for tables), `Badge` (green, amber, red, blue, gray; optional dot; `USER_STATUS_TONE` for account status), `StatTile` (label and number in the sans with `tabular-nums`, never the serif), `EmptyState` (dashed box, green check, one sentence), `Kbd`, and the table classes (tinted header row, uppercase 12 px headers, right-aligned numbers, long values truncated with a `title`).
 - **Actions** are pills (`Button`, or `Button asChild` around a link): primary for the one main action, outline for the rest, `danger` (red outline) for Reject, Unpublish, Suspend, Merge, and Remove. Row actions are small buttons in the last column (there is no dropdown menu component). "Show more" is a centred outline pill.
 - **Tables** sit in `ScrollRegion` (focusable, labelled, `relative` so sr-only text cannot widen the page); the page never scrolls sideways at 390 px (an e2e check, also run with a Member at every length limit). Users shows the email under the name (no Email column; name, username, and email each stop at 200 px with an ellipsis and a `title`, so the table fits beside the nav at 1440 px even with a 50-character name, an e2e check), swaps its table for a list of tappable rows below `md`, and collapses its filters, and the audit log's, behind a "Filters" button there. Free text outside tables breaks (`break-words`, or `Badge wrap` for a pill such as a merge reason); text that sits beside a badge in a flex row gets its own element so it can break.
 - **Queues:** the review queue is two panes from `lg` (list card with the open review highlighted like the Series card; the review card with a blue "Claimed by you" or amber "held by" strip, reviewer history badges, serif text, and a sticky bar with the shortcut keys, Reject, and Approve). Reports and the merge queue are stacked cards.

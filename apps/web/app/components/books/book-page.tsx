@@ -9,7 +9,7 @@ import {
   PERMISSIONS,
   type Viewer,
 } from '@reprint/shared'
-import { buttonVariants, chipVariants } from '@reprint/ui'
+import { buttonVariants, chipVariants, textStyles } from '@reprint/ui'
 import { type ReactNode, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -275,10 +275,7 @@ function Row({
   return (
     <section aria-labelledby={id} className="flex flex-col gap-5 md:gap-6">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-        <h2
-          id={id}
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-        >
+        <h2 id={id} className={textStyles.sectionTitle}>
           {heading}
         </h2>
         {action}
@@ -566,10 +563,7 @@ function BookDetails({ book }: { book: BookDetail }) {
   return (
     <section aria-labelledby="book-details" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2
-          id="book-details"
-          className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-        >
+        <h2 id="book-details" className={textStyles.sectionTitle}>
           {labels.detailsHeading}
         </h2>
         <span className="text-sm text-muted-foreground">{labels.fromPrimaryEdition}</span>
@@ -591,10 +585,7 @@ function Description({ text: description, tree }: { text: string | null; tree: R
       aria-labelledby="book-description"
       className="flex scroll-mt-16 flex-col gap-4"
     >
-      <h2
-        id="book-description"
-        className="font-serif text-[26px] leading-tight font-medium tracking-[-0.01em] md:text-[32px]"
-      >
+      <h2 id="book-description" className={textStyles.sectionTitle}>
         {text.descriptionHeading}
       </h2>
       {body && tree ? (

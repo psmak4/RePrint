@@ -735,7 +735,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M11-T04 · One Chip · deps: M11-T02 · PRD: §7.2 to §7.5, §8
   - Accept: a `Chip` in `@reprint/ui` (34 px, 14 px medium, chip border, accent fill when selected; a link, button, or label through `asChild`) is used for Genre chips, the Discover "Try" chips, child Genres on the Genres index, the Series pill, the review star filters, and the Editions format filter
   - Accept: the style guard fails on a hand-built chip; component tests are updated; `pnpm check` passes
-- [ ] M11-T05 · Page titles, section headings, and card corners from one scale · deps: M11-T02 · PRD: §11
+- [x] M11-T05 · Page titles, section headings, and card corners from one scale · deps: M11-T02 · PRD: §11
   - Accept: every page title outside Discover's hero, the Book header, and the auth card is 32 → 44 px (`PageHero`, `AdminPage`, search); every section heading is 26 → 32 px, Discover's included; card and panel titles are 22 px; pages take these from shared heading classes, not their own sizes
   - Accept: surface cards and panels have 16 px corners (the auth card keeps 24 px as a page frame); `DESIGN.md`'s type scale and page sections agree
   - Accept: `pnpm check` passes

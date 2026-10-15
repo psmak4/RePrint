@@ -5,7 +5,7 @@ import type {
   MostReviewedItem,
   Viewer,
 } from '@reprint/shared'
-import { buttonVariants, chipVariants, cn } from '@reprint/ui'
+import { buttonVariants, chipVariants, cn, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -78,10 +78,7 @@ function Section({
     <section aria-labelledby={id} className="flex flex-col gap-4 md:gap-6">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
         <div className="flex flex-col gap-1.5">
-          <h2
-            id={id}
-            className="font-serif text-[28px] leading-[1.1] font-medium tracking-[-0.01em] md:text-4xl"
-          >
+          <h2 id={id} className={textStyles.sectionTitle}>
             {heading}
           </h2>
           {note ? <p className="text-sm text-muted-foreground md:text-base">{note}</p> : null}
@@ -103,13 +100,10 @@ function FeaturedReview({
   return (
     <article
       aria-labelledby="discover-featured-review"
-      className="flex flex-col gap-4 rounded-[18px] border border-border bg-surface p-5 shadow-[0_24px_48px_-28px_rgba(15,23,42,0.35)] md:gap-5 md:rounded-[20px] md:p-7"
+      className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-[0_24px_48px_-28px_rgba(15,23,42,0.35)] md:gap-5 md:rounded-2xl md:p-7"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2
-          id="discover-featured-review"
-          className="text-xs font-semibold tracking-[0.12em] text-warning uppercase md:text-[13px]"
-        >
+        <h2 id="discover-featured-review" className={cn(textStyles.eyebrow, 'text-warning')}>
           {text.featuredReview}
         </h2>
         <span className="hidden text-[13px] text-muted-foreground sm:inline">
@@ -254,7 +248,7 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
       className="grid gap-4 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]"
     >
       <div className="col-span-full flex items-baseline justify-between gap-4">
-        <h2 id="discover-your-reading" className="font-serif text-[28px] font-medium">
+        <h2 id="discover-your-reading" className={textStyles.sectionTitle}>
           {t.heading(viewer.displayName)}
         </h2>
         <Link to={`/u/${viewer.username}/library`} className={actionLink}>
@@ -264,7 +258,7 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
       {entries.map(({ book, shelf }) => (
         <div
           key={book.id}
-          className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-4 rounded-[14px] border border-border bg-surface p-4"
+          className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-4 rounded-2xl border border-border bg-surface p-4"
         >
           <Cover
             cover={book.cover}
@@ -275,7 +269,7 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
             className="w-full"
           />
           <div className="flex min-w-0 flex-col gap-1.5">
-            <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            <p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>
               {shelf === 'reading' ? t.reading : t.wantToRead}
             </p>
             <Link
@@ -288,7 +282,7 @@ function YourReadingStrip({ viewer, reading }: { viewer: Viewer; reading: YourRe
           </div>
         </div>
       ))}
-      <div className="flex flex-col justify-center gap-2.5 rounded-[14px] border border-dashed border-dashed-border px-5 py-4">
+      <div className="flex flex-col justify-center gap-2.5 rounded-2xl border border-dashed border-dashed-border px-5 py-4">
         <p className="font-semibold">{t.finishedPrompt}</p>
         <p className="text-sm text-muted-foreground">{t.finishedNote}</p>
         <Link to={`/u/${viewer.username}/library?shelf=read`} className={actionLink}>
@@ -434,13 +428,10 @@ function SignUpPitch({ titles }: { titles: { slug: string; title: string }[] }) 
   return (
     <section
       aria-labelledby="discover-pitch"
-      className="grid items-center gap-10 overflow-hidden rounded-[20px] border border-border bg-surface p-6 md:rounded-3xl md:px-14 md:py-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12"
+      className="grid items-center gap-10 overflow-hidden rounded-2xl border border-border bg-surface p-6 md:px-14 md:py-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-12"
     >
       <div className="flex flex-col gap-5 md:gap-6">
-        <h2
-          id="discover-pitch"
-          className="font-serif text-[28px] leading-[1.1] font-medium tracking-[-0.01em] md:text-[40px]"
-        >
+        <h2 id="discover-pitch" className={textStyles.sectionTitle}>
           {t.heading}
         </h2>
         <p className="text-[15px] leading-relaxed text-strong md:text-[17px]">{t.lead}</p>

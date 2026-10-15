@@ -31,7 +31,7 @@ export function GenreTile({
   return (
     <Link
       to={href}
-      className="relative flex h-32 flex-col justify-end overflow-hidden rounded-xl border border-border bg-surface p-3 text-foreground hover:border-input-border hover:shadow-[0_6px_18px_-8px_rgba(15,23,42,0.25)] md:h-[168px] md:p-4"
+      className="relative flex h-32 flex-col justify-end overflow-hidden rounded-2xl border border-border bg-surface p-3 text-foreground hover:border-input-border hover:shadow-[0_6px_18px_-8px_rgba(15,23,42,0.25)] md:h-[168px] md:p-4"
     >
       <span
         aria-hidden="true"

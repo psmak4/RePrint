@@ -3,7 +3,7 @@ import type {
   AdminMergeCandidate,
   AdminMergeCandidatesResponse,
 } from '@reprint/shared'
-import { Button } from '@reprint/ui'
+import { Button, cn, textStyles } from '@reprint/ui'
 import { useId, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
@@ -71,13 +71,10 @@ function Candidate({ candidate }: { candidate: AdminMergeCandidate }) {
     <li>
       <article
         aria-labelledby={headingId}
-        className="flex flex-col gap-5 rounded-[18px] border border-border bg-surface p-5 md:p-6"
+        className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-5 md:p-6"
       >
         <header className="flex flex-col gap-2">
-          <h2
-            id={headingId}
-            className="font-serif text-[22px] leading-tight font-medium break-words"
-          >
+          <h2 id={headingId} className={cn(textStyles.cardTitle, 'break-words')}>
             {text.pairLabel(bookA.title, bookB.title)}
           </h2>
           <span>
