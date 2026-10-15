@@ -75,7 +75,11 @@ export function ModerationDashboard({
   oldest: ModQueueItem[] | null
 }) {
   return (
-    <AdminPage eyebrow={adminCopy.title} title={adminCopy.dashboardNav} lead={text.lead}>
+    <AdminPage
+      crumbs={[{ label: adminCopy.title }]}
+      title={adminCopy.dashboardNav}
+      lead={text.lead}
+    >
       <dl className="grid gap-5 md:grid-cols-2">
         <QueueCard
           icon="reviews"

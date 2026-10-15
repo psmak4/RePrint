@@ -7,6 +7,7 @@ import { Cover } from '../books/cover.js'
 import { summaryCard } from '../books/genre-pages.js'
 import { PageHero, PagerLinks } from '../books/page-hero.js'
 import { StarRating } from '../books/star-rating.js'
+import { TabNav } from '../common/tab-nav.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
 import { SpoilerToggle } from '../reviews/spoiler-toggle.js'
 
@@ -122,11 +123,26 @@ export function ProfilePage({
 }) {
   const isOwner = viewer?.username.toLowerCase() === profile.username.toLowerCase()
   const showLibrary = profile.libraryPublic || isOwner
-  const tab =
-    'inline-flex h-[52px] items-center border-b-2 text-base font-medium -mb-px whitespace-nowrap'
   return (
     <div className="flex flex-col gap-8 md:gap-10">
       <PageHero
+        trail={[{ label: profile.displayName }]}
+        tabs={
+          <TabNav
+            label={text.tabsLabel}
+            tabs={[
+              {
+                label: text.reviewsTab,
+                to: `/u/${profile.username}`,
+                current: true,
+                count: profile.reviewCount,
+              },
+              ...(showLibrary
+                ? [{ label: text.libraryTab, to: `/u/${profile.username}/library`, current: false }]
+                : []),
+            ]}
+          />
+        }
         leading={<Avatar profile={profile} />}
         title={profile.displayName}
         lead={
@@ -158,19 +174,6 @@ export function ProfilePage({
         </section>
       </PageHero>
       <div className="flex flex-col">
-        <nav aria-label={text.tabsLabel} className="flex gap-7 border-b border-border">
-          <span aria-current="page" className={`${tab} border-accent text-foreground`}>
-            {text.reviewsTab}
-          </span>
-          {showLibrary ? (
-            <Link
-              to={`/u/${profile.username}/library`}
-              className={`${tab} border-transparent text-strong hover:text-foreground`}
-            >
-              {text.libraryTab}
-            </Link>
-          ) : null}
-        </nav>
         <h2 className="sr-only">{text.reviewsTab}</h2>
         {reviews.length === 0 ? (
           <p className="py-8 text-muted-foreground">{text.noReviews}</p>

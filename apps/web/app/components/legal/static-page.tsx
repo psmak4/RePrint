@@ -22,7 +22,7 @@ export function StaticPage({
 }) {
   return (
     <article className="flex flex-col gap-10 md:gap-12">
-      <PageHero title={content.title} />
+      <PageHero trail={[{ label: content.title }]} title={content.title} />
       <div className="flex w-full max-w-[680px] flex-col gap-10">
         {content.sections.map((section) => (
           <section key={section.heading} className="flex flex-col gap-3">

@@ -1,5 +1,5 @@
 import type { SeriesDetailResponse, Viewer } from '@reprint/shared'
-import { cn, textStyles } from '@reprint/ui'
+import { textStyles } from '@reprint/ui'
 import { copy } from '../../copy/index.js'
 import type { RichTree } from '../../lib/rich-tree.js'
 import { RichText } from '../rich-text.js'
@@ -27,7 +27,8 @@ export function SeriesPage({
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       <PageHero
-        eyebrow={<p className={cn(textStyles.eyebrow, 'text-muted-foreground')}>{text.eyebrow}</p>}
+        trail={[{ label: series.name }]}
+        label={text.eyebrow}
         title={series.name}
         lead={
           series.description && descriptionTree ? (

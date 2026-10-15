@@ -35,35 +35,12 @@ export function genreHref(slug: string, sort: GenreSort, page: number): string {
   return `/genres/${slug}${query ? `?${query}` : ''}`
 }
 
-function Breadcrumb({
-  trail,
-  label = text.breadcrumbLabel,
-}: {
-  trail: { href: string; label: string }[]
-  label?: string
-}) {
-  return (
-    <nav aria-label={label} className="text-sm text-muted-foreground">
-      <ol className="flex flex-wrap items-center gap-x-2">
-        {trail.map((crumb, i) => (
-          <li key={crumb.href} className="flex gap-2">
-            {i > 0 ? <span aria-hidden="true">/</span> : null}
-            <Link to={crumb.href} className="text-strong hover:underline">
-              {crumb.label}
-            </Link>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )
-}
-
 /** `/genres`: every Genre as a tile; a child Genre is a chip under its parent (PRD §7.5). */
 export function GenresIndexPage({ items }: { items: GenreNode[] }) {
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       <PageHero
-        eyebrow={<Breadcrumb trail={[{ href: '/', label: text.discover }]} />}
+        trail={[{ label: text.indexTitle }]}
         title={text.indexTitle}
         lead={text.indexIntro}
       />
@@ -101,16 +78,13 @@ export function GenresIndexPage({ items }: { items: GenreNode[] }) {
 export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort: GenreSort }) {
   const { genre, parent, children, items, page, hasMore } = detail
   const trail = [
-    { href: '/genres', label: text.allGenres },
-    ...(parent ? [{ href: `/genres/${parent.slug}`, label: parent.name }] : []),
+    { to: '/genres', label: text.indexTitle },
+    ...(parent ? [{ to: `/genres/${parent.slug}`, label: parent.name }] : []),
+    { label: genre.name },
   ]
   return (
     <div className="flex flex-col gap-8 md:gap-10">
-      <PageHero
-        eyebrow={<Breadcrumb trail={trail} label={text.parentLabel} />}
-        title={genre.name}
-        lead={genre.description}
-      >
+      <PageHero trail={trail} title={genre.name} lead={genre.description}>
         {children.length > 0 ? (
           <section aria-labelledby="genre-children" className="flex flex-wrap items-center gap-2">
             <h2 id="genre-children" className="mr-1 text-sm text-muted-foreground">

@@ -81,7 +81,7 @@ describe('AdminPage', () => {
       { label: 'People', items: [{ to: '/admin/users', label: 'Users', icon: 'users' }] },
     ]
     const page = () => (
-      <AdminPage title="Page">
+      <AdminPage title="Page" crumbs={[{ label: 'Page' }]}>
         <p>x</p>
       </AdminPage>
     )
@@ -143,7 +143,14 @@ describe('AdminPage', () => {
 
   it('renders without a nav outside the admin layout (component tests)', () => {
     const Stub = createRoutesStub([
-      { path: '/', Component: () => <AdminPage title="Alone">x</AdminPage> },
+      {
+        path: '/',
+        Component: () => (
+          <AdminPage title="Alone" crumbs={[{ label: 'Alone' }]}>
+            x
+          </AdminPage>
+        ),
+      },
     ])
     render(<Stub initialEntries={['/']} />)
     expect(screen.getByRole('heading', { level: 1, name: 'Alone' })).toBeTruthy()
