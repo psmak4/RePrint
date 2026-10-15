@@ -3,10 +3,12 @@ import { GENRE_SORTS } from '@reprint/shared'
 import { chipVariants } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
+import { Pager } from '../common/pager.js'
+import { SortControl } from '../common/sort-control.js'
 import type { BookCardData } from './book-card.js'
 import { BookGrid } from './book-tile.js'
 import { GenreTile } from './genre-tile.js'
-import { PageHero, PagerLinks } from './page-hero.js'
+import { PageHero } from './page-hero.js'
 
 const text = copy.genres
 
@@ -98,19 +100,14 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
           </section>
         ) : null}
       </PageHero>
-      <nav aria-label={text.sortLabel} className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-sm text-muted-foreground">{text.sortLabel}</span>
-        {GENRE_SORTS.map((option) => (
-          <Link
-            key={option}
-            to={genreHref(genre.slug, option, 1)}
-            aria-current={option === sort ? 'true' : undefined}
-            className={chipVariants({ selected: option === sort })}
-          >
-            {text.sorts[option]}
-          </Link>
-        ))}
-      </nav>
+      <div className="flex justify-end">
+        <SortControl
+          action={`/genres/${genre.slug}`}
+          value={sort}
+          options={GENRE_SORTS}
+          optionLabel={(option) => text.sorts[option]}
+        />
+      </div>
       {items.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-dashed-border px-6 py-5 text-muted-foreground">
           {text.noBooks}
@@ -119,7 +116,7 @@ export function GenrePage({ detail, sort }: { detail: GenreDetailResponse; sort:
         <BookGrid items={items.map((book) => ({ slug: book.slug, book: summaryCard(book) }))} />
       )}
       {page > 1 || hasMore ? (
-        <PagerLinks
+        <Pager
           label={text.pagesLabel}
           previous={
             page > 1 ? { href: genreHref(genre.slug, sort, page - 1), text: text.previous } : null

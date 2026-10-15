@@ -10,6 +10,9 @@ export const copy = {
     nav: { discover: 'Discover', genres: 'Genres', library: 'My library' },
     // The trail that opens every page band (D-214); it always starts at Discover.
     breadcrumbLabel: 'Breadcrumb',
+    // One sort control everywhere (D-214): it applies on change; Apply shows only without JavaScript.
+    sortLabel: 'Sort by',
+    applySort: 'Apply',
     tabWithCount: (label: string, count: number) => `${label} (${count})`,
     skipToContent: 'Skip to main content',
     homeLinkLabel: 'RePrint home',
@@ -166,7 +169,6 @@ export const copy = {
     language: 'Language',
     decade: 'First published',
     minRating: 'Minimum rating',
-    sort: 'Sort by',
     anyOption: 'Any',
     decadeOption: (year: number) => `${year}s`,
     minRatingOption: (stars: number) => `${stars} stars and up`,
@@ -198,7 +200,6 @@ export const copy = {
     notOnReprint: 'Not on RePrint yet',
     beNotFirst: 'No RePrint reviews yet. Open it to be the first.',
     clearAll: 'Clear all',
-    applySort: 'Apply',
     viewAuthor: 'View author',
     firstPublished: (year: number) => `First published ${year}`,
     isbnHint: 'Have the book in hand?',
@@ -406,7 +407,6 @@ export const copy = {
         `${stars} ${stars === 1 ? 'star' : 'stars'}: ${count} ${count === 1 ? 'review' : 'reviews'}${active ? ' (filter on)' : ''}`,
       distributionText: (counts: number[]) =>
         counts.map((n, i) => `${5 - i} stars: ${n}`).join(', '),
-      sortLabel: 'Sort by',
       sorts: {
         most_helpful: 'Most helpful',
         newest: 'Newest',
@@ -417,7 +417,6 @@ export const copy = {
       allRatings: 'All ratings',
       starsOnly: (stars: number) => `${stars} ${stars === 1 ? 'star' : 'stars'} only`,
       clearFilter: 'Show all ratings',
-      apply: 'Apply',
       empty: 'No reviews yet. Be the first to write one.',
       emptyFiltered: 'No reviews with this rating.',
       by: (name: string) => `by ${name}`,
@@ -521,7 +520,6 @@ export const copy = {
     indexEmpty: 'No genres yet',
     indexMetaDescription: 'Browse books by genre, with ratings and reviews on RePrint.',
     childrenHeading: 'Genres within this one',
-    sortLabel: 'Sort by',
     sorts: {
       top_rated: 'Top rated',
       most_reviewed: 'Most reviewed',
@@ -577,14 +575,12 @@ export const copy = {
     eyebrow: 'Library',
     shelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on their shelves`,
     ownShelfCount: (count: number) => `${count} ${count === 1 ? 'book' : 'books'} on your shelves`,
-    sortLabel: 'Sort by',
     sorts: {
       added_desc: 'Newest added',
       added_asc: 'Oldest added',
       title: 'Title (A to Z)',
       author: 'Author',
     },
-    apply: 'Apply',
     empty: 'Nothing on this shelf yet.',
     discoverPrompt: 'Find something to read',
     privateHeading: 'This library is private',

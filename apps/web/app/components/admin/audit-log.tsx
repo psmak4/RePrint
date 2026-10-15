@@ -3,6 +3,7 @@ import { Button, cn, Input, Label, Select } from '@reprint/ui'
 import { useState } from 'react'
 import { Form, Link } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
+import { ShowMore } from '../common/show-more.js'
 import { AdminPage } from './admin-page.js'
 import {
   EmptyState,
@@ -188,11 +189,7 @@ export function AuditLog({ entries, filters }: { entries: AdminAuditResponse; fi
         </ScrollRegion>
       )}
       {entries.meta.nextCursor ? (
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link to={`/admin/audit?${nextParams}`}>{text.next}</Link>
-          </Button>
-        </div>
+        <ShowMore to={`/admin/audit?${nextParams}`}>{text.next}</ShowMore>
       ) : null}
     </AdminPage>
   )

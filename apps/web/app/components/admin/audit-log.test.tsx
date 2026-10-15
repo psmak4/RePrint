@@ -65,7 +65,9 @@ describe('AuditLog', () => {
     renderLog({ filters: { ...noFilters, actor: 'root', action: 'user.suspend' } })
     expect((screen.getByLabelText('Actor (username)') as HTMLInputElement).value).toBe('root')
     expect((screen.getByLabelText('Action') as HTMLSelectElement).value).toBe('user.suspend')
-    expect(screen.getByRole('button', { name: 'Filter' }).closest('form')?.method).toBe('get')
+    expect(screen.getByRole('button', { name: 'Apply filters' }).closest('form')?.method).toBe(
+      'get',
+    )
     expect(screen.getByRole('link', { name: 'Clear filters' })).toBeTruthy()
   })
 
