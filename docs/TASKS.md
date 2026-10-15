@@ -755,7 +755,7 @@ The build loop (`scripts/ralph/PROMPT.md`) works through this file top to bottom
 - [x] M11-T09 · One empty state, and titled error pages · deps: M11-T05 · PRD: §11
   - Accept: one `EmptyState` (dashed border, 16 px corners, one sentence, optional icon and action) replaces the Library, Genre, search, Discover, and admin versions
   - Accept: error pages (404, 500, and the resolve page's errors) set a `<title>`; a route test checks it; `pnpm check` passes
-- [ ] M11-T10 · M11 verification: measure again · deps: M11-T01, M11-T04, M11-T07, M11-T08, M11-T09 · PRD: §11, §12
-  - Accept: a script in `apps/web/scripts/ui/` measures page titles, section headings, pills, chips, selects, tabs, and card corners on every Visitor page at 1280 and 375 px; the PR shows the baseline table from `docs/milestones/M11-ui-consistency.md` beside the new values, each element down to one look
+- [x] M11-T10 · M11 verification: measure again · deps: M11-T01, M11-T04, M11-T07, M11-T08, M11-T09 · PRD: §11, §12
+  - Accept: the e2e spec `e2e/specs/ui-consistency.spec.ts` measures page titles, section and card headings, buttons, chips, dropdowns, card corners, tab titles, and sideways scroll on every Visitor, Member, and admin page type in Chromium, WebKit, and the phone profile, and fails on anything off the scale (changed from a script in `apps/web/scripts/ui/`: a spec runs in CI on every PR and can sign in); the PR shows the baseline table from `docs/milestones/M11-ui-consistency.md` beside the new values, each element down to one look
   - Accept: every acceptance criterion in the milestone brief is checked off in the PR body with the command that proved it; `DESIGN.md` matches the code
   - Accept: `pnpm check` and `pnpm test:e2e` (with axe) pass
