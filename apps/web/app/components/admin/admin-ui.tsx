@@ -1,47 +1,13 @@
 import type { AdminUserStatus } from '@reprint/shared'
 import { cn, textStyles } from '@reprint/ui'
 import { type ReactNode, useId } from 'react'
+import { DisclosureToggleLabel, disclosureToggleClass } from '../common/disclosure-toggle.js'
 import { EmptyState as SharedEmptyState } from '../common/empty-state.js'
-import { FiltersToggleLabel, filtersToggleClass } from '../common/filters-toggle.js'
 
-export type BadgeTone = 'green' | 'amber' | 'red' | 'blue' | 'gray'
+/** The status pill is the shared one (D-214); admin pages import it from here as before. */
+export { Badge, type BadgeTone } from '@reprint/ui'
 
-const TONES: Record<BadgeTone, string> = {
-  green: 'border-success-edge bg-success-tint text-success',
-  amber: 'border-warning-edge bg-warning-tint text-warning',
-  red: 'border-danger-edge bg-danger-tint text-danger',
-  blue: 'border-accent-edge bg-accent-tint text-link',
-  gray: 'border-border bg-surface-raised text-strong',
-}
-
-/** A small pill for a status, a role, a count, or an age. */
-export function Badge({
-  tone = 'gray',
-  dot = false,
-  wrap = false,
-  children,
-}: {
-  tone?: BadgeTone
-  dot?: boolean
-  /** For free text that may be long: it wraps instead of widening its container. */
-  wrap?: boolean
-  children: ReactNode
-}) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold',
-        wrap ? 'min-h-6 py-0.5 break-words whitespace-normal' : 'h-6 whitespace-nowrap',
-        TONES[tone],
-      )}
-    >
-      {dot ? <span aria-hidden="true" className="size-[7px] rounded-full bg-current" /> : null}
-      {children}
-    </span>
-  )
-}
-
-export const USER_STATUS_TONE: Record<AdminUserStatus, BadgeTone> = {
+export const USER_STATUS_TONE: Record<AdminUserStatus, 'green' | 'amber' | 'red' | 'gray'> = {
   active: 'green',
   unverified: 'amber',
   suspended: 'red',
@@ -147,12 +113,12 @@ export function FiltersToggle({
   return (
     <button
       type="button"
-      className={cn(filtersToggleClass, 'md:hidden')}
+      className={cn(disclosureToggleClass, 'md:hidden')}
       aria-expanded={open}
       aria-controls={controls}
       onClick={onToggle}
     >
-      <FiltersToggleLabel label={label} />
+      <DisclosureToggleLabel icon="filter" label={label} />
     </button>
   )
 }

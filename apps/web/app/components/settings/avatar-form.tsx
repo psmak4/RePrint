@@ -1,7 +1,8 @@
-import { Button, Input, Label, textStyles } from '@reprint/ui'
+import { Button, fileInputClass, Label, textStyles } from '@reprint/ui'
 import { useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { settingsCopy } from '../../copy/settings.js'
+import { MemberAvatar } from '../common/member-avatar.js'
 
 type UploadResult = { avatarUrl?: string; formError?: string }
 
@@ -9,9 +10,12 @@ type UploadResult = { avatarUrl?: string; formError?: string }
 export function AvatarForm({
   avatarUrl,
   displayName,
+  username,
 }: {
   avatarUrl: string | null
   displayName: string
+  /** Picks the initials' colour, as everywhere else the Member's initials appear. */
+  username: string
 }) {
   const c = settingsCopy.avatar
   const fetcher = useFetcher<UploadResult>()
@@ -63,28 +67,20 @@ export function AvatarForm({
         }}
       >
         <div className="flex items-center gap-4">
-          {shown ? (
-            <img
-              src={shown}
-              alt={preview ? c.previewAlt : c.currentAlt}
-              width={96}
-              height={96}
-              className="size-24 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="flex size-24 shrink-0 items-center justify-center rounded-full bg-accent-edge font-serif text-3xl font-medium"
-            >
-              {displayName.charAt(0).toUpperCase()}
-            </span>
-          )}
+          <MemberAvatar
+            url={shown}
+            name={displayName}
+            username={username}
+            alt={preview ? c.previewAlt : c.currentAlt}
+            className="size-24 md:size-24"
+          />
           <div className="flex flex-col gap-2">
             <Label htmlFor="avatar-file">{c.fileLabel}</Label>
-            <Input
+            <input
               id="avatar-file"
               name="file"
               type="file"
+              className={fileInputClass}
               accept="image/jpeg,image/png,image/webp,image/gif"
               aria-describedby={['avatar-hint', error ? 'avatar-error' : null]
                 .filter(Boolean)

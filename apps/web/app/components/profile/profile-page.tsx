@@ -2,11 +2,11 @@ import type { Profile, ProfileReview, Viewer } from '@reprint/shared'
 import { chipVariants } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
-import { avatarClass, initialsOf } from '../../lib/avatar.js'
 import { Cover } from '../books/cover.js'
 import { summaryCard } from '../books/genre-pages.js'
 import { PageHero } from '../books/page-hero.js'
 import { StarRating } from '../books/star-rating.js'
+import { MemberAvatar } from '../common/member-avatar.js'
 import { Pager } from '../common/pager.js'
 import { TabNav } from '../common/tab-nav.js'
 import { ReviewBody } from '../reviews/reviews-list.js'
@@ -24,30 +24,8 @@ const monthFormat = new Intl.DateTimeFormat('en-US', {
 export type ProfileReviewsView = { page: number; totalPages: number }
 
 function Avatar({ profile }: { profile: Profile }) {
-  const frame =
-    'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full md:size-28'
-  if (!profile.avatarUrl) {
-    return (
-      <div
-        role="img"
-        aria-label={text.avatarAlt(profile.displayName)}
-        className={`${frame} ${avatarClass(profile.username)}`}
-      >
-        <span aria-hidden="true" className="font-serif text-3xl font-medium md:text-[40px]">
-          {initialsOf(profile.displayName)}
-        </span>
-      </div>
-    )
-  }
   return (
-    <div className={frame}>
-      <img
-        src={profile.avatarUrl}
-        alt={text.avatarAlt(profile.displayName)}
-        decoding="async"
-        className="h-full w-full object-cover"
-      />
-    </div>
+    <MemberAvatar url={profile.avatarUrl} name={profile.displayName} username={profile.username} />
   )
 }
 

@@ -1,4 +1,4 @@
-import { chipVariants, textStyles } from '@reprint/ui'
+import { Badge, chipVariants, textStyles } from '@reprint/ui'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -123,9 +123,7 @@ export function EditionsCard({
                     .filter(Boolean)
                     .join(' · ')}
                   {edition.primary ? (
-                    <span className="ml-2 inline-flex h-[22px] items-center rounded-full bg-track px-2 align-middle text-xs font-medium text-strong">
-                      {text.primary}
-                    </span>
+                    <Badge className="ml-2 align-middle">{text.primary}</Badge>
                   ) : null}
                 </p>
                 {edition.publisher ? (

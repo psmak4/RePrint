@@ -1,5 +1,5 @@
 import type { SessionInfo } from '@reprint/shared'
-import { Button, textStyles } from '@reprint/ui'
+import { Badge, Button, textStyles } from '@reprint/ui'
 import { useFetcher } from 'react-router'
 import { settingsCopy } from '../../copy/settings.js'
 
@@ -19,9 +19,9 @@ function SessionRow({ session }: { session: SessionInfo }) {
         <p className="font-medium">
           {session.device}
           {session.current ? (
-            <span className="ml-2 rounded-full bg-success-tint px-2.5 py-0.5 text-xs font-medium text-success">
+            <Badge tone="green" className="ml-2">
               {c.thisDevice}
-            </span>
+            </Badge>
           ) : null}
         </p>
         <p className="text-sm text-muted-foreground">

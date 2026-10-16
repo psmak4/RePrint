@@ -12,3 +12,10 @@ export function Input({ className, ...props }: React.ComponentProps<'input'>) {
     />
   )
 }
+
+/**
+ * The one file picker look (D-214): the browser's file input with its button drawn as a small
+ * outline pill. Used for avatars and covers.
+ */
+export const fileInputClass =
+  'ui-file text-sm text-muted-foreground file:mr-3 file:h-10 file:cursor-pointer file:rounded-full file:border file:border-input-border file:bg-surface file:px-4 file:text-sm file:font-semibold file:text-foreground hover:file:bg-surface-raised'

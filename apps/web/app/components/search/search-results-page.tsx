@@ -19,8 +19,8 @@ import { AuthorMatchCard } from '../books/author-match-card.js'
 import { InitialsAvatar } from '../books/avatar.js'
 import { PageHero } from '../books/page-hero.js'
 import { BookShelfSelector, ShelfSelector } from '../books/shelf-selector.js'
+import { DisclosureToggleLabel, disclosureToggleClass } from '../common/disclosure-toggle.js'
 import { EmptyState } from '../common/empty-state.js'
-import { FiltersToggleLabel, filtersToggleClass } from '../common/filters-toggle.js'
 import { Pager } from '../common/pager.js'
 import { SortControl } from '../common/sort-control.js'
 import { TabNav } from '../common/tab-nav.js'
@@ -271,8 +271,8 @@ function FilterPanel({ children }: { children: React.ReactNode }) {
   }, [])
   return (
     <details ref={ref} className="group lg:[&::details-content]:[content-visibility:visible]">
-      <summary className={cn(filtersToggleClass, 'cursor-pointer list-none lg:hidden')}>
-        <FiltersToggleLabel label={copy.search.filtersToggle} />
+      <summary className={cn(disclosureToggleClass, 'cursor-pointer list-none lg:hidden')}>
+        <DisclosureToggleLabel icon="filter" label={copy.search.filtersToggle} />
       </summary>
       <div className="mt-2 lg:mt-0">{children}</div>
     </details>

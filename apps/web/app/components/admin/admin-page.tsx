@@ -1,8 +1,9 @@
-import { cn, textStyles } from '@reprint/ui'
+import { CountBadge, cn, textStyles } from '@reprint/ui'
 import type { ReactNode } from 'react'
 import { NavLink, useOutletContext } from 'react-router'
 import { adminCopy } from '../../copy/admin.js'
 import { PageHero } from '../books/page-hero.js'
+import { DisclosureToggleLabel, disclosureToggleClass } from '../common/disclosure-toggle.js'
 import { AdminIcon, type AdminIconName } from './icons.js'
 
 export type AdminNavItem = { to: string; label: string; icon: AdminIconName; count?: number }
@@ -38,10 +39,10 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
                   />
                   {item.label}
                   {item.count ? (
-                    <span className="ml-auto inline-flex h-[22px] min-w-6 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-accent-foreground">
+                    <CountBadge tone="accent" className="ml-auto">
                       <span aria-hidden="true">{item.count}</span>
                       <span className="sr-only">{`, ${adminCopy.navCount(item.count)}`}</span>
-                    </span>
+                    </CountBadge>
                   ) : null}
                 </NavLink>
               </li>
@@ -57,12 +58,12 @@ function NavLinks({ groups }: { groups: AdminNavGroup[] }) {
 function AdminNav({ groups }: { groups: AdminNavGroup[] }) {
   return (
     <nav aria-label={adminCopy.navLabel} className="lg:w-56 lg:shrink-0">
-      <details className="rounded-2xl border border-border bg-surface lg:hidden">
-        <summary className="flex h-12 cursor-pointer items-center justify-between gap-2 px-4 text-[15px] font-semibold">
-          {adminCopy.navToggle}
-          <AdminIcon name="chevronDown" />
+      <details className="lg:hidden">
+        {/* The same toggle as the filters on phones (D-214). */}
+        <summary className={cn(disclosureToggleClass, 'cursor-pointer list-none')}>
+          <DisclosureToggleLabel icon="dashboard" label={adminCopy.navToggle} />
         </summary>
-        <div className="p-2 pt-0">
+        <div className="mt-2 rounded-2xl border border-border bg-surface p-2">
           <NavLinks groups={groups} />
         </div>
       </details>

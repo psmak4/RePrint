@@ -5,7 +5,7 @@ import { ProfileForm } from './profile-form.js'
 export function ProfileSettingsPage({ me }: { me: Me }) {
   return (
     <div className="flex flex-col gap-10">
-      <AvatarForm avatarUrl={me.avatarUrl} displayName={me.displayName} />
+      <AvatarForm avatarUrl={me.avatarUrl} displayName={me.displayName} username={me.username} />
       <ProfileForm me={me} />
     </div>
   )
