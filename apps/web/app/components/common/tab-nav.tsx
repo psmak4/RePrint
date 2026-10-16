@@ -1,3 +1,4 @@
+import { CountBadge } from '@reprint/ui'
 import { Link } from 'react-router'
 import { copy } from '../../copy/index.js'
 
@@ -17,14 +18,7 @@ export const tabStateClass = (current: boolean) =>
 
 /** A number beside a tab's label: the badge-count size (DESIGN.md). */
 export function TabCount({ count }: { count: number }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="rounded-full bg-track px-2 py-0.5 text-xs font-semibold text-strong"
-    >
-      {count}
-    </span>
-  )
+  return <CountBadge aria-hidden="true">{count}</CountBadge>
 }
 
 /**

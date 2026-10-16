@@ -94,6 +94,27 @@ export function measureUi(frame) {
       if (pill && drawn) problems.push(`hand-built pill: ${label(el)}`)
     }
 
+    // Status badges and counts come from `Badge` and `CountBadge`; file pickers share one look.
+    for (const el of document.querySelectorAll('.ui-badge')) {
+      if (!visible(el)) continue
+      const style = getComputedStyle(el)
+      const height = Math.round(el.getBoundingClientRect().height)
+      note('badge', `${height}/${px(style.fontSize)}`)
+      if (px(style.fontSize) !== 12 || (height !== 24 && style.whiteSpace === 'nowrap')) {
+        problems.push(`badge ${height}px: ${label(el)}`)
+      }
+    }
+    for (const el of document.querySelectorAll('.ui-count')) {
+      if (!visible(el)) continue
+      const height = Math.round(el.getBoundingClientRect().height)
+      note('count', `${height}/${px(getComputedStyle(el).fontSize)}`)
+      if (height !== 22) problems.push(`count ${height}px: ${label(el)}`)
+    }
+    for (const el of main.querySelectorAll('input[type="file"]')) {
+      if (visible(el) && !el.classList.contains('ui-file'))
+        problems.push('file picker without the shared look')
+    }
+
     // Dropdowns.
     for (const select of main.querySelectorAll('select')) {
       if (!visible(select) || getComputedStyle(select).opacity === '0') continue

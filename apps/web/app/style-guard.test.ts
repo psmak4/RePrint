@@ -110,6 +110,28 @@ describe('style guard', () => {
     expect(dashed).toEqual([])
   })
 
+  it('draws status and count badges only through Badge and CountBadge (D-214)', () => {
+    // A hand-built badge: fully rounded, 12 px text, and a fill.
+    const handBuilt = classLists(files.filter(({ file }) => !file.startsWith('packages/ui/')))
+      .filter(
+        ({ classes }) =>
+          classes.includes('rounded-full') &&
+          classes.includes('text-xs') &&
+          classes.some((name) => name.startsWith('bg-') && name !== 'bg-current'),
+      )
+      .map(({ where }) => where)
+    expect(handBuilt).toEqual([])
+  })
+
+  it('draws every file picker with fileInputClass (D-214)', () => {
+    const pickers = files.flatMap(({ file, text }) =>
+      [...text.matchAll(/<(input|Input)\b[^>]*type="file"[^>]*>/gs)]
+        .filter((match) => !match[0].includes('fileInputClass'))
+        .map((match) => `${file}:${text.slice(0, match.index).split('\n').length}`),
+    )
+    expect(pickers).toEqual([])
+  })
+
   it('gives surface cards 16 px corners (the auth card keeps 24 px)', () => {
     const corner = /^(md:|lg:)?rounded-(xl|3xl|lg|md|\[\d+px\])$/
     const odd = classLists(

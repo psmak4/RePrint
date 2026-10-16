@@ -1,5 +1,5 @@
 import type { NotificationListResponse } from '@reprint/shared'
-import { buttonVariants, cn } from '@reprint/ui'
+import { buttonVariants, CountBadge, cn } from '@reprint/ui'
 import { useState } from 'react'
 import { useFetcher } from 'react-router'
 import { copy } from '../../copy/index.js'
@@ -46,12 +46,9 @@ export function NotificationBell({
             />
           </svg>
           {unread > 0 ? (
-            <span
-              aria-hidden="true"
-              className="rounded-full bg-accent px-1.5 text-xs text-accent-foreground"
-            >
+            <CountBadge aria-hidden="true" tone="accent">
               {unread}
-            </span>
+            </CountBadge>
           ) : null}
         </>
       }

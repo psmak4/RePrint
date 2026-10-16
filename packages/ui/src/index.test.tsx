@@ -1,7 +1,18 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { Button, buttonVariants, Chip, chipVariants, cn, Input, Label, Select } from './index.js'
+import {
+  Badge,
+  Button,
+  buttonVariants,
+  Chip,
+  CountBadge,
+  chipVariants,
+  cn,
+  Input,
+  Label,
+  Select,
+} from './index.js'
 
 describe('@reprint/ui', () => {
   it('renders a Button with its variant classes', () => {
@@ -47,6 +58,30 @@ describe('@reprint/ui', () => {
       </Chip>,
     )
     expect(screen.getByRole('link', { name: 'Fantasy' }).className).toContain('h-[34px]')
+  })
+
+  it('draws one status badge and one count badge (D-214)', () => {
+    render(
+      <>
+        <Badge tone="green" dot>
+          Active
+        </Badge>
+        <CountBadge tone="accent">3</CountBadge>
+      </>,
+    )
+    const badge = screen.getByText('Active').className.split(' ')
+    expect(badge).toEqual(expect.arrayContaining(['ui-badge', 'h-6', 'text-xs', 'font-semibold']))
+    const count = screen.getByText('3').className.split(' ')
+    expect(count).toEqual(
+      expect.arrayContaining([
+        'ui-count',
+        'h-[22px]',
+        'min-w-6',
+        'text-xs',
+        'font-semibold',
+        'bg-accent',
+      ]),
+    )
   })
 
   it('renders the child element when asChild is set', () => {

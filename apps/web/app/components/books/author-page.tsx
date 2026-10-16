@@ -5,12 +5,12 @@ import {
   type ContributionRole,
 } from '@reprint/shared'
 import { cn, textStyles } from '@reprint/ui'
-import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 import { copy } from '../../copy/index.js'
 import { initialsOf } from '../../lib/avatar.js'
 import { coverUrl } from '../../lib/cover-url.js'
 import type { RichTree } from '../../lib/rich-tree.js'
+import { RoundPhoto } from '../common/round-photo.js'
 import { ShowMore } from '../common/show-more.js'
 import { RichText } from '../rich-text.js'
 import { BookGrid } from './book-tile.js'
@@ -151,41 +151,21 @@ export function AuthorPage({
 
 const SECTION_HEADING = textStyles.sectionTitle
 
-const PHOTO_FRAME =
-  'flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent-edge md:size-28'
+const PHOTO_FRAME = 'size-20 bg-accent-edge md:size-28'
 
 /** The Author's photo, or their initial when there is none or it fails to load. */
 function AuthorPhoto({ photo, name }: { photo: AuthorDetail['photo']; name: string }) {
-  const url = coverUrl(photo, 'large')
-  const [failed, setFailed] = useState(false)
-  const imgRef = useRef<HTMLImageElement>(null)
-
-  // An image that failed before hydration never fires `onError` in React, so check it once mounted.
-  useEffect(() => {
-    const img = imgRef.current
-    if (img?.complete && img.naturalWidth === 0) setFailed(true)
-  }, [])
-
-  if (!url || failed) {
-    return (
-      <div role="img" aria-label={text.photoAlt(name)} className={PHOTO_FRAME}>
+  return (
+    <RoundPhoto
+      url={coverUrl(photo, 'large')}
+      alt={text.photoAlt(name)}
+      className={PHOTO_FRAME}
+      fallback={
         <span aria-hidden="true" className="font-serif text-3xl font-medium md:text-[40px]">
           {initialsOf(name)}
         </span>
-      </div>
-    )
-  }
-  return (
-    <div className={PHOTO_FRAME}>
-      <img
-        ref={imgRef}
-        src={url}
-        alt={text.photoAlt(name)}
-        decoding="async"
-        className="h-full w-full object-cover"
-        onError={() => setFailed(true)}
-      />
-    </div>
+      }
+    />
   )
 }
 

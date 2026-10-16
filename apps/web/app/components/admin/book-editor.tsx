@@ -7,11 +7,13 @@ import {
   type ContributionRole,
 } from '@reprint/shared'
 import {
+  Badge,
   Button,
   buttonVariants,
   Checkbox,
   chipVariants,
   cn,
+  fileInputClass,
   Input,
   Label,
   Select,
@@ -578,11 +580,7 @@ function EditionChoice({
       <span className="flex min-w-0 flex-col gap-0.5 text-sm">
         <span className="flex flex-wrap items-center gap-2 font-semibold">
           {heading}
-          {tag ? (
-            <span className="rounded-full bg-track px-2 py-0.5 text-xs font-medium text-strong">
-              {tag}
-            </span>
-          ) : null}
+          {tag ? <Badge>{tag}</Badge> : null}
         </span>
         {lines
           .filter((line): line is string => Boolean(line))
@@ -629,7 +627,7 @@ function CoverPanel({ book }: { book: AdminBookDetail }) {
           type="file"
           accept="image/jpeg,image/png,image/webp"
           aria-describedby={hintId}
-          className="text-sm file:mr-3 file:h-10 file:rounded-full file:border file:border-input-border file:bg-surface file:px-4 file:text-sm file:font-semibold"
+          className={fileInputClass}
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         />
         <p id={hintId} className="text-sm text-muted-foreground">
